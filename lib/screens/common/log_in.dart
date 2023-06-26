@@ -18,14 +18,11 @@ class _LogInScreenState extends State<LogInScreen> {
     );
   }
 
-  final _lnFocusNode = FocusNode();
   final _passFocusNode = FocusNode();
   final _emailFocusNode = FocusNode();
 
   //final _form = GlobalKey<FormState>();
 
-  final _nameController = TextEditingController();
-  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   //final _consentController = TextEditingController();
