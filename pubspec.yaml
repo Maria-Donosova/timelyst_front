@@ -28,7 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  cupertino_icons: ^1.0.2
+  # cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
   graphql_flutter: ^5.1.2
@@ -39,12 +39,13 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: "^0.10.0"
+  # flutter_launcher_icons: "^0.10.0"
 
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/images/logos/timelyst_logo.png"
+  web: true
+  image_path: "assets/images/icons/"
   min_sdk_android: 21 # android min sdk min:16, default 21
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -59,12 +60,14 @@ flutter_icons:
 
 # The following section is specific to Flutter packages.
 flutter:
+  uses-material-design: true
   assets:
     - assets/images/logos/timelyst_logo.png
     #- assets/images/photos/landing_background_2.png
     #- assets/images/photos/mobile_landing/
     #- assets/images/photos/mobile_landing/timelyst_logo_mini.png
     - assets/images/icons/
+    - assets/images/photos/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
@@ -79,10 +82,10 @@ flutter:
   fonts:
     - family: FontAwesome
       fonts:
-#         #- asset: assets/fonts/FontAwesome_5_Free-Regular-400.otf
-#         #weight: 400
-#         #- asset: assets/fonts/FontAwesome 5 Free-Solid-900.otf
-#         #weight: 900
+        - asset: assets/fonts/FontAwesome_5_Free-Regular-400.otf
+          weight: 400
+        - asset: assets/fonts/FontAwesome 5 Free-Solid-900.otf
+          weight: 900
         - asset: assets/fonts/FontAwesome 5 Brands-Regular-400.otf
           weight: 400
   #

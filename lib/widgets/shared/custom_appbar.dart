@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../shared/search.dart';
+//import '../shared/search.dart';
 
 enum _timelystMenu { about, contact_us }
 
@@ -31,13 +31,13 @@ class CustomAppBar extends AppBar {
             ],
           ),
           actions: <Widget>[
-            IconButton(
-              icon: Icon(
-                Icons.search_outlined,
-                color: Colors.grey[800],
-              ),
-              onPressed: () => SearchW(),
-            ),
+            // IconButton(
+            //   icon: Icon(
+            //     Icons.search_outlined,
+            //     color: Colors.grey[800],
+            //   ),
+            //   onPressed: () => SearchW(),
+            // ),
             PopupMenuButton(
               icon: Icon(
                 Icons.menu_outlined,
@@ -48,7 +48,7 @@ class CustomAppBar extends AppBar {
                   <PopupMenuEntry<_profileView>>[
                 const PopupMenuItem<_profileView>(
                   value: _profileView.profile,
-                  child: Text('Profile'),
+                  child: Text('Account'),
                 ),
                 const PopupMenuItem<_profileView>(
                   value: _profileView.settings,
