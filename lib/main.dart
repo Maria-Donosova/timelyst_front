@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'themes.dart';
 
-import 'screens/platform/sign_up.dart';
+import 'screens/common/sign_up.dart';
 
 void main() {
   runApp(const MyApp());
