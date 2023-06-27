@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../widgets/shared/title.dart';
-import '../../widgets/ToDo/task_list.dart';
+import '../../widgets/todo/task_list.dart';
 
 class LeftPanel extends StatelessWidget {
   const LeftPanel({Key? key}) : super(key: key);
