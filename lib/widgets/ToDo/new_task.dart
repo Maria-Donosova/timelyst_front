@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/shared/categories.dart';
+
 class NewTaskW extends StatefulWidget {
   final Function addTask;
   const NewTaskW(this.addTask);
@@ -10,32 +12,25 @@ class NewTaskW extends StatefulWidget {
 
 class _NewTaskWState extends State<NewTaskW> {
   final titleController = TextEditingController();
-  // final _form = GlobalKey<FormState>();
-  // final _taskFocusNode = FocusNode();
-  //final _taskDescriptionController = TextEditingController();
-  //final _taskTypeController = TextEditingController();
-  //final _categoryController = TextEditingController();
+  final _form = GlobalKey<FormState>();
+  final _taskFocusNode = FocusNode();
+  final _taskDescriptionController = TextEditingController();
+  final _taskTypeController = TextEditingController();
+  final _categoryController = TextEditingController();
 
-  // final List<String> _categories = [
-  //   'Work',
-  //   'Personal',
-  //   'Kids',
-  //   'Friends',
-  //   'Parents',
-  //   'Misc'
-  // ];
-
-  // String? _selectedCategory;
-
-  // void clearInput() {
-  //   _taskDescriptionController.clear;
-  //   _selectedCategory = null;
-  // }
+  void clearInput() {
+    _taskDescriptionController.clear;
+    selectedCategory = null;
+  }
 
   var currUserId;
 
+  String? selectedCategory;
+
   @override
   Widget build(BuildContext context) {
+    final catColor = selectedCatColor(selectedCategory!);
+
     return Column(
       children: <Widget>[
         Stack(

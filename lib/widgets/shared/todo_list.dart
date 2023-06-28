@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'task_item.dart';
+import '../todo/task_item.dart';
+import '../todo/new_task.dart';
+import '../../models/task.dart';
 
 class TaskListW extends StatefulWidget {
   TaskListW({Key? key}) : super(key: key);
@@ -9,6 +11,41 @@ class TaskListW extends StatefulWidget {
 }
 
 class _TaskListWState extends State<TaskListW> {
+  List tasks = [];
+
+  void _startAddNewTask(BuildContext mctx) {
+    showModalBottomSheet(
+      context: mctx,
+      builder: (_) {
+        return GestureDetector(
+          onTap: () {},
+          behavior: HitTestBehavior.opaque,
+          child: NewTaskW(addNewTask),
+        );
+      },
+    );
+  }
+
+  addNewTask(String taskTitle, String taskCategory, Color catColor) {
+    final newTask = Task(
+        id: DateTime.now().toString(),
+        title: "titile",
+        dateCreated: DateTime.now(),
+        dateChanged: DateTime.now(),
+        creator: "Name"
+        // title: taskTitle,
+        // category: taskCategory,
+        // catColor: catColor,
+        // dateCreated: DateTime.now(),
+        // dateChanged: DateTime.now(),
+        // userId: DateTime.now().toString(),
+        );
+
+    setState(() {
+      tasks.add(newTask);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -24,8 +61,7 @@ class _TaskListWState extends State<TaskListW> {
             children: [
               !isLandscape
                   ? SizedBox(
-                      height: constraints.maxHeight * 0.98,
-                      // child: Text("This is me!")
+                      height: constraints.maxHeight * 0.97,
                       child: ReorderableListView.builder(
                         onReorder: (oldIndex, newIndex) {
                           setState(() {
@@ -132,7 +168,16 @@ class _TaskListWState extends State<TaskListW> {
                         },
                       ),
                     )
-                  : Container()
+                  : Container(),
+              SizedBox(
+                child: TextButton(
+                  child: Text(
+                    '+ Add new',
+                    style: Theme.of(context).textTheme.headline2,
+                  ),
+                  onPressed: () => _startAddNewTask(context),
+                ),
+              )
             ],
           );
         },

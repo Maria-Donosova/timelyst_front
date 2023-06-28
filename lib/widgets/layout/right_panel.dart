@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/shared/title.dart';
-import '../../widgets/todo/task_list.dart';
+import '../calendar/calendar.dart';
 
-class LeftPanel extends StatelessWidget {
-  const LeftPanel({Key? key}) : super(key: key);
+class RightPanel extends StatelessWidget {
+  const RightPanel({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,25 +17,27 @@ class LeftPanel extends StatelessWidget {
             children: [
               !isLandscape
                   ? Container(
+                      //not used at all
                       //height: constraints.maxHeight * 0.04,
                       //fit: BoxFit.contain,
                       alignment: Alignment.bottomLeft,
-                      child: TitleW(),
+                      child: Container(),
                     )
-                  : const FittedBox(
+                  : FittedBox(
+                      //not used at all
                       //height: constraints.maxHeight * 0.09,
                       alignment: Alignment.bottomLeft,
-                      child: TitleW(),
+                      child: Container(),
                     ),
               !isLandscape
                   ? Container(
-                      height: constraints.maxHeight * 0.9,
+                      height: constraints.maxHeight * 0.98, //vertical view
                       alignment: Alignment.bottomLeft,
-                      child: TaskListW(),
+                      child: CalendarW(),
                     )
                   : Container(
-                      height: constraints.maxHeight * 0.9,
-                      child: TaskListW(),
+                      height: constraints.maxHeight * 0.6, // horizontal view
+                      child: CalendarW(),
                     ),
             ],
           ),
