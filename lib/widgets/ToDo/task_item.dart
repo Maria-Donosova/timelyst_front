@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../widgets/shared/categories.dart';
 //import '../../models/task.dart';
 
 class TaskItem extends StatefulWidget {
@@ -23,27 +25,6 @@ class TaskItem extends StatefulWidget {
 }
 
 class _TaskItemState extends State<TaskItem> {
-  //this logic should be extracted into separate widget
-  Color _selectedCatColor(String catTitle) {
-    //print(catTitle);
-    switch (catTitle) {
-      case "Work":
-        return Color.fromRGBO(8, 100, 237, 1);
-      case "Personal":
-        return Color.fromRGBO(177, 22, 239, 1);
-      case "Kids":
-        return Color.fromRGBO(114, 219, 233, 1);
-      case "Parents":
-        return Color.fromRGBO(0, 149, 63, 1);
-      case "Friends":
-        return Color.fromRGBO(255, 239, 91, 1);
-      case "Misc":
-        return Color.fromRGBO(189, 189, 189, 1);
-      default:
-        return Color.fromRGBO(64, 64, 64, 1);
-    }
-  }
-
   // _startEditTask(BuildContext ctx) {
   //   showModalBottomSheet(
   //     context: ctx,
@@ -59,8 +40,8 @@ class _TaskItemState extends State<TaskItem> {
 
   @override
   Widget build(BuildContext context) {
-    final _selectedCategory = widget.category;
-    final catColor = _selectedCatColor(_selectedCategory);
+    final selectedCategory = widget.category;
+    final catColor = selectedCatColor(selectedCategory);
 
     return Stack(
       alignment: Alignment.topLeft,
