@@ -57,11 +57,11 @@ class _TaskListWState extends State<TaskListW> {
       child: LayoutBuilder(
         builder: (ctx, constraints) {
           return Column(
-            mainAxisAlignment: MainAxisAlignment.end,
+            //mainAxisAlignment: MainAxisAlignment.start,
             children: [
               !isLandscape
-                  ? SizedBox(
-                      height: constraints.maxHeight * 0.97,
+                  ? Flexible(
+                      //height: constraints.maxHeight * 0.97,
                       child: ReorderableListView.builder(
                         onReorder: (oldIndex, newIndex) {
                           setState(() {
