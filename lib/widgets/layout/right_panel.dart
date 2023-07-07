@@ -14,29 +14,22 @@ class RightPanel extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(left: 4.0, top: 15),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              // !isLandscape
+              //     ? Flexible(
+              //         flex: 0,
+              //         child: Container(),
+              //       )
+              //     : Flexible(
+              //         flex: 0,
+              //         child: Container(),
+              //       ),
               !isLandscape
-                  ? Container(
-                      //not used at all
-                      //height: constraints.maxHeight * 0.04,
-                      //fit: BoxFit.contain,
-                      alignment: Alignment.bottomLeft,
-                      child: Container(),
-                    )
-                  : FittedBox(
-                      //not used at all
-                      //height: constraints.maxHeight * 0.09,
-                      alignment: Alignment.bottomLeft,
-                      child: Container(),
-                    ),
-              !isLandscape
-                  ? Container(
-                      height: constraints.maxHeight * 0.98, //vertical view
-                      alignment: Alignment.bottomLeft,
+                  ? Flexible(
                       child: CalendarW(),
                     )
-                  : Container(
-                      height: constraints.maxHeight * 0.6, // horizontal view
+                  : Flexible(
                       child: CalendarW(),
                     ),
             ],
