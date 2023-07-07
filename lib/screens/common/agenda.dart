@@ -18,29 +18,17 @@ class Agenda extends StatelessWidget {
       body: SafeArea(
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           !isLandscape
-              ? Container(
-                  width: mediaQuery.size.width * 0.43,
-                  // height: (mediaQuery.size.height -
-                  //         appBar.preferredSize.height -
-                  //         mediaQuery.padding.top) *
-                  //     0.96,
-                  child: const LeftPanel(),
-                )
-              : Container(
-                  width: mediaQuery.size.width * 0.28,
-                  // height: (mediaQuery.size.height -
-                  //         appBar.preferredSize.height -
-                  //         mediaQuery.padding.top) *
-                  //     0.97,
-                  child: const LeftPanel(),
-                ),
+              ? Expanded(flex: 1, child: LeftPanel())
+              : Expanded(flex: 1, child: LeftPanel()),
           !isLandscape
-              ? Container(
-                  width: mediaQuery.size.width * 0.57,
+              ? Expanded(
+                  //width: mediaQuery.size.width * 0.57,
+                  flex: 2,
                   child: const RightPanel(),
                 )
-              : Container(
-                  width: mediaQuery.size.width * 0.61,
+              : Expanded(
+                  //width: mediaQuery.size.width * 0.61,
+                  flex: 2,
                   child: const RightPanel(),
                 ),
         ]),

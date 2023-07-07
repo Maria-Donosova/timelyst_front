@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../shared/title.dart';
 import '../shared/todo_list.dart';
+import '../shared/text_button.dart';
 
 class LeftPanel extends StatelessWidget {
   const LeftPanel({Key? key}) : super(key: key);
@@ -13,29 +14,38 @@ class LeftPanel extends StatelessWidget {
     return LayoutBuilder(
       builder: (ctx, constraints) {
         return Padding(
-          padding: const EdgeInsets.only(left: 4.0, top: 15),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
+            mainAxisSize: MainAxisSize.max,
             children: [
               !isLandscape
-                  ? Container(
-                      //height: constraints.maxHeight * 0.04,
-                      //fit: BoxFit.contain,
-                      alignment: Alignment.bottomLeft,
-                      child: TitleW(),
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 6.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Flexible(flex: 0, child: TitleW()),
+                          Flexible(flex: 0, child: TextButtonW()),
+                        ],
+                      ),
                     )
-                  : const FittedBox(
-                      //height: constraints.maxHeight * 0.09,
-                      alignment: Alignment.bottomLeft,
-                      child: TitleW(),
+                  : Padding(
+                      padding: const EdgeInsets.only(bottom: 6.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Flexible(flex: 0, child: TitleW()),
+                          Flexible(flex: 0, child: TextButtonW()),
+                        ],
+                      ),
                     ),
               !isLandscape
-                  ? Container(
-                      height: constraints.maxHeight * 0.9,
-                      alignment: Alignment.bottomLeft,
+                  ? Flexible(
                       child: TaskListW(),
                     )
-                  : Container(
-                      height: constraints.maxHeight * 0.9,
+                  : Flexible(
                       child: TaskListW(),
                     ),
             ],

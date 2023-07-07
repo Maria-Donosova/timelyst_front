@@ -58,7 +58,7 @@ class _CalendarWState extends State<CalendarW> {
         children: [
           Column(children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Enable once traffic light logic is implemented
