@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../shared/title.dart';
-import '../shared/todo_list.dart';
-import '../shared/text_button.dart';
+import '../todo/task_list.dart';
+import '../todo/new_task.dart';
 
 class LeftPanel extends StatelessWidget {
   const LeftPanel({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final isLandscape = mediaQuery.orientation == Orientation.landscape;
     return LayoutBuilder(
       builder: (ctx, constraints) {
         return Padding(
@@ -18,36 +16,18 @@ class LeftPanel extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
-              !isLandscape
-                  ? Padding(
-                      padding: const EdgeInsets.only(bottom: 6.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Flexible(flex: 0, child: TitleW()),
-                          Flexible(flex: 0, child: TextButtonW()),
-                        ],
-                      ),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.only(bottom: 6.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Flexible(flex: 0, child: TitleW()),
-                          Flexible(flex: 0, child: TextButtonW()),
-                        ],
-                      ),
-                    ),
-              !isLandscape
-                  ? Flexible(
-                      child: TaskListW(),
-                    )
-                  : Flexible(
-                      child: TaskListW(),
-                    ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Flexible(flex: 0, child: TitleW()),
+                    Flexible(flex: 0, child: NewTaskW()),
+                  ],
+                ),
+              ),
+              Flexible(child: TaskListW()),
             ],
           ),
         );

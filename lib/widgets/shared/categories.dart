@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 
+List<String> categories = <String>[
+  'Work',
+  'Personal',
+  'Kids',
+  'Family',
+  'Friends',
+  'Social',
+  'Misc'
+];
+
 Color selectedCatColor(String catTitle) {
   switch (catTitle) {
     case "Work":
@@ -8,7 +18,7 @@ Color selectedCatColor(String catTitle) {
       return Color.fromRGBO(177, 22, 239, 1);
     case "Kids":
       return Color.fromRGBO(114, 219, 233, 1);
-    case "Parents":
+    case "Family":
       return Color.fromRGBO(0, 149, 63, 1);
     case "Friends":
       return Color.fromRGBO(255, 239, 91, 1);

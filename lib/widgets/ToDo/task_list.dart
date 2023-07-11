@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../todo/task_item.dart';
-import '../todo/new_task.dart';
-import '../../models/task.dart';
+import 'task_item.dart';
 
 class TaskListW extends StatefulWidget {
   TaskListW({Key? key}) : super(key: key);
@@ -148,7 +146,6 @@ class _TaskListWState extends State<TaskListW> {
                         });
                       },
                       scrollDirection: Axis.vertical,
-                      //shrinkWrap: true,
                       physics: const AlwaysScrollableScrollPhysics(),
                       itemCount: tasks.length,
                       itemBuilder: (ctx, index) {

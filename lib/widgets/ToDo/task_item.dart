@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-
 import '../../widgets/shared/categories.dart';
-//import '../../models/task.dart';
 
 class TaskItem extends StatefulWidget {
   final String id;
   final String title;
   final String category;
-  //final Function deleteTx;
-  //final Function editTx;
   //final String userID;
 
   const TaskItem(
@@ -16,9 +12,14 @@ class TaskItem extends StatefulWidget {
     this.title,
     this.category,
     //this.deleteTx,
-    //this.editTx
-    //this.userID,
+    //this.editTx,
+    //this.doneTx
+    //this.userID
   );
+
+  //final void Function() deleteTx;
+  //final void Function() editTx;
+  //final void Function() doneTx;
 
   @override
   State<TaskItem> createState() => _TaskItemState();
