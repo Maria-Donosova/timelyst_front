@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timelyst_flutter/widgets/todo/edit_task.dart';
 import '../../widgets/shared/categories.dart';
 
 class TaskItem extends StatefulWidget {
@@ -26,23 +27,10 @@ class TaskItem extends StatefulWidget {
 }
 
 class _TaskItemState extends State<TaskItem> {
-  // _startEditTask(BuildContext ctx) {
-  //   showModalBottomSheet(
-  //     context: ctx,
-  //     builder: (_) {
-  //       return GestureDetector(
-  //         onTap: () {},
-  //         behavior: HitTestBehavior.opaque,
-  //         child: EditTask(editTask),
-  //       );
-  //     },
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     final selectedCategory = widget.category;
-    final catColor = selectedCatColor(selectedCategory);
+    final categoryColor = catColor(selectedCategory);
 
     return Stack(
       alignment: Alignment.topLeft,
@@ -54,10 +42,13 @@ class _TaskItemState extends State<TaskItem> {
             onTap: () {
               print('Card tapped.');
             },
-            onLongPress: () {
-              // _startEditTask(context);
-              print('Long press');
-            },
+            onLongPress: () => showModalBottomSheet(
+              useSafeArea: false,
+              context: context,
+              builder: (_) {
+                return EditTaskW();
+              },
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +59,7 @@ class _TaskItemState extends State<TaskItem> {
                     decoration: BoxDecoration(
                       border: Border(
                         left: BorderSide(
-                          color: catColor,
+                          color: categoryColor,
                           width: 3,
                           style: BorderStyle.solid,
                         ),
@@ -102,7 +93,7 @@ class _TaskItemState extends State<TaskItem> {
           child: Align(
             alignment: Alignment(-0.98, 0.0),
             child: CircleAvatar(
-              backgroundColor: catColor,
+              backgroundColor: categoryColor,
               radius: 3.5,
             ),
           ),

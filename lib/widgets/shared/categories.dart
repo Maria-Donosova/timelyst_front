@@ -10,7 +10,7 @@ List<String> categories = <String>[
   'Misc'
 ];
 
-Color selectedCatColor(String catTitle) {
+Color catColor(String catTitle) {
   switch (catTitle) {
     case "Work":
       return Color.fromRGBO(8, 100, 237, 1);

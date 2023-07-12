@@ -26,7 +26,7 @@ class _NewTaskWState extends State<NewTaskW> {
 
   @override
   Widget build(BuildContext context) {
-    //final catColor = selectedCatColor;
+    //final selectedCatColor = catColor;
 
     return Container(
       alignment: Alignment.topRight,
