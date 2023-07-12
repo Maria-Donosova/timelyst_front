@@ -165,3 +165,16 @@ class _NewTaskWState extends State<NewTaskW> {
     );
   }
 }
+
+// // //   String insertTask() {
+// // //     return """
+// // //       mutation createTask(\$task_description: String!, \$task_type: String, \$category: String!, \$userId: String) {
+// // //         createTask(task_description: \$task_description, task_type: \$task_type, category: \$category, userId: \$userId) {
+// // //           id
+// // //           task_description
+          
+// // //    }
+// // // }
+// // // """;
+// // //   }
+// // // }
