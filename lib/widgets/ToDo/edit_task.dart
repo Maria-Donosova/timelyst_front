@@ -141,3 +141,18 @@ class _EditTaskWState extends State<EditTaskW> {
         ));
   }
 }
+
+
+
+// // //   String updateTask() {
+// // //     return """
+// // //       mutation updateTask(\$task_description: String!, \$task_type: String, \$category: String!, \$userId: String) {
+// // //         createTask(task_description: \$task_description, task_type: \$task_type, category: \$category, userId: \$userId) {
+// // //           id
+// // //           task_description
+          
+// // //    }
+// // // }
+// // // """;
+// // //   }
+// // // }
