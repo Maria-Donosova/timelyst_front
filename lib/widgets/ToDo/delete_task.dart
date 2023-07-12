@@ -1,19 +1,15 @@
-// import 'package:flutter/material.dart';
+List tasks = ['task', 'task1', 'task2'];
 
+void deleteTask(String id) {
+  tasks.removeWhere((tasks) => tasks.id == id);
+}
 
-//   // void _deleteTask(String id) {
-//   //   setState(() {
-//   //     tasks.removeWhere((tasks) => tasks.id == id);
-//   //   });
-//   // }
-
-
-// // String _removeTask() {
-// //   return """
-// //   mutation removeTask(\$id: String!){
-// //     removeTask(id: \$id) {
-// //       task_description
-// //     }
-// //   }
-// //   """;
-// //}
+String removeTask() {
+  return """
+  mutation removeTask(\$id: String!){
+    removeTask(id: \$id) {
+      task_description
+    }
+  }
+  """;
+}
