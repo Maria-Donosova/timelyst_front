@@ -5,6 +5,7 @@ var isDone = false;
 void doneTask(String id) {
   tasks.where((tasks) => tasks.id == id);
   isDone = true;
+  tasks.removeWhere((tasks) => tasks.id == id);
 }
 
 //backend: schema & method should be updated & developed
