@@ -34,8 +34,8 @@ class _TaskListWState extends State<TaskListW> {
                     });
                   },
                   scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  physics: const AlwaysScrollableScrollPhysics(),
+                  // shrinkWrap: true,
+                  // physics: const AlwaysScrollableScrollPhysics(),
                   itemCount: tasks.length,
                   itemBuilder: (ctx, index) {
                     return Dismissible(
@@ -47,6 +47,7 @@ class _TaskListWState extends State<TaskListW> {
                           // "${task['user']["id"]}",
                           ),
                       key: ValueKey(tasks[index]),
+                      direction: DismissDirection.horizontal,
                       background: Container(
                         color: Colors.orangeAccent,
                         child: Padding(
@@ -78,18 +79,18 @@ class _TaskListWState extends State<TaskListW> {
                       ),
                       onDismissed: (DismissDirection direction) {
                         if (direction == DismissDirection.startToEnd) {
+                          print('Marked Completed');
                           doneTask(tasks.toString()
                               //"${task["id"]}",
                               );
-                          print('Marked Completed');
                           setState(() {
                             tasks.removeAt(index);
                           });
                         } else {
+                          print('Removed item');
                           deleteTask(tasks.toString()
                               //"${task["id"]}",;
                               );
-                          print('Removed item');
                           setState(() {
                             tasks.removeAt(index);
                           });
@@ -101,7 +102,7 @@ class _TaskListWState extends State<TaskListW> {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: const Text("Well Done"),
+                                  title: const Text("Well Done!"),
                                 );
                               });
                         } else {
