@@ -23,16 +23,7 @@ class _TaskListWState extends State<TaskListW> {
             children: [
               Expanded(
                 flex: 1,
-                child: ReorderableListView.builder(
-                  onReorder: (oldIndex, newIndex) {
-                    setState(() {
-                      if (oldIndex < newIndex) {
-                        newIndex -= 1;
-                      }
-                      final task = tasks.removeAt(oldIndex);
-                      tasks.insert(newIndex, task);
-                    });
-                  },
+                child: ListView.builder(
                   scrollDirection: Axis.vertical,
                   // shrinkWrap: true,
                   // physics: const AlwaysScrollableScrollPhysics(),
@@ -80,21 +71,19 @@ class _TaskListWState extends State<TaskListW> {
                       onDismissed: (DismissDirection direction) {
                         if (direction == DismissDirection.startToEnd) {
                           print('Marked Completed');
-                          doneTask(tasks.toString()
-                              //"${task["id"]}",
-                              );
-                          setState(() {
-                            tasks.removeAt(index);
-                          });
+                          // doneTask(tasks.toString()
+                          //     //"${task["id"]}",
+                          //     );
                         } else {
                           print('Removed item');
-                          deleteTask(tasks.toString()
-                              //"${task["id"]}",;
-                              );
-                          setState(() {
-                            tasks.removeAt(index);
-                          });
                         }
+                        // deleteTask(tasks.toString()
+                        //     //"${task["id"]}",;
+                        //     );
+
+                        setState(() {
+                          tasks.removeAt(index);
+                        });
                       },
                       confirmDismiss: (DismissDirection direction) async {
                         if (direction == DismissDirection.startToEnd) {
