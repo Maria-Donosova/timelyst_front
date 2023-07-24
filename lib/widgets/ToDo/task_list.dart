@@ -23,10 +23,20 @@ class _TaskListWState extends State<TaskListW> {
             children: [
               Expanded(
                 flex: 1,
-                child: ListView.builder(
+                child: ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
                   scrollDirection: Axis.vertical,
                   // shrinkWrap: true,
                   // physics: const AlwaysScrollableScrollPhysics(),
+                  onReorder: (int oldIndex, int newIndex) {
+                    setState(() {
+                      if (oldIndex < newIndex) {
+                        newIndex -= 1;
+                      }
+                      final int item = tasks.removeAt(oldIndex);
+                      tasks.insert(newIndex, item);
+                    });
+                  },
                   itemCount: tasks.length,
                   itemBuilder: (ctx, index) {
                     return Dismissible(
@@ -71,15 +81,15 @@ class _TaskListWState extends State<TaskListW> {
                       onDismissed: (DismissDirection direction) {
                         if (direction == DismissDirection.startToEnd) {
                           print('Marked Completed');
-                          // doneTask(tasks.toString()
-                          //     //"${task["id"]}",
-                          //     );
+                          doneTask(tasks.toString()
+                              //"${task["id"]}",
+                              );
                         } else {
                           print('Removed item');
                         }
-                        // deleteTask(tasks.toString()
-                        //     //"${task["id"]}",;
-                        //     );
+                        deleteTask(tasks.toString()
+                            //"${task["id"]}",;
+                            );
 
                         setState(() {
                           tasks.removeAt(index);
@@ -87,13 +97,11 @@ class _TaskListWState extends State<TaskListW> {
                       },
                       confirmDismiss: (DismissDirection direction) async {
                         if (direction == DismissDirection.startToEnd) {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text("Well Done!"),
-                                );
-                              });
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: const Text('Well Done!'),
+                          ));
+
+                          return true;
                         } else {
                           return await showDialog(
                             context: context,
@@ -118,8 +126,6 @@ class _TaskListWState extends State<TaskListW> {
                             },
                           );
                         }
-                        ;
-                        return null;
                       },
                     );
                   },
