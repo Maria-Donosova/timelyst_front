@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/screens/common/agenda.dart';
+import 'screens/common/agenda.dart';
 
 import 'themes.dart';
 
-import 'screens/common/sign_up.dart';
+//import 'screens/common/sign_up.dart';
 
 void main() {
   runApp(const MyApp());
