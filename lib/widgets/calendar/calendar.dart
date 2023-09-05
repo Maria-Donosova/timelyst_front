@@ -194,6 +194,10 @@ class _CalendarWState extends State<CalendarW> {
           Expanded(
             child: SfCalendar(
               view: CalendarView.month,
+
+              appointmentTextStyle: TextStyle(
+                color: Color.fromARGB(255, 164, 65, 65),
+              ),
               allowedViews: const [
                 CalendarView.week,
                 CalendarView.day,
