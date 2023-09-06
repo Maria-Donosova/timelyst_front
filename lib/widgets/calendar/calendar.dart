@@ -6,6 +6,7 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 //import 'package:timelyst_flutter/widgets/calendar/traffic_light.dart';
 import 'package:timelyst_flutter/widgets/calendar/week_days.dart';
 
+import 'appointment_builder.dart';
 import 'event_of_day.dart';
 
 //Enable when connecting actual data source via actual model
@@ -194,17 +195,13 @@ class _CalendarWState extends State<CalendarW> {
           Expanded(
             child: SfCalendar(
               view: CalendarView.month,
-
-              appointmentTextStyle: TextStyle(
-                color: Color.fromARGB(255, 164, 65, 65),
-              ),
               allowedViews: const [
                 CalendarView.week,
                 CalendarView.day,
                 CalendarView.month
               ],
               controller: _controller,
-              dataSource: EventDataSource(_getDataSource()),
+              dataSource: _getCalendarDataSource(),
               timeSlotViewSettings: TimeSlotViewSettings(
                   dayFormat: 'EEEE', dateFormat: 'dd', timeFormat: 'hh:mm a'),
               allowViewNavigation: false,
@@ -254,6 +251,7 @@ class _CalendarWState extends State<CalendarW> {
                       .toString();
                 }
               },
+              appointmentBuilder: appointmentBuilder,
               allowAppointmentResize: true,
               allowDragAndDrop: true,
               //onDragStart: dragStart,
@@ -660,58 +658,84 @@ class _CalendarWState extends State<CalendarW> {
   }
 }
 
-List<Event> _getDataSource() {
-  final List<Event> events = <Event>[];
-  final DateTime today = DateTime.now();
-  final DateTime startTime =
-      DateTime(today.year, today.month, today.day, 9, 0, 0);
-  final DateTime endTime = startTime.add(const Duration(hours: 2));
-  events.add(
-      Event('Conference', startTime, endTime, const Color(0xFF0F8644), false));
-  return events;
+_AppointmentDataSource _getCalendarDataSource() {
+  List<Appointment> appointments = <Appointment>[];
+
+  DateTime date = DateTime.now();
+
+  appointments.add(Appointment(
+    startTime: DateTime(
+      date.year,
+      date.month,
+      date.day,
+      7,
+      0,
+      0,
+    ),
+    endTime: DateTime(date.year, date.month, date.day, 11, 0, 0),
+    subject: 'Meeting',
+    color: Colors.pink,
+  ));
+  return _AppointmentDataSource(appointments);
 }
 
-class EventDataSource extends CalendarDataSource {
-  EventDataSource(List<Event> source) {
+class _AppointmentDataSource extends CalendarDataSource {
+  _AppointmentDataSource(List<Appointment> source) {
     appointments = source;
   }
-
-  @override
-  DateTime getStartTime(int index) {
-    return appointments![index].from;
-  }
-
-  @override
-  DateTime getEndTime(int index) {
-    return appointments![index].to;
-  }
-
-  @override
-  String getSubject(int index) {
-    return appointments![index].eventName;
-  }
-
-  @override
-  Color getColor(int index) {
-    return appointments![index].background;
-  }
-
-  @override
-  bool isAllDay(int index) {
-    return appointments![index].isAllDay;
-  }
 }
 
-//the code should be replaced witht the actual model
-class Event {
-  Event(this.eventName, this.from, this.to, this.background, this.isAllDay);
+// List<Event> _getDataSource() {
+//   final List<Event> events = <Event>[];
+//   final DateTime today = DateTime.now();
+//   final DateTime startTime =
+//       DateTime(today.year, today.month, today.day, 9, 0, 0);
+//   final DateTime endTime = startTime.add(const Duration(hours: 2));
+//   events.add(
+//       Event('Conference', startTime, endTime, const Color(0xFF0F8644), false));
+//   return events;
+// }
 
-  String eventName;
-  DateTime from;
-  DateTime to;
-  Color background;
-  bool isAllDay;
-}
+// class EventDataSource extends CalendarDataSource {
+//   EventDataSource(List<Event> source) {
+//     appointments = source;
+//   }
+
+//   @override
+//   DateTime getStartTime(int index) {
+//     return appointments![index].from;
+//   }
+
+//   @override
+//   DateTime getEndTime(int index) {
+//     return appointments![index].to;
+//   }
+
+//   @override
+//   String getSubject(int index) {
+//     return appointments![index].eventName;
+//   }
+
+//   @override
+//   Color getColor(int index) {
+//     return appointments![index].background;
+//   }
+
+//   @override
+//   bool isAllDay(int index) {
+//     return appointments![index].isAllDay;
+//   }
+// }
+
+// class Event {
+//   Event(this.eventName, this.from, this.to, this.background, this.isAllDay);
+
+//   String eventName;
+//   DateTime from;
+//   DateTime to;
+//   Color background;
+//   bool isAllDay;
+// }
 
 //uncomment once App wide State (InitState is fixed to provide the Calendar details)
 // void calendarTapped(CalendarTapDetails details) {
