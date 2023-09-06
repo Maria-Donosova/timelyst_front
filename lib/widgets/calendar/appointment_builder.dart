@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
@@ -9,7 +8,7 @@ Widget appointmentBuilder(BuildContext context,
     CalendarAppointmentDetails calendarAppointmentDetails) {
   final Appointment appointment = calendarAppointmentDetails.appointments.first;
 
-  final selectedCategory = 'Personal';
+  final selectedCategory = 'Social';
   final categoryColor = catColor(selectedCategory);
 
   return Container(
@@ -48,13 +47,9 @@ Widget appointmentBuilder(BuildContext context,
                         Container(
                           padding: const EdgeInsets.only(bottom: 7),
                           child: Text(
-                            'Title',
+                            appointment.subject,
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
-                        ),
-                        Text(
-                          'Category',
-                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],
                     ),
@@ -77,32 +72,4 @@ Widget appointmentBuilder(BuildContext context,
       ],
     ),
   );
-
-  // Column(
-  //   children: [
-  //     Container(
-  //         width: calendarAppointmentDetails.bounds.width,
-  //         height: calendarAppointmentDetails.bounds.height / 2,
-  //         color: appointment.color,
-  //         child: Center(
-  //           child: Icon(
-  //             Icons.group,
-  //             color: Colors.black,
-  //           ),
-  //         )),
-  //     Container(
-  //       width: calendarAppointmentDetails.bounds.width,
-  //       height: calendarAppointmentDetails.bounds.height / 2,
-  //       color: appointment.color,
-  //       child: Text(
-  //         appointment.subject +
-  //             DateFormat(' (hh:mm a').format(appointment.startTime) +
-  //             '-' +
-  //             DateFormat('hh:mm a)').format(appointment.endTime),
-  //         textAlign: TextAlign.center,
-  //         style: TextStyle(fontSize: 10),
-  //       ),
-  //     )
-  //   ],
-  // );
 }
