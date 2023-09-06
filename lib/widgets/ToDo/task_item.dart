@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/widgets/todo/edit_task.dart';
-import '../../widgets/shared/categories.dart';
+import '/widgets/todo/edit_task.dart';
+import '../shared/categories.dart';
 
 class TaskItem extends StatefulWidget {
   final String id;
