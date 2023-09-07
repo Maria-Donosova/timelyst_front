@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -11,23 +12,16 @@ import 'event_of_day.dart';
 enum _calView { day, week, month }
 
 class CalendarW extends StatefulWidget {
-  const CalendarW({Key? key}) : super(key: key);
+  const CalendarW({super.key});
 
   @override
   State<StatefulWidget> createState() => _CalendarWState();
 }
 
 class _CalendarWState extends State<CalendarW> {
-  CalendarController _controller = CalendarController();
+  final CalendarController _controller = CalendarController();
   String? _headerText;
-  String? date;
   double? width, cellWidth;
-
-  final _appForm = GlobalKey<FormState>();
-  final _eventSubjController = TextEditingController();
-  //final _eventSourceController = TextEditingController();
-  final _eventStartDateController = TextEditingController();
-  final _eventEndDateController = TextEditingController();
 
   @override
   void initState() {
@@ -77,35 +71,6 @@ class _CalendarWState extends State<CalendarW> {
                     ),
                   ),
                 ),
-                //Use back and forward controllers for the web version
-                // Padding(
-                //   padding: const EdgeInsets.only(left: 4, right: 4),
-                //   child: SizedBox(
-                //     width: mediaQuery.size.width * 0.025,
-                //     child: IconButton(
-                //       iconSize: 18,
-                //       color: Colors.grey[800],
-                //       icon: const Icon(Icons.arrow_back),
-                //       onPressed: () {
-                //         //_controller.backward!();
-                //       },
-                //     ),
-                //   ),
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.only(left: 6, right: 4),
-                //   child: SizedBox(
-                //     width: mediaQuery.size.width * 0.025,
-                //     child: IconButton(
-                //       iconSize: 18,
-                //       color: Colors.grey[800],
-                //       icon: const Icon(Icons.arrow_forward),
-                //       onPressed: () {
-                //         //_controller.forward!();
-                //       },
-                //     ),
-                //   ),
-                // ),
                 Padding(
                   padding: const EdgeInsets.only(right: 8, left: 10),
                   child: SizedBox(
@@ -188,470 +153,74 @@ class _CalendarWState extends State<CalendarW> {
                       )
                     : Container(),
           ]),
-
-          //],
-          //),
-
           Expanded(
             child: SfCalendar(
-              view: CalendarView.day,
-              allowedViews: const [
-                CalendarView.day,
-                CalendarView.week,
-                CalendarView.month
-              ],
-              controller: _controller,
-              dataSource: _getCalendarDataSource(),
-              timeSlotViewSettings: TimeSlotViewSettings(
-                  dayFormat: 'EEEE', dateFormat: 'dd', timeFormat: 'hh:mm a'),
-              allowViewNavigation: false,
-              headerHeight: 0,
-              viewHeaderHeight: 0,
-              cellBorderColor: const Color.fromRGBO(238, 243, 246, 1.0),
-              selectionDecoration: BoxDecoration(
-                color: Colors.transparent,
-                border: Border.all(color: Colors.grey, width: 0.5),
-                borderRadius: const BorderRadius.all(Radius.circular(4)),
-                shape: BoxShape.rectangle,
-              ),
-              showWeekNumber: true,
-              weekNumberStyle: WeekNumberStyle(
-                backgroundColor: Colors.white,
-                textStyle: TextStyle(fontSize: 8, color: Colors.grey[600]),
-              ),
-              monthViewSettings: MonthViewSettings(
-                appointmentDisplayCount: 6,
-                navigationDirection: MonthNavigationDirection.horizontal,
-                showTrailingAndLeadingDates: false,
-                monthCellStyle: MonthCellStyle(
+                view: CalendarView.day,
+                allowedViews: const [
+                  CalendarView.day,
+                  CalendarView.week,
+                  CalendarView.month
+                ],
+                controller: _controller,
+                allowViewNavigation: false,
+                headerHeight: 0,
+                viewHeaderHeight: 0,
+                cellBorderColor: const Color.fromRGBO(238, 243, 246, 1.0),
+                selectionDecoration: BoxDecoration(
+                  color: Colors.transparent,
+                  border: Border.all(color: Colors.grey, width: 0.5),
+                  borderRadius: const BorderRadius.all(Radius.circular(4)),
+                  shape: BoxShape.rectangle,
+                ),
+                showWeekNumber: true,
+                weekNumberStyle: WeekNumberStyle(
                   backgroundColor: Colors.white,
-                  todayBackgroundColor:
-                      const Color.fromRGBO(238, 243, 246, 1.0),
-                  textStyle: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[800],
+                  textStyle: TextStyle(fontSize: 8, color: Colors.grey[600]),
+                ),
+                todayHighlightColor: Color.fromRGBO(238, 243, 246, 1.0),
+                todayTextStyle: TextStyle(color: Colors.grey[800]),
+                showNavigationArrow: true,
+                showCurrentTimeIndicator: true,
+                monthViewSettings: MonthViewSettings(
+                  appointmentDisplayCount: 6,
+                  navigationDirection: MonthNavigationDirection.horizontal,
+                  showTrailingAndLeadingDates: false,
+                  monthCellStyle: MonthCellStyle(
+                    backgroundColor: Colors.white,
+                    todayBackgroundColor:
+                        const Color.fromRGBO(238, 243, 246, 1.0),
+                    textStyle: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[800],
+                    ),
                   ),
                 ),
-              ),
-              onViewChanged: (ViewChangedDetails viewChangedDetails) {
-                if (_controller.view == CalendarView.month) {
-                  _headerText = DateFormat('LLL')
-                      .format(viewChangedDetails.visibleDates[
-                          viewChangedDetails.visibleDates.length ~/ 2])
-                      .toString();
-                } else if (_controller.view == CalendarView.week) {
-                  _headerText = DateFormat('MMMMd')
-                      .format(viewChangedDetails.visibleDates[
-                          viewChangedDetails.visibleDates.length ~/ 2])
-                      .toString();
-                } else if (_controller.view == CalendarView.day) {
-                  _headerText = DateFormat('MMMEd')
-                      .format(viewChangedDetails.visibleDates[
-                          viewChangedDetails.visibleDates.length ~/ 2])
-                      .toString();
-                }
-              },
-              appointmentBuilder: appointmentBuilder,
-              allowAppointmentResize: true,
-              allowDragAndDrop: true,
-              //onDragStart: dragStart,
-              //onDragUpdate: dragUpdate,
-              // onDragEnd: dragEnd,
-              dragAndDropSettings: const DragAndDropSettings(
-                allowNavigation: true,
-                allowScroll: true,
-                autoNavigateDelay: Duration(seconds: 1),
-                indicatorTimeFormat: 'HH:mm a',
-                showTimeIndicator: true,
-                timeIndicatorStyle: TextStyle(backgroundColor: Colors.grey),
-              ),
-              //showDatePickerButton: true,
-              todayHighlightColor: Colors.grey[200],
-              todayTextStyle: TextStyle(color: Colors.grey[800]),
-              showNavigationArrow: true,
-              showCurrentTimeIndicator: true,
-              onTap: (CalendarTapDetails calendarTapDetails) async {
-                showDialog(
-                  useSafeArea: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('New Event'),
-                      content:
-                          //  Mutation(
-                          //               options: MutationOptions(
-                          //                 document: gql(insertEvent()),
-                          //                 fetchPolicy: FetchPolicy.noCache,
-                          //                 onCompleted: (data) {
-                          //                   print(data.toString());
-                          //                   setState(() {
-                          //                     //currUserId = (data as Map)['createUser']['id'];
-                          //                     //currUserId = data['createUser']["id"];
-                          //                   });
-                          //                 },
-                          //               ),
-                          //               builder: (runMutation, result) {
-                          //                 return
-                          Form(
-                        key: _appForm,
-                        child: SizedBox(
-                          height: 500,
-                          child: Column(
-                            children: <Widget>[
-                              SizedBox(
-                                height: 50,
-                                width: 500,
-                                child: TextFormField(
-                                  autocorrect: true,
-                                  controller: _eventSubjController,
-                                  style: Theme.of(context).textTheme.bodyText1,
-                                  maxLines: null,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Subject',
-                                    labelStyle: TextStyle(fontSize: 14),
-                                    border: InputBorder.none,
-                                    errorStyle:
-                                        TextStyle(color: Colors.redAccent),
-                                  ),
-                                  textInputAction: TextInputAction.next,
-                                  keyboardType: TextInputType.name,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please provide a value.';
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(
-                                    height: 50,
-                                    width: 100,
-                                    child: TextFormField(
-                                      autocorrect: true,
-                                      controller: _eventStartDateController,
-                                      style:
-                                          Theme.of(context).textTheme.bodyText1,
-                                      decoration: const InputDecoration(
-                                        labelText: 'Start Date',
-                                        labelStyle: TextStyle(fontSize: 14),
-                                        border: InputBorder.none,
-                                        errorStyle:
-                                            TextStyle(color: Colors.redAccent),
-                                      ),
-                                      textInputAction: TextInputAction.next,
-                                      keyboardType: TextInputType.datetime,
-                                      validator: (value) {
-                                        if (value!.isEmpty) {
-                                          return 'Please provide a value.';
-                                        } else {
-                                          return null;
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 50,
-                                    width: 100,
-                                    child: TextFormField(
-                                      autocorrect: true,
-                                      controller: _eventEndDateController,
-                                      style:
-                                          Theme.of(context).textTheme.bodyText1,
-                                      decoration: const InputDecoration(
-                                        labelText: 'End Date',
-                                        labelStyle: TextStyle(fontSize: 14),
-                                        border: InputBorder.none,
-                                        errorStyle:
-                                            TextStyle(color: Colors.redAccent),
-                                      ),
-                                      textInputAction: TextInputAction.next,
-                                      keyboardType: TextInputType.datetime,
-                                      validator: (value) {
-                                        if (value!.isEmpty) {
-                                          return 'Please provide a value.';
-                                        } else {
-                                          return null;
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 50,
-                                width: 500,
-                                child: TextFormField(
-                                  autocorrect: true,
-                                  style: Theme.of(context).textTheme.bodyText1,
-                                  maxLines: null,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Category',
-                                    labelStyle: TextStyle(fontSize: 14),
-                                    border: InputBorder.none,
-                                    errorStyle:
-                                        TextStyle(color: Colors.redAccent),
-                                  ),
-                                  textInputAction: TextInputAction.next,
-                                  keyboardType: TextInputType.name,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please provide a value.';
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: 50,
-                                width: 500,
-                                child: TextFormField(
-                                  autocorrect: true,
-                                  //controller: _eventSubjController,
-                                  style: Theme.of(context).textTheme.bodyText1,
-                                  maxLines: null,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Description',
-                                    labelStyle: TextStyle(fontSize: 14),
-                                    border: InputBorder.none,
-                                    errorStyle:
-                                        TextStyle(color: Colors.redAccent),
-                                  ),
-                                  textInputAction: TextInputAction.next,
-                                  keyboardType: TextInputType.name,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please provide a value.';
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: 50,
-                                width: 500,
-                                child: TextFormField(
-                                  autocorrect: true,
-                                  controller: _eventSubjController,
-                                  style: Theme.of(context).textTheme.bodyText1,
-                                  maxLines: null,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Calendars',
-                                    labelStyle: TextStyle(fontSize: 14),
-                                    border: InputBorder.none,
-                                    errorStyle:
-                                        TextStyle(color: Colors.redAccent),
-                                  ),
-                                  textInputAction: TextInputAction.next,
-                                  keyboardType: TextInputType.name,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please provide a value.';
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: 50,
-                                width: 500,
-                                child: TextFormField(
-                                  autocorrect: true,
-                                  controller: _eventSubjController,
-                                  style: Theme.of(context).textTheme.bodyText1,
-                                  maxLines: null,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Attachements',
-                                    labelStyle: TextStyle(fontSize: 14),
-                                    border: InputBorder.none,
-                                    errorStyle:
-                                        TextStyle(color: Colors.redAccent),
-                                  ),
-                                  textInputAction: TextInputAction.next,
-                                  keyboardType: TextInputType.name,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please provide a value.';
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: 50,
-                                width: 500,
-                                child: TextFormField(
-                                  autocorrect: true,
-                                  controller: _eventSubjController,
-                                  style: Theme.of(context).textTheme.bodyText1,
-                                  maxLines: null,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Organizier',
-                                    labelStyle: TextStyle(fontSize: 14),
-                                    border: InputBorder.none,
-                                    errorStyle:
-                                        TextStyle(color: Colors.redAccent),
-                                  ),
-                                  textInputAction: TextInputAction.next,
-                                  keyboardType: TextInputType.name,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please provide a value.';
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: 50,
-                                width: 500,
-                                child: TextFormField(
-                                  autocorrect: true,
-                                  controller: _eventSubjController,
-                                  style: Theme.of(context).textTheme.bodyText1,
-                                  maxLines: null,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Attendees',
-                                    labelStyle: TextStyle(fontSize: 14),
-                                    border: InputBorder.none,
-                                    errorStyle:
-                                        TextStyle(color: Colors.redAccent),
-                                  ),
-                                  textInputAction: TextInputAction.next,
-                                  keyboardType: TextInputType.name,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please provide a value.';
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                ),
-                              ),
-                              // SizedBox(
-                              //   height: 50,
-                              //   width: 500,
-                              //   child: TextFormField(
-                              //     autocorrect: true,
-                              //     //controller: _eventSubjController,
-                              //     style:
-                              //         Theme.of(context).textTheme.bodyText1,
-                              //     maxLines: null,
-                              //     decoration: const InputDecoration(
-                              //       labelText: 'Repeat',
-                              //       labelStyle: TextStyle(fontSize: 14),
-                              //       border: InputBorder.none,
-                              //       errorStyle:
-                              //           TextStyle(color: Colors.redAccent),
-                              //     ),
-                              //     textInputAction: TextInputAction.next,
-                              //     keyboardType: TextInputType.name,
-                              //     validator: (value) {
-                              //       if (value!.isEmpty) {
-                              //         return 'Please provide a value.';
-                              //       } else {
-                              //         return null;
-                              //       }
-                              //     },
-                              //   ),
-                              // ),
-                              SizedBox(
-                                height: 50,
-                                width: 500,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    IconButton(
-                                      onPressed: null,
-                                      icon: Icon(
-                                        Icons.notification_important_outlined,
-                                        color: Colors.grey[800],
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: null,
-                                      icon: Icon(
-                                        Icons.celebration,
-                                        color: Colors.grey[800],
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: null,
-                                      icon: Icon(
-                                        Icons.all_inclusive_outlined,
-                                        color: Colors.grey[800],
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: null,
-                                      icon: Icon(
-                                        Icons.task_outlined,
-                                        color: Colors.grey[800],
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: null,
-                                      icon: Icon(
-                                        Icons.schedule_outlined,
-                                        color: Colors.grey[800],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton(
-                                      child: const Text('Save'),
-                                      onPressed: () {
-                                        setState(() {
-                                          // runMutation({
-                                          //   "event_subj":
-                                          //       _eventSubjController
-                                          //           .text
-                                          //           .trim(),
-                                          //   "event_startdate":
-                                          //       _eventStartDateController
-                                          //           .text
-                                          //           .trim(),
-                                          //   "event_enddate":
-                                          //       _eventEndDateController
-                                          //           .text
-                                          //           .trim(),
-                                          // });
-                                          print("event mutation");
-                                        });
-                                        Navigator.of(context).pop();
-                                      }),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Close'),
-                                  )
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
+                appointmentBuilder: appointmentBuilder,
+                dataSource: _getCalendarDataSource(),
+                onViewChanged: (ViewChangedDetails viewChangedDetails) {
+                  if (_controller.view == CalendarView.month) {
+                    _headerText = DateFormat('MMMMEEEEd')
+                        .format(viewChangedDetails.visibleDates[
+                            viewChangedDetails.visibleDates.length ~/ 2])
+                        .toString();
+                  }
+                  if (_controller.view == CalendarView.week) {
+                    _headerText = DateFormat('MMMMEEEEd')
+                        .format(viewChangedDetails.visibleDates[
+                            viewChangedDetails.visibleDates.length ~/ 2])
+                        .toString();
+                  }
+                  if (_controller.view == CalendarView.day) {
+                    _headerText = DateFormat('MMMMEEEEd')
+                        .format(viewChangedDetails.visibleDates[
+                            viewChangedDetails.visibleDates.length ~/ 2])
+                        .toString();
+                  }
+                  SchedulerBinding.instance.addPostFrameCallback((duration) {
+                    setState(() {});
+                  });
+                }),
+          )
         ],
       ),
     );
@@ -674,7 +243,7 @@ _AppointmentDataSource _getCalendarDataSource() {
       0,
     ),
     endTime: DateTime(date.year, date.month, date.day, 11, 0, 0),
-    subject: 'Personal Dummy Appointment',
+    subject: 'Dummy',
     color: categoryColor,
   ));
   return _AppointmentDataSource(appointments);
@@ -685,428 +254,3 @@ class _AppointmentDataSource extends CalendarDataSource {
     appointments = source;
   }
 }
-
-// List<Event> _getDataSource() {
-//   final List<Event> events = <Event>[];
-//   final DateTime today = DateTime.now();
-//   final DateTime startTime =
-//       DateTime(today.year, today.month, today.day, 9, 0, 0);
-//   final DateTime endTime = startTime.add(const Duration(hours: 2));
-//   events.add(
-//       Event('Conference', startTime, endTime, const Color(0xFF0F8644), false));
-//   return events;
-// }
-
-// class EventDataSource extends CalendarDataSource {
-//   EventDataSource(List<Event> source) {
-//     appointments = source;
-//   }
-
-//   @override
-//   DateTime getStartTime(int index) {
-//     return appointments![index].from;
-//   }
-
-//   @override
-//   DateTime getEndTime(int index) {
-//     return appointments![index].to;
-//   }
-
-//   @override
-//   String getSubject(int index) {
-//     return appointments![index].eventName;
-//   }
-
-//   @override
-//   Color getColor(int index) {
-//     return appointments![index].background;
-//   }
-
-//   @override
-//   bool isAllDay(int index) {
-//     return appointments![index].isAllDay;
-//   }
-// }
-
-// class Event {
-//   Event(this.eventName, this.from, this.to, this.background, this.isAllDay);
-
-//   String eventName;
-//   DateTime from;
-//   DateTime to;
-//   Color background;
-//   bool isAllDay;
-// }
-
-//uncomment once App wide State (InitState is fixed to provide the Calendar details)
-// void calendarTapped(CalendarTapDetails details) {
-//   final _appForm = GlobalKey<FormState>();
-//   final _eventSubjController = TextEditingController();
-//   final _eventStartDateController = TextEditingController();
-//   final _eventEndDateController = TextEditingController();
-//   var context;
-//   showDialog(
-//       useSafeArea: true,
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: const Text('New Event'),
-//           content:
-//               //  Mutation(
-//               //               options: MutationOptions(
-//               //                 document: gql(insertEvent()),
-//               //                 fetchPolicy: FetchPolicy.noCache,
-//               //                 onCompleted: (data) {
-//               //                   print(data.toString());
-//               //                   setState(() {
-//               //                     //currUserId = (data as Map)['createUser']['id'];
-//               //                     //currUserId = data['createUser']["id"];
-//               //                   });
-//               //                 },
-//               //               ),
-//               //               builder: (runMutation, result) {
-//               //                 return
-//               Form(
-//             key: _appForm,
-//             child: SizedBox(
-//               height: 500,
-//               child: Column(
-//                 children: <Widget>[
-//                   SizedBox(
-//                     height: 50,
-//                     width: 500,
-//                     child: TextFormField(
-//                       autocorrect: true,
-//                       controller: _eventSubjController,
-//                       style: Theme.of(context).textTheme.bodyLarge,
-//                       maxLines: null,
-//                       decoration: const InputDecoration(
-//                         labelText: 'Subject',
-//                         labelStyle: TextStyle(fontSize: 14),
-//                         border: InputBorder.none,
-//                         errorStyle: TextStyle(color: Colors.redAccent),
-//                       ),
-//                       textInputAction: TextInputAction.next,
-//                       keyboardType: TextInputType.name,
-//                       validator: (value) {
-//                         if (value!.isEmpty) {
-//                           return 'Please provide a value.';
-//                         } else {
-//                           return null;
-//                         }
-//                       },
-//                     ),
-//                   ),
-//                   Row(
-//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                     children: [
-//                       SizedBox(
-//                         height: 50,
-//                         width: 100,
-//                         child: TextFormField(
-//                           autocorrect: true,
-//                           controller: _eventStartDateController,
-//                           style: Theme.of(context).textTheme.bodyLarge,
-//                           decoration: const InputDecoration(
-//                             labelText: 'Start Date',
-//                             labelStyle: TextStyle(fontSize: 14),
-//                             border: InputBorder.none,
-//                             errorStyle: TextStyle(color: Colors.redAccent),
-//                           ),
-//                           textInputAction: TextInputAction.next,
-//                           keyboardType: TextInputType.datetime,
-//                           validator: (value) {
-//                             if (value!.isEmpty) {
-//                               return 'Please provide a value.';
-//                             } else {
-//                               return null;
-//                             }
-//                           },
-//                         ),
-//                       ),
-//                       SizedBox(
-//                         height: 50,
-//                         width: 100,
-//                         child: TextFormField(
-//                           autocorrect: true,
-//                           controller: _eventEndDateController,
-//                           style: Theme.of(context).textTheme.bodyLarge,
-//                           decoration: const InputDecoration(
-//                             labelText: 'End Date',
-//                             labelStyle: TextStyle(fontSize: 14),
-//                             border: InputBorder.none,
-//                             errorStyle: TextStyle(color: Colors.redAccent),
-//                           ),
-//                           textInputAction: TextInputAction.next,
-//                           keyboardType: TextInputType.datetime,
-//                           validator: (value) {
-//                             if (value!.isEmpty) {
-//                               return 'Please provide a value.';
-//                             } else {
-//                               return null;
-//                             }
-//                           },
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                   SizedBox(
-//                     height: 50,
-//                     width: 500,
-//                     child: TextFormField(
-//                       autocorrect: true,
-//                       style: Theme.of(context).textTheme.bodyLarge,
-//                       maxLines: null,
-//                       decoration: const InputDecoration(
-//                         labelText: 'Category',
-//                         labelStyle: TextStyle(fontSize: 14),
-//                         border: InputBorder.none,
-//                         errorStyle: TextStyle(color: Colors.redAccent),
-//                       ),
-//                       textInputAction: TextInputAction.next,
-//                       keyboardType: TextInputType.name,
-//                       validator: (value) {
-//                         if (value!.isEmpty) {
-//                           return 'Please provide a value.';
-//                         } else {
-//                           return null;
-//                         }
-//                       },
-//                     ),
-//                   ),
-//                   SizedBox(
-//                     height: 50,
-//                     width: 500,
-//                     child: TextFormField(
-//                       autocorrect: true,
-//                       //controller: _eventSubjController,
-//                       style: Theme.of(context).textTheme.bodyLarge,
-//                       maxLines: null,
-//                       decoration: const InputDecoration(
-//                         labelText: 'Description',
-//                         labelStyle: TextStyle(fontSize: 14),
-//                         border: InputBorder.none,
-//                         errorStyle: TextStyle(color: Colors.redAccent),
-//                       ),
-//                       textInputAction: TextInputAction.next,
-//                       keyboardType: TextInputType.name,
-//                       validator: (value) {
-//                         if (value!.isEmpty) {
-//                           return 'Please provide a value.';
-//                         } else {
-//                           return null;
-//                         }
-//                       },
-//                     ),
-//                   ),
-//                   SizedBox(
-//                     height: 50,
-//                     width: 500,
-//                     child: TextFormField(
-//                       autocorrect: true,
-//                       controller: _eventSubjController,
-//                       style: Theme.of(context).textTheme.bodyLarge,
-//                       maxLines: null,
-//                       decoration: const InputDecoration(
-//                         labelText: 'Calendars',
-//                         labelStyle: TextStyle(fontSize: 14),
-//                         border: InputBorder.none,
-//                         errorStyle: TextStyle(color: Colors.redAccent),
-//                       ),
-//                       textInputAction: TextInputAction.next,
-//                       keyboardType: TextInputType.name,
-//                       validator: (value) {
-//                         if (value!.isEmpty) {
-//                           return 'Please provide a value.';
-//                         } else {
-//                           return null;
-//                         }
-//                       },
-//                     ),
-//                   ),
-//                   SizedBox(
-//                     height: 50,
-//                     width: 500,
-//                     child: TextFormField(
-//                       autocorrect: true,
-//                       controller: _eventSubjController,
-//                       style: Theme.of(context).textTheme.bodyLarge,
-//                       maxLines: null,
-//                       decoration: const InputDecoration(
-//                         labelText: 'Attachements',
-//                         labelStyle: TextStyle(fontSize: 14),
-//                         border: InputBorder.none,
-//                         errorStyle: TextStyle(color: Colors.redAccent),
-//                       ),
-//                       textInputAction: TextInputAction.next,
-//                       keyboardType: TextInputType.name,
-//                       validator: (value) {
-//                         if (value!.isEmpty) {
-//                           return 'Please provide a value.';
-//                         } else {
-//                           return null;
-//                         }
-//                       },
-//                     ),
-//                   ),
-//                   SizedBox(
-//                     height: 50,
-//                     width: 500,
-//                     child: TextFormField(
-//                       autocorrect: true,
-//                       controller: _eventSubjController,
-//                       style: Theme.of(context).textTheme.bodyLarge,
-//                       maxLines: null,
-//                       decoration: const InputDecoration(
-//                         labelText: 'Organizier',
-//                         labelStyle: TextStyle(fontSize: 14),
-//                         border: InputBorder.none,
-//                         errorStyle: TextStyle(color: Colors.redAccent),
-//                       ),
-//                       textInputAction: TextInputAction.next,
-//                       keyboardType: TextInputType.name,
-//                       validator: (value) {
-//                         if (value!.isEmpty) {
-//                           return 'Please provide a value.';
-//                         } else {
-//                           return null;
-//                         }
-//                       },
-//                     ),
-//                   ),
-//                   SizedBox(
-//                     height: 50,
-//                     width: 500,
-//                     child: TextFormField(
-//                       autocorrect: true,
-//                       controller: _eventSubjController,
-//                       style: Theme.of(context).textTheme.bodyLarge,
-//                       maxLines: null,
-//                       decoration: const InputDecoration(
-//                         labelText: 'Attendees',
-//                         labelStyle: TextStyle(fontSize: 14),
-//                         border: InputBorder.none,
-//                         errorStyle: TextStyle(color: Colors.redAccent),
-//                       ),
-//                       textInputAction: TextInputAction.next,
-//                       keyboardType: TextInputType.name,
-//                       validator: (value) {
-//                         if (value!.isEmpty) {
-//                           return 'Please provide a value.';
-//                         } else {
-//                           return null;
-//                         }
-//                       },
-//                     ),
-//                   ),
-//                   // SizedBox(
-//                   //   height: 50,
-//                   //   width: 500,
-//                   //   child: TextFormField(
-//                   //     autocorrect: true,
-//                   //     //controller: _eventSubjController,
-//                   //     style:
-//                   //         Theme.of(context).textTheme.bodyText1,
-//                   //     maxLines: null,
-//                   //     decoration: const InputDecoration(
-//                   //       labelText: 'Repeat',
-//                   //       labelStyle: TextStyle(fontSize: 14),
-//                   //       border: InputBorder.none,
-//                   //       errorStyle:
-//                   //           TextStyle(color: Colors.redAccent),
-//                   //     ),
-//                   //     textInputAction: TextInputAction.next,
-//                   //     keyboardType: TextInputType.name,
-//                   //     validator: (value) {
-//                   //       if (value!.isEmpty) {
-//                   //         return 'Please provide a value.';
-//                   //       } else {
-//                   //         return null;
-//                   //       }
-//                   //     },
-//                   //   ),
-//                   // ),
-//                   SizedBox(
-//                     height: 50,
-//                     width: 500,
-//                     child: Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                       children: [
-//                         IconButton(
-//                           onPressed: null,
-//                           icon: Icon(
-//                             Icons.notification_important_outlined,
-//                             color: Colors.grey[800],
-//                           ),
-//                         ),
-//                         IconButton(
-//                           onPressed: null,
-//                           icon: Icon(
-//                             Icons.celebration,
-//                             color: Colors.grey[800],
-//                           ),
-//                         ),
-//                         IconButton(
-//                           onPressed: null,
-//                           icon: Icon(
-//                             Icons.all_inclusive_outlined,
-//                             color: Colors.grey[800],
-//                           ),
-//                         ),
-//                         IconButton(
-//                           onPressed: null,
-//                           icon: Icon(
-//                             Icons.task_outlined,
-//                             color: Colors.grey[800],
-//                           ),
-//                         ),
-//                         IconButton(
-//                           onPressed: null,
-//                           icon: Icon(
-//                             Icons.schedule_outlined,
-//                             color: Colors.grey[800],
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                   Row(
-//                     mainAxisAlignment: MainAxisAlignment.end,
-//                     children: [
-//                       TextButton(
-//                           child: const Text('Save'),
-//                           onPressed: () {
-//                             // setState(() {
-//                             //   // runMutation({
-//                             //   //   "event_subj":
-//                             //   //       _eventSubjController
-//                             //   //           .text
-//                             //   //           .trim(),
-//                             //   //   "event_startdate":
-//                             //   //       _eventStartDateController
-//                             //   //           .text
-//                             //   //           .trim(),
-//                             //   //   "event_enddate":
-//                             //   //       _eventEndDateController
-//                             //   //           .text
-//                             //   //           .trim(),
-//                             //   // });
-//                             //   print("event mutation");
-//                             // });
-//                             Navigator.of(context).pop();
-//                           }),
-//                       TextButton(
-//                         onPressed: () {
-//                           Navigator.of(context).pop();
-//                         },
-//                         child: const Text('Close'),
-//                       )
-//                     ],
-//                   )
-//                 ],
-//               ),
-//             ),
-//           ),
-//         );
-//       });
-// }
