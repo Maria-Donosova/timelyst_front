@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:timelyst_flutter/widgets/calendar/calendar_header.dart';
-import 'package:timelyst_flutter/widgets/calendar/week_days.dart';
 
+import '/widgets/calendar/week_days.dart';
 import '../shared/categories.dart';
 import 'appointment_builder.dart';
 import 'event_of_day.dart';
@@ -20,21 +18,23 @@ class CalendarW extends StatefulWidget {
 }
 
 class _CalendarWState extends State<CalendarW> {
+  CalendarController _controller = CalendarController();
+  String? _headerText;
+  String? date;
+  double? width, cellWidth;
+
   final _appForm = GlobalKey<FormState>();
   final _eventSubjController = TextEditingController();
   //final _eventSourceController = TextEditingController();
   final _eventStartDateController = TextEditingController();
   final _eventEndDateController = TextEditingController();
 
-  CalendarController _controller = CalendarController();
-  String? _headerText;
-
-  CalendarDetails get calendarDetails => calendarDetails;
-
   @override
   void initState() {
-    _controller = CalendarController();
-    _headerText = '';
+    _headerText = 'header';
+
+    width = 0.0;
+    cellWidth = 0.0;
 
     // _getEvents().then((results) {
     //   setState(() {
@@ -58,101 +58,100 @@ class _CalendarWState extends State<CalendarW> {
       child: Column(
         children: [
           Column(children: [
-            CalendarHeaderBuilder(context, calendarDetails),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   crossAxisAlignment: CrossAxisAlignment.center,
-            //   children: [
-            //     // Enable once traffic light logic is implemented
-            //     // const Padding(
-            //     //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-            //     //   child: TrafficLightW(),
-            //     // ),
-            //     SizedBox(
-            //       width: mediaQuery.size.width * 0.38,
-            //       child: Padding(
-            //         padding: const EdgeInsets.only(left: 10.0, right: 20),
-            //         child: Text(
-            //           _headerText!,
-            //           style: Theme.of(context).textTheme.displayLarge,
-            //         ),
-            //       ),
-            //     ),
-            //     //Use back and forward controllers for the web version
-            //     // Padding(
-            //     //   padding: const EdgeInsets.only(left: 4, right: 4),
-            //     //   child: SizedBox(
-            //     //     width: mediaQuery.size.width * 0.025,
-            //     //     child: IconButton(
-            //     //       iconSize: 18,
-            //     //       color: Colors.grey[800],
-            //     //       icon: const Icon(Icons.arrow_back),
-            //     //       onPressed: () {
-            //     //         //_controller.backward!();
-            //     //       },
-            //     //     ),
-            //     //   ),
-            //     // ),
-            //     // Padding(
-            //     //   padding: const EdgeInsets.only(left: 6, right: 4),
-            //     //   child: SizedBox(
-            //     //     width: mediaQuery.size.width * 0.025,
-            //     //     child: IconButton(
-            //     //       iconSize: 18,
-            //     //       color: Colors.grey[800],
-            //     //       icon: const Icon(Icons.arrow_forward),
-            //     //       onPressed: () {
-            //     //         //_controller.forward!();
-            //     //       },
-            //     //     ),
-            //     //   ),
-            //     // ),
-            //     Padding(
-            //       padding: const EdgeInsets.only(right: 8, left: 10),
-            //       child: SizedBox(
-            //         //width: mediaQuery.size.width * 0.03,
-            //         child: PopupMenuButton(
-            //           icon: Icon(
-            //             Icons.calendar_today_outlined,
-            //             color: Colors.grey[800],
-            //           ),
-            //           iconSize: 20,
-            //           itemBuilder: (BuildContext context) =>
-            //               <PopupMenuEntry<_calView>>[
-            //             const PopupMenuItem<_calView>(
-            //               value: _calView.day,
-            //               child: Text('Day'),
-            //             ),
-            //             const PopupMenuItem<_calView>(
-            //               value: _calView.week,
-            //               child: Text('Week'),
-            //             ),
-            //             const PopupMenuItem<_calView>(
-            //               value: _calView.month,
-            //               child: Text('Month'),
-            //             ),
-            //           ],
-            //           onSelected: (value) {
-            //             setState(
-            //               () {
-            //                 if (value == _calView.day) {
-            //                   _controller.view = CalendarView.day;
-            //                 } else if (value == _calView.week) {
-            //                   _controller.view = CalendarView.week;
-            //                 } else if (value == _calView.month) {
-            //                   _controller.view = CalendarView.month;
-            //                 }
-            //                 ;
-            //               },
-            //             );
-            //           },
-            //         ),
-            //         //},
-            //       ),
-            //     ),
-            //     //),
-            //   ],
-            // ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Enable once traffic light logic is implemented
+                // const Padding(
+                //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                //   child: TrafficLightW(),
+                // ),
+                SizedBox(
+                  width: mediaQuery.size.width * 0.38,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10.0, right: 20),
+                    child: Text(
+                      _headerText!,
+                      //style: Theme.of(context).textTheme.displayLarge,
+                    ),
+                  ),
+                ),
+                //Use back and forward controllers for the web version
+                // Padding(
+                //   padding: const EdgeInsets.only(left: 4, right: 4),
+                //   child: SizedBox(
+                //     width: mediaQuery.size.width * 0.025,
+                //     child: IconButton(
+                //       iconSize: 18,
+                //       color: Colors.grey[800],
+                //       icon: const Icon(Icons.arrow_back),
+                //       onPressed: () {
+                //         //_controller.backward!();
+                //       },
+                //     ),
+                //   ),
+                // ),
+                // Padding(
+                //   padding: const EdgeInsets.only(left: 6, right: 4),
+                //   child: SizedBox(
+                //     width: mediaQuery.size.width * 0.025,
+                //     child: IconButton(
+                //       iconSize: 18,
+                //       color: Colors.grey[800],
+                //       icon: const Icon(Icons.arrow_forward),
+                //       onPressed: () {
+                //         //_controller.forward!();
+                //       },
+                //     ),
+                //   ),
+                // ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8, left: 10),
+                  child: SizedBox(
+                    //width: mediaQuery.size.width * 0.03,
+                    child: PopupMenuButton(
+                      icon: Icon(
+                        Icons.calendar_today_outlined,
+                        color: Colors.grey[800],
+                      ),
+                      iconSize: 20,
+                      itemBuilder: (BuildContext context) =>
+                          <PopupMenuEntry<_calView>>[
+                        const PopupMenuItem<_calView>(
+                          value: _calView.day,
+                          child: Text('Day'),
+                        ),
+                        const PopupMenuItem<_calView>(
+                          value: _calView.week,
+                          child: Text('Week'),
+                        ),
+                        const PopupMenuItem<_calView>(
+                          value: _calView.month,
+                          child: Text('Month'),
+                        ),
+                      ],
+                      onSelected: (value) {
+                        setState(
+                          () {
+                            if (value == _calView.day) {
+                              _controller.view = CalendarView.day;
+                            } else if (value == _calView.week) {
+                              _controller.view = CalendarView.week;
+                            } else if (value == _calView.month) {
+                              _controller.view = CalendarView.month;
+                            }
+                            ;
+                          },
+                        );
+                      },
+                    ),
+                    //},
+                  ),
+                ),
+                //),
+              ],
+            ),
             Container(
               width: width,
               color: const Color.fromRGBO(238, 243, 246, 1.0),
@@ -195,10 +194,10 @@ class _CalendarWState extends State<CalendarW> {
 
           Expanded(
             child: SfCalendar(
-              view: CalendarView.month,
+              view: CalendarView.day,
               allowedViews: const [
-                CalendarView.week,
                 CalendarView.day,
+                CalendarView.week,
                 CalendarView.month
               ],
               controller: _controller,
@@ -236,7 +235,7 @@ class _CalendarWState extends State<CalendarW> {
               ),
               onViewChanged: (ViewChangedDetails viewChangedDetails) {
                 if (_controller.view == CalendarView.month) {
-                  _headerText = DateFormat('MMMMd')
+                  _headerText = DateFormat('LLL')
                       .format(viewChangedDetails.visibleDates[
                           viewChangedDetails.visibleDates.length ~/ 2])
                       .toString();
@@ -246,7 +245,7 @@ class _CalendarWState extends State<CalendarW> {
                           viewChangedDetails.visibleDates.length ~/ 2])
                       .toString();
                 } else if (_controller.view == CalendarView.day) {
-                  _headerText = DateFormat('MMMMd')
+                  _headerText = DateFormat('MMMEd')
                       .format(viewChangedDetails.visibleDates[
                           viewChangedDetails.visibleDates.length ~/ 2])
                       .toString();

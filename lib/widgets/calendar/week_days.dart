@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:syncfusion_flutter_calendar/calendar.dart';
-
 class WeekDaysW extends StatelessWidget {
   const WeekDaysW({
     Key? key,
