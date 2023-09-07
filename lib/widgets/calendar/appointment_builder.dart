@@ -48,7 +48,7 @@ Widget appointmentBuilder(BuildContext context,
                           padding: const EdgeInsets.only(bottom: 7),
                           child: Text(
                             appointment.subject,
-                            style: Theme.of(context).textTheme.bodyLarge,
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ),
                       ],
