@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import '../calendar/calendar.dart';
+import '../calendar/calendar_header.dart';
 
 class RightPanel extends StatelessWidget {
   const RightPanel({Key? key}) : super(key: key);
@@ -16,15 +18,12 @@ class RightPanel extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // !isLandscape
-              //     ? Flexible(
-              //         flex: 0,
-              //         child: Container(),
-              //       )
-              //     : Flexible(
-              //         flex: 0,
-              //         child: Container(),
-              //       ),
+              !isLandscape
+                  ? Flexible(flex: 0, child: Container())
+                  : Flexible(
+                      flex: 0,
+                      child: Container(),
+                    ),
               !isLandscape
                   ? Flexible(
                       child: CalendarW(),

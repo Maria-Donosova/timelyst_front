@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter/scheduler.dart';
+
 import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-//import 'package:timelyst_flutter/widgets/calendar/traffic_light.dart';
+import 'package:timelyst_flutter/widgets/calendar/calendar_header.dart';
 import 'package:timelyst_flutter/widgets/calendar/week_days.dart';
 
+import '../shared/categories.dart';
 import 'appointment_builder.dart';
 import 'event_of_day.dart';
-
-//Enable when connecting actual data source via actual model
-//import '../../models/event.dart';
 
 enum _calView { day, week, month }
 
@@ -30,6 +28,8 @@ class _CalendarWState extends State<CalendarW> {
 
   CalendarController _controller = CalendarController();
   String? _headerText;
+
+  CalendarDetails get calendarDetails => calendarDetails;
 
   @override
   void initState() {
@@ -58,100 +58,101 @@ class _CalendarWState extends State<CalendarW> {
       child: Column(
         children: [
           Column(children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Enable once traffic light logic is implemented
-                // const Padding(
-                //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                //   child: TrafficLightW(),
-                // ),
-                SizedBox(
-                  width: mediaQuery.size.width * 0.38,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10.0, right: 20),
-                    child: Text(
-                      _headerText!,
-                      style: Theme.of(context).textTheme.displayLarge,
-                    ),
-                  ),
-                ),
-                //Use back and forward controllers for the web version
-                // Padding(
-                //   padding: const EdgeInsets.only(left: 4, right: 4),
-                //   child: SizedBox(
-                //     width: mediaQuery.size.width * 0.025,
-                //     child: IconButton(
-                //       iconSize: 18,
-                //       color: Colors.grey[800],
-                //       icon: const Icon(Icons.arrow_back),
-                //       onPressed: () {
-                //         //_controller.backward!();
-                //       },
-                //     ),
-                //   ),
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.only(left: 6, right: 4),
-                //   child: SizedBox(
-                //     width: mediaQuery.size.width * 0.025,
-                //     child: IconButton(
-                //       iconSize: 18,
-                //       color: Colors.grey[800],
-                //       icon: const Icon(Icons.arrow_forward),
-                //       onPressed: () {
-                //         //_controller.forward!();
-                //       },
-                //     ),
-                //   ),
-                // ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 8, left: 10),
-                  child: SizedBox(
-                    //width: mediaQuery.size.width * 0.03,
-                    child: PopupMenuButton(
-                      icon: Icon(
-                        Icons.calendar_today_outlined,
-                        color: Colors.grey[800],
-                      ),
-                      iconSize: 20,
-                      itemBuilder: (BuildContext context) =>
-                          <PopupMenuEntry<_calView>>[
-                        const PopupMenuItem<_calView>(
-                          value: _calView.day,
-                          child: Text('Day'),
-                        ),
-                        const PopupMenuItem<_calView>(
-                          value: _calView.week,
-                          child: Text('Week'),
-                        ),
-                        const PopupMenuItem<_calView>(
-                          value: _calView.month,
-                          child: Text('Month'),
-                        ),
-                      ],
-                      onSelected: (value) {
-                        setState(
-                          () {
-                            if (value == _calView.day) {
-                              _controller.view = CalendarView.day;
-                            } else if (value == _calView.week) {
-                              _controller.view = CalendarView.week;
-                            } else if (value == _calView.month) {
-                              _controller.view = CalendarView.month;
-                            }
-                            ;
-                          },
-                        );
-                      },
-                    ),
-                    //},
-                  ),
-                ),
-                //),
-              ],
-            ),
+            CalendarHeaderBuilder(context, calendarDetails),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   crossAxisAlignment: CrossAxisAlignment.center,
+            //   children: [
+            //     // Enable once traffic light logic is implemented
+            //     // const Padding(
+            //     //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            //     //   child: TrafficLightW(),
+            //     // ),
+            //     SizedBox(
+            //       width: mediaQuery.size.width * 0.38,
+            //       child: Padding(
+            //         padding: const EdgeInsets.only(left: 10.0, right: 20),
+            //         child: Text(
+            //           _headerText!,
+            //           style: Theme.of(context).textTheme.displayLarge,
+            //         ),
+            //       ),
+            //     ),
+            //     //Use back and forward controllers for the web version
+            //     // Padding(
+            //     //   padding: const EdgeInsets.only(left: 4, right: 4),
+            //     //   child: SizedBox(
+            //     //     width: mediaQuery.size.width * 0.025,
+            //     //     child: IconButton(
+            //     //       iconSize: 18,
+            //     //       color: Colors.grey[800],
+            //     //       icon: const Icon(Icons.arrow_back),
+            //     //       onPressed: () {
+            //     //         //_controller.backward!();
+            //     //       },
+            //     //     ),
+            //     //   ),
+            //     // ),
+            //     // Padding(
+            //     //   padding: const EdgeInsets.only(left: 6, right: 4),
+            //     //   child: SizedBox(
+            //     //     width: mediaQuery.size.width * 0.025,
+            //     //     child: IconButton(
+            //     //       iconSize: 18,
+            //     //       color: Colors.grey[800],
+            //     //       icon: const Icon(Icons.arrow_forward),
+            //     //       onPressed: () {
+            //     //         //_controller.forward!();
+            //     //       },
+            //     //     ),
+            //     //   ),
+            //     // ),
+            //     Padding(
+            //       padding: const EdgeInsets.only(right: 8, left: 10),
+            //       child: SizedBox(
+            //         //width: mediaQuery.size.width * 0.03,
+            //         child: PopupMenuButton(
+            //           icon: Icon(
+            //             Icons.calendar_today_outlined,
+            //             color: Colors.grey[800],
+            //           ),
+            //           iconSize: 20,
+            //           itemBuilder: (BuildContext context) =>
+            //               <PopupMenuEntry<_calView>>[
+            //             const PopupMenuItem<_calView>(
+            //               value: _calView.day,
+            //               child: Text('Day'),
+            //             ),
+            //             const PopupMenuItem<_calView>(
+            //               value: _calView.week,
+            //               child: Text('Week'),
+            //             ),
+            //             const PopupMenuItem<_calView>(
+            //               value: _calView.month,
+            //               child: Text('Month'),
+            //             ),
+            //           ],
+            //           onSelected: (value) {
+            //             setState(
+            //               () {
+            //                 if (value == _calView.day) {
+            //                   _controller.view = CalendarView.day;
+            //                 } else if (value == _calView.week) {
+            //                   _controller.view = CalendarView.week;
+            //                 } else if (value == _calView.month) {
+            //                   _controller.view = CalendarView.month;
+            //                 }
+            //                 ;
+            //               },
+            //             );
+            //           },
+            //         ),
+            //         //},
+            //       ),
+            //     ),
+            //     //),
+            //   ],
+            // ),
             Container(
               width: width,
               color: const Color.fromRGBO(238, 243, 246, 1.0),
@@ -660,7 +661,8 @@ class _CalendarWState extends State<CalendarW> {
 
 _AppointmentDataSource _getCalendarDataSource() {
   List<Appointment> appointments = <Appointment>[];
-
+  final selectedCategory = 'Social';
+  final categoryColor = catColor(selectedCategory);
   DateTime date = DateTime.now();
 
   appointments.add(Appointment(
@@ -673,8 +675,8 @@ _AppointmentDataSource _getCalendarDataSource() {
       0,
     ),
     endTime: DateTime(date.year, date.month, date.day, 11, 0, 0),
-    subject: 'Meeting',
-    color: Colors.pink,
+    subject: 'Personal Dummy Appointment',
+    color: categoryColor,
   ));
   return _AppointmentDataSource(appointments);
 }
