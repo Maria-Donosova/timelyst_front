@@ -198,16 +198,16 @@ class _CalendarWState extends State<CalendarW> {
                 appointmentBuilder: appointmentBuilder,
                 dataSource: _getCalendarDataSource(),
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
+                  //_headerText = DateFormat('MMMMEEEEd').format(DateTime.now()).toString();
                   if (_controller.view == CalendarView.month) {
-                    _headerText = DateFormat('MMMMEEEEd')
+                    _headerText = DateFormat('yMMMM')
                         .format(viewChangedDetails.visibleDates[
                             viewChangedDetails.visibleDates.length ~/ 2])
                         .toString();
                   }
                   if (_controller.view == CalendarView.week) {
-                    _headerText = DateFormat('MMMMEEEEd')
-                        .format(viewChangedDetails.visibleDates[
-                            viewChangedDetails.visibleDates.length ~/ 2])
+                    _headerText = DateFormat('yMMMMd')
+                        .format(viewChangedDetails.visibleDates[0])
                         .toString();
                   }
                   if (_controller.view == CalendarView.day) {
