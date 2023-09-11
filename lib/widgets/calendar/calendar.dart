@@ -68,7 +68,7 @@ class _CalendarWState extends State<CalendarW> {
                     padding: const EdgeInsets.only(left: 10.0, right: 20),
                     child: Text(
                       _headerText!,
-                      //style: Theme.of(context).textTheme.displayLarge,
+                      style: Theme.of(context).textTheme.displayMedium,
                     ),
                   ),
                 ),
@@ -206,7 +206,7 @@ class _CalendarWState extends State<CalendarW> {
                         .format(viewChangedDetails.visibleDates[0])
                         .toString();
                     _headerText =
-                        _month! + ', ' + _weekStart! + ' - ' + _weekEnd!;
+                        _month! + ' ' + _weekStart! + ' - ' + _weekEnd!;
                   }
                   if (_controller.view == CalendarView.day) {
                     _headerText = DateFormat('MMMMEEEEd')

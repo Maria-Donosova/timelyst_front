@@ -11,8 +11,11 @@ Widget appointmentBuilder(BuildContext context,
   final selectedCategory = 'Social';
   final categoryColor = catColor(selectedCategory);
 
+  final width = MediaQuery.of(context).size.width;
+
   return Container(
-    width: calendarAppointmentDetails.bounds.width,
+    width: width,
+    //width: calendarAppointmentDetails.bounds.width,
     height: calendarAppointmentDetails.bounds.height,
     child: Stack(
       alignment: Alignment.bottomCenter,

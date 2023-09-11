@@ -29,8 +29,9 @@ class CustomTheme with ChangeNotifier {
         displaySmall: TextStyle(color: Colors.grey[900], fontSize: 12),
         bodyLarge: TextStyle(color: Colors.grey[900], fontSize: 16),
         bodyMedium: TextStyle(color: Colors.grey[800], fontSize: 16),
+        bodySmall: TextStyle(color: Colors.grey[800], fontSize: 12),
         titleMedium: TextStyle(color: Colors.grey[900], fontSize: 16),
-        titleSmall: TextStyle(color: Colors.grey[800], fontSize: 10),
+        titleSmall: TextStyle(color: Colors.grey[800], fontSize: 12),
       ),
     );
   }
@@ -52,6 +53,7 @@ class CustomTheme with ChangeNotifier {
           displayMedium: const TextStyle(color: Colors.white10, fontSize: 18),
           displaySmall: const TextStyle(color: Colors.white10, fontSize: 12),
           bodyLarge: const TextStyle(color: Colors.white10, fontSize: 16),
+          bodySmall: TextStyle(color: Colors.white10, fontSize: 8),
           labelLarge: TextStyle(backgroundColor: Colors.grey[900])),
     );
   }
