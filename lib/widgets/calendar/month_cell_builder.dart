@@ -28,19 +28,9 @@ Widget monthCellBuilder(BuildContext context, MonthCellDetails details) {
                 textAlign: TextAlign.left,
               ),
             ),
+            EventOfDayW(),
             Padding(
-              padding: const EdgeInsets.only(top: 6.0),
-              child: Container(
-                width: width,
-                color: const Color.fromRGBO(238, 243, 246, 1.0),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                  child: EventOfDayW(),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 6.0, left: 6.0, right: 6.0),
+              padding: const EdgeInsets.only(left: 6.0, right: 6.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

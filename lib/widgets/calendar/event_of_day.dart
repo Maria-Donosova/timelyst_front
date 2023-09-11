@@ -7,12 +7,20 @@ class EventOfDayW extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'The event',
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        color: Colors.grey[900],
-        fontSize: 14,
+    final width = MediaQuery.of(context).size.width;
+    return Padding(
+      padding: const EdgeInsets.only(top: 2.0),
+      child: Container(
+        width: width,
+        color: const Color.fromRGBO(238, 243, 246, 1.0),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+          child: Text(
+            'The event',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
       ),
     );
   }
