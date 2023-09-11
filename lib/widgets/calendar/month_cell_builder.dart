@@ -10,6 +10,7 @@ Widget monthCellBuilder(BuildContext context, MonthCellDetails details) {
   var length = details.appointments.length;
   final width = MediaQuery.of(context).size.width;
   return Container(
+    width: width,
     child: Card(
       elevation: 4,
       child: InkWell(
