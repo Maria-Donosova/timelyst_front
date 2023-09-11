@@ -26,10 +26,11 @@ class CustomTheme with ChangeNotifier {
       textTheme: TextTheme(
         displayLarge: TextStyle(color: Colors.grey[900], fontSize: 20),
         displayMedium: TextStyle(color: Colors.grey[900], fontSize: 18),
+        displaySmall: TextStyle(color: Colors.grey[900], fontSize: 12),
         bodyLarge: TextStyle(color: Colors.grey[900], fontSize: 16),
         bodyMedium: TextStyle(color: Colors.grey[800], fontSize: 16),
         titleMedium: TextStyle(color: Colors.grey[900], fontSize: 16),
-        titleSmall: TextStyle(color: Colors.grey[800], fontSize: 16),
+        titleSmall: TextStyle(color: Colors.grey[800], fontSize: 10),
       ),
     );
   }
@@ -49,6 +50,7 @@ class CustomTheme with ChangeNotifier {
       textTheme: TextTheme(
           displayLarge: const TextStyle(color: Colors.white10, fontSize: 20),
           displayMedium: const TextStyle(color: Colors.white10, fontSize: 18),
+          displaySmall: const TextStyle(color: Colors.white10, fontSize: 12),
           bodyLarge: const TextStyle(color: Colors.white10, fontSize: 16),
           labelLarge: TextStyle(backgroundColor: Colors.grey[900])),
     );
