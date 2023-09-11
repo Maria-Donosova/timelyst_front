@@ -8,7 +8,7 @@ class EventOfDayW extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      'The event of the day',
+      'The event',
       textAlign: TextAlign.center,
       style: TextStyle(
         color: Colors.grey[900],

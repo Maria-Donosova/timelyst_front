@@ -8,6 +8,7 @@ import '/widgets/calendar/week_days.dart';
 import '../shared/categories.dart';
 import 'appointment_builder.dart';
 import 'event_of_day.dart';
+import 'month_cell_builder.dart';
 
 enum _calView { day, week, month }
 
@@ -181,20 +182,23 @@ class _CalendarWState extends State<CalendarW> {
                 todayTextStyle: TextStyle(color: Colors.grey[800]),
                 showNavigationArrow: true,
                 showCurrentTimeIndicator: true,
+                monthCellBuilder: monthCellBuilder,
                 monthViewSettings: MonthViewSettings(
-                  appointmentDisplayCount: 6,
-                  navigationDirection: MonthNavigationDirection.horizontal,
-                  showTrailingAndLeadingDates: false,
-                  monthCellStyle: MonthCellStyle(
-                    backgroundColor: Colors.white,
-                    todayBackgroundColor:
-                        const Color.fromRGBO(238, 243, 246, 1.0),
-                    textStyle: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                ),
+                    appointmentDisplayMode: MonthAppointmentDisplayMode.none),
+                // monthViewSettings: MonthViewSettings(
+                //   appointmentDisplayCount: 6,
+                //   navigationDirection: MonthNavigationDirection.horizontal,
+                //   showTrailingAndLeadingDates: false,
+                //   monthCellStyle: MonthCellStyle(
+                //     backgroundColor: Colors.white,
+                //     todayBackgroundColor:
+                //         const Color.fromRGBO(238, 243, 246, 1.0),
+                //     textStyle: TextStyle(
+                //       fontSize: 12,
+                //       color: Colors.grey[800],
+                //     ),
+                //   ),
+                // ),
                 appointmentBuilder: appointmentBuilder,
                 dataSource: _getCalendarDataSource(),
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
@@ -206,7 +210,7 @@ class _CalendarWState extends State<CalendarW> {
                         .toString();
                   }
                   if (_controller.view == CalendarView.week) {
-                    _headerText = DateFormat('yMMMMd')
+                    _headerText = DateFormat('MMMMd')
                         .format(viewChangedDetails.visibleDates[0])
                         .toString();
                   }
