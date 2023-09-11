@@ -21,7 +21,7 @@ class CalendarW extends StatefulWidget {
 
 class _CalendarWState extends State<CalendarW> {
   final CalendarController _controller = CalendarController();
-  String? _headerText;
+  String? _headerText, _weekStart, _weekEnd, _month;
   double? width, cellWidth;
 
   @override
@@ -185,20 +185,6 @@ class _CalendarWState extends State<CalendarW> {
                 monthCellBuilder: monthCellBuilder,
                 monthViewSettings: MonthViewSettings(
                     appointmentDisplayMode: MonthAppointmentDisplayMode.none),
-                // monthViewSettings: MonthViewSettings(
-                //   appointmentDisplayCount: 6,
-                //   navigationDirection: MonthNavigationDirection.horizontal,
-                //   showTrailingAndLeadingDates: false,
-                //   monthCellStyle: MonthCellStyle(
-                //     backgroundColor: Colors.white,
-                //     todayBackgroundColor:
-                //         const Color.fromRGBO(238, 243, 246, 1.0),
-                //     textStyle: TextStyle(
-                //       fontSize: 12,
-                //       color: Colors.grey[800],
-                //     ),
-                //   ),
-                // ),
                 appointmentBuilder: appointmentBuilder,
                 dataSource: _getCalendarDataSource(),
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
@@ -210,9 +196,17 @@ class _CalendarWState extends State<CalendarW> {
                         .toString();
                   }
                   if (_controller.view == CalendarView.week) {
-                    _headerText = DateFormat('MMMMd')
+                    _weekStart = DateFormat('d')
                         .format(viewChangedDetails.visibleDates[0])
                         .toString();
+                    _weekEnd = DateFormat('d')
+                        .format(viewChangedDetails.visibleDates[6])
+                        .toString();
+                    _month = DateFormat('MMMM')
+                        .format(viewChangedDetails.visibleDates[0])
+                        .toString();
+                    _headerText =
+                        _month! + ', ' + _weekStart! + ' - ' + _weekEnd!;
                   }
                   if (_controller.view == CalendarView.day) {
                     _headerText = DateFormat('MMMMEEEEd')
