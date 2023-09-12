@@ -114,17 +114,20 @@ class _CalendarWState extends State<CalendarW> {
                   backgroundColor: Colors.white,
                   textStyle: TextStyle(fontSize: 8, color: Colors.grey[600]),
                 ),
-                todayHighlightColor: Color.fromRGBO(238, 243, 246, 1.0),
+                todayHighlightColor: Color.fromRGBO(171, 178, 183, 1),
                 todayTextStyle: TextStyle(color: Colors.grey[800]),
                 showNavigationArrow: true,
                 showCurrentTimeIndicator: true,
                 monthCellBuilder: monthCellBuilder,
                 monthViewSettings: MonthViewSettings(
-                    appointmentDisplayMode: MonthAppointmentDisplayMode.none),
+                  appointmentDisplayMode: MonthAppointmentDisplayMode.none,
+                  showTrailingAndLeadingDates: false,
+                ),
                 appointmentBuilder: appointmentBuilder,
+                allowAppointmentResize: true,
+                allowDragAndDrop: true,
                 dataSource: _getCalendarDataSource(),
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
-                  //_headerText = DateFormat('MMMMEEEEd').format(DateTime.now()).toString();
                   if (_controller.view == CalendarView.month) {
                     _headerText = DateFormat('yMMMM')
                         .format(viewChangedDetails.visibleDates[
