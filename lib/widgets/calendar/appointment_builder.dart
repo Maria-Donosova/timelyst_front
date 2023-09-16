@@ -24,9 +24,6 @@ Widget appointmentBuilder(BuildContext context,
           elevation: 4,
           child: InkWell(
             splashColor: Colors.blueGrey.withAlpha(30),
-            onTap: () {
-              print('Card tapped.');
-            },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
