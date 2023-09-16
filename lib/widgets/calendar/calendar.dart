@@ -21,12 +21,26 @@ class CalendarW extends StatefulWidget {
 
 class _CalendarWState extends State<CalendarW> {
   final CalendarController _controller = CalendarController();
-  String? _headerText, _weekStart, _weekEnd, _month;
+  String? _headerText,
+      _weekStart,
+      _weekEnd,
+      _month,
+      _subjectText,
+      _startTimeText,
+      _endTimeText,
+      _dateText,
+      _timeDetails;
   double? width, cellWidth;
 
   @override
   void initState() {
     _headerText = 'header';
+
+    _subjectText = '';
+    _startTimeText = '';
+    _endTimeText = '';
+    _dateText = '';
+    _timeDetails = '';
 
     width = 0.0;
     cellWidth = 0.0;
@@ -127,6 +141,80 @@ class _CalendarWState extends State<CalendarW> {
                 allowAppointmentResize: true,
                 allowDragAndDrop: true,
                 dataSource: _getCalendarDataSource(),
+                onTap: (CalendarTapDetails details) {
+                  if (details.targetElement == CalendarElement.appointment) {
+                    final Appointment appointmentDetails =
+                        details.appointments![0];
+                    _subjectText = appointmentDetails.subject;
+                    _dateText = DateFormat('MMMM dd, yyyy')
+                        .format(appointmentDetails.startTime)
+                        .toString();
+                    _startTimeText = DateFormat('hh:mm a')
+                        .format(appointmentDetails.startTime)
+                        .toString();
+                    _endTimeText = DateFormat('hh:mm a')
+                        .format(appointmentDetails.endTime)
+                        .toString();
+                    if (appointmentDetails.isAllDay) {
+                      _timeDetails = 'All day';
+                    } else {
+                      _timeDetails = '$_startTimeText - $_endTimeText';
+                    }
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Container(child: new Text('$_subjectText')),
+                            content: Container(
+                              height: 80,
+                              child: Column(
+                                children: <Widget>[
+                                  Row(
+                                    children: <Widget>[
+                                      Text(
+                                        '$_dateText',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      Text(''),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      Text(_timeDetails!,
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 15)),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                            actions: <Widget>[
+                              new TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: new Text('close'))
+                            ],
+                          );
+                        });
+                  } else
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(title: Text("New Apopointment"));
+                        });
+                  // dynamic _appointment = details.appointments;
+                  // DateTime _date = details.date!;
+                  // CalendarElement _element = details.targetElement;
+                },
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
                   if (_controller.view == CalendarView.month) {
                     _headerText = DateFormat('yMMMM')
