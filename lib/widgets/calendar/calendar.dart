@@ -8,7 +8,9 @@ import '/widgets/calendar/week_days.dart';
 import '../shared/categories.dart';
 import 'appointment_builder.dart';
 import 'event_of_day.dart';
+import 'existing_appointment.dart';
 import 'month_cell_builder.dart';
+import './new_appointment.dart';
 
 enum _calView { day, week, month }
 
@@ -29,7 +31,8 @@ class _CalendarWState extends State<CalendarW> {
       _startTimeText,
       _endTimeText,
       _dateText,
-      _timeDetails;
+      _timeDetails,
+      _cellDateText;
   double? width, cellWidth;
 
   @override
@@ -41,6 +44,7 @@ class _CalendarWState extends State<CalendarW> {
     _endTimeText = '';
     _dateText = '';
     _timeDetails = '';
+    _cellDateText = '';
 
     width = 0.0;
     cellWidth = 0.0;
@@ -246,70 +250,51 @@ class _CalendarWState extends State<CalendarW> {
   }
 
   void calendarTapped(CalendarTapDetails details) {
+    if (details.targetElement == CalendarElement.calendarCell) {
+      _cellDateText = DateFormat('MMMM dd').format(details.date!).toString();
+      _startTimeText = DateFormat('jm').format(details.date!).toString();
+      // else {
+      //   _dateText = DateFormat('MMMM dd').format(details.date!).toString();
+      //   _startTimeText = DateFormat('hh:mm a').format(details.date!).toString();
+      //   // _endTimeText =
+      //   //     DateFormat('hh:mm a').format(appointmentDetails.endTime).toString();
+      //   // _timeDetails = '$_startTimeText - $_endTimeText';
+    }
     if (details.targetElement == CalendarElement.appointment) {
       final Appointment appointmentDetails = details.appointments![0];
       _subjectText = appointmentDetails.subject;
-      _dateText = DateFormat('MMMM dd, yyyy')
-          .format(appointmentDetails.startTime)
-          .toString();
+      _dateText =
+          DateFormat('MMMM dd').format(appointmentDetails.startTime).toString();
       _startTimeText =
           DateFormat('hh:mm a').format(appointmentDetails.startTime).toString();
       _endTimeText =
           DateFormat('hh:mm a').format(appointmentDetails.endTime).toString();
+      _timeDetails = '$_startTimeText - $_endTimeText';
       if (appointmentDetails.isAllDay) {
         _timeDetails = 'All day';
-      } else {
-        _timeDetails = '$_startTimeText - $_endTimeText';
       }
+
       showDialog(
           context: context,
           builder: (BuildContext context) {
-            return AlertDialog(
-              title: Container(child: new Text('$_subjectText')),
-              content: Container(
-                height: 80,
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Text(
-                          '$_dateText',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Text(''),
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Text(_timeDetails!,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w400, fontSize: 15)),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              actions: <Widget>[
-                new TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: new Text('close'))
-              ],
-            );
+            return ExistingAppointment(
+                subjectText: _subjectText,
+                dateText: _dateText,
+                timeDetails: _timeDetails);
           });
     } else
       showDialog(
           context: context,
           builder: (BuildContext context) {
-            return AlertDialog(title: Text("New Apopointment"));
+            return AlertDialog(
+              title: Text("New Apopointment"),
+              content: NewAppointment(
+                dateText: _cellDateText,
+                // timeDetails: _timeDetails,
+                startTimeText: _startTimeText,
+                // endTimeText: _endTimeText,
+              ),
+            );
           });
   }
 }

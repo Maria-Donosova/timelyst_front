@@ -15,7 +15,6 @@ Widget appointmentBuilder(BuildContext context,
 
   return Container(
     width: width,
-    //width: calendarAppointmentDetails.bounds.width,
     height: calendarAppointmentDetails.bounds.height,
     child: Stack(
       alignment: Alignment.bottomCenter,
