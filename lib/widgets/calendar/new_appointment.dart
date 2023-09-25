@@ -4,18 +4,15 @@ class NewAppointment extends StatefulWidget {
   const NewAppointment({
     super.key,
     required String? dateText,
-    // required String? timeDetails,
     required String? startTimeText,
-    // required String? endTimeText,
+    required String? endTimeText,
   })  : _dateText = dateText,
-        // _timeDetails = timeDetails,
-        _startTimeText = startTimeText;
-  // _endTimeText = endTimeText;
+        _startTimeText = startTimeText,
+        _endTimeText = endTimeText;
 
   final String? _dateText;
   final String? _startTimeText;
-  // final String? _endTimeText;
-  // final String? _timeDetails;
+  final String? _endTimeText;
 
   @override
   State<NewAppointment> createState() => NewAppointmentState();
@@ -30,8 +27,8 @@ class NewAppointmentState extends State<NewAppointment> {
     final _eventDateController = TextEditingController(text: widget._dateText);
     final _eventStartTimeController =
         TextEditingController(text: widget._startTimeText);
-    // final _eventEndTimeController =
-    //     TextEditingController(text: widget._endTimeText);
+    final _eventEndTimeController =
+        TextEditingController(text: widget._endTimeText);
 
     return Form(
       key: _appForm,
@@ -120,7 +117,7 @@ class NewAppointmentState extends State<NewAppointment> {
                   width: 100,
                   child: TextFormField(
                     autocorrect: true,
-                    //controller: _eventEndTimeController,
+                    controller: _eventEndTimeController,
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: const InputDecoration(
                       labelText: 'End Date',

@@ -253,12 +253,9 @@ class _CalendarWState extends State<CalendarW> {
     if (details.targetElement == CalendarElement.calendarCell) {
       _cellDateText = DateFormat('MMMM dd').format(details.date!).toString();
       _startTimeText = DateFormat('jm').format(details.date!).toString();
-      // else {
-      //   _dateText = DateFormat('MMMM dd').format(details.date!).toString();
-      //   _startTimeText = DateFormat('hh:mm a').format(details.date!).toString();
-      //   // _endTimeText =
-      //   //     DateFormat('hh:mm a').format(appointmentDetails.endTime).toString();
-      //   // _timeDetails = '$_startTimeText - $_endTimeText';
+      _endTimeText = DateFormat('jm')
+          .format(details.date!.add(const Duration(minutes: 30)))
+          .toString();
     }
     if (details.targetElement == CalendarElement.appointment) {
       final Appointment appointmentDetails = details.appointments![0];
@@ -290,9 +287,8 @@ class _CalendarWState extends State<CalendarW> {
               title: Text("New Apopointment"),
               content: NewAppointment(
                 dateText: _cellDateText,
-                // timeDetails: _timeDetails,
                 startTimeText: _startTimeText,
-                // endTimeText: _endTimeText,
+                endTimeText: _endTimeText,
               ),
             );
           });
