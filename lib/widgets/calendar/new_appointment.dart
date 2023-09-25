@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../shared/categories.dart';
 
 class NewAppointment extends StatefulWidget {
   const NewAppointment({
@@ -29,20 +30,22 @@ class NewAppointmentState extends State<NewAppointment> {
         TextEditingController(text: widget._startTimeText);
     final _eventEndTimeController =
         TextEditingController(text: widget._endTimeText);
+    final width = MediaQuery.of(context).size.width;
+    final hight = MediaQuery.of(context).size.height;
 
     return Form(
       key: _appForm,
       child: SizedBox(
-        height: 500,
+        width: 500,
+        height: hight,
         child: Column(
           children: <Widget>[
             SizedBox(
-              height: 50,
               width: 500,
               child: TextFormField(
                 autocorrect: true,
                 controller: _eventSubjController,
-                style: Theme.of(context).textTheme.bodyText1,
+                style: Theme.of(context).textTheme.bodyMedium,
                 maxLines: null,
                 decoration: const InputDecoration(
                   labelText: 'Subject',
@@ -65,7 +68,6 @@ class NewAppointmentState extends State<NewAppointment> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SizedBox(
-                  height: 50,
                   width: 160,
                   child: TextFormField(
                     autocorrect: true,
@@ -89,7 +91,6 @@ class NewAppointmentState extends State<NewAppointment> {
                   ),
                 ),
                 SizedBox(
-                  height: 50,
                   width: 100,
                   child: TextFormField(
                     autocorrect: true,
@@ -113,7 +114,6 @@ class NewAppointmentState extends State<NewAppointment> {
                   ),
                 ),
                 SizedBox(
-                  height: 50,
                   width: 100,
                   child: TextFormField(
                     autocorrect: true,
@@ -139,31 +139,42 @@ class NewAppointmentState extends State<NewAppointment> {
               ],
             ),
             SizedBox(
-              height: 50,
-              width: 500,
-              child: TextFormField(
-                autocorrect: true,
-                style: Theme.of(context).textTheme.bodyMedium,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  labelText: 'Category',
-                  labelStyle: TextStyle(fontSize: 14),
-                  border: InputBorder.none,
-                  errorStyle: TextStyle(color: Colors.redAccent),
+              width: width,
+              child: DropdownButton<String>(
+                hint: Text(
+                  'Category',
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.name,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please provide a value.';
-                  } else {
-                    return null;
-                  }
+                icon: const Icon(Icons.arrow_downward),
+                iconSize: 14,
+                //value: selectedCategory,
+                onChanged: (newValue) {
+                  //   if (_form.currentState!.validate()) {
+                  //     setState(() {
+                  //       // selectedCategory = newValue;
+                  //       // runMutation({
+                  //       //   "task_description":
+                  //       //       _taskDescriptionController.text
+                  //       //           .trim(),
+                  //       //   // "task_type":
+                  //       //   //  _taskTypeController.text.trim(),
+                  //       //   "category": _selectedCategory,
+                  //       //   'userId': currUserId,
+                  //       // });
+                  //     });
+                  //     Navigator.of(context).pop();
+                  //     clearInput();
+                  //   }
                 },
+                items: categories.map((category) {
+                  return DropdownMenuItem(
+                    child: Text(category),
+                    value: category,
+                  );
+                }).toList(),
               ),
             ),
             SizedBox(
-              height: 50,
               width: 500,
               child: TextFormField(
                 autocorrect: true,
@@ -187,121 +198,19 @@ class NewAppointmentState extends State<NewAppointment> {
                 },
               ),
             ),
-            SizedBox(
-              height: 50,
-              width: 500,
-              child: TextFormField(
-                autocorrect: true,
-                //controller: _eventSubjController,
-                style: Theme.of(context).textTheme.bodyMedium,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  labelText: 'Calendars',
-                  labelStyle: TextStyle(fontSize: 14),
-                  border: InputBorder.none,
-                  errorStyle: TextStyle(color: Colors.redAccent),
-                ),
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.name,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please provide a value.';
-                  } else {
-                    return null;
-                  }
-                },
-              ),
-            ),
-            SizedBox(
-              height: 50,
-              width: 500,
-              child: TextFormField(
-                autocorrect: true,
-                //controller: _eventSubjController,
-                style: Theme.of(context).textTheme.bodyMedium,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  labelText: 'Attachements',
-                  labelStyle: TextStyle(fontSize: 14),
-                  border: InputBorder.none,
-                  errorStyle: TextStyle(color: Colors.redAccent),
-                ),
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.name,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please provide a value.';
-                  } else {
-                    return null;
-                  }
-                },
-              ),
-            ),
-            SizedBox(
-              height: 50,
-              width: 500,
-              child: TextFormField(
-                autocorrect: true,
-                //controller: _eventSubjController,
-                style: Theme.of(context).textTheme.bodyMedium,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  labelText: 'Organizier',
-                  labelStyle: TextStyle(fontSize: 14),
-                  border: InputBorder.none,
-                  errorStyle: TextStyle(color: Colors.redAccent),
-                ),
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.name,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please provide a value.';
-                  } else {
-                    return null;
-                  }
-                },
-              ),
-            ),
-            SizedBox(
-              height: 50,
-              width: 500,
-              child: TextFormField(
-                autocorrect: true,
-                controller: _eventSubjController,
-                style: Theme.of(context).textTheme.bodyMedium,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  labelText: 'Attendees',
-                  labelStyle: TextStyle(fontSize: 14),
-                  border: InputBorder.none,
-                  errorStyle: TextStyle(color: Colors.redAccent),
-                ),
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.name,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please provide a value.';
-                  } else {
-                    return null;
-                  }
-                },
-              ),
-            ),
             // SizedBox(
             //   height: 50,
             //   width: 500,
             //   child: TextFormField(
             //     autocorrect: true,
             //     //controller: _eventSubjController,
-            //     style:
-            //         Theme.of(context).textTheme.bodyMedium,
+            //     style: Theme.of(context).textTheme.bodyMedium,
             //     maxLines: null,
             //     decoration: const InputDecoration(
-            //       labelText: 'Repeat',
+            //       labelText: 'Organizier',
             //       labelStyle: TextStyle(fontSize: 14),
             //       border: InputBorder.none,
-            //       errorStyle:
-            //           TextStyle(color: Colors.redAccent),
+            //       errorStyle: TextStyle(color: Colors.redAccent),
             //     ),
             //     textInputAction: TextInputAction.next,
             //     keyboardType: TextInputType.name,
@@ -314,74 +223,33 @@ class NewAppointmentState extends State<NewAppointment> {
             //     },
             //   ),
             // ),
-            SizedBox(
-              height: 50,
-              width: 500,
+            Padding(
+              padding: const EdgeInsets.only(top: 30),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  IconButton(
-                    onPressed: null,
-                    icon: Icon(
-                      Icons.notification_important_outlined,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: null,
-                    icon: Icon(
-                      Icons.celebration,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: null,
-                    icon: Icon(
-                      Icons.all_inclusive_outlined,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: null,
-                    icon: Icon(
-                      Icons.task_outlined,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: null,
-                    icon: Icon(
-                      Icons.schedule_outlined,
-                      color: Colors.grey[800],
-                    ),
-                  ),
+                  TextButton(
+                      child: const Text('Save'),
+                      onPressed: () {
+                        setState(() {
+                          // runMutation({
+                          //   "event_subj": _eventSubjController.text.trim(),
+                          //   "event_startdate":
+                          //       _eventStartDateController.text.trim(),
+                          //   "event_enddate": _eventEndDateController.text.trim(),
+                          // });
+                          print("event mutation");
+                        });
+                        Navigator.of(context).pop();
+                      }),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Close'),
+                  )
                 ],
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                    child: const Text('Save'),
-                    onPressed: () {
-                      setState(() {
-                        // runMutation({
-                        //   "event_subj": _eventSubjController.text.trim(),
-                        //   "event_startdate":
-                        //       _eventStartDateController.text.trim(),
-                        //   "event_enddate": _eventEndDateController.text.trim(),
-                        // });
-                        print("event mutation");
-                      });
-                      Navigator.of(context).pop();
-                    }),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Close'),
-                )
-              ],
             )
           ],
         ),
