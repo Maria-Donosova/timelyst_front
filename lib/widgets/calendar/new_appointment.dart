@@ -21,6 +21,26 @@ class NewAppointment extends StatefulWidget {
 
 class NewAppointmentState extends State<NewAppointment> {
   final _appForm = GlobalKey<FormState>();
+  DateTime selectedDate = DateTime.now();
+  TimeOfDay selectedStartTime = TimeOfDay.now();
+  TimeOfDay selectedEndTime = TimeOfDay.now();
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        firstDate: DateTime(2023, 1),
+        lastDate: DateTime(2101));
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _selecteStartTime(BuildContext context) async {
+    showTimePicker(context: context, initialTime: selectedStartTime);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +101,7 @@ class NewAppointmentState extends State<NewAppointment> {
                     ),
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.datetime,
+                    onTap: () => _selectDate(context),
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Please provide a value.';
@@ -97,13 +118,14 @@ class NewAppointmentState extends State<NewAppointment> {
                     controller: _eventStartTimeController,
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: const InputDecoration(
-                      labelText: 'Start Date',
+                      labelText: 'Start Time',
                       labelStyle: TextStyle(fontSize: 14),
                       border: InputBorder.none,
                       errorStyle: TextStyle(color: Colors.redAccent),
                     ),
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.datetime,
+                    onTap: () => _selecteStartTime(context),
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Please provide a value.';
@@ -120,13 +142,14 @@ class NewAppointmentState extends State<NewAppointment> {
                     controller: _eventEndTimeController,
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: const InputDecoration(
-                      labelText: 'End Date',
+                      labelText: 'End Time',
                       labelStyle: TextStyle(fontSize: 14),
                       border: InputBorder.none,
                       errorStyle: TextStyle(color: Colors.redAccent),
                     ),
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.datetime,
+                    onTap: () => _selecteStartTime(context),
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Please provide a value.';
