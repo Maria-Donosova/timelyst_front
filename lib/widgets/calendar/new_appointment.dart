@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 import '../shared/categories.dart';
 
 class NewAppointment extends StatefulWidget {
@@ -21,25 +23,40 @@ class NewAppointment extends StatefulWidget {
 
 class NewAppointmentState extends State<NewAppointment> {
   final _appForm = GlobalKey<FormState>();
-  DateTime selectedDate = DateTime.now();
-  TimeOfDay selectedStartTime = TimeOfDay.now();
-  TimeOfDay selectedEndTime = TimeOfDay.now();
+  DateTime _selectedDate = DateTime.now();
+  TimeOfDay selectedTime = TimeOfDay.now();
+  late final TimeOfDay? pickedStartDate;
+  late final TimeOfDay? pickedEndDate;
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: selectedDate,
-        firstDate: DateTime(2023, 1),
-        lastDate: DateTime(2101));
-    if (picked != null && picked != selectedDate) {
+  Future<String?> _selectDate(BuildContext context) async {
+    final newSelectedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2023, 1),
+      lastDate: DateTime(2101),
+    );
+
+    final df = new DateFormat('MMMMd');
+
+    if (newSelectedDate != null && newSelectedDate != _selectedDate) {
       setState(() {
-        selectedDate = picked;
+        _selectedDate = newSelectedDate;
       });
     }
+    return df.format(_selectedDate);
   }
 
-  Future<void> _selecteStartTime(BuildContext context) async {
-    showTimePicker(context: context, initialTime: selectedStartTime);
+  Future<void> _selectTime(BuildContext context) async {
+    pickedStartDate = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+      initialEntryMode: TimePickerEntryMode.inputOnly,
+    );
+    setState(() {
+      selectedTime = pickedStartDate!;
+    });
+
+    Text('Selected time: ${selectedTime.format(context)}');
   }
 
   @override
@@ -101,12 +118,13 @@ class NewAppointmentState extends State<NewAppointment> {
                     ),
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.datetime,
-                    onTap: () => _selectDate(context),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please provide a value.';
-                      } else {
-                        return null;
+                    onTap: () async {
+                      final selectedDate = await _selectDate(context);
+                      if (selectedDate != null) {
+                        setState(() {
+                          _eventDateController.text = selectedDate;
+                        });
+                        print(_eventDateController.text);
                       }
                     },
                   ),
@@ -125,7 +143,12 @@ class NewAppointmentState extends State<NewAppointment> {
                     ),
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.datetime,
-                    onTap: () => _selecteStartTime(context),
+                    onTap: () => _selectTime(context),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedTime = value as TimeOfDay;
+                      });
+                    },
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Please provide a value.';
@@ -149,7 +172,7 @@ class NewAppointmentState extends State<NewAppointment> {
                     ),
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.datetime,
-                    onTap: () => _selecteStartTime(context),
+                    onTap: () => _selectTime(context),
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Please provide a value.';
@@ -164,44 +187,42 @@ class NewAppointmentState extends State<NewAppointment> {
             SizedBox(
               width: width,
               child: DropdownButton<String>(
-                hint: Text(
-                  'Category',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                icon: const Icon(Icons.arrow_downward),
-                iconSize: 14,
-                //value: selectedCategory,
-                onChanged: (newValue) {
-                  //   if (_form.currentState!.validate()) {
-                  //     setState(() {
-                  //       // selectedCategory = newValue;
-                  //       // runMutation({
-                  //       //   "task_description":
-                  //       //       _taskDescriptionController.text
-                  //       //           .trim(),
-                  //       //   // "task_type":
-                  //       //   //  _taskTypeController.text.trim(),
-                  //       //   "category": _selectedCategory,
-                  //       //   'userId': currUserId,
-                  //       // });
-                  //     });
-                  //     Navigator.of(context).pop();
-                  //     clearInput();
-                  //   }
-                },
-                items: categories.map((category) {
-                  return DropdownMenuItem(
-                    child: Text(category),
-                    value: category,
-                  );
-                }).toList(),
-              ),
+                  hint: Text(
+                    'Category',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  icon: const Icon(Icons.arrow_downward),
+                  iconSize: 14,
+                  items: categories.map((category) {
+                    return DropdownMenuItem(
+                      child: Text(category),
+                      value: category,
+                    );
+                  }).toList(),
+                  //value: selectedCategory,
+                  onChanged: (newValue) {
+                    //   if (_form.currentState!.validate()) {
+                    setState(() {
+                      //selectedCategory = newValue;
+
+                      // runMutation({
+                      //   "task_description":
+                      //       _taskDescriptionController.text
+                      //           .trim(),
+                      //   // "task_type":
+                      //   //  _taskTypeController.text.trim(),
+                      //   "category": _selectedCategory,
+                      //   'userId': currUserId,
+                      // });
+                    });
+                    Navigator.of(context).pop();
+                    //clearInput();
+                  }),
             ),
             SizedBox(
               width: 500,
               child: TextFormField(
                 autocorrect: true,
-                //controller: _eventSubjController,
                 style: Theme.of(context).textTheme.bodyMedium,
                 maxLines: null,
                 decoration: const InputDecoration(
