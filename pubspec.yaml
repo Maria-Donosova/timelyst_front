@@ -62,9 +62,9 @@ flutter_icons:
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/   
     - assets/images/logos/timelyst_logo.png
-    #- assets/images/photos/landing_background_2.png
-    #- assets/images/photos/mobile_landing/
+    - assets/images/photos/web/landing_background.png
     #- assets/images/photos/mobile_landing/timelyst_logo_mini.png
     - assets/images/icons/
     - assets/images/photos/
