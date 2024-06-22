@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'screens/common/agenda.dart';
 
 import 'themes.dart';
 
 //import 'screens/common/sign_up.dart';
+import 'screens/common/log_in.dart';
+//import 'screens/common/agenda.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
       title: 'Agenda',
       theme: CustomTheme.lightTheme,
       themeMode: currentTheme.currentTheme,
-      home: const Agenda(),
+      home: const LogInScreen(),
     );
   }
 }

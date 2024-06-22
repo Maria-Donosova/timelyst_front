@@ -11,6 +11,11 @@ class CustomAppBar extends AppBar {
     Key? key,
   }) : super(
           key: key,
+          title: Text(
+            'Tame the Time',
+            //style: Theme.of(context).textTheme.displayLarge,
+            style: TextStyle(color: Colors.black),
+          ),
           backgroundColor: Colors.white,
           leading: PopupMenuButton(
             icon: Image.asset(
@@ -38,6 +43,7 @@ class CustomAppBar extends AppBar {
             //   ),
             //   onPressed: () => SearchW(),
             // ),
+
             PopupMenuButton(
               icon: Icon(
                 Icons.menu_outlined,
