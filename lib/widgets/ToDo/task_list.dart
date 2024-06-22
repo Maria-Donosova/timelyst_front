@@ -18,8 +18,8 @@ class _TaskListWState extends State<TaskListW> {
     return LayoutBuilder(
       builder: (ctx, constraints) {
         return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+            //mainAxisAlignment: MainAxisAlignment.start,
+            //mainAxisSize: MainAxisSize.min,
             children: [
               Expanded(
                 flex: 1,

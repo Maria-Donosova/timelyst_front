@@ -14,18 +14,15 @@ Widget appointmentBuilder(BuildContext context,
   final width = MediaQuery.of(context).size.width;
 
   return Container(
-    width: width,
+    //width: width,
     height: calendarAppointmentDetails.bounds.height,
-    child: Stack(
-      alignment: Alignment.bottomCenter,
-      children: <Widget>[
-        Card(
-          elevation: 4,
-          child: InkWell(
-            splashColor: Colors.blueGrey.withAlpha(30),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
+    child: Card(
+      elevation: 4,
+      child: InkWell(
+        splashColor: Colors.blueGrey.withAlpha(30),
+        child: Stack(
+          children: [
+            Column(
               children: [
                 Flexible(
                   child: Container(
@@ -41,10 +38,10 @@ Widget appointmentBuilder(BuildContext context,
                       shape: BoxShape.rectangle,
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Container(
-                          padding: const EdgeInsets.only(bottom: 7),
+                          width: width,
+                          //padding: const EdgeInsets.only(bottom: 7),
                           child: Text(
                             appointment.subject,
                             style: Theme.of(context).textTheme.bodyMedium,
@@ -56,19 +53,18 @@ Widget appointmentBuilder(BuildContext context,
                 ),
               ],
             ),
-          ),
-        ),
-        SizedBox(
-          width: calendarAppointmentDetails.bounds.width,
-          child: Align(
-            alignment: Alignment(-0.989, -1),
-            child: CircleAvatar(
-              backgroundColor: categoryColor,
-              radius: 3.5,
+            SizedBox(
+              child: Align(
+                alignment: Alignment(-1.005, -1.05),
+                child: CircleAvatar(
+                  backgroundColor: categoryColor,
+                  radius: 3.5,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     ),
   );
 }
