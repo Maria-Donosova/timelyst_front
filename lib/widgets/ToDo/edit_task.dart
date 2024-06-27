@@ -13,8 +13,8 @@ class _EditTaskWState extends State<EditTaskW> {
   final _form = GlobalKey<FormState>();
   final _taskDescriptionController = TextEditingController();
   final _taskFocusNode = FocusNode();
-  final _taskTypeController = TextEditingController();
-  final _categoryController = TextEditingController();
+  // final _taskTypeController = TextEditingController();
+  // final _categoryController = TextEditingController();
 
   void clearInput() {
     _taskDescriptionController.clear;
@@ -79,7 +79,7 @@ class _EditTaskWState extends State<EditTaskW> {
                             style: Theme.of(context).textTheme.bodyText1,
                             maxLines: null,
                             decoration: const InputDecoration(
-                              labelText: 'Add new task',
+                              //labelText: 'Add new task',
                               labelStyle: TextStyle(fontSize: 14),
                               border: InputBorder.none,
                               errorStyle: TextStyle(color: Colors.redAccent),

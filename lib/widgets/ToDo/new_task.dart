@@ -13,8 +13,8 @@ class _NewTaskWState extends State<NewTaskW> {
   final _form = GlobalKey<FormState>();
   final _taskFocusNode = FocusNode();
   final _taskDescriptionController = TextEditingController();
-  final _taskTypeController = TextEditingController();
-  final _categoryController = TextEditingController();
+  // final _taskTypeController = TextEditingController();
+  // final _categoryController = TextEditingController();
 
   void clearInput() {
     _taskDescriptionController.clear;
@@ -129,7 +129,6 @@ class _NewTaskWState extends State<NewTaskW> {
                                         if (_form.currentState!.validate()) {
                                           setState(() {
                                             selectedCategory = newValue;
-
                                             // runMutation({
                                             //   "task_description":
                                             //       _taskDescriptionController.text

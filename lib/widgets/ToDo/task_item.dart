@@ -8,15 +8,12 @@ class TaskItem extends StatefulWidget {
   final String category;
   //final String userID;
 
-  const TaskItem(
-    this.id,
-    this.title,
-    this.category,
-    //this.deleteTx,
-    //this.editTx,
-    //this.doneTx
-    //this.userID
-  );
+  const TaskItem(this.id, this.title, this.category,
+      //this.deleteTx,
+      //this.editTx,
+      //this.doneTx
+      //this.userID
+      {super.key});
 
   //final void Function() deleteTx;
   //final void Function() editTx;
