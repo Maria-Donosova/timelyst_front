@@ -40,13 +40,15 @@ class _TaskListWState extends State<TaskListW> {
                   itemCount: tasks.length,
                   itemBuilder: (ctx, index) {
                     return Dismissible(
-                      child: TaskItem("1231241242", "DummyTask", "Social"
-                          // "${task["id"]}",
-                          // "${task["task_description"]}",
-                          // "${task["category"]}",
-                          // _deleteTask,
-                          // "${task['user']["id"]}",
-                          ),
+                      child: TaskItem(
+                        "1231241242", "DummyTask", "Social",
+                        // key: ValueKey("${task["id"]}"),
+                        // "${task["id"]}",
+                        // "${task["task_description"]}",
+                        // "${task["category"]}",
+                        // _deleteTask,
+                        // "${task['user']["id"]}",
+                      ),
                       key: ValueKey(tasks[index]),
                       direction: DismissDirection.horizontal,
                       background: Container(
