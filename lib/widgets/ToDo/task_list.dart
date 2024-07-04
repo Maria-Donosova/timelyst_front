@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/widgets/shared/categories.dart';
+//import 'package:timelyst_flutter/widgets/shared/categories.dart';
 //import 'package:timelyst_flutter/widgets/todo/delete_task.dart';
-import 'package:timelyst_flutter/widgets/todo/done_task.dart';
+//import 'package:timelyst_flutter/widgets/todo/done_task.dart';
+import '../../models/task.dart';
 import 'task_item.dart';
 
 class TaskListW extends StatefulWidget {
@@ -12,16 +14,86 @@ class TaskListW extends StatefulWidget {
 }
 
 class _TaskListWState extends State<TaskListW> {
+  //List<int> _dummyTasks = List<int>.generate(10, (int index) => index);
+  List _dummyTasks = [
+    Task(
+      id: '1',
+      title: 'Try Me',
+      category: 'Personal',
+      dateCreated: DateTime.now(),
+      dateChanged: DateTime.now(),
+      creator: 'Maria Donosova',
+    ),
+    Task(
+      id: '2',
+      title: 'Dare',
+      category: 'Work',
+      dateCreated: DateTime.now(),
+      dateChanged: DateTime.now(),
+      creator: 'Maria Donosova',
+    ),
+    Task(
+      id: '3',
+      title: 'Destiny',
+      category: 'Friends',
+      dateCreated: DateTime.now(),
+      dateChanged: DateTime.now(),
+      creator: 'Maria Donosova',
+    ),
+    Task(
+      id: '4',
+      title: 'Work it out',
+      category: 'Other',
+      dateCreated: DateTime.now(),
+      dateChanged: DateTime.now(),
+      creator: 'Maria Donosova',
+    ),
+    Task(
+      id: '5',
+      title: 'Just do it',
+      category: 'Family',
+      dateCreated: DateTime.now(),
+      dateChanged: DateTime.now(),
+      creator: 'Maria Donosova',
+    ),
+  ];
+
+  var _order = 'asc';
+
+  List get _orderedTasks {
+    final _sortedTasks = List.of(_dummyTasks);
+    _sortedTasks.sort((a, b) {
+      final bComesAfterA = a.text.compareTo(b.text);
+      return _order == 'asc' ? bComesAfterA : -bComesAfterA;
+    });
+    return _sortedTasks;
+  }
+
+  void _changeOrder() {
+    setState(() {
+      _order = _order == 'asc' ? 'desc' : 'asc';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<int> _tasks = List<int>.generate(10, (int index) => index);
-
     return LayoutBuilder(
       builder: (ctx, constraints) {
         return Column(
             //mainAxisAlignment: MainAxisAlignment.start,
             //mainAxisSize: MainAxisSize.min,
             children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: _changeOrder,
+                  icon: Icon(
+                    _order == 'asc' ? Icons.arrow_downward : Icons.arrow_upward,
+                  ),
+                  label: Text(
+                      'Sort ${_order == 'asc' ? 'Descending' : 'Ascending'}'),
+                ),
+              ),
               Expanded(
                 flex: 1,
                 child: ReorderableListView.builder(
@@ -34,27 +106,32 @@ class _TaskListWState extends State<TaskListW> {
                         if (oldIndex < newIndex) {
                           newIndex -= 1;
                         }
-                        final int item = _tasks.removeAt(oldIndex);
-                        _tasks.insert(newIndex, item);
+                        final int item = _dummyTasks.removeAt(oldIndex);
+                        _dummyTasks.insert(newIndex, item);
                       });
                     },
-                    itemCount: _tasks.length,
+                    itemCount: _dummyTasks.length,
                     itemBuilder: (ctx, index) {
                       return ReorderableDragStartListener(
                         index: index,
-                        key: Key('$index'),
+
+                        //key: Key('$index'),
+                        key: ValueKey(_dummyTasks[index]),
                         child: Dismissible(
                           child: TaskItem(
-                            key: ValueKey(_tasks[index]),
-                            "1231241242", "DummyTask", "Social",
+                            _dummyTasks[index].id,
+                            _dummyTasks[index].title,
+                            _dummyTasks[index].category,
+                            key: UniqueKey(),
+
                             //key: ValueKey("${task["id"]}"),
-                            // "${task["id"]}",
+                            //"${task["id"]}",
                             // "${task["task_description"]}",
                             // "${task["category"]}",
                             // _deleteTask,
                             // "${task['user']["id"]}",
                           ),
-                          key: ValueKey(_tasks[index]),
+                          key: ValueKey(_dummyTasks[index]),
                           direction: DismissDirection.horizontal,
                           background: Container(
                             color: Colors.orangeAccent,
@@ -88,10 +165,10 @@ class _TaskListWState extends State<TaskListW> {
                           onDismissed: (DismissDirection direction) {
                             if (direction == DismissDirection.startToEnd) {
                               print('Marked Completed');
-                              doneTask(
-                                _tasks.toString(),
-                                //"${task["id"]}",
-                              );
+                              // doneTask(
+                              //   _tasks.toString(),
+                              //   //"${task["id"]}",
+                              // );
                             } else {
                               print('Removed item');
                             }
