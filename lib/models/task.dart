@@ -4,7 +4,8 @@ class Task {
   final String id;
   final String title;
   final String task_type;
-  final Color category;
+  final String category;
+  //final Color category;
   final DateTime dateCreated;
   final DateTime dateChanged;
   final String creator;
@@ -13,7 +14,8 @@ class Task {
     required this.id,
     required this.title,
     this.task_type = "Task",
-    this.category = Colors.grey,
+    this.category = 'Work',
+    //this.category = Colors.grey,
     required this.dateCreated,
     required this.dateChanged,
     required this.creator,
