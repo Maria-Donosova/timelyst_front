@@ -71,38 +71,80 @@ class _TaskListWState extends State<TaskListW> {
   }
 
   // sorting
-  var _order = 'asc';
+  var _orderAlphabet = 'asc';
+  var _orderCreated = 'asc';
 
-  List get _orderedTasks {
+  List get _orderedByAlphabet {
     final _sortedTasks = List.of(_dummyTasks);
     _sortedTasks.sort((a, b) {
       final bComesAfterA = a.text.compareTo(b.text);
-      return _order == 'asc' ? bComesAfterA : -bComesAfterA;
+      return _orderAlphabet == 'asc' ? bComesAfterA : -bComesAfterA;
     });
     return _sortedTasks;
   }
 
-  void _changeOrder() {
+  void _sortByAlphabet() {
     setState(() {
-      _order = _order == 'asc' ? 'desc' : 'asc';
+      _orderAlphabet = _orderAlphabet == 'asc' ? 'desc' : 'asc';
+    });
+  }
+
+  void _sortByCreated() {
+    setState(() {
+      _orderCreated = _orderCreated == 'asc' ? 'desc' : 'asc';
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
     return LayoutBuilder(
       builder: (ctx, constraints) {
         return Column(children: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: _changeOrder,
-              icon: Icon(
-                _order == 'asc' ? Icons.arrow_downward : Icons.arrow_upward,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 7.0, bottom: 5),
+                  child: Container(
+                    width: mediaQuery.size.width * 0.2,
+                    child: TextFormField(
+                      autocorrect: true,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        labelText: 'Search',
+                        labelStyle: TextStyle(fontSize: 10),
+                        errorStyle: TextStyle(color: Colors.redAccent),
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall,
+                      textInputAction: TextInputAction.next,
+                      onFieldSubmitted: (_) {},
+                    ),
+                  ),
+                ),
               ),
-              label:
-                  Text('Sort ${_order == 'asc' ? 'Descending' : 'Ascending'}'),
-            ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                      onPressed: _sortByAlphabet,
+                      child: Text(
+                        '${_orderAlphabet == 'asc' ? 'A' : 'Z'}',
+                        style: Theme.of(context).textTheme.displaySmall,
+                      )),
+                  IconButton(
+                    onPressed: _sortByCreated,
+                    icon: Icon(
+                      _orderCreated == 'asc'
+                          ? Icons.arrow_downward
+                          : Icons.arrow_upward,
+                      size: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
           Expanded(
             flex: 1,
