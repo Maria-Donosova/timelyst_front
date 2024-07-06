@@ -70,6 +70,11 @@ class _TaskListWState extends State<TaskListW> {
     setState(() {});
   }
 
+  void _onDismissed(index) {
+    _dummyTasks.removeAt(index);
+    setState(() {});
+  }
+
   // sorting
   var _orderAlphabet = 'asc';
   var _orderCreated = 'asc';
@@ -139,7 +144,7 @@ class _TaskListWState extends State<TaskListW> {
                       _orderCreated == 'asc'
                           ? Icons.arrow_downward
                           : Icons.arrow_upward,
-                      size: 12,
+                      size: 14,
                     ),
                   ),
                 ],
@@ -154,16 +159,17 @@ class _TaskListWState extends State<TaskListW> {
               itemCount: _dummyTasks.length,
               itemBuilder: (ctx, index) {
                 final item = _dummyTasks[index];
-                return Dismissible(
+                return ReorderableDragStartListener(
                   key: Key(item.id),
-                  direction: DismissDirection.horizontal,
-                  child: ReorderableDragStartListener(
-                    index: index,
+                  index: index,
+                  child: Dismissible(
+                    key: Key(item.id),
+                    direction: DismissDirection.horizontal,
                     child: TaskItem(
                       _dummyTasks[index].id,
                       _dummyTasks[index].title,
                       _dummyTasks[index].category,
-                      key: UniqueKey(),
+
                       //key: ValueKey("${task["id"]}"),
                       //"${task["id"]}",
                       // "${task["task_description"]}",
@@ -171,83 +177,83 @@ class _TaskListWState extends State<TaskListW> {
                       // _deleteTask,
                       // "${task['user']["id"]}",
                     ),
-                  ),
-                  onDismissed: (DismissDirection direction) {
-                    if (direction == DismissDirection.startToEnd) {
-                      print('Marked Completed');
-                      _dummyTasks.removeAt(index);
-                      // doneTask(
-                      //   _tasks.toString(),
-                      //   //"${task["id"]}",
-                      // );
-                    } else {
-                      print('Removed item');
-                      _dummyTasks.removeAt(index);
-                    }
-                    //deleteTask(tasks.toString()
-                    //"${task["id"]}",;
-                    //);
-                    // setState(() {
-                    //   _tasks.removeAt(index);
-                    // });
-                  },
-                  confirmDismiss: (DismissDirection direction) async {
-                    if (direction == DismissDirection.startToEnd) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: const Text('Well Done!'),
-                      ));
-                      return true;
-                    } else {
-                      return await showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text("Delete Confirmation"),
-                            content: const Text(
-                                "Are you sure you want to delete this item?"),
-                            actions: <Widget>[
-                              TextButton(
-                                  onPressed: () async {
-                                    Navigator.of(context).pop(true);
-                                  },
-                                  child: const Text("Delete")),
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(false),
-                                child: const Text("Cancel"),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }
-                  },
-                  background: Container(
-                    color: Colors.orangeAccent,
-                    child: Padding(
-                      padding: const EdgeInsets.all(5),
-                      child: Row(
-                        children: const [
-                          Text(
-                            'Done',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ],
+                    onDismissed: (DismissDirection direction) {
+                      if (direction == DismissDirection.startToEnd) {
+                        print('Marked Completed');
+                        _onDismissed(index);
+                        // doneTask(
+                        //   _tasks.toString(),
+                        //   //"${task["id"]}",
+                        // );
+                      } else {
+                        print('Removed item');
+                        _onDismissed(index);
+                        //deleteTask(tasks.toString()
+                        //"${task["id"]}",;
+                        //);
+                        // setState(() {
+                        //   _tasks.removeAt(index);
+                        // });
+                      }
+                    },
+                    confirmDismiss: (DismissDirection direction) async {
+                      if (direction == DismissDirection.startToEnd) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: const Text('Well Done!'),
+                        ));
+                        return true;
+                      } else {
+                        return await showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text("Delete Confirmation"),
+                              content: const Text(
+                                  "Are you sure you want to delete this item?"),
+                              actions: <Widget>[
+                                TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    child: const Text("Delete")),
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(false),
+                                  child: const Text("Cancel"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    },
+                    background: Container(
+                      color: Colors.orangeAccent,
+                      child: Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: Row(
+                          children: const [
+                            Text(
+                              'Done',
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  secondaryBackground: Container(
-                    color: Colors.redAccent,
-                    child: Padding(
-                      padding: const EdgeInsets.all(5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: const [
-                          Text(
-                            'Delete',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
+                    secondaryBackground: Container(
+                      color: Colors.redAccent,
+                      child: Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: const [
+                            Text(
+                              'Delete',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
