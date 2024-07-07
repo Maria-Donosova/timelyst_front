@@ -36,14 +36,27 @@ class CustomAppBar extends AppBar {
             ],
           ),
           actions: <Widget>[
+            Container(
+              child: TextFormField(
+                autocorrect: true,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  labelText: 'Search',
+                  labelStyle: TextStyle(fontSize: 10),
+                  errorStyle: TextStyle(color: Colors.redAccent),
+                ),
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) {},
+              ),
+            ),
+
             // IconButton(
             //   icon: Icon(
             //     Icons.search_outlined,
             //     color: Colors.grey[800],
             //   ),
-            //   onPressed: () => SearchW(),
+            //   onPressed: null,
             // ),
-
             PopupMenuButton(
               icon: Icon(
                 Icons.menu_outlined,
