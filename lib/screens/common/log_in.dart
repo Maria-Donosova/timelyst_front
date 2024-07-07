@@ -28,7 +28,7 @@ class _LogInScreenState extends State<LogInScreen> {
   final _passwordController = TextEditingController();
   //final _consentController = TextEditingController();
 
-  bool _isSaving = false;
+  //bool _isSaving = false;
   bool isChecked = false;
 
   var currUserId;
