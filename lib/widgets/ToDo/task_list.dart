@@ -15,14 +15,12 @@ class TaskListW extends StatefulWidget {
 
 class _TaskListWState extends State<TaskListW> {
   //Dummy tasks - remove once connected to database
-  // final List<String> _dummyTasks =
-  //List.generate(10, (index) => 'TaskItem $index');
   List _dummyTasks = [
     Task(
       id: '1234',
       title: 'Try Me',
       category: 'Personal',
-      dateCreated: DateTime.now(),
+      dateCreated: DateTime.now().subtract(Duration(days: 2)),
       dateChanged: DateTime.now(),
       creator: 'Maria Donosova',
     ),
@@ -30,7 +28,7 @@ class _TaskListWState extends State<TaskListW> {
       id: '21234',
       title: 'Dare',
       category: 'Work',
-      dateCreated: DateTime.now(),
+      dateCreated: DateTime.now().subtract(Duration(days: 1)),
       dateChanged: DateTime.now(),
       creator: 'Maria Donosova',
     ),
@@ -38,7 +36,7 @@ class _TaskListWState extends State<TaskListW> {
       id: '35467',
       title: 'Destiny',
       category: 'Friends',
-      dateCreated: DateTime.now(),
+      dateCreated: DateTime.now().subtract(Duration(days: 3)),
       dateChanged: DateTime.now(),
       creator: 'Maria Donosova',
     ),
@@ -46,7 +44,7 @@ class _TaskListWState extends State<TaskListW> {
       id: '4567',
       title: 'Work it out',
       category: 'Other',
-      dateCreated: DateTime.now(),
+      dateCreated: DateTime.now().subtract(Duration(days: 10)),
       dateChanged: DateTime.now(),
       creator: 'Maria Donosova',
     ),
@@ -54,7 +52,7 @@ class _TaskListWState extends State<TaskListW> {
       id: '5124',
       title: 'Just do it',
       category: 'Family',
-      dateCreated: DateTime.now(),
+      dateCreated: DateTime.now().subtract(Duration(days: 7)),
       dateChanged: DateTime.now(),
       creator: 'Maria Donosova',
     ),
@@ -75,82 +73,12 @@ class _TaskListWState extends State<TaskListW> {
     setState(() {});
   }
 
-  // sorting
-  var _orderAlphabet = 'asc';
-  var _orderCreated = 'asc';
-
-  List get _orderedByAlphabet {
-    final _sortedTasks = List.of(_dummyTasks);
-    _sortedTasks.sort((a, b) {
-      final bComesAfterA = a.text.compareTo(b.text);
-      return _orderAlphabet == 'asc' ? bComesAfterA : -bComesAfterA;
-    });
-    return _sortedTasks;
-  }
-
-  void _sortByAlphabet() {
-    setState(() {
-      _orderAlphabet = _orderAlphabet == 'asc' ? 'desc' : 'asc';
-    });
-  }
-
-  void _sortByCreated() {
-    setState(() {
-      _orderCreated = _orderCreated == 'asc' ? 'desc' : 'asc';
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     return LayoutBuilder(
       builder: (ctx, constraints) {
         return Column(children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 7.0, bottom: 5),
-                  child: Container(
-                    width: mediaQuery.size.width * 0.2,
-                    child: TextFormField(
-                      autocorrect: true,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        labelText: 'Search',
-                        labelStyle: TextStyle(fontSize: 10),
-                        errorStyle: TextStyle(color: Colors.redAccent),
-                      ),
-                      style: Theme.of(context).textTheme.bodySmall,
-                      textInputAction: TextInputAction.next,
-                      onFieldSubmitted: (_) {},
-                    ),
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton(
-                      onPressed: _sortByAlphabet,
-                      child: Text(
-                        '${_orderAlphabet == 'asc' ? 'A' : 'Z'}',
-                        style: Theme.of(context).textTheme.displaySmall,
-                      )),
-                  IconButton(
-                    onPressed: _sortByCreated,
-                    icon: Icon(
-                      _orderCreated == 'asc'
-                          ? Icons.arrow_downward
-                          : Icons.arrow_upward,
-                      size: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
           Expanded(
             flex: 1,
             child: ReorderableListView.builder(
@@ -170,7 +98,6 @@ class _TaskListWState extends State<TaskListW> {
                       _dummyTasks[index].title,
                       _dummyTasks[index].category,
 
-                      //key: ValueKey("${task["id"]}"),
                       //"${task["id"]}",
                       // "${task["task_description"]}",
                       // "${task["category"]}",
