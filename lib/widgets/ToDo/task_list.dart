@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/widgets/shared/categories.dart';
+//import 'package:timelyst_flutter/widgets/shared/categories.dart';
 //import 'package:timelyst_flutter/widgets/shared/categories.dart';
 //import 'package:timelyst_flutter/widgets/todo/delete_task.dart';
 //import 'package:timelyst_flutter/widgets/todo/done_task.dart';
@@ -75,7 +75,7 @@ class _TaskListWState extends State<TaskListW> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
+    //final mediaQuery = MediaQuery.of(context);
     return LayoutBuilder(
       builder: (ctx, constraints) {
         return Column(children: [
