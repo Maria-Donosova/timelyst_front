@@ -49,27 +49,29 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   List<Widget> _buildActions(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
+    // final mediaQuery = MediaQuery.of(context);
     return [
       Row(
         children: [
-          Container(
-            width: mediaQuery.size.width * 0.1,
-            child: TextFormField(
-              autocorrect: true,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                icon: Icon(
-                  Icons.search_outlined,
-                  color: Colors.grey.shade800,
-                ),
-                labelStyle: TextStyle(fontSize: 10),
-                errorStyle: TextStyle(color: Colors.redAccent),
-              ),
-              textInputAction: TextInputAction.next,
-              onFieldSubmitted: (_) {},
-            ),
-          ),
+          // Container(
+          //   width: mediaQuery.size.width * 0.1,
+          //   child: TextFormField(
+          //     autocorrect: true,
+          //     decoration: InputDecoration(
+          //       border: InputBorder.none,
+          //       icon: Icon(
+          //         Icons.search_outlined,
+          //         color: Colors.grey.shade800,
+          //       ),
+          //       labelStyle: TextStyle(fontSize: 10),
+          //       errorStyle: TextStyle(color: Colors.redAccent),
+          //     ),
+          //     textInputAction: TextInputAction.next,
+          //     onFieldSubmitted: (
+          //       FilterByTaskEvent,
+          //     ) {},
+          //   ),
+          // ),
         ],
       ),
       PopupMenuButton(

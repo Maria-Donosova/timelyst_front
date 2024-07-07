@@ -1,83 +1,73 @@
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+// class FilterTasksEvents extends StatelessWidget {
+//   FilterTasksEvents({Key? key}) : super(key: key);
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: FilterTasksEvents(),
-    );
-  }
-}
+//   TextEditingController _searchController = TextEditingController();
+//   List<String> _allTasksEvents = [
+//     'Task 1',
+//     'Event 1',
+//     'Task 2',
+//     'Event 2'
+//   ]; // Example list
+//   List<String> _filteredTasksEvents = [];
 
-class FilterTasksEvents extends StatefulWidget {
-  @override
-  _FilterTasksEventsState createState() => _FilterTasksEventsState();
-}
+//   @override
+//   void initState() {
+//     super.initState();
+//     _filteredTasksEvents = _allTasksEvents;
+//     _searchController.addListener(_filterTasksEvents);
+//   }
 
-class _FilterTasksEventsState extends State<FilterTasksEvents> {
-  TextEditingController _searchController = TextEditingController();
-  List<String> _allTasksEvents = [
-    'Task 1',
-    'Event 1',
-    'Task 2',
-    'Event 2'
-  ]; // Example list
-  List<String> _filteredTasksEvents = [];
+//   void _filterTasksEvents() {
+//     String query = _searchController.text.toLowerCase();
+//     setState(() {
+//       _filteredTasksEvents = _allTasksEvents.where((taskEvent) {
+//         return taskEvent.toLowerCase().contains(query);
+//       }).toList();
+//     });
+//   }
 
-  @override
-  void initState() {
-    super.initState();
-    _filteredTasksEvents = _allTasksEvents;
-    _searchController.addListener(_filterTasksEvents);
-  }
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Filter Tasks & Events'),
+//       ),
+//       body: Column(
+//         children: <Widget>[
+//           Padding(
+//             padding: const EdgeInsets.all(8.0),
+//             child: TextField(
+//               controller: _searchController,
+//               decoration: InputDecoration(
+//                 labelText: 'Search',
+//                 suffixIcon: Icon(Icons.search),
+//               ),
+//             ),
+//           ),
+//           Expanded(
+//             child: FIlterByTaskEvent(),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
 
-  void _filterTasksEvents() {
-    String query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredTasksEvents = _allTasksEvents.where((taskEvent) {
-        return taskEvent.toLowerCase().contains(query);
-      }).toList();
-    });
-  }
+//   ListView FIlterByTaskEvent() {
+//     return ListView.builder(
+//             itemCount: _filteredTasksEvents.length,
+//             itemBuilder: (context, index) {
+//               return ListTile(
+//                 title: Text(_filteredTasksEvents[index]),
+//               );
+//             },
+//           );
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Filter Tasks & Events'),
-      ),
-      body: Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Search',
-                suffixIcon: Icon(Icons.search),
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _filteredTasksEvents.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(_filteredTasksEvents[index]),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-}
+//   // @override
+//   // void dispose() {
+//   //   _searchController.dispose();
+//   //   super.dispose();
+//   // }
+// }
