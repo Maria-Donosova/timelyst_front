@@ -23,9 +23,6 @@ class NewAppointment extends StatefulWidget {
 
 class NewAppointmentState extends State<NewAppointment> {
   //final _appForm = GlobalKey<FormState>();
-  DateTime? _selectedDate = DateTime.now();
-  TimeOfDay _selectedStartTime = TimeOfDay.now();
-  TimeOfDay _selectedEndTime = TimeOfDay.now();
   late TextEditingController _eventDateController;
   late TextEditingController _eventStartTimeController;
   late TextEditingController _eventEndTimeController;
@@ -34,11 +31,12 @@ class NewAppointmentState extends State<NewAppointment> {
   void initState() {
     super.initState();
     _eventDateController = TextEditingController(text: widget._dateText);
-    _eventStartTimeController =
+    _eventStartTimeController = _eventStartTimeController =
         TextEditingController(text: widget._startTimeText);
     _eventEndTimeController = TextEditingController(text: widget._endTimeText);
   }
 
+//function to select date
   Future<void> _selectDate(BuildContext context) async {
     final selectedDate = await showDatePicker(
       context: context,
@@ -48,27 +46,45 @@ class NewAppointmentState extends State<NewAppointment> {
     );
 
     if (selectedDate != null) {
-      _selectedDate = selectedDate;
       setState(() {
         _eventDateController.text = DateFormat('MMMM d').format(selectedDate);
       });
     }
   }
 
+//function to select start time based on user input via time picker and update end time by 30 minutes
+
   Future<void> _selectStartTime(BuildContext context, bool isStartTime) async {
+    // final tapCaledarStartTime =
+    //     TimeOfDay.fromDateTime(DateTime.parse(widget._startTimeText!));
+
+    TimeOfDay initialStartTime;
+    try {
+      initialStartTime =
+          TimeOfDay.fromDateTime(DateTime.parse(widget._startTimeText!));
+    } catch (e) {
+      initialStartTime =
+          TimeOfDay.now(); // Fallback to current date if parsing fails
+    }
     final selectedStartTime = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: initialStartTime,
       initialEntryMode: TimePickerEntryMode.inputOnly,
     );
-
     if (selectedStartTime != null) {
+      final newEndTime = selectedStartTime.replacing(
+        hour: (selectedStartTime.hour + (selectedStartTime.minute + 30) ~/ 60) %
+            24,
+        minute: (selectedStartTime.minute + 30) % 60,
+      );
       setState(() {
         _eventStartTimeController.text = selectedStartTime.format(context);
+        _eventEndTimeController.text = newEndTime.format(context);
       });
     }
   }
 
+//function to select end time
   Future<void> _selectEndTime(BuildContext context, bool isStartTime) async {
     final selectedEndTime = await showTimePicker(
       context: context,
@@ -76,8 +92,8 @@ class NewAppointmentState extends State<NewAppointment> {
           TimeOfDay.fromDateTime(DateTime.now().add(Duration(minutes: 30))),
       initialEntryMode: TimePickerEntryMode.inputOnly,
     );
-
-    if (selectedEndTime != null && selectedEndTime != _selectedStartTime) {
+    final selectedStartTime = _eventStartTimeController.text;
+    if (selectedEndTime != null && selectedEndTime != selectedStartTime) {
       setState(() {
         _eventEndTimeController.text = selectedEndTime.format(context);
       });
