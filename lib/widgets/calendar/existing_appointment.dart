@@ -53,6 +53,11 @@ class ExistingAppointment extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pop();
             },
+            child: new Text('Cancel')),
+        new TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
             child: new Text('Save')),
       ],
     );

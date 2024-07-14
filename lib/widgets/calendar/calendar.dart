@@ -317,9 +317,10 @@ class _CalendarWState extends State<CalendarW> {
           context: context,
           builder: (BuildContext context) {
             return EditAppointment(
-                subjectText: _subjectText,
+                //subjectText: _subjectText,
                 dateText: _dateText,
-                timeDetails: _timeDetails);
+                startTimeText: _startTimeText,
+                endTimeText: _endTimeText);
           });
     } else
       showDialog(
