@@ -5,17 +5,71 @@ import '../shared/categories.dart';
 
 class NewAppointment extends StatefulWidget {
   const NewAppointment({
-    //super.key,
+    super.key,
+    //required String? id,
+    required String? eventTitle,
+    required String? eventCategory,
     required String? dateText,
-    required String? startTimeText,
-    required String? endTimeText,
-  })  : _dateText = dateText,
-        _startTimeText = startTimeText,
-        _endTimeText = endTimeText;
+    required String? from,
+    required String? to,
+    required String? sourceCalendar,
+    required String? calendarType,
+    //required String? recurrenceId,
+    required String? eventBody,
+    required bool isAllDay,
+    required String eventConferenceDetails,
+    required String eventOrganizer,
+    required String eventAttendees,
+    required bool reminder,
+    required bool holiday,
+    //required List<DateTime>? exceptionDates,
+    //required String? recurrenceRule,
+    // required DateTime dateCreated,
+    // required DateTime dateChanged,
+    // required String creator,
+  })  : //_id = id,
+        _eventTitle = eventTitle,
+        _eventCategory = eventCategory,
+        _dateText = dateText,
+        _startTimeText = from,
+        _endTimeText = to,
+        _sourceCalendar = sourceCalendar,
+        _calendarType = calendarType,
+        //_recurrenceId = recurrenceId,
+        _eventBody = eventBody,
+        _isAllDay = isAllDay,
+        _eventConferenceDetails = eventConferenceDetails,
+        _eventOrganizer = eventOrganizer,
+        _eventAttendees = eventAttendees,
+        _reminder = reminder,
+        _holiday = holiday;
+  // _exceptionDates = exceptionDates,
+  // _recurrenceRule = recurrenceRule,
+  // _dateCreated = dateCreated,
+  // _dateChanged = dateChanged,
+  // _creator = creator
 
+  //final String? _id;
+  final String? _eventTitle;
+  final String? _eventCategory;
   final String? _dateText;
   final String? _startTimeText;
   final String? _endTimeText;
+  final String? _sourceCalendar;
+  final String? _calendarType;
+  //final String? _recurrenceId;
+  final String? _eventBody;
+  final bool _isAllDay;
+  final String _eventConferenceDetails;
+  final String _eventOrganizer;
+  final String _eventAttendees;
+  final bool _reminder;
+  final bool _holiday;
+  // final List<DateTime>? _exceptionDates;
+  // final String? _recurrenceRule;
+  // final DateTime _dateCreated;
+  // final DateTime _dateChanged;
+  // final String _creator;
 
   @override
   State<NewAppointment> createState() => NewAppointmentState();
@@ -24,8 +78,20 @@ class NewAppointment extends StatefulWidget {
 class NewAppointmentState extends State<NewAppointment> {
   final _appForm = GlobalKey<FormState>();
   late TextEditingController _eventDateController;
+  late TextEditingController _eventCategoryController;
   late TextEditingController _eventStartTimeController;
   late TextEditingController _eventEndTimeController;
+  late TextEditingController _eventSourceCalendar;
+  late TextEditingController _eventCalendarType;
+  late TextEditingController _eventRecurrenceId;
+  late TextEditingController _eventIsAllDay;
+  late TextEditingController _eventConferenceDetails;
+  late TextEditingController _eventOrganizer;
+  late TextEditingController _eventAttendees;
+  late TextEditingController _eventReminder;
+  late TextEditingController _eventHoliday;
+  late TextEditingController _eventExceptionDates;
+  late TextEditingController _eventRecurrenceRule;
 
   @override
   void initState() {
@@ -123,7 +189,7 @@ class NewAppointmentState extends State<NewAppointment> {
         child: Column(
           children: <Widget>[
             SizedBox(
-              width: 500,
+              width: width * 0.8,
               child: TextFormField(
                 autocorrect: true,
                 controller: _eventSubjController,
@@ -243,6 +309,14 @@ class NewAppointmentState extends State<NewAppointment> {
                     Navigator.of(context).pop();
                   }),
             ),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              IconButton(onPressed: () {}, icon: Icon(Icons.view_day_outlined)),
+              IconButton(onPressed: () {}, icon: Icon(Icons.queue_rounded)),
+              IconButton(
+                  onPressed: () {}, icon: Icon(Icons.question_mark_outlined)),
+              IconButton(
+                  onPressed: () {}, icon: Icon(Icons.holiday_village_outlined)),
+            ]),
             SizedBox(
               width: 500,
               child: TextFormField(
@@ -257,15 +331,30 @@ class NewAppointmentState extends State<NewAppointment> {
                 ),
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.name,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please provide a value.';
-                  } else {
-                    return null;
-                  }
-                },
               ),
             ),
+            SizedBox(
+              width: width * 0.8,
+              child: TextFormField(
+                autocorrect: true,
+                controller: _eventOrganizer,
+                style: Theme.of(context).textTheme.bodyMedium,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  labelText: 'Attendees',
+                  labelStyle: TextStyle(fontSize: 14),
+                  border: InputBorder.none,
+                  errorStyle: TextStyle(color: Colors.redAccent),
+                ),
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.name,
+              ),
+            ),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              IconButton(onPressed: () {}, icon: Icon(Icons.calendar_month)),
+              IconButton(onPressed: () {}, icon: Icon(Icons.calendar_today)),
+              IconButton(onPressed: () {}, icon: Icon(Icons.person_2_outlined)),
+            ]),
             Padding(
               padding: const EdgeInsets.only(top: 30),
               child: Row(
