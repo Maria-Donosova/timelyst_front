@@ -281,9 +281,20 @@ class _CalendarWState extends State<CalendarW> {
             return AlertDialog(
               title: Text("New Appointment"),
               content: NewAppointment(
+                eventTitle: '',
                 dateText: _cellDateText,
-                startTimeText: _startTimeText,
-                endTimeText: _endTimeText,
+                to: _startTimeText,
+                from: _endTimeText,
+                eventCategory: 'Social',
+                eventBody: '',
+                eventAttendees: '',
+                eventConferenceDetails: '',
+                eventOrganizer: 'Maria Donosova',
+                sourceCalendar: '',
+                calendarType: '',
+                isAllDay: true,
+                reminder: true,
+                holiday: true,
               ),
             );
           });
