@@ -11,7 +11,6 @@ import 'event_of_day.dart';
 import 'existing_appointment.dart';
 import 'month_cell_builder.dart';
 import 'new_appointment.dart';
-import 'edit_appointment.dart';
 
 enum _calView { day, week, month }
 
@@ -147,7 +146,6 @@ class _CalendarWState extends State<CalendarW> {
                 allowDragAndDrop: true,
                 dataSource: _getCalendarDataSource(),
                 onTap: _calendarTapped,
-                onLongPress: _editAppointment,
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
                   if (_controller.view == CalendarView.month) {
                     _headerText = DateFormat('yMMMM')
@@ -275,52 +273,6 @@ class _CalendarWState extends State<CalendarW> {
                 subjectText: _subjectText,
                 dateText: _dateText,
                 timeDetails: _timeDetails);
-          });
-    } else
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text("New Appointment"),
-              content: NewAppointment(
-                dateText: _cellDateText,
-                startTimeText: _startTimeText,
-                endTimeText: _endTimeText,
-              ),
-            );
-          });
-  }
-
-  void _editAppointment(CalendarLongPressDetails details) {
-    if (details.targetElement == CalendarElement.calendarCell) {
-      _cellDateText = DateFormat('MMMM dd').format(details.date!).toString();
-      _startTimeText = DateFormat('jm').format(details.date!).toString();
-      _endTimeText = DateFormat('jm')
-          .format(details.date!.add(const Duration(minutes: 30)))
-          .toString();
-    }
-    if (details.targetElement == CalendarElement.appointment) {
-      final Appointment appointmentDetails = details.appointments![0];
-      _subjectText = appointmentDetails.subject;
-      _dateText =
-          DateFormat('MMMM dd').format(appointmentDetails.startTime).toString();
-      _startTimeText =
-          DateFormat('hh:mm a').format(appointmentDetails.startTime).toString();
-      _endTimeText =
-          DateFormat('hh:mm a').format(appointmentDetails.endTime).toString();
-      _timeDetails = '$_startTimeText - $_endTimeText';
-      if (appointmentDetails.isAllDay) {
-        _timeDetails = 'All day';
-      }
-
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return EditAppointment(
-                //subjectText: _subjectText,
-                dateText: _dateText,
-                startTimeText: _startTimeText,
-                endTimeText: _endTimeText);
           });
     } else
       showDialog(
