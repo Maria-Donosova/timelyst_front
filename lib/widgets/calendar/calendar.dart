@@ -279,13 +279,14 @@ class _CalendarWState extends State<CalendarW> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text("New Appointment"),
+              //title: Text("New Appointment"),
               content: NewAppointment(
                 eventTitle: '',
                 dateText: _cellDateText,
                 to: _startTimeText,
                 from: _endTimeText,
-                eventCategory: 'Social',
+                category: '',
+                categoryTitle: '',
                 eventBody: '',
                 eventAttendees: '',
                 eventConferenceDetails: '',
