@@ -127,7 +127,6 @@ class NewAppointmentState extends State<NewAppointment> {
   }
 
 //function to select start time based on user input via time picker and update end time by 30 minutes
-
   Future<void> _selectStartTime(BuildContext context, bool isStartTime) async {
     // final tapCaledarStartTime =
     //     TimeOfDay.fromDateTime(DateTime.parse(widget._startTimeText!));
@@ -174,6 +173,185 @@ class NewAppointmentState extends State<NewAppointment> {
     }
   }
 
+  //function to pick up the recurrence rule for the event based on user input. the recurrent pattern can be daily, weekly, monthly or yearly or custom set by day of the week
+  Future<void> _selectRecurrenceRule(BuildContext context) async {
+    String _recurrence = 'None';
+    List<String> _selectedDays = [];
+
+    final selectedRecurrenceRule = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                  title: const Text('Select Recurrence'),
+                  content: Column(mainAxisSize: MainAxisSize.min, children: [
+                    RadioListTile<String>(
+                      title: Text('None'),
+                      value: 'None',
+                      groupValue: _recurrence,
+                      onChanged: (value) {
+                        setState(() {
+                          _recurrence = value!;
+                          _selectedDays.clear();
+                        });
+                      },
+                    ),
+                    RadioListTile<String>(
+                      title: Text('Daily'),
+                      value: 'Daily',
+                      groupValue: _recurrence,
+                      onChanged: (value) {
+                        setState(() {
+                          _recurrence = value!;
+                          _selectedDays.clear();
+                        });
+                      },
+                    ),
+                    RadioListTile<String>(
+                      title: Text('Weekly'),
+                      value: 'Weekly',
+                      groupValue: _recurrence,
+                      onChanged: (value) {
+                        setState(() {
+                          _recurrence = value!;
+                        });
+                      },
+                    ),
+                    RadioListTile<String>(
+                      title: Text('Yearly'),
+                      value: 'Yearly',
+                      groupValue: _recurrence,
+                      onChanged: (value) {
+                        setState(() {
+                          _recurrence = value!;
+                          _selectedDays.clear();
+                        });
+                      },
+                    ),
+                    if (_recurrence == 'Weekly')
+                      Column(children: [
+                        CheckboxListTile(
+                          title: Text('Monday'),
+                          value: _selectedDays.contains('Monday'),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value == true) {
+                                _selectedDays.add('Monday');
+                              } else {
+                                _selectedDays.remove('Monday');
+                              }
+                            });
+                          },
+                        ),
+                        CheckboxListTile(
+                          title: Text('Tuesday'),
+                          value: _selectedDays.contains('Tuesday'),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value == true) {
+                                _selectedDays.add('Tuesday');
+                              } else {
+                                _selectedDays.remove('Tuesday');
+                              }
+                            });
+                          },
+                        ),
+                        CheckboxListTile(
+                          title: Text('Wednesday'),
+                          value: _selectedDays.contains('Wednesday'),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value == true) {
+                                _selectedDays.add('Wednesday');
+                              } else {
+                                _selectedDays.remove('Wednesday');
+                              }
+                            });
+                          },
+                        ),
+                        CheckboxListTile(
+                          title: Text('Thursday'),
+                          value: _selectedDays.contains('Thursday'),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value == true) {
+                                _selectedDays.add('Thursday');
+                              } else {
+                                _selectedDays.remove('Thursday');
+                              }
+                            });
+                          },
+                        ),
+                        CheckboxListTile(
+                          title: Text('Friday'),
+                          value: _selectedDays.contains('Friday'),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value == true) {
+                                _selectedDays.add('Friday');
+                              } else {
+                                _selectedDays.remove('Friday');
+                              }
+                            });
+                          },
+                        ),
+                        CheckboxListTile(
+                          title: Text('Saturday'),
+                          value: _selectedDays.contains('Saturday'),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value == true) {
+                                _selectedDays.add('Saturday');
+                              } else {
+                                _selectedDays.remove('Saturday');
+                              }
+                            });
+                          },
+                        ),
+                        CheckboxListTile(
+                          title: Text('Sunday'),
+                          value: _selectedDays.contains('Sunday'),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value == true) {
+                                _selectedDays.add('Sunday');
+                              } else {
+                                _selectedDays.remove('Sunday');
+                              }
+                            });
+
+                            actions:
+                            [
+                              TextButton(
+                                child: Text('Cancel'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              TextButton(
+                                child: Text('Save'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  // Save the recurrence data
+                                },
+                              )
+                            ];
+                          },
+                        )
+                      ])
+                  ]));
+            },
+          );
+        });
+
+    if (selectedRecurrenceRule != null) {
+      setState(() {
+        _eventRecurrenceRule.text = selectedRecurrenceRule;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _eventDateController.dispose();
@@ -197,7 +375,7 @@ class NewAppointmentState extends State<NewAppointment> {
       key: _appForm,
       child: SizedBox(
         width: width * 0.3,
-        height: height,
+        //height: height,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
@@ -230,6 +408,7 @@ class NewAppointmentState extends State<NewAppointment> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   SizedBox(
                     width: 65,
@@ -302,6 +481,7 @@ class NewAppointmentState extends State<NewAppointment> {
                     ),
                   ),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       IconButton(
                         iconSize: 20,
@@ -320,6 +500,7 @@ class NewAppointmentState extends State<NewAppointment> {
                         IconButton(
                           iconSize: 20,
                           onPressed: () {
+                            _selectRecurrenceRule(context);
                             setState(() {
                               _isRecurring = !_isRecurring;
                             });
@@ -364,36 +545,8 @@ class NewAppointmentState extends State<NewAppointment> {
                     );
                   }).toList(),
                 ),
-                // DropdownButton<String>(
-                //     hint: Text(
-                //       'Category',
-                //       style: Theme.of(context).textTheme.titleSmall,
-                //     ),
-                //     icon: const Icon(Icons.arrow_downward),
-                //     iconSize: 14,
-                //     items: categories.map((category) {
-                //       return DropdownMenuItem(
-                //         child: Text(category),
-                //         value: category,
-                //       );
-                //     }).toList(),
-                //     onChanged: (newValue) {
-                //       setState(() {
-                //         // Handle category selection
-                //       });
-                //       Navigator.of(context).pop();
-                //     }),
               ),
             ),
-            // Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            //   IconButton(onPressed: () {}, icon: Icon(Icons.view_day_outlined)),
-            //   IconButton(onPressed: () {}, icon: Icon(Icons.queue_rounded)),
-            //   IconButton(
-            //       onPressed: () {}, icon: Icon(Icons.question_mark_outlined)),
-            //   IconButton(
-            //       onPressed: () {}, icon: Icon(Icons.holiday_village_outlined)),
-            // ]),
-
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10.0),
               child: SizedBox(
@@ -493,223 +646,3 @@ class NewAppointmentState extends State<NewAppointment> {
     );
   }
 }
-
-
-
-
-// class NewAppointment extends StatefulWidget {
-//   @override
-//   _NewAppointmentState createState() => _NewAppointmentState();
-// }
-
-// class _NewAppointmentState extends State<NewAppointment> {
-//   final _formKey = GlobalKey<FormState>();
-//   String _eventTitle = '';
-//   String _subject = '';
-//   DateTime? _selectedDate;
-//   TimeOfDay? _startTime;
-//   TimeOfDay? _endTime;
-//   bool _isAllDay = false;
-//   bool _isRecurring = false;
-//   String _recurrencePattern = 'Mon, Thur';
-//   String _category = '';
-//   List<String> _participants = [];
-//   String _description = '';
-
-//   final List<String> _categories = [
-//     'Work',
-//     'Friends',
-//     'Personal',
-//     'Family',
-//     'Kids',
-//     'Generic'
-//   ];
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Event Title'),
-//         actions: [
-//           PopupMenuButton<String>(
-//             icon: Icon(Icons.account_circle),
-//             onSelected: (String result) {
-//               // Handle account selection
-//             },
-//             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-//               PopupMenuItem<String>(
-//                 value: 'account1',
-//                 child: Text('Account 1'),
-//               ),
-//               PopupMenuItem<String>(
-//                 value: 'account2',
-//                 child: Text('Account 2'),
-//               ),
-//               PopupMenuItem<String>(
-//                 value: 'calendar1',
-//                 child: Text('Calendar 1'),
-//               ),
-//               PopupMenuItem<String>(
-//                 value: 'calendar2',
-//                 child: Text('Calendar 2'),
-//               ),
-//             ],
-//           ),
-//         ],
-//       ),
-//       body: Form(
-//         key: _formKey,
-//         child: ListView(
-//           padding: EdgeInsets.all(16.0),
-//           children: [
-//             TextFormField(
-//               decoration: InputDecoration(labelText: 'Subject'),
-//               onSaved: (value) => _subject = value ?? '',
-//             ),
-//             Row(
-//               children: [
-//                 Expanded(
-//                   child: TextFormField(
-//                     decoration: InputDecoration(labelText: 'Date'),
-//                     readOnly: true,
-//                     onTap: () async {
-//                       final pickedDate = await showDatePicker(
-//                         context: context,
-//                         initialDate: _selectedDate ?? DateTime.now(),
-//                         firstDate: DateTime(2000),
-//                         lastDate: DateTime(2101),
-//                       );
-//                       if (pickedDate != null) {
-//                         setState(() {
-//                           _selectedDate = pickedDate;
-//                         });
-//                       }
-//                     },
-//                     controller: TextEditingController(
-//                       text: _selectedDate?.toString().split(' ')[0] ?? '',
-//                     ),
-//                   ),
-//                 ),
-//                 SizedBox(width: 16),
-//                 Expanded(
-//                   child: TextFormField(
-//                     decoration: InputDecoration(labelText: 'From'),
-//                     readOnly: true,
-//                     onTap: () async {
-//                       final pickedTime = await showTimePicker(
-//                         context: context,
-//                         initialTime: _startTime ?? TimeOfDay.now(),
-//                       );
-//                       if (pickedTime != null) {
-//                         setState(() {
-//                           _startTime = pickedTime;
-//                         });
-//                       }
-//                     },
-//                     controller: TextEditingController(
-//                       text: _startTime?.format(context) ?? '',
-//                     ),
-//                   ),
-//                 ),
-//                 SizedBox(width: 16),
-//                 Expanded(
-//                   child: TextFormField(
-//                     decoration: InputDecoration(labelText: 'To'),
-//                     readOnly: true,
-//                     onTap: () async {
-//                       final pickedTime = await showTimePicker(
-//                         context: context,
-//                         initialTime: _endTime ?? TimeOfDay.now(),
-//                       );
-//                       if (pickedTime != null) {
-//                         setState(() {
-//                           _endTime = pickedTime;
-//                         });
-//                       }
-//                     },
-//                     controller: TextEditingController(
-//                       text: _endTime?.format(context) ?? '',
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//             Row(
-//               children: [
-//                 IconButton(
-//                   icon: Icon(Icons.view_day),
-//                   onPressed: () {
-//                     setState(() {
-//                       _isAllDay = !_isAllDay;
-//                     });
-//                   },
-//                   color: _isAllDay ? Colors.blue : Colors.grey,
-//                 ),
-//                 IconButton(
-//                   icon: Icon(Icons.repeat),
-//                   onPressed: () {
-//                     setState(() {
-//                       _isRecurring = !_isRecurring;
-//                     });
-//                   },
-//                   color: _isRecurring ? Colors.blue : Colors.grey,
-//                 ),
-//                 Text(_recurrencePattern),
-//               ],
-//             ),
-//             Wrap(
-//               spacing: 8.0,
-//               children: _categories.map((String category) {
-//                 return ChoiceChip(
-//                   label: Text(category),
-//                   selected: _category == category,
-//                   onSelected: (bool selected) {
-//                     setState(() {
-//                       _category = selected ? category : '';
-//                     });
-//                   },
-//                 );
-//               }).toList(),
-//             ),
-//             TextFormField(
-//               decoration: InputDecoration(labelText: 'List participants'),
-//               onChanged: (value) {
-//                 setState(() {
-//                   _participants =
-//                       value.split(',').map((e) => e.trim()).toList();
-//                 });
-//               },
-//             ),
-//             TextFormField(
-//               decoration: InputDecoration(labelText: 'Description'),
-//               maxLines: 5,
-//               onChanged: (value) => _description = value,
-//             ),
-//             SizedBox(height: 16),
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.end,
-//               children: [
-//                 TextButton(
-//                   child: Text('Cancel'),
-//                   onPressed: () {
-//                     // Handle cancel action
-//                   },
-//                 ),
-//                 SizedBox(width: 16),
-//                 ElevatedButton(
-//                   child: Text('Save'),
-//                   onPressed: () {
-//                     if (_formKey.currentState!.validate()) {
-//                       _formKey.currentState!.save();
-//                       // Handle save action
-//                     }
-//                   },
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
