@@ -75,7 +75,6 @@ class _TaskItemState extends State<TaskItem> {
                         ),
                         Text(
                           widget.category,
-                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],
                     ),
