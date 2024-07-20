@@ -281,6 +281,7 @@ class _CalendarWState extends State<CalendarW> {
             return AlertDialog(
               //title: Text("New Appointment"),
               content: NewAppointment(
+                userProfiles: [],
                 eventTitle: '',
                 dateText: _cellDateText,
                 to: _startTimeText,
