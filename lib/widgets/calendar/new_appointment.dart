@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../shared/categories.dart';
+import '../shared/categories.dart'; // Imports the categories and their colors
+import '../../models/user_profile.dart'; // Imports the file that contains the UserProfile class
 
 class NewAppointment extends StatefulWidget {
   const NewAppointment({
     super.key,
     //required String? id,
+    required List<UserProfile> userProfiles,
     required String? eventTitle,
     required String? category,
     required String? categoryTitle,
@@ -29,6 +31,7 @@ class NewAppointment extends StatefulWidget {
     // required DateTime dateChanged,
     // required String creator,
   })  : //_id = id,
+        _userProfiles = userProfiles,
         _eventTitle = eventTitle,
         _category = category,
         _catTitle = categoryTitle,
@@ -52,6 +55,7 @@ class NewAppointment extends StatefulWidget {
   // _creator = creator
 
   //final String? _id;
+  final List<UserProfile> _userProfiles;
   final String? _eventTitle;
   final String? _category;
   final String? _catTitle;
@@ -82,6 +86,7 @@ class NewAppointmentState extends State<NewAppointment> {
   bool _isAllDay = false;
   bool _isRecurring = false;
   final _appForm = GlobalKey<FormState>();
+  bool isChecked = false;
   late TextEditingController _eventDateController;
   late TextEditingController _categoryController;
   late TextEditingController _eventStartTimeController;
@@ -352,6 +357,57 @@ class NewAppointmentState extends State<NewAppointment> {
     }
   }
 
+  //function returns a dialog and displays the external profiles and calendars to which the event can be added
+  Future<void> _selectSourceCalendar(BuildContext context) async {
+    final List<UserProfile> userProfiles;
+
+    final selectedSourceCalendar = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Your Calendars'),
+            content: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const Text('Google'),
+                      CheckboxMenuButton(
+                          value: isChecked,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              isChecked = value!;
+                            });
+                          },
+                          child: Text('Holidays'))
+                    ],
+                  ),
+                ),
+                ListTile(
+                  title: const Text('Outlook'),
+                  onTap: () {
+                    Navigator.of(context).pop('Outlook');
+                  },
+                ),
+                ListTile(
+                  title: const Text('Apple'),
+                  onTap: () {
+                    Navigator.of(context).pop('Apple');
+                  },
+                ),
+              ],
+            ),
+          );
+        });
+
+    if (selectedSourceCalendar != null) {
+      setState(() {
+        _eventSourceCalendar.text = selectedSourceCalendar;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _eventDateController.dispose();
@@ -381,26 +437,44 @@ class NewAppointmentState extends State<NewAppointment> {
           children: <Widget>[
             SizedBox(
               width: width * 0.8,
-              child: TextFormField(
-                autocorrect: true,
-                controller: _eventSubjController,
-                style: Theme.of(context).textTheme.bodyLarge,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  labelText: 'Subject',
-                  labelStyle: TextStyle(fontSize: 14),
-                  border: InputBorder.none,
-                  errorStyle: TextStyle(color: Colors.redAccent),
-                ),
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.name,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please provide a value.';
-                  } else {
-                    return null;
-                  }
-                },
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 250,
+                    child: TextFormField(
+                      autocorrect: true,
+                      controller: _eventSubjController,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      maxLines: null,
+                      decoration: const InputDecoration(
+                        labelText: 'Subject',
+                        labelStyle: TextStyle(fontSize: 14),
+                        border: InputBorder.none,
+                        errorStyle: TextStyle(color: Colors.redAccent),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.name,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please provide a value.';
+                        } else {
+                          return null;
+                        }
+                      },
+                    ),
+                  ),
+                  //profile icon button to select the associated user profile and the calendar to which the event is to be added
+                  SizedBox(
+                    width: width * 0.1,
+                    child: IconButton(
+                      iconSize: 20,
+                      icon: Icon(Icons.person),
+                      onPressed: () {
+                        _selectSourceCalendar(context);
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
             Padding(
