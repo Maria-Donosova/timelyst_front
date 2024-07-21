@@ -89,6 +89,7 @@ class NewAppointmentState extends State<NewAppointment> {
   bool isChecked = false;
   String _recurrence = 'None';
   List<String> _selectedDays = [];
+  String _selectedCategory = '';
   late TextEditingController _eventDateController;
   late TextEditingController _categoryController;
   late TextEditingController _eventStartTimeController;
@@ -569,7 +570,7 @@ class NewAppointmentState extends State<NewAppointment> {
                     ),
                   ),
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       IconButton(
                         iconSize: 20,
@@ -584,7 +585,7 @@ class NewAppointmentState extends State<NewAppointment> {
                             : Icon(Icons.hourglass_empty_rounded),
                         tooltip: "All Day Event",
                       ),
-                      Row(children: [
+                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                         if (_recurrence == 'Weekly')
                           Tooltip(
                             message: _selectedDays.join(', '),
@@ -636,12 +637,10 @@ class NewAppointmentState extends State<NewAppointment> {
               child: SizedBox(
                 width: width,
                 child: Wrap(
-                  //spacing: 1.0,
                   children: categories.map((String category) {
-                    category = category;
                     categoryColor = catColor(category);
                     return ChoiceChip(
-                      visualDensity: VisualDensity.comfortable,
+                      visualDensity: VisualDensity.standard,
                       avatar: CircleAvatar(
                         backgroundColor: categoryColor,
                         radius: 4.5,
@@ -650,12 +649,12 @@ class NewAppointmentState extends State<NewAppointment> {
                         category,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                      selected: _isSelected,
+                      selected: _selectedCategory == category,
                       selectedColor: Colors.grey.shade200,
                       backgroundColor: Colors.white,
                       onSelected: (bool selected) {
                         setState(() {
-                          _isSelected = !_isSelected;
+                          _selectedCategory = (selected ? category : null)!;
                         });
                       },
                     );
