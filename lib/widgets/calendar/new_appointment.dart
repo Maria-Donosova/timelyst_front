@@ -83,13 +83,7 @@ class NewAppointment extends StatefulWidget {
 }
 
 class NewAppointmentState extends State<NewAppointment> {
-  bool _isAllDay = false;
-  bool _isRecurring = false;
-  final _appForm = GlobalKey<FormState>();
-  bool isChecked = false;
-  String _recurrence = 'None';
-  List<String> _selectedDays = [];
-  String _selectedCategory = '';
+  late TextEditingController _eventTitleController;
   late TextEditingController _eventDateController;
   late TextEditingController _categoryController;
   late TextEditingController _eventStartTimeController;
@@ -106,12 +100,21 @@ class NewAppointmentState extends State<NewAppointment> {
   late TextEditingController _eventExceptionDates;
   late TextEditingController _eventRecurrenceRule;
 
+  bool _isAllDay = false;
+  bool _isRecurring = false;
+  final _appFormKey = GlobalKey<FormState>();
+  bool isChecked = false;
+  String _recurrence = 'None';
+  List<String> _selectedDays = [];
+  String _selectedCategory = '';
+
   @override
   void initState() {
     super.initState();
     // categories.forEach((category) {
     //   category = '';
     //},);
+    _eventTitleController = TextEditingController(text: widget._eventTitle);
     _eventDateController = TextEditingController(text: widget._dateText);
     _eventStartTimeController = _eventStartTimeController =
         TextEditingController(text: widget._startTimeText);
@@ -434,16 +437,14 @@ class NewAppointmentState extends State<NewAppointment> {
   @override
   Widget build(BuildContext context) {
     bool _isSelected = false;
-    final _eventSubjController = TextEditingController();
-
     final selectedCategory = widget._category;
     var categoryColor = catColor(selectedCategory!);
-
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
     return Form(
-      key: _appForm,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      key: _appFormKey,
       child: SizedBox(
         width: width * 0.3,
         //height: height,
@@ -458,7 +459,7 @@ class NewAppointmentState extends State<NewAppointment> {
                     width: 250,
                     child: TextFormField(
                       autocorrect: true,
-                      controller: _eventSubjController,
+                      controller: _eventTitleController,
                       style: Theme.of(context).textTheme.bodyLarge,
                       maxLines: null,
                       decoration: const InputDecoration(
@@ -472,8 +473,6 @@ class NewAppointmentState extends State<NewAppointment> {
                       validator: (value) {
                         if (value!.isEmpty) {
                           return 'Please provide a value.';
-                        } else {
-                          return null;
                         }
                       },
                     ),
@@ -518,7 +517,7 @@ class NewAppointmentState extends State<NewAppointment> {
                         }),
                   ),
                   SizedBox(
-                    width: 65,
+                    width: 80,
                     child: TextFormField(
                       autocorrect: true,
                       controller: _eventStartTimeController,
@@ -544,7 +543,7 @@ class NewAppointmentState extends State<NewAppointment> {
                     ),
                   ),
                   SizedBox(
-                    width: 65,
+                    width: 80,
                     child: TextFormField(
                       autocorrect: true,
                       controller: _eventEndTimeController,
@@ -680,7 +679,8 @@ class NewAppointmentState extends State<NewAppointment> {
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
-                      const pattern = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+                      const pattern =
+                          r'^([\w-\.]+@([\w-]+\.)+[\w-]{2,4},\s*)*[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
                       final regExp = RegExp(pattern);
                       if (!regExp.hasMatch(value!)) {
                         return 'Please enter a valid email';
@@ -715,8 +715,30 @@ class NewAppointmentState extends State<NewAppointment> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
+                    onPressed: () {
+                      setState(() {
+                        print("Cancel");
+                        // runMutation({
+//                           //   "event_subj": _eventSubjController.text.trim(),
+//                           //   "event_startdate":
+//                           //       _eventStartDateController.text.trim(),
+//                           //   "event_enddate": _eventEndDateController.text.trim(),
+//                           // });
+//                           print("event mutation");
+                      });
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Close'),
+                  ),
+                  TextButton(
                       child: const Text('Save'),
                       onPressed: () {
+                        if (_appFormKey.currentState!.validate()) {
+                          print('saved');
+                        } else {
+                          Text('Fix the items');
+                        }
+
                         setState(() {
                           print("event saved");
                           // runMutation({
@@ -731,22 +753,6 @@ class NewAppointmentState extends State<NewAppointment> {
                         });
                         Navigator.of(context).pop();
                       }),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        print("new event closed");
-                        // runMutation({
-//                           //   "event_subj": _eventSubjController.text.trim(),
-//                           //   "event_startdate":
-//                           //       _eventStartDateController.text.trim(),
-//                           //   "event_enddate": _eventEndDateController.text.trim(),
-//                           // });
-//                           print("event mutation");
-                      });
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Close'),
-                  )
                 ],
               ),
             )
