@@ -87,6 +87,8 @@ class NewAppointmentState extends State<NewAppointment> {
   bool _isRecurring = false;
   final _appForm = GlobalKey<FormState>();
   bool isChecked = false;
+  String _recurrence = 'None';
+  List<String> _selectedDays = [];
   late TextEditingController _eventDateController;
   late TextEditingController _categoryController;
   late TextEditingController _eventStartTimeController;
@@ -178,17 +180,47 @@ class NewAppointmentState extends State<NewAppointment> {
     }
   }
 
+  //function the changes the color of eventrepeat icon once the user chooses a recurrence pattern and clicked Saved within the _selectRecurrenceRule function
+  void _changeRecurringColor() {
+    if (_recurrence != 'None') {
+      setState(() {
+        _isRecurring = true;
+      });
+    }
+  }
+
+  void _changeRecurringPattern() {
+    if (_recurrence != 'None') {
+      setState(() {
+        _recurrence = _recurrence;
+      });
+    }
+  }
+
   //function to pick up the recurrence rule for the event based on user input. the recurrent pattern can be daily, weekly, monthly or yearly or custom set by day of the week
   Future<void> _selectRecurrenceRule(BuildContext context) async {
-    String _recurrence = 'None';
-    List<String> _selectedDays = [];
-
     final selectedRecurrenceRule = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return StatefulBuilder(
             builder: (context, setState) {
               return AlertDialog(
+                  actions: [
+                    TextButton(
+                      child: Text('Cancel'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: Text('Save'),
+                      onPressed: () {
+                        _changeRecurringColor();
+                        _changeRecurringPattern();
+                        Navigator.of(context).pop();
+                      },
+                    )
+                  ],
                   title: const Text('Select Recurrence'),
                   content: Column(mainAxisSize: MainAxisSize.min, children: [
                     RadioListTile<String>(
@@ -325,23 +357,6 @@ class NewAppointmentState extends State<NewAppointment> {
                                 _selectedDays.remove('Sunday');
                               }
                             });
-
-                            actions:
-                            [
-                              TextButton(
-                                child: Text('Cancel'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              TextButton(
-                                child: Text('Save'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  // Save the recurrence data
-                                },
-                              )
-                            ];
                           },
                         )
                       ])
@@ -349,7 +364,6 @@ class NewAppointmentState extends State<NewAppointment> {
             },
           );
         });
-
     if (selectedRecurrenceRule != null) {
       setState(() {
         _eventRecurrenceRule.text = selectedRecurrenceRule;
@@ -571,18 +585,46 @@ class NewAppointmentState extends State<NewAppointment> {
                         tooltip: "All Day Event",
                       ),
                       Row(children: [
-                        IconButton(
-                          iconSize: 20,
-                          onPressed: () {
-                            _selectRecurrenceRule(context);
-                            setState(() {
-                              _isRecurring = !_isRecurring;
-                            });
-                          },
-                          color: _isRecurring ? Colors.black : Colors.grey,
-                          icon: Icon(Icons.event_repeat_rounded),
-                        ),
-                        Text('Weekly'),
+                        if (_recurrence == 'Weekly')
+                          Tooltip(
+                            message: _selectedDays.join(', '),
+                            child: TextButton.icon(
+                                style: TextButton.styleFrom(
+                                  foregroundColor:
+                                      _isRecurring ? Colors.black : Colors.grey,
+                                  textStyle:
+                                      Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                icon:
+                                    Icon(size: 20, Icons.event_repeat_rounded),
+                                label: Text(_recurrence.toString()),
+                                //iconSize: 20,
+                                //tooltip: _selectedDays.toString(),
+                                onPressed: () {
+                                  _selectRecurrenceRule(context);
+                                  setState(() {
+                                    // _isRecurring = !_isRecurring;
+                                  });
+                                }),
+                          )
+                        else
+                          TextButton.icon(
+                              style: TextButton.styleFrom(
+                                foregroundColor:
+                                    _isRecurring ? Colors.black : Colors.grey,
+                                textStyle:
+                                    Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              icon: Icon(size: 20, Icons.event_repeat_rounded),
+                              label: Text(_recurrence.toString()),
+                              //iconSize: 20,
+                              //tooltip: _selectedDays.toString(),
+                              onPressed: () {
+                                _selectRecurrenceRule(context);
+                                setState(() {
+                                  // _isRecurring = !_isRecurring;
+                                });
+                              }),
                       ]),
                     ],
                   ),
@@ -594,7 +636,7 @@ class NewAppointmentState extends State<NewAppointment> {
               child: SizedBox(
                 width: width,
                 child: Wrap(
-                  spacing: 1.0,
+                  //spacing: 1.0,
                   children: categories.map((String category) {
                     category = category;
                     categoryColor = catColor(category);
@@ -668,11 +710,6 @@ class NewAppointmentState extends State<NewAppointment> {
                 ),
               ),
             ),
-            // Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            //   IconButton(onPressed: () {}, icon: Icon(Icons.calendar_month)),
-            //   IconButton(onPressed: () {}, icon: Icon(Icons.calendar_today)),
-            //   IconButton(onPressed: () {}, icon: Icon(Icons.person_2_outlined)),
-            // ]),
             Padding(
               padding: const EdgeInsets.only(top: 120),
               child: Row(
