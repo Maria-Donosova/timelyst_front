@@ -73,7 +73,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: Text(
                         'Tell us more about yourself',
                         // ignore: deprecated_member_use
-                        style: Theme.of(context).textTheme.headline1,
+                        style: Theme.of(context).textTheme.displayLarge,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -81,7 +81,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       autocorrect: true,
                       controller: _nameController,
                       // ignore: deprecated_member_use
-                      style: Theme.of(context).textTheme.bodyText1,
+                      style: Theme.of(context).textTheme.bodyLarge,
                       decoration: const InputDecoration(
                         labelText: 'Name',
                         labelStyle: TextStyle(fontSize: 14),

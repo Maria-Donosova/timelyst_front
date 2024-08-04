@@ -13,7 +13,20 @@ class CustomTheme with ChangeNotifier {
 
   static ThemeData get lightTheme {
     return ThemeData(
+      colorScheme: ColorScheme(
+        primary: Colors.white,
+        onPrimary: Colors.grey[900]!,
+        secondary: Colors.deepPurpleAccent,
+        onSecondary: Colors.black,
+        error: Colors.redAccent,
+        onError: Colors.grey[900]!,
+        surface: Colors.white,
+        onSurface: Colors.grey[900]!,
+        shadow: Colors.grey[400]!,
+        brightness: Brightness.light,
+      ),
       primaryColor: Colors.white,
+      primaryColorLight: Colors.white,
       scaffoldBackgroundColor: Colors.white,
       shadowColor: const Color.fromRGBO(207, 204, 215, 100),
       hintColor: Colors.grey,
@@ -21,7 +34,7 @@ class CustomTheme with ChangeNotifier {
       fontFamily: 'FontAwesome',
       iconTheme: IconThemeData(
         color: Colors.grey[900],
-        size: 28,
+        size: 20,
       ),
       textTheme: TextTheme(
         displayLarge: TextStyle(color: Colors.grey[900], fontSize: 20),

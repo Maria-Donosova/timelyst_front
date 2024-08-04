@@ -78,7 +78,7 @@ class _AgendaSettingsState extends State<AgendaSettings> {
                   padding: const EdgeInsets.only(top: 30.0),
                   child: Text(
                     'Choose what you’d like to import for',
-                    style: Theme.of(context).textTheme.headline2,
+                    style: Theme.of(context).textTheme.displayMedium,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -86,7 +86,7 @@ class _AgendaSettingsState extends State<AgendaSettings> {
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   child: Text(
                     'Maria Donosova calendar',
-                    style: Theme.of(context).textTheme.headline1,
+                    style: Theme.of(context).textTheme.displayLarge,
                     textAlign: TextAlign.left,
                   ),
                 ),
@@ -514,7 +514,7 @@ class _AgendaSettingsState extends State<AgendaSettings> {
                   padding: const EdgeInsets.only(top: 50.0),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.grey[800],
+                      backgroundColor: Colors.grey[800],
                     ),
                     child: const Text('Next'),
                     onPressed: () {

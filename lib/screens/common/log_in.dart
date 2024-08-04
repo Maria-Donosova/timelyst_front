@@ -74,7 +74,7 @@ class _LogInScreenState extends State<LogInScreen> {
                         Text(
                           'Hello Friend',
                           // ignore: deprecated_member_use
-                          style: Theme.of(context).textTheme.headline1,
+                          style: Theme.of(context).textTheme.displayLarge,
                           textAlign: TextAlign.center,
                         ),
                         Column(
