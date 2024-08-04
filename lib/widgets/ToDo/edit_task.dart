@@ -76,7 +76,7 @@ class _EditTaskWState extends State<EditTaskW> {
                           TextFormField(
                             autocorrect: true,
                             controller: _taskDescriptionController,
-                            style: Theme.of(context).textTheme.bodyText1,
+                            style: Theme.of(context).textTheme.bodyLarge,
                             maxLines: null,
                             decoration: const InputDecoration(
                               //labelText: 'Add new task',
