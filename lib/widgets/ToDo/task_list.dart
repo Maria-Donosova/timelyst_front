@@ -139,11 +139,17 @@ class _TaskListWState extends State<TaskListW> {
                                   "Are you sure you want to delete this item?"),
                               actions: <Widget>[
                                 TextButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.grey[800],
+                                    ),
                                     onPressed: () async {
                                       Navigator.of(context).pop(true);
                                     },
                                     child: const Text("Delete")),
                                 TextButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.grey[800],
+                                  ),
                                   onPressed: () =>
                                       Navigator.of(context).pop(false),
                                   child: const Text("Cancel"),
