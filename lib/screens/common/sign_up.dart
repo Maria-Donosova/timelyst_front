@@ -292,7 +292,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 'Sign Up',
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[800],
+                                backgroundColor: Colors.grey[600],
                               ),
                               onPressed: () {
                                 //_saveForm,

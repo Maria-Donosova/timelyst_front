@@ -179,9 +179,6 @@ class _LogInScreenState extends State<LogInScreen> {
                                   child: const Text(
                                     'Sign Up',
                                   ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey[800],
-                                  ),
                                   onPressed: () {
                                     //_saveForm,
                                     print('sign up button pressed');
@@ -199,7 +196,7 @@ class _LogInScreenState extends State<LogInScreen> {
                                     'Log In',
                                   ),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey[800],
+                                    backgroundColor: Colors.grey[700],
                                   ),
                                   onPressed: () {
                                     //_saveForm,

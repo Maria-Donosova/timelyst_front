@@ -734,6 +734,9 @@ class NewAppointmentState extends State<NewAppointment> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey[800],
+                    ),
                     onPressed: () {
                       setState(() {
                         print("Cancel");
@@ -750,6 +753,9 @@ class NewAppointmentState extends State<NewAppointment> {
                     child: const Text('Close'),
                   ),
                   TextButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[800],
+                      ),
                       child: const Text('Save'),
                       onPressed: () {
                         if (_appFormKey.currentState!.validate()) {
