@@ -202,6 +202,7 @@ class _CalendarWState extends State<CalendarW> {
           child: SizedBox(
             //width: mediaQuery.size.width * 0.03,
             child: PopupMenuButton(
+              tooltip: 'Mode',
               icon: Icon(
                 Icons.calendar_today_outlined,
                 color: Colors.grey[800],
@@ -279,7 +280,6 @@ class _CalendarWState extends State<CalendarW> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              //title: Text("New Appointment"),
               content: NewAppointment(
                 userProfiles: [],
                 eventTitle: '',
