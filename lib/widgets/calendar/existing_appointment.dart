@@ -50,11 +50,17 @@ class ExistingAppointment extends StatelessWidget {
       ),
       actions: <Widget>[
         new TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+            ),
             onPressed: () {
               Navigator.of(context).pop();
             },
             child: new Text('Cancel')),
         new TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+            ),
             onPressed: () {
               Navigator.of(context).pop();
             },

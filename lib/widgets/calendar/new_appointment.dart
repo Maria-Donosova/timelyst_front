@@ -489,9 +489,9 @@ class NewAppointmentState extends State<NewAppointment> {
                         controller: _eventTitleController,
                         style: Theme.of(context).textTheme.bodyLarge,
                         maxLines: null,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Subject',
-                          labelStyle: TextStyle(fontSize: 14),
+                          labelStyle: Theme.of(context).textTheme.displaySmall,
                           border: InputBorder.none,
                           errorStyle: TextStyle(color: Colors.redAccent),
                         ),
@@ -507,7 +507,7 @@ class NewAppointmentState extends State<NewAppointment> {
                   ),
                   //profile icon button to select the associated user profile and the calendar to which the event is to be added
                   IconButton(
-                    iconSize: 20,
+                    iconSize: Theme.of(context).iconTheme.size,
                     icon: Icon(Icons.person),
                     onPressed: () {
                       _selectSourceCalendar(context);
@@ -524,14 +524,13 @@ class NewAppointmentState extends State<NewAppointment> {
                 children: [
                   SizedBox(
                     width: width * 0.07,
-                    //width: 65,
                     child: TextFormField(
                         autocorrect: true,
                         controller: _eventDateController,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        decoration: const InputDecoration(
-                          labelText: 'Event Date',
-                          labelStyle: TextStyle(fontSize: 14),
+                        style: Theme.of(context).textTheme.displaySmall,
+                        decoration: InputDecoration(
+                          labelText: 'Event',
+                          labelStyle: Theme.of(context).textTheme.displaySmall,
                           border: InputBorder.none,
                           errorStyle: TextStyle(color: Colors.redAccent),
                         ),
@@ -547,10 +546,10 @@ class NewAppointmentState extends State<NewAppointment> {
                     child: TextFormField(
                       autocorrect: true,
                       controller: _eventStartTimeController,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      decoration: const InputDecoration(
-                        labelText: 'Start Time',
-                        labelStyle: TextStyle(fontSize: 14),
+                      style: Theme.of(context).textTheme.displaySmall,
+                      decoration: InputDecoration(
+                        labelText: 'Begin',
+                        labelStyle: Theme.of(context).textTheme.displaySmall,
                         border: InputBorder.none,
                         errorStyle: TextStyle(color: Colors.redAccent),
                       ),
@@ -574,10 +573,10 @@ class NewAppointmentState extends State<NewAppointment> {
                     child: TextFormField(
                       autocorrect: true,
                       controller: _eventEndTimeController,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      decoration: const InputDecoration(
-                        labelText: 'End Time',
-                        labelStyle: TextStyle(fontSize: 14),
+                      style: Theme.of(context).textTheme.displaySmall,
+                      decoration: InputDecoration(
+                        labelText: 'End',
+                        labelStyle: Theme.of(context).textTheme.displaySmall,
                         border: InputBorder.none,
                         errorStyle: TextStyle(color: Colors.redAccent),
                       ),
@@ -618,7 +617,9 @@ class NewAppointmentState extends State<NewAppointment> {
                                   _isRecurring ? Colors.black : Colors.grey,
                               textStyle: Theme.of(context).textTheme.bodyMedium,
                             ),
-                            icon: Icon(size: 20, Icons.event_repeat_rounded),
+                            icon: Icon(
+                                size: Theme.of(context).iconTheme.size,
+                                Icons.event_repeat_rounded),
                             label: Text(_recurrence.toString()),
                             //iconSize: 20,
                             //tooltip: _selectedDays.toString(),
@@ -665,7 +666,7 @@ class NewAppointmentState extends State<NewAppointment> {
                       ),
                       label: Text(
                         category,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.displaySmall,
                       ),
                       selected: _selectedCategory == category,
                       selectedColor: Colors.grey.shade200,
@@ -733,28 +734,33 @@ class NewAppointmentState extends State<NewAppointment> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[800],
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          print("Cancel");
+                          // runMutation({
+                          //                           //   "event_subj": _eventSubjController.text.trim(),
+                          //                           //   "event_startdate":
+                          //                           //       _eventStartDateController.text.trim(),
+                          //                           //   "event_enddate": _eventEndDateController.text.trim(),
+                          //                           // });
+                          //                           print("event mutation");
+                        });
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Close'),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        print("Cancel");
-                        // runMutation({
-//                           //   "event_subj": _eventSubjController.text.trim(),
-//                           //   "event_startdate":
-//                           //       _eventStartDateController.text.trim(),
-//                           //   "event_enddate": _eventEndDateController.text.trim(),
-//                           // });
-//                           print("event mutation");
-                      });
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Close'),
                   ),
                   TextButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[800],
+                      style: TextButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
                       ),
                       child: const Text('Save'),
                       onPressed: () {

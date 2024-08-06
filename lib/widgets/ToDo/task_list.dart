@@ -126,7 +126,11 @@ class _TaskListWState extends State<TaskListW> {
                     confirmDismiss: (DismissDirection direction) async {
                       if (direction == DismissDirection.startToEnd) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: const Text('Well Done!'),
+                          backgroundColor: Theme.of(context).colorScheme.shadow,
+                          content: Text(
+                            'Well Done!',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
                         ));
                         return true;
                       } else {
@@ -134,25 +138,40 @@ class _TaskListWState extends State<TaskListW> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: const Text("Delete Confirmation"),
-                              content: const Text(
-                                  "Are you sure you want to delete this item?"),
+                              title: Text(
+                                "Confirmation",
+                                style: Theme.of(context).textTheme.displaySmall,
+                              ),
+                              content: Text(
+                                "Are you sure you want to delete this item?",
+                                style:
+                                    Theme.of(context).textTheme.displayMedium,
+                              ),
                               actions: <Widget>[
                                 TextButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.grey[800],
-                                    ),
-                                    onPressed: () async {
-                                      Navigator.of(context).pop(true);
-                                    },
-                                    child: const Text("Delete")),
+                                  style: TextButton.styleFrom(
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.shadow,
+                                  ),
+                                  onPressed: () async {
+                                    Navigator.of(context).pop(true);
+                                  },
+                                  child: Text("Cancel",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge),
+                                ),
                                 TextButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey[800],
+                                  style: TextButton.styleFrom(
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.shadow,
                                   ),
                                   onPressed: () =>
                                       Navigator.of(context).pop(false),
-                                  child: const Text("Cancel"),
+                                  child: Text("Delete",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge),
                                 ),
                               ],
                             );
@@ -161,29 +180,29 @@ class _TaskListWState extends State<TaskListW> {
                       }
                     },
                     background: Container(
-                      color: Colors.orangeAccent,
+                      color: Colors.greenAccent[100],
                       child: Padding(
                         padding: const EdgeInsets.all(5),
                         child: Row(
-                          children: const [
+                          children: [
                             Text(
                               'Done',
-                              style: TextStyle(color: Colors.black),
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
                           ],
                         ),
                       ),
                     ),
                     secondaryBackground: Container(
-                      color: Colors.redAccent,
+                      color: Colors.orangeAccent[100],
                       child: Padding(
                         padding: const EdgeInsets.all(5),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
-                          children: const [
+                          children: [
                             Text(
                               'Delete',
-                              style: TextStyle(color: Colors.white),
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
                           ],
                         ),

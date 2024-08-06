@@ -70,7 +70,7 @@ class _TaskItemState extends State<TaskItem> {
                           padding: const EdgeInsets.only(bottom: 7),
                           child: Text(
                             widget.title,
-                            style: Theme.of(context).textTheme.bodyLarge,
+                            style: Theme.of(context).textTheme.displaySmall,
                           ),
                         ),
                         Text(

@@ -14,59 +14,43 @@ Widget appointmentBuilder(BuildContext context,
   final width = MediaQuery.of(context).size.width;
 
   return Container(
-    //width: width,
-    height: calendarAppointmentDetails.bounds.height,
-    child: Flexible(
+      width: width,
+      height: calendarAppointmentDetails.bounds.height,
       child: Card(
         elevation: 4,
         child: InkWell(
           splashColor: Colors.blueGrey.withAlpha(30),
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  Flexible(
-                    child: Container(
-                      padding: const EdgeInsets.all(10.0),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: categoryColor,
-                            width: 3,
-                            style: BorderStyle.solid,
-                          ),
-                        ),
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            width: width,
-                            //padding: const EdgeInsets.only(bottom: 7),
-                            child: Text(
-                              appointment.subject,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+          child: Stack(children: [
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Text(
+                appointment.subject,
+                style: Theme.of(context).textTheme.displaySmall,
               ),
-              SizedBox(
-                child: Align(
-                  alignment: Alignment(-1.005, -1.05),
-                  child: CircleAvatar(
-                    backgroundColor: categoryColor,
-                    radius: 3.5,
-                  ),
+            ),
+            SizedBox(
+              child: Align(
+                alignment: Alignment(-1.005, -1.05),
+                child: CircleAvatar(
+                  backgroundColor: categoryColor,
+                  radius: 3.5,
                 ),
               ),
-            ],
-          ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: categoryColor,
+                    width: 3,
+                    style: BorderStyle.solid,
+                  ),
+                ),
+                shape: BoxShape.rectangle,
+              ),
+            ),
+          ]),
         ),
-      ),
-    ),
-  );
+      ));
 }

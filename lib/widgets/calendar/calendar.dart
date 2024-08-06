@@ -241,16 +241,6 @@ class _CalendarWState extends State<CalendarW> {
           ),
         ),
         //),
-        Padding(
-          padding: const EdgeInsets.only(right: 8, left: 10),
-          child: Text(
-            'I would like to receive T-Emails',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.secondary,
-            ),
-          ),
-        ),
       ],
     );
   }

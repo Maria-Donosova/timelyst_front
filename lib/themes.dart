@@ -14,36 +14,34 @@ class CustomTheme with ChangeNotifier {
   static ThemeData get lightTheme {
     return ThemeData(
       colorScheme: ColorScheme.light(
-        primary: Colors.grey[700]!,
-        onPrimary: Colors.white,
-        secondary: Colors.grey[900]!,
-        onSecondary: Colors.grey[200]!,
+        primary: Colors.white,
+        onPrimary: Colors.grey[900]!,
+        secondary: Colors.grey[800]!,
+        onSecondary: Colors.white,
         error: Colors.redAccent,
         onError: Colors.grey[900]!,
         surface: Colors.white,
         onSurface: Colors.grey[900]!,
         shadow: const Color.fromRGBO(207, 204, 215, 100),
-        brightness: Brightness.light,
       ),
-      //primaryColor: Colors.white,
-      //primaryColorLight: Colors.white,
-      //scaffoldBackgroundColor: Colors.white,
-      shadowColor: const Color.fromRGBO(207, 204, 215, 100),
-      hintColor: const Color.fromRGBO(207, 204, 215, 100),
-      visualDensity: VisualDensity.adaptivePlatformDensity,
-
+      // buttonTheme: ButtonThemeData(
+      //   buttonColor: Colors.grey[700]!,
+      // ),
       fontFamily: 'FontAwesome',
       iconTheme: IconThemeData(
         color: Colors.grey[900],
         size: 20,
       ),
+      chipTheme: ChipThemeData(
+        side: BorderSide.none,
+      ),
       textTheme: TextTheme(
         displayLarge: TextStyle(color: Colors.grey[900], fontSize: 20),
         displayMedium: TextStyle(color: Colors.grey[900], fontSize: 18),
-        displaySmall: TextStyle(color: Colors.grey[900], fontSize: 12),
-        bodyLarge: TextStyle(color: Colors.grey[900], fontSize: 16),
-        bodyMedium: TextStyle(color: Colors.grey[800], fontSize: 16),
-        bodySmall: TextStyle(color: Colors.grey[800], fontSize: 12),
+        displaySmall: TextStyle(color: Colors.grey[900], fontSize: 16),
+        bodyLarge: TextStyle(color: Colors.grey[900], fontSize: 14),
+        bodyMedium: TextStyle(color: Colors.grey[800], fontSize: 12),
+        bodySmall: TextStyle(color: Colors.grey[800], fontSize: 10),
         titleMedium: TextStyle(color: Colors.grey[900], fontSize: 16),
         titleSmall: TextStyle(color: Colors.grey[800], fontSize: 12),
       ),
@@ -52,14 +50,20 @@ class CustomTheme with ChangeNotifier {
 
   static ThemeData get darkTheme {
     return ThemeData(
-      primaryColor: Colors.grey[700],
-      scaffoldBackgroundColor: Colors.grey[900],
-      shadowColor: const Color.fromRGBO(207, 204, 215, 100),
-      hintColor: Colors.grey,
-      visualDensity: VisualDensity.adaptivePlatformDensity,
+      colorScheme: ColorScheme.dark(
+        primary: Colors.grey[700]!,
+        onPrimary: Colors.white,
+        secondary: Colors.white,
+        onSecondary: Colors.grey[800]!,
+        error: Colors.redAccent,
+        onError: Colors.white,
+        surface: Colors.white,
+        onSurface: Colors.grey[700]!,
+        shadow: Colors.grey[500]!,
+      ),
       fontFamily: 'FontAwesome',
       iconTheme: const IconThemeData(
-        color: Colors.white70,
+        color: Colors.black45,
         size: 28,
       ),
       textTheme: TextTheme(

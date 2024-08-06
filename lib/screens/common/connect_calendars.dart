@@ -37,7 +37,7 @@ class ConnectCal extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 40.0),
                   child: Text(
-                    'Add your calendars',
+                    'Connect',
                     style: Theme.of(context).textTheme.displayLarge,
                     textAlign: TextAlign.center,
                   ),
@@ -98,11 +98,8 @@ class ConnectCal extends StatelessWidget {
                         MaterialPageRoute(builder: (context) => const Agenda()),
                       );
                     },
-                    child: const Text('Or Start Blank'),
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      textStyle: TextStyle(fontSize: 16),
-                    ),
+                    child: Text('Or Start Blank',
+                        style: Theme.of(context).textTheme.bodyLarge),
                   ),
                 ),
               ]),
