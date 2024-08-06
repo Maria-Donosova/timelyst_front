@@ -28,23 +28,23 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget _buildTitle() {
     return Text(
       'Tame the Time',
-      style: TextStyle(color: Colors.black),
     );
   }
 
   Widget _buildLeading(BuildContext context) {
     return PopupMenuButton(
+      tooltip: 'About',
       icon: Image.asset("assets/images/logos/timelyst_logo.png"),
       iconSize: 20,
       elevation: 8,
       itemBuilder: (BuildContext context) => <PopupMenuEntry<_timelystMenu>>[
         const PopupMenuItem<_timelystMenu>(
           value: _timelystMenu.about,
-          child: Text('About'),
+          child: Text('About Us'),
         ),
         const PopupMenuItem<_timelystMenu>(
           value: _timelystMenu.contact_us,
-          child: Text('Contact Us'),
+          child: Text('Contact'),
         ),
       ],
     );
@@ -53,33 +53,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   List<Widget> _buildActions(BuildContext context) {
     // final mediaQuery = MediaQuery.of(context);
     return [
-      Row(
-        children: [
-          // Container(
-          //   width: mediaQuery.size.width * 0.1,
-          //   child: TextFormField(
-          //     autocorrect: true,
-          //     decoration: InputDecoration(
-          //       border: InputBorder.none,
-          //       icon: Icon(
-          //         Icons.search_outlined,
-          //         color: Colors.grey.shade800,
-          //       ),
-          //       labelStyle: TextStyle(fontSize: 10),
-          //       errorStyle: TextStyle(color: Colors.redAccent),
-          //     ),
-          //     textInputAction: TextInputAction.next,
-          //     onFieldSubmitted: (
-          //       FilterByTaskEvent,
-          //     ) {},
-          //   ),
-          // ),
-        ],
-      ),
       PopupMenuButton(
+        tooltip: 'Account',
         icon: Icon(
           Icons.menu_outlined,
-          color: Colors.grey[800],
         ),
         elevation: 8,
         itemBuilder: (BuildContext context) => <PopupMenuEntry<_profileView>>[

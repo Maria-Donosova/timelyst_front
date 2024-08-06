@@ -82,12 +82,12 @@ flutter:
   fonts:
     - family: FontAwesome
       fonts:
-        - asset: assets/fonts/FontAwesome_5_Free-Regular-400.otf
-          weight: 400
-        - asset: assets/fonts/FontAwesome 5 Free-Solid-900.otf
-          weight: 900
-        - asset: assets/fonts/FontAwesome 5 Brands-Regular-400.otf
-          weight: 400
+         - asset: assets/fonts/FontAwesome_5_Free-Regular-400.otf
+           weight: 400
+  #       - asset: assets/fonts/FontAwesome 5 Free-Solid-900.otf
+  #        weight: 900
+  #      - asset: assets/fonts/FontAwesome 5 Brands-Regular-400.otf
+  #       weight: 400
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

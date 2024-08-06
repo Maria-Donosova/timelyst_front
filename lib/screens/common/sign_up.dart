@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../widgets/shared/custom_appbar.dart';
 import 'connect_calendars.dart';
 
@@ -261,11 +262,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 return;
                               }),
                         ),
-                        const Padding(
+                        Padding(
                           padding: EdgeInsets.only(top: 20),
                           child: Text(
                             'I would like to receive T-Emails',
                             softWrap: true,
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.secondary),
                           ),
                         ),
                       ],
@@ -274,7 +277,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       padding: const EdgeInsets.only(top: 25.0),
                       child: Text(
                         'By signing up, you agree to our Terms, Data Policy and Cookies Policy.',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
                     _isSaving
@@ -292,7 +295,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 'Sign Up',
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[600],
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.secondary,
                               ),
                               onPressed: () {
                                 //_saveForm,
