@@ -184,12 +184,15 @@ class _LogInScreenState extends State<LogInScreen> {
                             Padding(
                               padding: const EdgeInsets.all(4.0),
                               child: ElevatedButton(
-                                child: const Text(
-                                  'Sign Up',
-                                ),
+                                child: Text('Sign Up',
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
+                                    )),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
-                                      Theme.of(context).colorScheme.secondary,
+                                      Theme.of(context).colorScheme.shadow,
                                 ),
                                 onPressed: () {
                                   //_saveForm,
@@ -207,12 +210,15 @@ class _LogInScreenState extends State<LogInScreen> {
                             Padding(
                               padding: const EdgeInsets.all(4.0),
                               child: ElevatedButton(
-                                child: const Text(
-                                  'Log In',
-                                ),
+                                child: Text('Log In',
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
+                                    )),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
-                                      Theme.of(context).colorScheme.secondary,
+                                      Theme.of(context).colorScheme.shadow,
                                 ),
                                 onPressed: () {
                                   //_saveForm,

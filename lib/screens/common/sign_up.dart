@@ -291,12 +291,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         : Padding(
                             padding: const EdgeInsets.only(top: 30.0),
                             child: ElevatedButton(
-                              child: const Text(
-                                'Sign Up',
-                              ),
+                              child: Text('Sign Up',
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
+                                  )),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
-                                    Theme.of(context).colorScheme.secondary,
+                                    Theme.of(context).colorScheme.shadow,
                               ),
                               onPressed: () {
                                 //_saveForm,
