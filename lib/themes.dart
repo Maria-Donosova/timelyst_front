@@ -32,9 +32,7 @@ class CustomTheme with ChangeNotifier {
         color: Colors.grey[900],
         size: 20,
       ),
-      chipTheme: ChipThemeData(
-        side: BorderSide.none,
-      ),
+      chipTheme: ChipThemeData(side: BorderSide.none, showCheckmark: false),
       textTheme: TextTheme(
         displayLarge: TextStyle(color: Colors.grey[900], fontSize: 20),
         displayMedium: TextStyle(color: Colors.grey[900], fontSize: 18),
