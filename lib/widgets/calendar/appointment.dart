@@ -3,87 +3,84 @@ import 'package:intl/intl.dart';
 
 import '../shared/categories.dart'; // Imports the categories and their colors
 import '../../models/user_profile.dart'; // Imports the file that contains the UserProfile class
-import '../../models/user_calendars.dart';
+import '../../models/user_calendar.dart';
 
-class NewAppointment extends StatefulWidget {
-  const NewAppointment({
+class AppointmentS extends StatefulWidget {
+  const AppointmentS({
     super.key,
     //required String? id,
-    required List<UserProfile> userProfiles,
-    required String? eventTitle,
-    required String? category,
-    required String? categoryTitle,
-    required String? dateText,
-    required String? from,
-    required String? to,
-    required String? sourceCalendar,
-    required String? calendarType,
-    //required String? recurrenceId,
-    required String? eventBody,
-    required bool isAllDay,
-    required String eventConferenceDetails,
+    // required String creator,
     required String eventOrganizer,
-    required String eventAttendees,
-    required bool reminder,
-    required bool holiday,
+    required List<UserProfile> userProfiles,
+    required List<UserCalendar> userCalendars,
+    required String? eventTitle,
+    required String? dateText,
+    required String? to,
+    required String? from,
+    required bool isAllDay,
+    required String? recurrenceId,
+    required String? recurrenceRule,
+    // required bool reminder,
+    // required bool holiday,
+    required String? catTitle,
+    required String? catColor,
+    required String participants,
+    required String? eventBody,
+    required String eventConferenceDetails,
     //required List<DateTime>? exceptionDates,
-    //required String? recurrenceRule,
     // required DateTime dateCreated,
     // required DateTime dateChanged,
-    // required String creator,
   })  : //_id = id,
+        // _creator = creator,
+        _eventOrganizer = eventOrganizer,
         _userProfiles = userProfiles,
+        _userCalendars = userCalendars,
         _eventTitle = eventTitle,
-        _category = category,
-        _catTitle = categoryTitle,
         _dateText = dateText,
         _startTimeText = from,
         _endTimeText = to,
-        _sourceCalendar = sourceCalendar,
-        _calendarType = calendarType,
-        //_recurrenceId = recurrenceId,
-        _eventBody = eventBody,
         _isAllDay = isAllDay,
-        _eventConferenceDetails = eventConferenceDetails,
-        _eventOrganizer = eventOrganizer,
-        _eventAttendees = eventAttendees,
-        _reminder = reminder,
-        _holiday = holiday;
+        _recurrenceId = recurrenceId,
+        _recurrenceRule = recurrenceRule,
+        // _reminder = reminder,
+        // _holiday = holiday,
+        _catTitle = catTitle,
+        _catColor = catColor,
+        _participants = participants,
+        _eventBody = eventBody,
+        _eventConferenceDetails = eventConferenceDetails;
   // _exceptionDates = exceptionDates,
-  // _recurrenceRule = recurrenceRule,
   // _dateCreated = dateCreated,
   // _dateChanged = dateChanged,
-  // _creator = creator
 
   //final String? _id;
+  // final String _creator;
+  final String _eventOrganizer;
   final List<UserProfile> _userProfiles;
+  final List<UserCalendar> _userCalendars;
   final String? _eventTitle;
-  final String? _category;
-  final String? _catTitle;
   final String? _dateText;
   final String? _startTimeText;
   final String? _endTimeText;
-  final String? _sourceCalendar;
-  final String? _calendarType;
-  //final String? _recurrenceId;
-  final String? _eventBody;
   final bool _isAllDay;
+  final String? _recurrenceId;
+  final String? _recurrenceRule;
+  // final String? _reminder;
+  // final String? _holiday;
+  final String? _catTitle;
+  final String? _catColor;
+  final String? _participants;
+  final String? _eventBody;
   final String _eventConferenceDetails;
-  final String _eventOrganizer;
-  final String _eventAttendees;
-  final bool _reminder;
-  final bool _holiday;
   // final List<DateTime>? _exceptionDates;
-  // final String? _recurrenceRule;
   // final DateTime _dateCreated;
   // final DateTime _dateChanged;
-  // final String _creator;
 
   @override
-  State<NewAppointment> createState() => NewAppointmentState();
+  State<AppointmentS> createState() => NewAppointmentState();
 }
 
-class NewAppointmentState extends State<NewAppointment> {
+class NewAppointmentState extends State<AppointmentS> {
   late TextEditingController _eventTitleController;
   late TextEditingController _eventDateController;
   late TextEditingController _categoryController;
@@ -388,9 +385,6 @@ class NewAppointmentState extends State<NewAppointment> {
 
   //function returns a dialog and displays the external profiles and calendars to which the event can be added
   Future<void> _selectSourceCalendar(BuildContext context) async {
-    final List<UserProfile> accounts;
-    final List<UserCalendar> calendars;
-
     final selectedSourceCalendar = await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -476,75 +470,95 @@ class NewAppointmentState extends State<NewAppointment> {
 
   @override
   Widget build(BuildContext context) {
-    bool _isSelected = false;
-    final selectedCategory = widget._category;
+    //bool _isSelected = false;
+    final selectedCategory = widget._catTitle;
     var categoryColor = catColor(selectedCategory!);
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
-    return Form(
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      key: _appFormKey,
-      child: SizedBox(
-        width: width * 0.3,
-        //height: height,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              width: width * 0.8,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      child: Form(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        key: _appFormKey,
+        child: SizedBox(
+          width: width * 0.3,
+          height: height * 0.6,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(
+                width: width * 0.8,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: SizedBox(
+                        width: width * 1,
+                        child: TextFormField(
+                          autocorrect: true,
+                          controller: _eventTitleController,
+                          style: Theme.of(context).textTheme.displaySmall,
+                          maxLines: null,
+                          decoration: InputDecoration(
+                            labelText: 'Subject',
+                            labelStyle: Theme.of(context).textTheme.bodyLarge,
+                            border: InputBorder.none,
+                            errorStyle: TextStyle(
+                                color: Theme.of(context).colorScheme.error),
+                          ),
+                          textInputAction: TextInputAction.next,
+                          keyboardType: TextInputType.name,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please provide a value.';
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    //profile icon button to select the associated user profile and the calendar to which the event is to be added
+                    IconButton(
+                      iconSize: Theme.of(context).iconTheme.size,
+                      icon: Icon(Icons.person),
+                      onPressed: () {
+                        _selectSourceCalendar(context);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.end,
+                spacing: 8,
                 children: [
-                  Flexible(
-                    child: SizedBox(
-                      width: width * 1,
-                      child: TextFormField(
+                  SizedBox(
+                    width: 100,
+                    child: TextFormField(
                         autocorrect: true,
-                        controller: _eventTitleController,
+                        controller: _eventDateController,
                         style: Theme.of(context).textTheme.displaySmall,
-                        maxLines: null,
                         decoration: InputDecoration(
-                          labelText: 'Subject',
-                          labelStyle: Theme.of(context).textTheme.bodyLarge,
+                          labelText: 'Date',
+                          labelStyle: Theme.of(context).textTheme.bodyMedium,
                           border: InputBorder.none,
                           errorStyle: TextStyle(
                               color: Theme.of(context).colorScheme.error),
                         ),
                         textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.name,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Please provide a value.';
-                          }
-                        },
-                      ),
-                    ),
+                        keyboardType: TextInputType.datetime,
+                        onTap: () async {
+                          await _selectDate(context);
+                        }),
                   ),
-                  //profile icon button to select the associated user profile and the calendar to which the event is to be added
-                  IconButton(
-                    iconSize: Theme.of(context).iconTheme.size,
-                    icon: Icon(Icons.person),
-                    onPressed: () {
-                      _selectSourceCalendar(context);
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Wrap(
-              crossAxisAlignment: WrapCrossAlignment.end,
-              spacing: 8,
-              children: [
-                SizedBox(
-                  width: 100,
-                  child: TextFormField(
+                  SizedBox(
+                    width: 80,
+                    child: TextFormField(
                       autocorrect: true,
-                      controller: _eventDateController,
+                      controller: _eventStartTimeController,
                       style: Theme.of(context).textTheme.displaySmall,
                       decoration: InputDecoration(
-                        labelText: 'Date',
+                        labelText: 'Begin',
                         labelStyle: Theme.of(context).textTheme.bodyMedium,
                         border: InputBorder.none,
                         errorStyle: TextStyle(
@@ -553,82 +567,83 @@ class NewAppointmentState extends State<NewAppointment> {
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.datetime,
                       onTap: () async {
-                        await _selectDate(context);
-                      }),
-                ),
-                SizedBox(
-                  width: 80,
-                  child: TextFormField(
-                    autocorrect: true,
-                    controller: _eventStartTimeController,
-                    style: Theme.of(context).textTheme.displaySmall,
-                    decoration: InputDecoration(
-                      labelText: 'Begin',
-                      labelStyle: Theme.of(context).textTheme.bodyMedium,
-                      border: InputBorder.none,
-                      errorStyle:
-                          TextStyle(color: Theme.of(context).colorScheme.error),
+                        await _selectStartTime(context, true);
+                      },
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please provide a value.';
+                        } else {
+                          return null;
+                        }
+                      },
                     ),
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.datetime,
-                    onTap: () async {
-                      await _selectStartTime(context, true);
-                    },
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please provide a value.';
-                      } else {
-                        return null;
-                      }
-                    },
                   ),
-                ),
-                SizedBox(
-                  width: 80,
-                  child: TextFormField(
-                    autocorrect: true,
-                    controller: _eventEndTimeController,
-                    style: Theme.of(context).textTheme.displaySmall,
-                    decoration: InputDecoration(
-                      labelText: 'End',
-                      labelStyle: Theme.of(context).textTheme.bodyMedium,
-                      border: InputBorder.none,
-                      errorStyle:
-                          TextStyle(color: Theme.of(context).colorScheme.error),
+                  SizedBox(
+                    width: 80,
+                    child: TextFormField(
+                      autocorrect: true,
+                      controller: _eventEndTimeController,
+                      style: Theme.of(context).textTheme.displaySmall,
+                      decoration: InputDecoration(
+                        labelText: 'End',
+                        labelStyle: Theme.of(context).textTheme.bodyMedium,
+                        border: InputBorder.none,
+                        errorStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.error),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.datetime,
+                      onTap: () async {
+                        await _selectEndTime(context, false);
+                      },
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please provide a value.';
+                        } else {
+                          return null;
+                        }
+                      },
                     ),
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.datetime,
-                    onTap: () async {
-                      await _selectEndTime(context, false);
-                    },
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please provide a value.';
-                      } else {
-                        return null;
-                      }
-                    },
                   ),
-                ),
-                IconButton(
-                  iconSize: Theme.of(context).iconTheme.size,
-                  onPressed: () {
-                    setState(() {
-                      _isAllDay = !_isAllDay;
-                    });
-                  },
-                  color: _isAllDay
-                      ? Theme.of(context).colorScheme.onPrimary
-                      : Colors.grey,
-                  icon: _isAllDay
-                      ? Icon(Icons.hourglass_full_rounded)
-                      : Icon(Icons.hourglass_empty_rounded),
-                  tooltip: "All Day Event",
-                ),
-                if (_recurrence == 'Weekly')
-                  Tooltip(
-                    message: _selectedDays.join(', '),
-                    child: TextButton.icon(
+                  IconButton(
+                    iconSize: Theme.of(context).iconTheme.size,
+                    onPressed: () {
+                      setState(() {
+                        _isAllDay = !_isAllDay;
+                      });
+                    },
+                    color: _isAllDay
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Colors.grey,
+                    icon: _isAllDay
+                        ? Icon(Icons.hourglass_full_rounded)
+                        : Icon(Icons.hourglass_empty_rounded),
+                    tooltip: "All Day Event",
+                  ),
+                  if (_recurrence == 'Weekly')
+                    Tooltip(
+                      message: _selectedDays.join(', '),
+                      child: TextButton.icon(
+                          style: TextButton.styleFrom(
+                            foregroundColor: _isRecurring
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Colors.grey,
+                            textStyle: Theme.of(context).textTheme.displaySmall,
+                          ),
+                          icon: Icon(
+                              size: Theme.of(context).iconTheme.size,
+                              Icons.event_repeat_rounded),
+                          label: Text(_recurrence.toString(),
+                              style: Theme.of(context).textTheme.displaySmall),
+                          onPressed: () {
+                            _selectRecurrenceRule(context);
+                            setState(() {
+                              // _isRecurring = !_isRecurring;
+                            });
+                          }),
+                    )
+                  else
+                    TextButton.icon(
                         style: TextButton.styleFrom(
                           foregroundColor: _isRecurring
                               ? Theme.of(context).colorScheme.onPrimary
@@ -638,179 +653,160 @@ class NewAppointmentState extends State<NewAppointment> {
                         icon: Icon(
                             size: Theme.of(context).iconTheme.size,
                             Icons.event_repeat_rounded),
-                        label: Text(_recurrence.toString(),
-                            style: Theme.of(context).textTheme.displaySmall),
+                        label: Text(
+                          _recurrence.toString(),
+                          style: Theme.of(context).textTheme.displaySmall,
+                        ),
+                        //iconSize: 20,
+                        //tooltip: _selectedDays.toString(),
                         onPressed: () {
                           _selectRecurrenceRule(context);
                           setState(() {
                             // _isRecurring = !_isRecurring;
                           });
                         }),
-                  )
-                else
-                  TextButton.icon(
-                      style: TextButton.styleFrom(
-                        foregroundColor: _isRecurring
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Colors.grey,
-                        textStyle: Theme.of(context).textTheme.displaySmall,
-                      ),
-                      icon: Icon(
-                          size: Theme.of(context).iconTheme.size,
-                          Icons.event_repeat_rounded),
-                      label: Text(
-                        _recurrence.toString(),
-                        style: Theme.of(context).textTheme.displaySmall,
-                      ),
-                      //iconSize: 20,
-                      //tooltip: _selectedDays.toString(),
-                      onPressed: () {
-                        _selectRecurrenceRule(context);
-                        setState(() {
-                          // _isRecurring = !_isRecurring;
-                        });
-                      }),
-              ],
-            ),
-            SizedBox(
-              width: width,
-              child: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.end,
-                children: categories.map((String category) {
-                  categoryColor = catColor(category);
-                  return ChoiceChip(
-                    visualDensity: VisualDensity.standard,
-                    avatar: CircleAvatar(
-                      backgroundColor: categoryColor,
-                      radius: 4.5,
-                    ),
-                    label: Text(
-                      category,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    selected: _selectedCategory == category,
-                    selectedColor: Colors.grey.shade200,
-                    backgroundColor: Colors.white,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        _selectedCategory = (selected ? category : null)!;
-                      });
-                    },
-                  );
-                }).toList(),
+                ],
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: SizedBox(
-                width: width * 0.8,
-                child: TextFormField(
+              SizedBox(
+                width: width,
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.end,
+                  children: categories.map((String category) {
+                    categoryColor = catColor(category);
+                    return ChoiceChip(
+                      visualDensity: VisualDensity.standard,
+                      avatar: CircleAvatar(
+                        backgroundColor: categoryColor,
+                        radius: 4.5,
+                      ),
+                      label: Text(
+                        category,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      selected: _selectedCategory == category,
+                      selectedColor: Colors.grey.shade200,
+                      backgroundColor: Colors.white,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          _selectedCategory = (selected ? category : null)!;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: SizedBox(
+                  width: width * 0.8,
+                  child: TextFormField(
+                      autocorrect: true,
+                      //Rcontroller: ,
+                      style: Theme.of(context).textTheme.displaySmall,
+                      maxLines: null,
+                      decoration: const InputDecoration(
+                        labelText: 'Participants',
+                        labelStyle: TextStyle(fontSize: 14),
+                        border: InputBorder.none,
+                        errorStyle: TextStyle(color: Colors.redAccent),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        const pattern =
+                            r'^([\w-\.]+@([\w-]+\.)+[\w-]{2,4},\s*)*[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+                        final regExp = RegExp(pattern);
+                        if (!regExp.hasMatch(value!)) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      }),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: SizedBox(
+                  width: 500,
+                  child: TextFormField(
                     autocorrect: true,
-                    //Rcontroller: ,
                     style: Theme.of(context).textTheme.displaySmall,
                     maxLines: null,
                     decoration: const InputDecoration(
-                      labelText: 'Participants',
+                      labelText: 'Description',
+                      fillColor: Colors.grey,
                       labelStyle: TextStyle(fontSize: 14),
                       border: InputBorder.none,
                       errorStyle: TextStyle(color: Colors.redAccent),
                     ),
                     textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      const pattern =
-                          r'^([\w-\.]+@([\w-]+\.)+[\w-]{2,4},\s*)*[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
-                      final regExp = RegExp(pattern);
-                      if (!regExp.hasMatch(value!)) {
-                        return 'Please enter a valid email';
-                      }
-                      return null;
-                    }),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: SizedBox(
-                width: 500,
-                child: TextFormField(
-                  autocorrect: true,
-                  style: Theme.of(context).textTheme.displaySmall,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    fillColor: Colors.grey,
-                    labelStyle: TextStyle(fontSize: 14),
-                    border: InputBorder.none,
-                    errorStyle: TextStyle(color: Colors.redAccent),
+                    keyboardType: TextInputType.name,
                   ),
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.name,
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 120),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.shadow,
+              Padding(
+                padding: const EdgeInsets.only(top: 120),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.shadow,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            print("Cancel");
+                            // runMutation({
+                            //                           //   "event_subj": _eventSubjController.text.trim(),
+                            //                           //   "event_startdate":
+                            //                           //       _eventStartDateController.text.trim(),
+                            //                           //   "event_enddate": _eventEndDateController.text.trim(),
+                            //                           // });
+                            //                           print("event mutation");
+                          });
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Close',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.secondary,
+                            )),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          print("Cancel");
-                          // runMutation({
-                          //                           //   "event_subj": _eventSubjController.text.trim(),
-                          //                           //   "event_startdate":
-                          //                           //       _eventStartDateController.text.trim(),
-                          //                           //   "event_enddate": _eventEndDateController.text.trim(),
-                          //                           // });
-                          //                           print("event mutation");
-                        });
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Close',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary,
-                          )),
                     ),
-                  ),
-                  TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.shadow,
-                      ),
-                      child: Text('Save',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary,
-                          )),
-                      onPressed: () {
-                        if (_appFormKey.currentState!.validate()) {
-                          print('saved');
-                        } else {
-                          Text('Fix the items');
-                        }
+                    TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.shadow,
+                        ),
+                        child: Text('Save',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.secondary,
+                            )),
+                        onPressed: () {
+                          if (_appFormKey.currentState!.validate()) {
+                            print('saved');
+                          } else {
+                            Text('Fix the items');
+                          }
 
-                        setState(() {
-                          print("event saved");
-                          // runMutation({
-//                       //   "task_description":
-//                       //       _taskDescriptionController.text
-//                       //           .trim(),
-//                       //   // "task_type":
-//                       //   //  _taskTypeController.text.trim(),
-//                       //   "category": _selectedCategory,
-//                       //   'userId': currUserId,
-//                       // });;
-                        });
-                        Navigator.of(context).pop();
-                      }),
-                ],
-              ),
-            )
-          ],
+                          setState(() {
+                            print("event saved");
+                            // runMutation({
+                            //                       //   "task_description":
+                            //                       //       _taskDescriptionController.text
+                            //                       //           .trim(),
+                            //                       //   // "task_type":
+                            //                       //   //  _taskTypeController.text.trim(),
+                            //                       //   "category": _selectedCategory,
+                            //                       //   'userId': currUserId,
+                            //                       // });;
+                          });
+                          Navigator.of(context).pop();
+                        }),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

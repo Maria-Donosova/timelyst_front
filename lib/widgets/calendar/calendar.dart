@@ -5,12 +5,11 @@ import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import '/widgets/calendar/week_days.dart';
-import '../shared/categories.dart';
+// import '../shared/categories.dart';
 import 'appointment_builder.dart';
 import 'event_of_day.dart';
-import 'existing_appointment.dart';
 import 'month_cell_builder.dart';
-import 'new_appointment.dart';
+import 'appointment.dart';
 
 enum _calView { day, week, month }
 
@@ -63,7 +62,7 @@ class _CalendarWState extends State<CalendarW> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final width = MediaQuery.of(context).size.width;
-    final cellWidth = width / 16;
+    final cellWidth = width / 14;
     final isMonth = _controller.view == CalendarView.month;
     final isWeek = _controller.view == CalendarView.week;
 
@@ -94,10 +93,10 @@ class _CalendarWState extends State<CalendarW> {
                         viewHeaderText5: 'Sat'),
                   )
                 : isWeek
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: WeekDaysW(
-                            cellWidth: 7,
+                            cellWidth: cellWidth,
                             viewHeaderText6: 'S',
                             viewHeaderText: 'M',
                             viewHeaderText1: 'T',
@@ -263,40 +262,53 @@ class _CalendarWState extends State<CalendarW> {
       _endTimeText =
           DateFormat('hh:mm a').format(appointmentDetails.endTime).toString();
       _timeDetails = '$_startTimeText - $_endTimeText';
-      if (appointmentDetails.isAllDay) {
-        _timeDetails = 'All day';
-      }
-
+      // if (appointmentDetails._isAllDay) {
+      //   _timeDetails = 'All day';
+      // }
       showDialog(
           context: context,
           builder: (BuildContext context) {
-            return ExistingAppointment(
-                subjectText: _subjectText,
-                dateText: _dateText,
-                timeDetails: _timeDetails);
+            return AlertDialog(
+              content: AppointmentS(
+                eventOrganizer: 'Maria Donosova',
+                userProfiles: [],
+                userCalendars: [],
+                eventTitle: '',
+                dateText: _cellDateText,
+                to: _startTimeText,
+                from: _endTimeText,
+                catTitle: '',
+                catColor: '',
+                participants: '',
+                eventBody: '',
+                eventConferenceDetails: '',
+                isAllDay: true,
+                recurrenceId: '',
+                recurrenceRule: '',
+              ),
+            );
           });
     } else
       showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              content: NewAppointment(
+              content: AppointmentS(
+                eventOrganizer: 'Maria Donosova',
                 userProfiles: [],
+                userCalendars: [],
                 eventTitle: '',
                 dateText: _cellDateText,
                 to: _startTimeText,
                 from: _endTimeText,
-                category: '',
-                categoryTitle: '',
+                catTitle: '',
+                catColor: '',
+                participants: '',
                 eventBody: '',
-                eventAttendees: '',
                 eventConferenceDetails: '',
-                eventOrganizer: 'Maria Donosova',
-                sourceCalendar: '',
-                calendarType: '',
                 isAllDay: true,
-                reminder: true,
-                holiday: true,
+                recurrenceId: '',
+                recurrenceRule: '',
               ),
             );
           });

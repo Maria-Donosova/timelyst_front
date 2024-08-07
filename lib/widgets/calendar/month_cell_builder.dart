@@ -18,36 +18,40 @@ Widget monthCellBuilder(BuildContext context, MonthCellDetails details) {
         onTap: () {
           print('Card tapped.');
         },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 6, left: 6.0),
-              child: Text(
-                details.date.day.toString(),
-                textAlign: TextAlign.left,
+        child: SingleChildScrollView(
+          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          // crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 6, left: 6.0),
+                child: Text(
+                  details.date.day.toString(),
+                  textAlign: TextAlign.left,
+                ),
               ),
-            ),
-            EventOfDayW(),
-            Padding(
-              padding: const EdgeInsets.only(left: 6.0, right: 6.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '$length' + ' Event(s)',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.displaySmall,
-                  ),
-                  CircleAvatar(
-                    backgroundColor: Colors.green,
-                    radius: 5,
-                  )
-                ],
+              EventOfDayW(),
+              Padding(
+                padding:
+                    const EdgeInsets.only(left: 6.0, right: 6.0, top: 12.0),
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '$length' + ' Event(s)',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    CircleAvatar(
+                      backgroundColor: Colors.green,
+                      radius: 5,
+                    )
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     ),

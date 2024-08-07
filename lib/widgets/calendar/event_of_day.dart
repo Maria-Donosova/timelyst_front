@@ -16,7 +16,7 @@ class EventOfDayW extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 2, vertical: 2),
           child: Text(
-            'The event(s) of the day',
+            'The event(s)',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),

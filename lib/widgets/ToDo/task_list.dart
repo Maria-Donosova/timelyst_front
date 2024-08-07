@@ -154,7 +154,7 @@ class _TaskListWState extends State<TaskListW> {
                                         Theme.of(context).colorScheme.shadow,
                                   ),
                                   onPressed: () async {
-                                    Navigator.of(context).pop(true);
+                                    Navigator.of(context).pop(false);
                                   },
                                   child: Text("Cancel",
                                       style: Theme.of(context)
@@ -167,7 +167,7 @@ class _TaskListWState extends State<TaskListW> {
                                         Theme.of(context).colorScheme.shadow,
                                   ),
                                   onPressed: () =>
-                                      Navigator.of(context).pop(false),
+                                      Navigator.of(context).pop(true),
                                   child: Text("Delete",
                                       style: Theme.of(context)
                                           .textTheme
