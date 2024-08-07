@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../shared/categories.dart'; // Imports the categories and their colors
 import '../../models/user_profile.dart'; // Imports the file that contains the UserProfile class
+import '../../models/user_calendars.dart';
 
 class NewAppointment extends StatefulWidget {
   const NewAppointment({
@@ -139,9 +140,6 @@ class NewAppointmentState extends State<NewAppointment> {
 
 //function to select start time based on user input via time picker and update end time by 30 minutes
   Future<void> _selectStartTime(BuildContext context, bool isStartTime) async {
-    // final tapCaledarStartTime =
-    //     TimeOfDay.fromDateTime(DateTime.parse(widget._startTimeText!));
-
     TimeOfDay initialStartTime;
     try {
       initialStartTime =
@@ -211,13 +209,25 @@ class NewAppointmentState extends State<NewAppointment> {
               return AlertDialog(
                   actions: [
                     TextButton(
-                      child: Text('Cancel'),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.shadow),
+                      child: Text('Cancel',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary,
+                          )),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
                     ),
                     TextButton(
-                      child: Text('Save'),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.shadow),
+                      child: Text('Save',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary,
+                          )),
                       onPressed: () {
                         _changeRecurringColor();
                         _changeRecurringPattern();
@@ -228,6 +238,7 @@ class NewAppointmentState extends State<NewAppointment> {
                   title: const Text('Select Recurrence'),
                   content: Column(mainAxisSize: MainAxisSize.min, children: [
                     RadioListTile<String>(
+                      activeColor: Theme.of(context).colorScheme.onPrimary,
                       title: Text('None'),
                       value: 'None',
                       groupValue: _recurrence,
@@ -377,69 +388,73 @@ class NewAppointmentState extends State<NewAppointment> {
 
   //function returns a dialog and displays the external profiles and calendars to which the event can be added
   Future<void> _selectSourceCalendar(BuildContext context) async {
-    final List<UserProfile> userProfiles;
+    final List<UserProfile> accounts;
+    final List<UserCalendar> calendars;
 
     final selectedSourceCalendar = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Your Calendars'),
+            title: Text('Accounts',
+                style: Theme.of(context).textTheme.displaySmall),
             content: SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('test@gmail.com'),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
-                    child: Row(
-                      children: [
-                        CheckboxMenuButton(
-                            value: isChecked,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isChecked = value!;
-                              });
-                            },
-                            child: Text('US Holidays')),
-                        CheckboxMenuButton(
-                            value: isChecked,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isChecked = value!;
-                              });
-                            },
-                            child: Text('Russian Holidays')),
-                        CheckboxMenuButton(
-                            value: isChecked,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isChecked = value!;
-                              });
-                            },
-                            child: Text('Birthdays')),
-                      ],
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('test@gmail.com',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: Row(
+                        children: [
+                          CheckboxMenuButton(
+                              value: isChecked,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  isChecked = value!;
+                                });
+                              },
+                              child: Text('US Holidays')),
+                          CheckboxMenuButton(
+                              value: isChecked,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  isChecked = value!;
+                                });
+                              },
+                              child: Text('Russian Holidays')),
+                          CheckboxMenuButton(
+                              value: isChecked,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  isChecked = value!;
+                                });
+                              },
+                              child: Text('Birthdays')),
+                        ],
+                      ),
                     ),
-                  ),
-                  const Text('tryitout@gmail.com'),
-                  CheckboxMenuButton(
-                      value: isChecked,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isChecked = value!;
-                        });
-                      },
-                      child: Text('Holidays')),
-                  const Text('thisisit@icloud.com'),
-                  CheckboxMenuButton(
-                      value: isChecked,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isChecked = value!;
-                        });
-                      },
-                      child: Text('Holidays'))
-                ],
-              ),
+                    Text('tryitout@gmail.com',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    CheckboxMenuButton(
+                        value: isChecked,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            isChecked = value!;
+                          });
+                        },
+                        child: Text('Holidays')),
+                    Text('thisisit@icloud.com',
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    CheckboxMenuButton(
+                        value: isChecked,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            isChecked = value!;
+                          });
+                        },
+                        child: Text('Holidays'))
+                  ]),
             ),
           );
         });
