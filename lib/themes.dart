@@ -27,6 +27,7 @@ class CustomTheme with ChangeNotifier {
       // buttonTheme: ButtonThemeData(
       //   buttonColor: Colors.grey[700]!,
       // ),
+
       fontFamily: 'FontAwesome',
       iconTheme: IconThemeData(
         color: Colors.grey[900],
