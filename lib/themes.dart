@@ -14,13 +14,13 @@ class CustomTheme with ChangeNotifier {
   static ThemeData get lightTheme {
     return ThemeData(
       colorScheme: ColorScheme.light(
-        primary: Colors.white,
+        primary: Colors.grey[900]!,
         onPrimary: Colors.grey[900]!,
-        secondary: Colors.grey[800]!,
-        onSecondary: Colors.white,
+        secondary: Colors.grey[900]!,
+        onSecondary: Colors.grey[900]!,
         error: Colors.redAccent,
         onError: Colors.grey[900]!,
-        surface: Colors.white,
+        surface: Colors.grey[900]!,
         onSurface: Colors.grey[900]!,
         shadow: const Color.fromRGBO(207, 204, 215, 100),
       ),
@@ -39,10 +39,10 @@ class CustomTheme with ChangeNotifier {
         displayMedium: TextStyle(color: Colors.grey[900], fontSize: 18),
         displaySmall: TextStyle(color: Colors.grey[900], fontSize: 16),
         bodyLarge: TextStyle(color: Colors.grey[900], fontSize: 14),
-        bodyMedium: TextStyle(color: Colors.grey[800], fontSize: 12),
-        bodySmall: TextStyle(color: Colors.grey[800], fontSize: 10),
+        bodyMedium: TextStyle(color: Colors.grey[900], fontSize: 12),
+        bodySmall: TextStyle(color: Colors.grey[900], fontSize: 10),
         titleMedium: TextStyle(color: Colors.grey[900], fontSize: 16),
-        titleSmall: TextStyle(color: Colors.grey[800], fontSize: 12),
+        titleSmall: TextStyle(color: Colors.grey[900], fontSize: 12),
       ),
     );
   }
@@ -50,14 +50,14 @@ class CustomTheme with ChangeNotifier {
   static ThemeData get darkTheme {
     return ThemeData(
       colorScheme: ColorScheme.dark(
-        primary: Colors.grey[700]!,
-        onPrimary: Colors.white,
-        secondary: Colors.white,
-        onSecondary: Colors.grey[800]!,
+        primary: Colors.grey[900]!,
+        onPrimary: Colors.grey[900]!,
+        secondary: Colors.grey[900]!,
+        onSecondary: Colors.grey[900]!,
         error: Colors.redAccent,
-        onError: Colors.white,
-        surface: Colors.white,
-        onSurface: Colors.grey[700]!,
+        onError: Colors.grey[900]!,
+        surface: Colors.grey[900]!,
+        onSurface: Colors.grey[900]!,
         shadow: Colors.grey[500]!,
       ),
       fontFamily: 'FontAwesome',
@@ -72,6 +72,38 @@ class CustomTheme with ChangeNotifier {
           bodyLarge: const TextStyle(color: Colors.white10, fontSize: 16),
           bodySmall: TextStyle(color: Colors.white10, fontSize: 8),
           labelLarge: TextStyle(backgroundColor: Colors.grey[900])),
+    );
+  }
+
+  static ThemeData get radioTheme {
+    return ThemeData(
+      colorScheme: ColorScheme.light(
+        primary: Colors.grey[900]!,
+        onPrimary: Colors.grey[900]!,
+        secondary: Colors.grey[900]!,
+        onSecondary: Colors.grey[900]!,
+        error: Colors.redAccent,
+        onError: Colors.grey[900]!,
+        surface: Colors.grey[900]!,
+        onSurface: Colors.grey[900]!,
+        shadow: const Color.fromRGBO(207, 204, 215, 100),
+      ),
+      fontFamily: 'FontAwesome',
+      iconTheme: IconThemeData(
+        color: Colors.grey[900],
+        size: 20,
+      ),
+      chipTheme: ChipThemeData(side: BorderSide.none, showCheckmark: false),
+      textTheme: TextTheme(
+        displayLarge: TextStyle(color: Colors.grey[900], fontSize: 20),
+        displayMedium: TextStyle(color: Colors.grey[900], fontSize: 18),
+        displaySmall: TextStyle(color: Colors.grey[900], fontSize: 16),
+        bodyLarge: TextStyle(color: Colors.grey[900], fontSize: 14),
+        bodyMedium: TextStyle(color: Colors.grey[900], fontSize: 12),
+        bodySmall: TextStyle(color: Colors.grey[900], fontSize: 10),
+        titleMedium: TextStyle(color: Colors.grey[900], fontSize: 16),
+        titleSmall: TextStyle(color: Colors.grey[900], fontSize: 12),
+      ),
     );
   }
 }
