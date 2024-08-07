@@ -144,7 +144,7 @@ class _CalendarWState extends State<CalendarW> {
                 appointmentBuilder: appointmentBuilder,
                 allowAppointmentResize: true,
                 allowDragAndDrop: true,
-                dataSource: _getCalendarDataSource(),
+                //dataSource: _getCalendarDataSource(),
                 onTap: _calendarTapped,
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
                   if (_controller.view == CalendarView.month) {
@@ -300,19 +300,5 @@ class _CalendarWState extends State<CalendarW> {
               ),
             );
           });
-  }
-}
-
-class UserCalendars {
-  String accountType;
-  List<Calendar> calendars;
-
-  UserCalendars({required this.accountType, required this.calendars});
-
-  class Calendar {
-    String category;
-    String name;
-
-    Calendar({required this.category, required this.name});
   }
 }
