@@ -303,30 +303,16 @@ class _CalendarWState extends State<CalendarW> {
   }
 }
 
-_AppointmentDataSource _getCalendarDataSource() {
-  List<Appointment> appointments = <Appointment>[];
-  final selectedCategory = 'Social';
-  final categoryColor = catColor(selectedCategory);
-  DateTime date = DateTime.now();
+class UserCalendars {
+  String accountType;
+  List<Calendar> calendars;
 
-  appointments.add(Appointment(
-    startTime: DateTime(
-      date.year,
-      date.month,
-      date.day,
-      7,
-      0,
-      0,
-    ),
-    endTime: DateTime(date.year, date.month, date.day, 11, 0, 0),
-    subject: 'Dummy',
-    color: categoryColor,
-  ));
-  return _AppointmentDataSource(appointments);
-}
+  UserCalendars({required this.accountType, required this.calendars});
 
-class _AppointmentDataSource extends CalendarDataSource {
-  _AppointmentDataSource(List<Appointment> source) {
-    appointments = source;
+  class Calendar {
+    String category;
+    String name;
+
+    Calendar({required this.category, required this.name});
   }
 }
