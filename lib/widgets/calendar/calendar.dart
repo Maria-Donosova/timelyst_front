@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:timelyst_flutter/models/event.dart';
 
 import '/widgets/calendar/week_days.dart';
 // import '../shared/categories.dart';
@@ -143,7 +144,7 @@ class _CalendarWState extends State<CalendarW> {
                 appointmentBuilder: appointmentBuilder,
                 allowAppointmentResize: true,
                 allowDragAndDrop: true,
-                //dataSource: _getCalendarDataSource(),
+                dataSource: EventDataSource(getEvents()),
                 onTap: _calendarTapped,
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
                   if (_controller.view == CalendarView.month) {
@@ -270,7 +271,7 @@ class _CalendarWState extends State<CalendarW> {
           builder: (BuildContext context) {
             return AlertDialog(
               content: AppointmentS(
-                eventOrganizer: 'Maria Donosova',
+                eventOrganizer: '',
                 userProfiles: [],
                 userCalendars: [],
                 eventTitle: '',
@@ -297,8 +298,8 @@ class _CalendarWState extends State<CalendarW> {
                 eventOrganizer: 'Maria Donosova',
                 userProfiles: [],
                 userCalendars: [],
-                eventTitle: '',
-                dateText: _cellDateText,
+                eventTitle: _subjectText,
+                dateText: _dateText,
                 to: _startTimeText,
                 from: _endTimeText,
                 catTitle: '',
@@ -313,4 +314,85 @@ class _CalendarWState extends State<CalendarW> {
             );
           });
   }
+}
+
+//dummy data
+final List<Map<String, dynamic>> events = [
+  {
+    'eventTitle': 'Meeting 1',
+    'date': DateTime.now(),
+    'startTime': '09:00',
+    'endTime': '10:00',
+    'category': 'Meeting'
+  },
+  {
+    'eventTitle': 'Event 1',
+    'date': DateTime(2024, 08, 08),
+    'startTime': '14:00',
+    'endTime': '15:00',
+    'category': 'Event'
+  },
+];
+
+// flutter data source
+class EventDataSource extends CalendarDataSource {
+  EventDataSource(List<Event> source) {
+    appointments = source;
+  }
+
+  @override
+  DateTime getStartTime(int index) {
+    return appointments![index].from;
+  }
+
+  @override
+  DateTime getEndTime(int index) {
+    return appointments![index].to;
+  }
+
+  @override
+  String getSubject(int index) {
+    return appointments![index].eventTitle;
+  }
+
+  @override
+  Color getCategory(int index) {
+    return appointments![index].catTitle;
+  }
+}
+
+//map source events to syncfusion structure
+List<Event> getEvents() {
+  return events.map((event) {
+    final startTime = event['date'].add(Duration(
+        hours: int.parse(event['startTime'].split(':')[0]),
+        minutes: int.parse(event['startTime'].split(':')[1])));
+    final endTime = event['date'].add(Duration(
+        hours: int.parse(event['endTime'].split(':')[0]),
+        minutes: int.parse(event['endTime'].split(':')[1])));
+    return Event(
+      // id: '',
+      //creator: '',
+      eventOrganizer: '',
+      userProfiles: List.empty(),
+      userCalendars: List.empty(),
+      eventTitle: event['eventTitle'],
+      dateText: event['dateText'],
+      from: startTime,
+      to: endTime,
+      isAllDay: false,
+      recurrenceId: '',
+      recurrenceRule: '',
+      // holiday: false,
+      // reminder: false,
+      catTitle: 'Social',
+      catColor: Colors.grey,
+      participants: '',
+      eventBody: '',
+      eventConferenceDetails: '',
+      // exceptionDates: ,
+      // dateChanged: ,
+      // dateCreated:
+    );
+  }).toList();
 }
