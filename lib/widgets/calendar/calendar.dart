@@ -334,9 +334,45 @@ final List<Map<String, dynamic>> events = [
   },
 ];
 
+//create appointment objects:
+List<Appointment> getEvents() {
+  return events.map((event) {
+    final startTime = event['date'].add(Duration(
+        hours: int.parse(event['startTime'].split(':')[0]),
+        minutes: int.parse(event['startTime'].split(':')[1])));
+    final endTime = event['date'].add(Duration(
+        hours: int.parse(event['endTime'].split(':')[0]),
+        minutes: int.parse(event['endTime'].split(':')[1])));
+    return Appointment(
+      // id: '',
+      //creator: '',
+      // eventOrganizer: '',
+      // userProfiles: List.empty(),
+      // userCalendars: List.empty(),
+      subject: event['eventTitle'],
+      // date: event['dateText'],
+      startTime: startTime,
+      endTime: endTime,
+      isAllDay: false,
+      recurrenceId: '',
+      recurrenceRule: '',
+      // holiday: false,
+      // reminder: false,
+      // catTitle: 'Social',
+      // catColor: Colors.grey,
+      // participants: '',
+      // eventBody: '',
+      // eventConferenceDetails: '',
+      // exceptionDates: ,
+      // dateChanged: ,
+      // dateCreated:
+    );
+  }).toList();
+}
+
 // flutter data source
 class EventDataSource extends CalendarDataSource {
-  EventDataSource(List<Event> source) {
+  EventDataSource(List<Appointment> source) {
     appointments = source;
   }
 
@@ -359,40 +395,4 @@ class EventDataSource extends CalendarDataSource {
   Color getCategory(int index) {
     return appointments![index].catTitle;
   }
-}
-
-//map source events to syncfusion structure
-List<Event> getEvents() {
-  return events.map((event) {
-    final startTime = event['date'].add(Duration(
-        hours: int.parse(event['startTime'].split(':')[0]),
-        minutes: int.parse(event['startTime'].split(':')[1])));
-    final endTime = event['date'].add(Duration(
-        hours: int.parse(event['endTime'].split(':')[0]),
-        minutes: int.parse(event['endTime'].split(':')[1])));
-    return Event(
-      // id: '',
-      //creator: '',
-      eventOrganizer: '',
-      userProfiles: List.empty(),
-      userCalendars: List.empty(),
-      eventTitle: event['eventTitle'],
-      dateText: event['dateText'],
-      from: startTime,
-      to: endTime,
-      isAllDay: false,
-      recurrenceId: '',
-      recurrenceRule: '',
-      // holiday: false,
-      // reminder: false,
-      catTitle: 'Social',
-      catColor: Colors.grey,
-      participants: '',
-      eventBody: '',
-      eventConferenceDetails: '',
-      // exceptionDates: ,
-      // dateChanged: ,
-      // dateCreated:
-    );
-  }).toList();
 }
