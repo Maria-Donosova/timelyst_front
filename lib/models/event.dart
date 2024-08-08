@@ -1,47 +1,53 @@
-import 'dart:ffi';
+import 'package:flutter/material.dart';
+import '../models/user_calendar.dart';
+import '../models/user_profile.dart';
 
 class Event {
-  Object? id;
+  // Object? id;
+  // String creator;
+  String eventOrganizer;
+  List<UserProfile> userProfiles;
+  List<UserCalendar> userCalendars;
   String eventTitle;
-  String eventCategory;
+  DateTime? dateText;
   DateTime from;
   DateTime to;
-  String source_calendar;
-  String calendar_type;
-  Object? recurrenceId;
-  String? event_body;
   bool isAllDay;
-  String event_conferencedetails;
-  String event_organizer;
-  String event_attendees;
-  Bool reminder;
-  Bool holiday;
-  List<DateTime>? exceptionDates;
+  Object? recurrenceId;
   String? recurrenceRule;
-  DateTime dateCreated;
-  DateTime dateChanged;
-  String creator;
+  // bool reminder;
+  // bool holiday;
+  String catTitle;
+  Color catColor;
+  String participants;
+  String? eventBody;
+  String eventConferenceDetails;
+  // List<DateTime>? exceptionDates;
+  // DateTime dateCreated;
+  // DateTime dateChanged;
 
   Event({
-    this.id,
+    // this.id,
+    //required this.creator,
+    required this.eventOrganizer,
+    required this.userProfiles,
+    required this.userCalendars,
     this.eventTitle = '',
-    required this.eventCategory,
+    required this.dateText,
     required this.from,
     required this.to,
-    required this.source_calendar,
-    required this.calendar_type,
-    this.recurrenceId,
-    this.event_body,
     this.isAllDay = false,
-    required this.event_conferencedetails,
-    required this.event_organizer,
-    required this.event_attendees,
-    required this.reminder,
-    required this.holiday,
-    this.exceptionDates,
+    this.recurrenceId,
     this.recurrenceRule,
-    required this.dateCreated,
-    required this.dateChanged,
-    required this.creator,
+    // required this.reminder,
+    // required this.holiday,
+    required this.catTitle,
+    required this.catColor,
+    required this.participants,
+    this.eventBody,
+    required this.eventConferenceDetails,
+    // this.exceptionDates,
+    // required this.dateCreated,
+    // required this.dateChanged,
   });
 }
