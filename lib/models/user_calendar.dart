@@ -1,6 +1,6 @@
 class UserCalendar {
   String userProfile;
-  List userCalendars;
+  String userCalendars;
 
-  UserCalendar({required this.userProfile, required this.userCalendars});
+  UserCalendar({this.userProfile = '', this.userCalendars = ''});
 }

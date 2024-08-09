@@ -2,14 +2,73 @@ import 'package:flutter/material.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
+import '../../models/user_calendar.dart';
+import '../../models/user_profile.dart';
+
 import '../shared/categories.dart';
+
+class CustomAppointment extends Appointment {
+  final String creator;
+  final String eventOrganizer;
+  // List<UserProfile> userProfiles;
+  // List<UserCalendar> userCalendars;
+  DateTime? dateText;
+  // bool reminder;
+  // bool holiday;
+  final String catTitle;
+  final Color catColor;
+  final String participants;
+  String? eventBody;
+  // List<DateTime>? exceptionDates;
+  // DateTime dateCreated;
+  // DateTime dateChanged;
+
+  CustomAppointment({
+    this.creator = 'Maria',
+    // List<UserProfile> userProfiles = '',
+    // List<UserCalendar> userCalendars = '',
+    required DateTime startTime,
+    required DateTime endTime,
+    required this.eventOrganizer,
+    String? subject,
+    Color? color,
+    bool isAllDay = false,
+    String? startTimeZone,
+    String? endTimeZone,
+    String? recurrenceRule,
+    List<DateTime>? recurrenceExceptionDates,
+    Object? recurrenceId,
+    String? notes,
+    String? location,
+    List<Object>? resourceIds,
+    required this.catTitle,
+    required this.catColor,
+    this.participants = '',
+  }) : super(
+          startTime: startTime,
+          endTime: endTime,
+          subject: subject ?? '',
+          color: color ?? Colors.blue,
+          isAllDay: isAllDay,
+          startTimeZone: startTimeZone,
+          endTimeZone: endTimeZone,
+          recurrenceRule: recurrenceRule,
+          recurrenceExceptionDates: recurrenceExceptionDates,
+          recurrenceId: recurrenceId,
+          notes: notes,
+          location: location,
+          resourceIds: resourceIds,
+        );
+}
 
 Widget appointmentBuilder(BuildContext context,
     CalendarAppointmentDetails calendarAppointmentDetails) {
   final Appointment appointment = calendarAppointmentDetails.appointments.first;
 
-  final selectedCategory = 'Social';
-  final categoryColor = catColor(selectedCategory);
+  final categoryColor = appointment.color;
+
+  //final selectedCategory = 'Friends';
+//  final categoryColor = catColor(selectedCategory);
 
   final width = MediaQuery.of(context).size.width;
 
@@ -25,7 +84,7 @@ Widget appointmentBuilder(BuildContext context,
               padding: const EdgeInsets.all(10.0),
               child: Text(
                 appointment.subject,
-                style: Theme.of(context).textTheme.displaySmall,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
             SizedBox(
