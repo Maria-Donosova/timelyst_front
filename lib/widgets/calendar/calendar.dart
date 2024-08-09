@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:timelyst_flutter/models/event.dart';
+import 'package:timelyst_flutter/widgets/shared/categories.dart';
 
 import '/widgets/calendar/week_days.dart';
 // import '../shared/categories.dart';
@@ -144,7 +146,7 @@ class _CalendarWState extends State<CalendarW> {
                 appointmentBuilder: appointmentBuilder,
                 allowAppointmentResize: true,
                 allowDragAndDrop: true,
-                dataSource: EventDataSource(getEvents()),
+                dataSource: _EventDataSource(getEvents()),
                 onTap: _calendarTapped,
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
                   if (_controller.view == CalendarView.month) {
@@ -282,10 +284,11 @@ class _CalendarWState extends State<CalendarW> {
                 catColor: '',
                 participants: '',
                 eventBody: '',
-                eventConferenceDetails: '',
+                eventLocation: '',
                 isAllDay: true,
                 recurrenceId: '',
                 recurrenceRule: '',
+                recurrenceExceptions: [],
               ),
             );
           });
@@ -306,53 +309,56 @@ class _CalendarWState extends State<CalendarW> {
                 catColor: '',
                 participants: '',
                 eventBody: '',
-                eventConferenceDetails: '',
+                eventLocation: '',
                 isAllDay: true,
                 recurrenceId: '',
                 recurrenceRule: '',
+                recurrenceExceptions: [],
               ),
             );
           });
   }
 }
 
-//dummy data
-final List<Map<String, dynamic>> events = [
-  {
-    'eventTitle': 'Meeting 1',
-    'date': DateTime.now(),
-    'startTime': '09:00',
-    'endTime': '10:00',
-    'category': 'Meeting'
-  },
-  {
-    'eventTitle': 'Event 1',
-    'date': DateTime(2024, 08, 08),
-    'startTime': '14:00',
-    'endTime': '15:00',
-    'category': 'Event'
-  },
+//dummy events
+List<Event> events = [
+  Event(
+    eventOrganizer: 'Maria Donosova',
+    eventTitle: 'Meeting with Team',
+    dateText: DateTime.now(),
+    from: DateTime.now(),
+    to: DateTime.now().add(Duration(hours: 1)),
+    isAllDay: false,
+    eventBody: 'Discuss project updates',
+    catTitle: 'Social',
+    catColor: Colors.grey,
+  ),
+  Event(
+    eventOrganizer: 'Maria Donosova',
+    eventTitle: 'Get Together',
+    dateText: DateTime.now().add(Duration(days: 1)),
+    from: DateTime.now().add(Duration(hours: 2)),
+    to: DateTime.now().add(Duration(hours: 4)),
+    isAllDay: false,
+    eventBody: 'Discuss project updates',
+    catTitle: 'Friends',
+    catColor: Colors.grey,
+  )
 ];
 
-//create appointment objects:
+//map syncfusion appointment properties to event properties
 List<Appointment> getEvents() {
   return events.map((event) {
-    final startTime = event['date'].add(Duration(
-        hours: int.parse(event['startTime'].split(':')[0]),
-        minutes: int.parse(event['startTime'].split(':')[1])));
-    final endTime = event['date'].add(Duration(
-        hours: int.parse(event['endTime'].split(':')[0]),
-        minutes: int.parse(event['endTime'].split(':')[1])));
     return Appointment(
       // id: '',
       //creator: '',
       // eventOrganizer: '',
       // userProfiles: List.empty(),
       // userCalendars: List.empty(),
-      subject: event['eventTitle'],
+      subject: event.eventTitle,
       // date: event['dateText'],
-      startTime: startTime,
-      endTime: endTime,
+      startTime: event.from,
+      endTime: event.to,
       isAllDay: false,
       recurrenceId: '',
       recurrenceRule: '',
@@ -371,8 +377,8 @@ List<Appointment> getEvents() {
 }
 
 // flutter data source
-class EventDataSource extends CalendarDataSource {
-  EventDataSource(List<Appointment> source) {
+class _EventDataSource extends CalendarDataSource {
+  _EventDataSource(List<Appointment> source) {
     appointments = source;
   }
 
@@ -391,7 +397,6 @@ class EventDataSource extends CalendarDataSource {
     return appointments![index].eventTitle;
   }
 
-  @override
   Color getCategory(int index) {
     return appointments![index].catTitle;
   }

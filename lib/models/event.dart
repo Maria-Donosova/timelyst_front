@@ -6,8 +6,8 @@ class Event {
   // Object? id;
   // String creator;
   String eventOrganizer;
-  List<UserProfile> userProfiles;
-  List<UserCalendar> userCalendars;
+  // List<UserProfile> userProfiles;
+  // List<UserCalendar> userCalendars;
   String eventTitle;
   DateTime? dateText;
   DateTime from;
@@ -15,13 +15,14 @@ class Event {
   bool isAllDay;
   Object? recurrenceId;
   String? recurrenceRule;
+  List<DateTime>? recurrenceExceptions;
   // bool reminder;
   // bool holiday;
   String catTitle;
   Color catColor;
   String participants;
   String? eventBody;
-  String eventConferenceDetails;
+  String eventLocation;
   // List<DateTime>? exceptionDates;
   // DateTime dateCreated;
   // DateTime dateChanged;
@@ -30,8 +31,8 @@ class Event {
     // this.id,
     //required this.creator,
     required this.eventOrganizer,
-    required this.userProfiles,
-    required this.userCalendars,
+    // required this.userProfiles,
+    // required this.userCalendars,
     this.eventTitle = '',
     required this.dateText,
     required this.from,
@@ -39,13 +40,14 @@ class Event {
     this.isAllDay = false,
     this.recurrenceId,
     this.recurrenceRule,
+    this.recurrenceExceptions,
     // required this.reminder,
     // required this.holiday,
     required this.catTitle,
     required this.catColor,
-    required this.participants,
+    this.participants = '',
     this.eventBody,
-    required this.eventConferenceDetails,
+    this.eventLocation = '',
     // this.exceptionDates,
     // required this.dateCreated,
     // required this.dateChanged,
