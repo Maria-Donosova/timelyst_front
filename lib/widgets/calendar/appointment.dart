@@ -9,7 +9,7 @@ class AppointmentS extends StatefulWidget {
   const AppointmentS({
     super.key,
     //required String? id,
-    // required String creator,
+    //required String creator,
     required String eventOrganizer,
     required List<UserProfile> userProfiles,
     required List<UserCalendar> userCalendars,
@@ -20,13 +20,14 @@ class AppointmentS extends StatefulWidget {
     required bool isAllDay,
     required String? recurrenceId,
     required String? recurrenceRule,
+    required List<DateTime>? recurrenceExceptions,
     // required bool reminder,
     // required bool holiday,
     required String? catTitle,
     required String? catColor,
     required String participants,
     required String? eventBody,
-    required String eventConferenceDetails,
+    required String eventLocation,
     //required List<DateTime>? exceptionDates,
     // required DateTime dateCreated,
     // required DateTime dateChanged,
@@ -42,13 +43,14 @@ class AppointmentS extends StatefulWidget {
         _isAllDay = isAllDay,
         _recurrenceId = recurrenceId,
         _recurrenceRule = recurrenceRule,
+        _recurrenceExceptions = recurrenceExceptions,
         // _reminder = reminder,
         // _holiday = holiday,
         _catTitle = catTitle,
         _catColor = catColor,
         _participants = participants,
         _eventBody = eventBody,
-        _eventConferenceDetails = eventConferenceDetails;
+        _eventLocation = eventLocation;
   // _exceptionDates = exceptionDates,
   // _dateCreated = dateCreated,
   // _dateChanged = dateChanged,
@@ -65,13 +67,14 @@ class AppointmentS extends StatefulWidget {
   final bool _isAllDay;
   final String? _recurrenceId;
   final String? _recurrenceRule;
+  final List<DateTime>? _recurrenceExceptions;
   // final String? _reminder;
   // final String? _holiday;
   final String? _catTitle;
   final String? _catColor;
   final String? _participants;
   final String? _eventBody;
-  final String _eventConferenceDetails;
+  final String _eventLocation;
   // final List<DateTime>? _exceptionDates;
   // final DateTime _dateCreated;
   // final DateTime _dateChanged;
@@ -90,7 +93,7 @@ class NewAppointmentState extends State<AppointmentS> {
   late TextEditingController _eventCalendarType;
   late TextEditingController _eventRecurrenceId;
   late TextEditingController _eventIsAllDay;
-  late TextEditingController _eventConferenceDetails;
+  late TextEditingController _eventLocation;
   late TextEditingController _eventOrganizer;
   late TextEditingController _eventAttendees;
   late TextEditingController _eventReminder;
