@@ -1,12 +1,14 @@
 class UserProfile {
   final String name;
   final String email;
-  final List<String> accounts;
-  final List<String> calendars;
+  final String accounts;
+  final String calendars;
+  // final List<String> accounts;
+  // final List<String> calendars;
 
   UserProfile(
-      {required this.name,
-      required this.email,
-      required this.accounts,
-      required this.calendars});
+      {this.name = '',
+      this.email = '',
+      this.accounts = '',
+      this.calendars = ''});
 }

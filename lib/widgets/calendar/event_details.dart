@@ -5,8 +5,8 @@ import '../shared/categories.dart'; // Imports the categories and their colors
 import '../../models/user_profile.dart'; // Imports the file that contains the UserProfile class
 import '../../models/user_calendar.dart';
 
-class AppointmentS extends StatefulWidget {
-  const AppointmentS({
+class EventScreen extends StatefulWidget {
+  const EventScreen({
     super.key,
     //required String? id,
     //required String creator,
@@ -80,10 +80,10 @@ class AppointmentS extends StatefulWidget {
   // final DateTime _dateChanged;
 
   @override
-  State<AppointmentS> createState() => NewAppointmentState();
+  State<EventScreen> createState() => NewEventScreentate();
 }
 
-class NewAppointmentState extends State<AppointmentS> {
+class NewEventScreentate extends State<EventScreen> {
   late TextEditingController _eventTitleController;
   late TextEditingController _eventDateController;
   late TextEditingController _categoryController;

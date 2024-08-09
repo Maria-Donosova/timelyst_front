@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
+
 import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:timelyst_flutter/models/event.dart';
-import 'package:timelyst_flutter/widgets/shared/categories.dart';
+import '../shared/categories.dart';
 
 import '/widgets/calendar/week_days.dart';
 // import '../shared/categories.dart';
 import 'appointment_builder.dart';
 import 'event_of_day.dart';
 import 'month_cell_builder.dart';
-import 'appointment.dart';
+import 'event_details.dart';
 
 enum _calView { day, week, month }
 
@@ -118,6 +118,9 @@ class _CalendarWState extends State<CalendarW> {
                   CalendarView.week,
                   CalendarView.month
                 ],
+                timeSlotViewSettings: TimeSlotViewSettings(
+                  timeIntervalHeight: 50,
+                ),
                 controller: _controller,
                 allowViewNavigation: false,
                 headerHeight: 0,
@@ -272,7 +275,7 @@ class _CalendarWState extends State<CalendarW> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              content: AppointmentS(
+              content: EventScreen(
                 eventOrganizer: '',
                 userProfiles: [],
                 userCalendars: [],
@@ -297,7 +300,7 @@ class _CalendarWState extends State<CalendarW> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              content: AppointmentS(
+              content: EventScreen(
                 eventOrganizer: 'Maria Donosova',
                 userProfiles: [],
                 userCalendars: [],
@@ -350,20 +353,13 @@ List<Event> events = [
 List<Appointment> getEvents() {
   return events.map((event) {
     return Appointment(
-      // id: '',
-      //creator: '',
-      // eventOrganizer: '',
-      // userProfiles: List.empty(),
-      // userCalendars: List.empty(),
+      id: '123',
       subject: event.eventTitle,
-      // date: event['dateText'],
       startTime: event.from,
       endTime: event.to,
       isAllDay: false,
       recurrenceId: '',
       recurrenceRule: '',
-      // holiday: false,
-      // reminder: false,
       // catTitle: 'Social',
       // catColor: Colors.grey,
       // participants: '',
@@ -376,7 +372,7 @@ List<Appointment> getEvents() {
   }).toList();
 }
 
-// flutter data source
+// flutter data source connector
 class _EventDataSource extends CalendarDataSource {
   _EventDataSource(List<Appointment> source) {
     appointments = source;
