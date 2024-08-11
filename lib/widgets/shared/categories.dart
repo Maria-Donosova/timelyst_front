@@ -27,6 +27,6 @@ Color catColor(String catTitle) {
     case "Misc":
       return Color.fromRGBO(249, 200, 42, 1);
     default:
-      return Color.fromRGBO(64, 64, 64, 1);
+      return Color.fromRGBO(223, 3, 80, 1);
   }
 }
