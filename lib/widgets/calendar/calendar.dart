@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:timelyst_flutter/models/event.dart';
-import '../shared/categories.dart';
+import 'package:timelyst_flutter/widgets/shared/categories.dart';
 
 import '/widgets/calendar/week_days.dart';
 // import '../shared/categories.dart';
@@ -33,7 +33,6 @@ class _CalendarWState extends State<CalendarW> {
       _startTimeText,
       _endTimeText,
       _dateText,
-      _timeDetails,
       _cellDateText;
   double? width, cellWidth;
 
@@ -45,7 +44,7 @@ class _CalendarWState extends State<CalendarW> {
     _startTimeText = '';
     _endTimeText = '';
     _dateText = '';
-    _timeDetails = '';
+
     _cellDateText = '';
 
     width = 0.0;
@@ -260,6 +259,7 @@ class _CalendarWState extends State<CalendarW> {
     }
     if (details.targetElement == CalendarElement.appointment) {
       final Appointment appointmentDetails = details.appointments![0];
+
       _subjectText = appointmentDetails.subject;
       _dateText =
           DateFormat('MMMM dd').format(appointmentDetails.startTime).toString();
@@ -267,26 +267,25 @@ class _CalendarWState extends State<CalendarW> {
           DateFormat('hh:mm a').format(appointmentDetails.startTime).toString();
       _endTimeText =
           DateFormat('hh:mm a').format(appointmentDetails.endTime).toString();
-      _timeDetails = '$_startTimeText - $_endTimeText';
-      // if (appointmentDetails._isAllDay) {
-      //   _timeDetails = 'All day';
-      // }
+
+      final CustomAppointment event = details.appointments![0];
+
       showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              content: EventScreen(
+              content: EventDetails(
                 eventOrganizer: '',
                 userProfiles: [],
                 userCalendars: [],
-                eventTitle: '',
-                dateText: _cellDateText,
-                to: _startTimeText,
-                from: _endTimeText,
-                catTitle: '',
-                catColor: '',
+                eventTitle: _subjectText,
+                dateText: _dateText,
+                from: _startTimeText,
+                to: _endTimeText,
+                catTitle: event.catTitle,
+                catColor: catColor(event.catTitle),
                 participants: '',
-                eventBody: '',
+                eventBody: event.notes,
                 eventLocation: '',
                 isAllDay: true,
                 recurrenceId: '',
@@ -300,16 +299,16 @@ class _CalendarWState extends State<CalendarW> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              content: EventScreen(
-                eventOrganizer: 'Maria Donosova',
+              content: EventDetails(
+                eventOrganizer: '',
                 userProfiles: [],
                 userCalendars: [],
-                eventTitle: _subjectText,
-                dateText: _dateText,
-                to: _startTimeText,
-                from: _endTimeText,
+                eventTitle: '',
+                dateText: _cellDateText,
+                from: _startTimeText,
+                to: _endTimeText,
                 catTitle: '',
-                catColor: '',
+                catColor: Colors.grey,
                 participants: '',
                 eventBody: '',
                 eventLocation: '',
@@ -333,8 +332,8 @@ List<Event> events = [
     to: DateTime.now().add(Duration(hours: 1)),
     isAllDay: false,
     eventBody: 'Discuss project updates',
-    catTitle: 'Social',
-    catColor: Colors.grey,
+    catTitle: 'Work',
+    catColor: Colors.green,
   ),
   Event(
     eventOrganizer: 'Maria Donosova',
@@ -342,28 +341,29 @@ List<Event> events = [
     dateText: DateTime.now().add(Duration(days: 1)),
     from: DateTime.now().add(Duration(hours: 2)),
     to: DateTime.now().add(Duration(hours: 4)),
-    isAllDay: false,
+    isAllDay: true,
     eventBody: 'Discuss project updates',
     catTitle: 'Friends',
-    catColor: Colors.grey,
+    catColor: Colors.yellow,
   )
 ];
 
 //map syncfusion appointment properties to event properties
-List<Appointment> getEvents() {
+List<CustomAppointment> getEvents() {
   return events.map((event) {
-    return Appointment(
-      id: '123',
+    return CustomAppointment(
+      // id: '123',
       subject: event.eventTitle,
       startTime: event.from,
       endTime: event.to,
       isAllDay: false,
       recurrenceId: '',
       recurrenceRule: '',
-      // catTitle: 'Social',
-      // catColor: Colors.grey,
+      catTitle: event.catTitle,
+      catColor: catColor(event.catTitle),
+      eventOrganizer: '',
       // participants: '',
-      // eventBody: '',
+      notes: event.eventBody,
       // eventConferenceDetails: '',
       // exceptionDates: ,
       // dateChanged: ,
@@ -374,7 +374,7 @@ List<Appointment> getEvents() {
 
 // flutter data source connector
 class _EventDataSource extends CalendarDataSource {
-  _EventDataSource(List<Appointment> source) {
+  _EventDataSource(List<CustomAppointment> source) {
     appointments = source;
   }
 
@@ -396,4 +396,58 @@ class _EventDataSource extends CalendarDataSource {
   Color getCategory(int index) {
     return appointments![index].catTitle;
   }
+}
+
+class CustomAppointment extends Appointment {
+  final String creator;
+  final String eventOrganizer;
+  // List<UserProfile> userProfiles;
+  // List<UserCalendar> userCalendars;
+  DateTime? dateText;
+  // bool reminder;
+  // bool holiday;
+  final String catTitle;
+  final Color catColor;
+  final String participants;
+  String? eventBody;
+  // List<DateTime>? exceptionDates;
+  // DateTime dateCreated;
+  // DateTime dateChanged;
+
+  CustomAppointment({
+    this.creator = 'Maria',
+    // List<UserProfile> userProfiles = '',
+    // List<UserCalendar> userCalendars = '',
+    required DateTime startTime,
+    required DateTime endTime,
+    required this.eventOrganizer,
+    String? subject,
+    Color? color,
+    bool isAllDay = false,
+    String? startTimeZone,
+    String? endTimeZone,
+    String? recurrenceRule,
+    List<DateTime>? recurrenceExceptionDates,
+    Object? recurrenceId,
+    String? notes,
+    String? location,
+    List<Object>? resourceIds,
+    required this.catTitle,
+    required this.catColor,
+    this.participants = '',
+  }) : super(
+          startTime: startTime,
+          endTime: endTime,
+          subject: subject ?? '',
+          color: color ?? Colors.red,
+          isAllDay: isAllDay,
+          startTimeZone: startTimeZone,
+          endTimeZone: endTimeZone,
+          recurrenceRule: recurrenceRule,
+          recurrenceExceptionDates: recurrenceExceptionDates,
+          recurrenceId: recurrenceId,
+          notes: notes,
+          location: location,
+          resourceIds: resourceIds,
+        );
 }

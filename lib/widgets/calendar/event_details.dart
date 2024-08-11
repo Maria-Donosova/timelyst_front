@@ -5,8 +5,8 @@ import '../shared/categories.dart'; // Imports the categories and their colors
 import '../../models/user_profile.dart'; // Imports the file that contains the UserProfile class
 import '../../models/user_calendar.dart';
 
-class EventScreen extends StatefulWidget {
-  const EventScreen({
+class EventDetails extends StatefulWidget {
+  const EventDetails({
     super.key,
     //required String? id,
     //required String creator,
@@ -24,7 +24,7 @@ class EventScreen extends StatefulWidget {
     // required bool reminder,
     // required bool holiday,
     required String? catTitle,
-    required String? catColor,
+    required Color? catColor,
     required String participants,
     required String? eventBody,
     required String eventLocation,
@@ -71,7 +71,7 @@ class EventScreen extends StatefulWidget {
   // final String? _reminder;
   // final String? _holiday;
   final String? _catTitle;
-  final String? _catColor;
+  final Color? _catColor;
   final String? _participants;
   final String? _eventBody;
   final String _eventLocation;
@@ -80,10 +80,10 @@ class EventScreen extends StatefulWidget {
   // final DateTime _dateChanged;
 
   @override
-  State<EventScreen> createState() => NewEventScreentate();
+  State<EventDetails> createState() => NewEventScreentate();
 }
 
-class NewEventScreentate extends State<EventScreen> {
+class NewEventScreentate extends State<EventDetails> {
   late TextEditingController _eventTitleController;
   late TextEditingController _eventDateController;
   late TextEditingController _categoryController;
@@ -100,6 +100,7 @@ class NewEventScreentate extends State<EventScreen> {
   late TextEditingController _eventHoliday;
   late TextEditingController _eventExceptionDates;
   late TextEditingController _eventRecurrenceRule;
+  late TextEditingController _eventDescriptionController;
 
   bool _isAllDay = false;
   bool _isRecurring = false;
@@ -120,6 +121,8 @@ class NewEventScreentate extends State<EventScreen> {
     _eventStartTimeController = _eventStartTimeController =
         TextEditingController(text: widget._startTimeText);
     _eventEndTimeController = TextEditingController(text: widget._endTimeText);
+    _eventDescriptionController =
+        TextEditingController(text: widget._eventBody);
   }
 
 //function to select date
@@ -732,6 +735,7 @@ class NewEventScreentate extends State<EventScreen> {
                   width: 500,
                   child: TextFormField(
                     autocorrect: true,
+                    controller: _eventDescriptionController,
                     style: Theme.of(context).textTheme.displaySmall,
                     maxLines: null,
                     decoration: const InputDecoration(
