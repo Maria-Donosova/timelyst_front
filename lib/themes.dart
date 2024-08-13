@@ -35,6 +35,11 @@ class CustomTheme with ChangeNotifier {
           foregroundColor: Colors.grey[900]!, // Button text color
         ),
       ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: Colors.grey[900]!,
+        selectionColor: Color.fromRGBO(207, 204, 215, 100),
+        selectionHandleColor: Colors.grey[800]!,
+      ),
       radioTheme: RadioThemeData(
         fillColor:
             WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {

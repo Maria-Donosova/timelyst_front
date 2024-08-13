@@ -84,28 +84,21 @@ class EventDetails extends StatefulWidget {
 }
 
 class NewEventScreentate extends State<EventDetails> {
+  late TextEditingController _eventSourceCalendar;
   late TextEditingController _eventTitleController;
   late TextEditingController _eventDateController;
-  late TextEditingController _categoryController;
   late TextEditingController _eventStartTimeController;
   late TextEditingController _eventEndTimeController;
-  late TextEditingController _eventSourceCalendar;
-  late TextEditingController _eventCalendarType;
-  late TextEditingController _eventRecurrenceId;
-  late TextEditingController _eventIsAllDay;
-  late TextEditingController _eventLocation;
-  late TextEditingController _eventOrganizer;
-  late TextEditingController _eventAttendees;
-  late TextEditingController _eventReminder;
-  late TextEditingController _eventHoliday;
-  late TextEditingController _eventExceptionDates;
-  late TextEditingController _eventRecurrenceRule;
   late TextEditingController _eventDescriptionController;
+  late TextEditingController _eventLocation;
+  late TextEditingController _eventRecurrenceRule;
+  late TextEditingController _eventAttendees;
+
+  final _appFormKey = GlobalKey<FormState>();
+  bool isChecked = false;
 
   bool _isAllDay = false;
   bool _isRecurring = false;
-  final _appFormKey = GlobalKey<FormState>();
-  bool isChecked = false;
   String _recurrence = 'None';
   List<String> _selectedDays = [];
   String _selectedCategory = '';
@@ -121,8 +114,12 @@ class NewEventScreentate extends State<EventDetails> {
     _eventStartTimeController = _eventStartTimeController =
         TextEditingController(text: widget._startTimeText);
     _eventEndTimeController = TextEditingController(text: widget._endTimeText);
+
+    _eventLocation = TextEditingController(text: widget._eventLocation);
     _eventDescriptionController =
         TextEditingController(text: widget._eventBody);
+    _selectedCategory = widget._catTitle!;
+    _eventAttendees = TextEditingController(text: widget._participants);
   }
 
 //function to select date
@@ -480,29 +477,28 @@ class NewEventScreentate extends State<EventDetails> {
     final selectedCategory = widget._catTitle;
     var categoryColor = catColor(selectedCategory!);
     final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
 
-    return Container(
-      child: Form(
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        key: _appFormKey,
-        child: SizedBox(
-          width: width * 0.3,
-          height: height * 0.6,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(
-                width: width * 0.8,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: SizedBox(
-                        width: width * 1,
-                        child: TextFormField(
+    return Form(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      key: _appFormKey,
+      child: SizedBox(
+        width: width * 0.3,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            SizedBox(
+              width: width * 0.8,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: SizedBox(
+                      width: width * 1,
+                      child: TextFormField(
                           autocorrect: true,
+                          enabled: true,
                           controller: _eventTitleController,
                           style: Theme.of(context).textTheme.displaySmall,
                           maxLines: null,
@@ -520,136 +516,123 @@ class NewEventScreentate extends State<EventDetails> {
                               return 'Please provide a value.';
                             }
                           },
-                        ),
-                      ),
-                    ),
-                    //profile icon button to select the associated user profile and the calendar to which the event is to be added
-                    IconButton(
-                      iconSize: Theme.of(context).iconTheme.size,
-                      icon: Icon(Icons.person),
-                      onPressed: () {
-                        _selectSourceCalendar(context);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.end,
-                spacing: 8,
-                children: [
-                  SizedBox(
-                    width: 100,
-                    child: TextFormField(
-                        autocorrect: true,
-                        controller: _eventDateController,
-                        style: Theme.of(context).textTheme.displaySmall,
-                        decoration: InputDecoration(
-                          labelText: 'Date',
-                          labelStyle: Theme.of(context).textTheme.bodyMedium,
-                          border: InputBorder.none,
-                          errorStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.error),
-                        ),
-                        textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.datetime,
-                        onTap: () async {
-                          await _selectDate(context);
-                        }),
-                  ),
-                  SizedBox(
-                    width: 80,
-                    child: TextFormField(
-                      autocorrect: true,
-                      controller: _eventStartTimeController,
-                      style: Theme.of(context).textTheme.displaySmall,
-                      decoration: InputDecoration(
-                        labelText: 'Begin',
-                        labelStyle: Theme.of(context).textTheme.bodyMedium,
-                        border: InputBorder.none,
-                        errorStyle: TextStyle(
-                            color: Theme.of(context).colorScheme.error),
-                      ),
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.datetime,
-                      onTap: () async {
-                        await _selectStartTime(context, true);
-                      },
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please provide a value.';
-                        } else {
-                          return null;
-                        }
-                      },
+                          onTap: () {
+                            _eventTitleController.value = TextEditingValue(
+                              text: _eventTitleController.value.text,
+                              // selection: TextSelection.fromPosition(
+                              //   //TextPosition(offset: _newValue.length),
+                              // ),
+                            );
+                          }),
                     ),
                   ),
-                  SizedBox(
-                    width: 80,
-                    child: TextFormField(
-                      autocorrect: true,
-                      controller: _eventEndTimeController,
-                      style: Theme.of(context).textTheme.displaySmall,
-                      decoration: InputDecoration(
-                        labelText: 'End',
-                        labelStyle: Theme.of(context).textTheme.bodyMedium,
-                        border: InputBorder.none,
-                        errorStyle: TextStyle(
-                            color: Theme.of(context).colorScheme.error),
-                      ),
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.datetime,
-                      onTap: () async {
-                        await _selectEndTime(context, false);
-                      },
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please provide a value.';
-                        } else {
-                          return null;
-                        }
-                      },
-                    ),
-                  ),
+                  //profile icon button to select the associated user profile and the calendar to which the event is to be added
                   IconButton(
                     iconSize: Theme.of(context).iconTheme.size,
+                    icon: Icon(Icons.person),
                     onPressed: () {
-                      setState(() {
-                        _isAllDay = !_isAllDay;
-                      });
+                      _selectSourceCalendar(context);
                     },
-                    color: _isAllDay
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Colors.grey,
-                    icon: _isAllDay
-                        ? Icon(Icons.hourglass_full_rounded)
-                        : Icon(Icons.hourglass_empty_rounded),
-                    tooltip: "All Day Event",
                   ),
-                  if (_recurrence == 'Weekly')
-                    Tooltip(
-                      message: _selectedDays.join(', '),
-                      child: TextButton.icon(
-                          style: TextButton.styleFrom(
-                            foregroundColor: _isRecurring
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Colors.grey,
-                            textStyle: Theme.of(context).textTheme.displaySmall,
-                          ),
-                          icon: Icon(
-                              size: Theme.of(context).iconTheme.size,
-                              Icons.event_repeat_rounded),
-                          label: Text(_recurrence.toString(),
-                              style: Theme.of(context).textTheme.displaySmall),
-                          onPressed: () {
-                            _selectRecurrenceRule(context);
-                            setState(() {
-                              // _isRecurring = !_isRecurring;
-                            });
-                          }),
-                    )
-                  else
-                    TextButton.icon(
+                ],
+              ),
+            ),
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.end,
+              spacing: 8,
+              children: [
+                SizedBox(
+                  width: 100,
+                  child: TextFormField(
+                      autocorrect: true,
+                      controller: _eventDateController,
+                      style: Theme.of(context).textTheme.displaySmall,
+                      decoration: InputDecoration(
+                        labelText: 'Date',
+                        labelStyle: Theme.of(context).textTheme.bodyMedium,
+                        border: InputBorder.none,
+                        errorStyle: TextStyle(
+                            color: Theme.of(context).colorScheme.error),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.datetime,
+                      onTap: () async {
+                        await _selectDate(context);
+                      }),
+                ),
+                SizedBox(
+                  width: 80,
+                  child: TextFormField(
+                    autocorrect: true,
+                    controller: _eventStartTimeController,
+                    style: Theme.of(context).textTheme.displaySmall,
+                    decoration: InputDecoration(
+                      labelText: 'Begin',
+                      labelStyle: Theme.of(context).textTheme.bodyMedium,
+                      border: InputBorder.none,
+                      errorStyle:
+                          TextStyle(color: Theme.of(context).colorScheme.error),
+                    ),
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.datetime,
+                    onTap: () async {
+                      await _selectStartTime(context, true);
+                    },
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please provide a value.';
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: 80,
+                  child: TextFormField(
+                    autocorrect: true,
+                    controller: _eventEndTimeController,
+                    style: Theme.of(context).textTheme.displaySmall,
+                    decoration: InputDecoration(
+                      labelText: 'End',
+                      labelStyle: Theme.of(context).textTheme.bodyMedium,
+                      border: InputBorder.none,
+                      errorStyle:
+                          TextStyle(color: Theme.of(context).colorScheme.error),
+                    ),
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.datetime,
+                    onTap: () async {
+                      await _selectEndTime(context, false);
+                    },
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please provide a value.';
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
+                ),
+                IconButton(
+                  iconSize: Theme.of(context).iconTheme.size,
+                  onPressed: () {
+                    setState(() {
+                      _isAllDay = !_isAllDay;
+                    });
+                  },
+                  color: _isAllDay
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Colors.grey,
+                  icon: _isAllDay
+                      ? Icon(Icons.hourglass_full_rounded)
+                      : Icon(Icons.hourglass_empty_rounded),
+                  tooltip: "All Day Event",
+                ),
+                if (_recurrence == 'Weekly')
+                  Tooltip(
+                    message: _selectedDays.join(', '),
+                    child: TextButton.icon(
                         style: TextButton.styleFrom(
                           foregroundColor: _isRecurring
                               ? Theme.of(context).colorScheme.onPrimary
@@ -659,161 +642,200 @@ class NewEventScreentate extends State<EventDetails> {
                         icon: Icon(
                             size: Theme.of(context).iconTheme.size,
                             Icons.event_repeat_rounded),
-                        label: Text(
-                          _recurrence.toString(),
-                          style: Theme.of(context).textTheme.displaySmall,
-                        ),
-                        //iconSize: 20,
-                        //tooltip: _selectedDays.toString(),
+                        label: Text(_recurrence.toString(),
+                            style: Theme.of(context).textTheme.displaySmall),
                         onPressed: () {
                           _selectRecurrenceRule(context);
                           setState(() {
                             // _isRecurring = !_isRecurring;
                           });
                         }),
-                ],
-              ),
-              SizedBox(
-                width: width,
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.end,
-                  children: categories.map((String category) {
-                    categoryColor = catColor(category);
-                    return ChoiceChip(
-                      visualDensity: VisualDensity.standard,
-                      avatar: CircleAvatar(
-                        backgroundColor: categoryColor,
-                        radius: 4.5,
+                  )
+                else
+                  TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: _isRecurring
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Colors.grey,
+                        textStyle: Theme.of(context).textTheme.displaySmall,
                       ),
+                      icon: Icon(
+                          size: Theme.of(context).iconTheme.size,
+                          Icons.event_repeat_rounded),
                       label: Text(
-                        category,
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        _recurrence.toString(),
+                        style: Theme.of(context).textTheme.displaySmall,
                       ),
-                      selected: _selectedCategory == category,
-                      selectedColor: Colors.grey.shade200,
-                      backgroundColor: Colors.white,
-                      onSelected: (bool selected) {
+                      //iconSize: 20,
+                      //tooltip: _selectedDays.toString(),
+                      onPressed: () {
+                        _selectRecurrenceRule(context);
                         setState(() {
-                          _selectedCategory = (selected ? category : null)!;
+                          // _isRecurring = !_isRecurring;
                         });
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: SizedBox(
-                  width: width * 0.8,
-                  child: TextFormField(
-                      autocorrect: true,
-                      //Rcontroller: ,
-                      style: Theme.of(context).textTheme.displaySmall,
-                      maxLines: null,
-                      decoration: const InputDecoration(
-                        labelText: 'Participants',
-                        labelStyle: TextStyle(fontSize: 14),
-                        border: InputBorder.none,
-                        errorStyle: TextStyle(color: Colors.redAccent),
-                      ),
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        const pattern =
-                            r'^([\w-\.]+@([\w-]+\.)+[\w-]{2,4},\s*)*[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
-                        final regExp = RegExp(pattern);
-                        if (!regExp.hasMatch(value!)) {
-                          return 'Please enter a valid email';
-                        }
-                        return null;
                       }),
+              ],
+            ),
+            SizedBox(
+              width: width,
+              child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.end,
+                children: categories.map((String category) {
+                  categoryColor = catColor(category);
+                  return ChoiceChip(
+                    visualDensity: VisualDensity.standard,
+                    avatar: CircleAvatar(
+                      backgroundColor: categoryColor,
+                      radius: 4.5,
+                    ),
+                    label: Text(
+                      category,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    selected: _selectedCategory == category,
+                    selectedColor: Colors.grey.shade200,
+                    backgroundColor: Colors.white,
+                    onSelected: (bool selected) {
+                      setState(() {
+                        _selectedCategory = (selected ? category : null)!;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: SizedBox(
+                width: width * 0.8,
+                child: TextFormField(
+                  autocorrect: true,
+                  controller: _eventLocation,
+                  style: Theme.of(context).textTheme.displaySmall,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    labelText: 'Location',
+                    labelStyle: TextStyle(fontSize: 14),
+                    border: InputBorder.none,
+                    errorStyle: TextStyle(color: Colors.redAccent),
+                  ),
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.emailAddress,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: SizedBox(
-                  width: 500,
-                  child: TextFormField(
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: SizedBox(
+                width: width * 0.8,
+                child: TextFormField(
                     autocorrect: true,
-                    controller: _eventDescriptionController,
+                    //Rcontroller: ,
                     style: Theme.of(context).textTheme.displaySmall,
                     maxLines: null,
                     decoration: const InputDecoration(
-                      labelText: 'Description',
-                      fillColor: Colors.grey,
+                      labelText: 'Participants',
                       labelStyle: TextStyle(fontSize: 14),
                       border: InputBorder.none,
                       errorStyle: TextStyle(color: Colors.redAccent),
                     ),
                     textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.name,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      const pattern =
+                          r'^([\w-\.]+@([\w-]+\.)+[\w-]{2,4},\s*)*[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+                      final regExp = RegExp(pattern);
+                      if (!regExp.hasMatch(value!)) {
+                        return 'Please enter a valid email';
+                      }
+                      return null;
+                    }),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: SizedBox(
+                width: 500,
+                child: TextFormField(
+                  autocorrect: true,
+                  controller: _eventDescriptionController,
+                  style: Theme.of(context).textTheme.displaySmall,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    fillColor: Colors.grey,
+                    labelStyle: TextStyle(fontSize: 14),
+                    border: InputBorder.none,
+                    errorStyle: TextStyle(color: Colors.redAccent),
                   ),
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.name,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 120),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.shadow,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            print("Cancel");
-                            // runMutation({
-                            //                           //   "event_subj": _eventSubjController.text.trim(),
-                            //                           //   "event_startdate":
-                            //                           //       _eventStartDateController.text.trim(),
-                            //                           //   "event_enddate": _eventEndDateController.text.trim(),
-                            //                           // });
-                            //                           print("event mutation");
-                          });
-                          Navigator.of(context).pop();
-                        },
-                        child: Text('Close',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.secondary,
-                            )),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 120),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.shadow,
                       ),
+                      onPressed: () {
+                        setState(() {
+                          print("Cancel");
+                          // runMutation({
+                          //                           //   "event_subj": _eventSubjController.text.trim(),
+                          //                           //   "event_startdate":
+                          //                           //       _eventStartDateController.text.trim(),
+                          //                           //   "event_enddate": _eventEndDateController.text.trim(),
+                          //                           // });
+                          //                           print("event mutation");
+                        });
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Close',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary,
+                          )),
                     ),
-                    TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.shadow,
-                        ),
-                        child: Text('Save',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.secondary,
-                            )),
-                        onPressed: () {
-                          if (_appFormKey.currentState!.validate()) {
-                            print('saved');
-                          } else {
-                            Text('Fix the items');
-                          }
+                  ),
+                  TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.shadow,
+                      ),
+                      child: Text('Save',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary,
+                          )),
+                      onPressed: () {
+                        if (_appFormKey.currentState!.validate()) {
+                          print('saved');
+                        } else {
+                          Text('Fix the items');
+                        }
 
-                          setState(() {
-                            print("event saved");
-                            // runMutation({
-                            //                       //   "task_description":
-                            //                       //       _taskDescriptionController.text
-                            //                       //           .trim(),
-                            //                       //   // "task_type":
-                            //                       //   //  _taskTypeController.text.trim(),
-                            //                       //   "category": _selectedCategory,
-                            //                       //   'userId': currUserId,
-                            //                       // });;
-                          });
-                          Navigator.of(context).pop();
-                        }),
-                  ],
-                ),
-              )
-            ],
-          ),
+                        setState(() {
+                          print("event saved");
+                          // runMutation({
+                          //                       //   "task_description":
+                          //                       //       _taskDescriptionController.text
+                          //                       //           .trim(),
+                          //                       //   // "task_type":
+                          //                       //   //  _taskTypeController.text.trim(),
+                          //                       //   "category": _selectedCategory,
+                          //                       //   'userId': currUserId,
+                          //                       // });;
+                        });
+                        Navigator.of(context).pop();
+                      }),
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );
