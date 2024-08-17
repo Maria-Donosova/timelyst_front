@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 class EventOfDayW extends StatelessWidget {
+  final String? eventOfDay;
+
   const EventOfDayW({
     Key? key,
+    required this.eventOfDay,
   }) : super(key: key);
 
   @override
@@ -16,7 +19,7 @@ class EventOfDayW extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 2, vertical: 2),
           child: Text(
-            'The event(s)',
+            eventOfDay!,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
