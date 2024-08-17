@@ -27,7 +27,7 @@ class CustomTheme with ChangeNotifier {
       fontFamily: 'FontAwesome',
       iconTheme: IconThemeData(
         color: Colors.grey[900],
-        size: 20,
+        size: 16,
       ),
       chipTheme: ChipThemeData(side: BorderSide.none, showCheckmark: false),
       textButtonTheme: TextButtonThemeData(

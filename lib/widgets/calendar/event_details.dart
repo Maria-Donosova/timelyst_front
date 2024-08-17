@@ -17,7 +17,7 @@ class EventDetails extends StatefulWidget {
     required String? dateText,
     required String? from,
     required String? to,
-    required bool isAllDay,
+    required bool allDay,
     required String? recurrenceId,
     required String? recurrenceRule,
     required List<DateTime>? recurrenceExceptions,
@@ -40,7 +40,7 @@ class EventDetails extends StatefulWidget {
         _dateText = dateText,
         _startTimeText = from,
         _endTimeText = to,
-        _isAllDay = isAllDay,
+        _allDay = allDay,
         _recurrenceId = recurrenceId,
         _recurrenceRule = recurrenceRule,
         _recurrenceExceptions = recurrenceExceptions,
@@ -64,7 +64,7 @@ class EventDetails extends StatefulWidget {
   final String? _dateText;
   final String? _startTimeText;
   final String? _endTimeText;
-  final bool _isAllDay;
+  final bool _allDay;
   final String? _recurrenceId;
   final String? _recurrenceRule;
   final List<DateTime>? _recurrenceExceptions;
@@ -97,7 +97,7 @@ class NewEventScreentate extends State<EventDetails> {
   final _appFormKey = GlobalKey<FormState>();
   bool isChecked = false;
 
-  bool _isAllDay = false;
+  bool _allDay = false;
   bool _isRecurring = false;
   String _recurrence = 'None';
   List<String> _selectedDays = [];
@@ -106,12 +106,9 @@ class NewEventScreentate extends State<EventDetails> {
   @override
   void initState() {
     super.initState();
-    // categories.forEach((category) {
-    //   category = '';
-    //},);
     _eventTitleController = TextEditingController(text: widget._eventTitle);
     _eventDateController = TextEditingController(text: widget._dateText);
-    _eventStartTimeController = _eventStartTimeController =
+    _eventStartTimeController =
         TextEditingController(text: widget._startTimeText);
     _eventEndTimeController = TextEditingController(text: widget._endTimeText);
 
@@ -120,6 +117,7 @@ class NewEventScreentate extends State<EventDetails> {
         TextEditingController(text: widget._eventBody);
     _selectedCategory = widget._catTitle!;
     _eventAttendees = TextEditingController(text: widget._participants);
+    _allDay = widget._allDay;
   }
 
 //function to select date
@@ -497,33 +495,34 @@ class NewEventScreentate extends State<EventDetails> {
                     child: SizedBox(
                       width: width * 1,
                       child: TextFormField(
-                          autocorrect: true,
-                          enabled: true,
-                          controller: _eventTitleController,
-                          style: Theme.of(context).textTheme.displaySmall,
-                          maxLines: null,
-                          decoration: InputDecoration(
-                            labelText: 'Subject',
-                            labelStyle: Theme.of(context).textTheme.bodyLarge,
-                            border: InputBorder.none,
-                            errorStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.error),
-                          ),
-                          textInputAction: TextInputAction.next,
-                          keyboardType: TextInputType.name,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please provide a value.';
-                            }
-                          },
-                          onTap: () {
-                            _eventTitleController.value = TextEditingValue(
-                              text: _eventTitleController.value.text,
-                              // selection: TextSelection.fromPosition(
-                              //   //TextPosition(offset: _newValue.length),
-                              // ),
-                            );
-                          }),
+                        autocorrect: true,
+                        enabled: true,
+                        controller: _eventTitleController,
+                        style: Theme.of(context).textTheme.displaySmall,
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          labelText: 'Subject',
+                          labelStyle: Theme.of(context).textTheme.bodyLarge,
+                          border: InputBorder.none,
+                          errorStyle: TextStyle(
+                              color: Theme.of(context).colorScheme.error),
+                        ),
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.name,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please provide a value.';
+                          }
+                        },
+                        // onTap: () {
+                        //   _eventTitleController.value = TextEditingValue(
+                        //     text: _eventTitleController.value.text,
+                        //     // selection: TextSelection.fromPosition(
+                        //     //   //TextPosition(offset: _newValue.length),
+                        //     // ),
+                        //   );
+                        // },
+                      ),
                     ),
                   ),
                   //profile icon button to select the associated user profile and the calendar to which the event is to be added
@@ -618,16 +617,16 @@ class NewEventScreentate extends State<EventDetails> {
                   iconSize: Theme.of(context).iconTheme.size,
                   onPressed: () {
                     setState(() {
-                      _isAllDay = !_isAllDay;
+                      _allDay = !_allDay;
                     });
                   },
-                  color: _isAllDay
+                  color: _allDay
                       ? Theme.of(context).colorScheme.onPrimary
-                      : Colors.grey,
-                  icon: _isAllDay
+                      : Theme.of(context).colorScheme.shadow,
+                  icon: _allDay
                       ? Icon(Icons.hourglass_full_rounded)
                       : Icon(Icons.hourglass_empty_rounded),
-                  tooltip: "All Day Event",
+                  tooltip: "All Day",
                 ),
                 if (_recurrence == 'Weekly')
                   Tooltip(

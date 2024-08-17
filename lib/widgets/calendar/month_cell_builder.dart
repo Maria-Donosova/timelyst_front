@@ -31,7 +31,9 @@ Widget monthCellBuilder(BuildContext context, MonthCellDetails details) {
                   textAlign: TextAlign.left,
                 ),
               ),
-              EventOfDayW(),
+              EventOfDayW(
+                eventOfDay: 'Title',
+              ),
               Padding(
                 padding:
                     const EdgeInsets.only(left: 6.0, right: 6.0, top: 12.0),

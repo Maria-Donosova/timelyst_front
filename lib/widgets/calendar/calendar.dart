@@ -76,9 +76,11 @@ class _CalendarWState extends State<CalendarW> {
             Container(
               width: width,
               color: const Color.fromRGBO(238, 243, 246, 1.0),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                child: EventOfDayW(),
+                child: EventOfDayW(
+                  eventOfDay: _subjectText,
+                ),
               ),
             ),
             isMonth
@@ -119,6 +121,7 @@ class _CalendarWState extends State<CalendarW> {
                 ],
                 timeSlotViewSettings: TimeSlotViewSettings(
                   timeIntervalHeight: 50,
+                  //allDayPanelColor: Theme.of(context).colorScheme.shadow,
                 ),
                 controller: _controller,
                 allowViewNavigation: false,
@@ -287,7 +290,7 @@ class _CalendarWState extends State<CalendarW> {
                 participants: '',
                 eventBody: event.notes,
                 eventLocation: '',
-                isAllDay: true,
+                allDay: event.isAllDay,
                 recurrenceId: '',
                 recurrenceRule: '',
                 recurrenceExceptions: [],
@@ -312,7 +315,7 @@ class _CalendarWState extends State<CalendarW> {
                 participants: '',
                 eventBody: '',
                 eventLocation: '',
-                isAllDay: true,
+                allDay: false,
                 recurrenceId: '',
                 recurrenceRule: '',
                 recurrenceExceptions: [],
@@ -327,9 +330,9 @@ List<Event> events = [
   Event(
     eventOrganizer: 'Maria Donosova',
     eventTitle: 'Meeting with Team',
-    dateText: DateTime.now(),
-    from: DateTime.now(),
-    to: DateTime.now().add(Duration(hours: 1)),
+    dateText: DateTime.now().add(Duration(days: 1)),
+    from: DateTime(2024, 08, 17, 0, 10, 0),
+    to: DateTime(2024, 08, 17, 23, 0, 0),
     isAllDay: false,
     eventBody: 'Discuss project updates',
     catTitle: 'Work',
@@ -341,8 +344,8 @@ List<Event> events = [
     dateText: DateTime.now().add(Duration(days: 1)),
     from: DateTime.now().add(Duration(hours: 2)),
     to: DateTime.now().add(Duration(hours: 4)),
-    isAllDay: true,
-    eventBody: 'Discuss project updates',
+    isAllDay: false,
+    eventBody: 'Have a lot of fun',
     catTitle: 'Friends',
     catColor: Colors.yellow,
   )
@@ -356,7 +359,7 @@ List<CustomAppointment> getEvents() {
       subject: event.eventTitle,
       startTime: event.from,
       endTime: event.to,
-      isAllDay: false,
+      isAllDay: event.isAllDay,
       recurrenceId: '',
       recurrenceRule: '',
       catTitle: event.catTitle,
@@ -393,6 +396,11 @@ class _EventDataSource extends CalendarDataSource {
     return appointments![index].eventTitle;
   }
 
+  @override
+  bool isAllDay(int index) {
+    return appointments![index].isAllDay;
+  }
+
   Color getCategory(int index) {
     return appointments![index].catTitle;
   }
@@ -423,7 +431,7 @@ class CustomAppointment extends Appointment {
     required this.eventOrganizer,
     String? subject,
     Color? color,
-    bool isAllDay = false,
+    required bool isAllDay,
     String? startTimeZone,
     String? endTimeZone,
     String? recurrenceRule,
