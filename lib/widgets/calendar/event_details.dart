@@ -180,6 +180,17 @@ class NewEventScreentate extends State<EventDetails> {
     }
   }
 
+  //function that updates _eventStartDateController and _eventEndDateController to (2024, 08, 18, 0, 00, 0) and (2024, 08, 18, 23, 59, 59) respectively once _allDay is set to true
+
+  void _setAllDay() {
+    if (_allDay == true) {
+      setState(() {
+        _eventStartTimeController.text = '00:00';
+        _eventEndTimeController.text = '23:59';
+      });
+    }
+  }
+
   //function the changes the color of eventrepeat icon once the user chooses a recurrence pattern and clicked Saved within the _selectRecurrenceRule function
   void _changeRecurringColor() {
     if (_recurrence != 'None') {
@@ -618,6 +629,7 @@ class NewEventScreentate extends State<EventDetails> {
                   onPressed: () {
                     setState(() {
                       _allDay = !_allDay;
+                      _setAllDay();
                     });
                   },
                   color: _allDay
@@ -754,7 +766,7 @@ class NewEventScreentate extends State<EventDetails> {
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       const pattern =
-                          r'^([\w-\.]+@([\w-]+\.)+[\w-]{2,4},\s*)*[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+                          r'^([\w-\.]+@([\w-]+\.)+[\w-]{2,4},\s*)*[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$|^$';
                       final regExp = RegExp(pattern);
                       if (!regExp.hasMatch(value!)) {
                         return 'Please enter a valid email';
