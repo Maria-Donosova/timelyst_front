@@ -16,8 +16,9 @@ class CustomTheme with ChangeNotifier {
       colorScheme: ColorScheme.light(
         primary: Colors.white,
         onPrimary: Colors.grey[900]!,
-        secondary: Colors.grey[800]!,
-        onSecondary: Colors.white,
+        secondary: const Color.fromRGBO(238, 243, 246, 1.0),
+        onSecondary: Colors.grey[900]!,
+        tertiary: Colors.grey[600]!,
         error: Colors.redAccent,
         onError: Colors.grey[900]!,
         surface: Colors.white,
@@ -26,7 +27,7 @@ class CustomTheme with ChangeNotifier {
       ),
       fontFamily: 'FontAwesome',
       iconTheme: IconThemeData(
-        color: Colors.grey[900],
+        color: Colors.grey[800],
         size: 16,
       ),
       chipTheme: ChipThemeData(side: BorderSide.none, showCheckmark: false),

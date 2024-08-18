@@ -15,7 +15,7 @@ class EventOfDayW extends StatelessWidget {
       padding: const EdgeInsets.only(top: 2.0),
       child: Container(
         width: width,
-        color: const Color.fromRGBO(238, 243, 246, 1.0),
+        color: Theme.of(context).colorScheme.secondary,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 2, vertical: 2),
           child: Text(
