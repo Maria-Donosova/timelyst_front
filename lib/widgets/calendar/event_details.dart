@@ -209,10 +209,10 @@ class NewEventScreentate extends State<EventDetails> {
                     TextButton(
                       style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              Theme.of(context).colorScheme.shadow),
+                              Theme.of(context).colorScheme.secondary),
                       child: Text('Cancel',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           )),
                       onPressed: () {
                         Navigator.of(context).pop();
@@ -221,10 +221,10 @@ class NewEventScreentate extends State<EventDetails> {
                     TextButton(
                       style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              Theme.of(context).colorScheme.shadow),
+                              Theme.of(context).colorScheme.secondary),
                       child: Text('Save',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           )),
                       onPressed: () {
                         _changeRecurringColor();
@@ -622,7 +622,7 @@ class NewEventScreentate extends State<EventDetails> {
                   },
                   color: _allDay
                       ? Theme.of(context).colorScheme.onPrimary
-                      : Theme.of(context).colorScheme.shadow,
+                      : Theme.of(context).colorScheme.tertiary,
                   icon: _allDay
                       ? Icon(Icons.hourglass_full_rounded)
                       : Icon(Icons.hourglass_empty_rounded),
@@ -631,76 +631,88 @@ class NewEventScreentate extends State<EventDetails> {
                 if (_recurrence == 'Weekly')
                   Tooltip(
                     message: _selectedDays.join(', '),
-                    child: TextButton.icon(
-                        style: TextButton.styleFrom(
-                          foregroundColor: _isRecurring
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Colors.grey,
-                          textStyle: Theme.of(context).textTheme.displaySmall,
-                        ),
-                        icon: Icon(
-                            size: Theme.of(context).iconTheme.size,
-                            Icons.event_repeat_rounded),
-                        label: Text(_recurrence.toString(),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: _isRecurring
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context).colorScheme.tertiary,
+                              textStyle:
+                                  Theme.of(context).textTheme.displaySmall,
+                            ),
+                            icon: Icon(
+                                size: Theme.of(context).iconTheme.size,
+                                Icons.event_repeat_rounded),
+                            onPressed: () {
+                              _selectRecurrenceRule(context);
+                              setState(() {
+                                // _isRecurring = !_isRecurring;
+                              });
+                            }),
+                        Text(_recurrence.toString(),
                             style: Theme.of(context).textTheme.displaySmall),
-                        onPressed: () {
-                          _selectRecurrenceRule(context);
-                          setState(() {
-                            // _isRecurring = !_isRecurring;
-                          });
-                        }),
+                      ],
+                    ),
                   )
                 else
-                  TextButton.icon(
-                      style: TextButton.styleFrom(
-                        foregroundColor: _isRecurring
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Colors.grey,
-                        textStyle: Theme.of(context).textTheme.displaySmall,
-                      ),
-                      icon: Icon(
-                          size: Theme.of(context).iconTheme.size,
-                          Icons.event_repeat_rounded),
-                      label: Text(
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: _isRecurring
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.tertiary,
+                            textStyle: Theme.of(context).textTheme.displaySmall,
+                          ),
+                          icon: Icon(
+                              size: Theme.of(context).iconTheme.size,
+                              Icons.event_repeat_rounded),
+                          onPressed: () {
+                            _selectRecurrenceRule(context);
+                            setState(() {
+                              // _isRecurring = !_isRecurring;
+                            });
+                          }),
+                      Text(
                         _recurrence.toString(),
                         style: Theme.of(context).textTheme.displaySmall,
                       ),
-                      //iconSize: 20,
-                      //tooltip: _selectedDays.toString(),
-                      onPressed: () {
-                        _selectRecurrenceRule(context);
-                        setState(() {
-                          // _isRecurring = !_isRecurring;
-                        });
-                      }),
+                    ],
+                  ),
               ],
             ),
-            SizedBox(
-              width: width,
-              child: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.end,
-                children: categories.map((String category) {
-                  categoryColor = catColor(category);
-                  return ChoiceChip(
-                    visualDensity: VisualDensity.standard,
-                    avatar: CircleAvatar(
-                      backgroundColor: categoryColor,
-                      radius: 4.5,
-                    ),
-                    label: Text(
-                      category,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    selected: _selectedCategory == category,
-                    selectedColor: Colors.grey.shade200,
-                    backgroundColor: Colors.white,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        _selectedCategory = (selected ? category : null)!;
-                      });
-                    },
-                  );
-                }).toList(),
+            Padding(
+              padding: const EdgeInsets.only(top: 6.0),
+              child: SizedBox(
+                width: width,
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.end,
+                  children: categories.map((String category) {
+                    categoryColor = catColor(category);
+                    return ChoiceChip(
+                      visualDensity: VisualDensity.standard,
+                      avatar: CircleAvatar(
+                        backgroundColor: categoryColor,
+                        radius: 4.5,
+                      ),
+                      label: Text(
+                        category,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      selected: _selectedCategory == category,
+                      selectedColor: Colors.grey.shade200,
+                      backgroundColor: Colors.white,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          _selectedCategory = (selected ? category : null)!;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
               ),
             ),
             Padding(
@@ -781,7 +793,8 @@ class NewEventScreentate extends State<EventDetails> {
                     padding: const EdgeInsets.only(right: 8.0),
                     child: TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.shadow,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
                       ),
                       onPressed: () {
                         setState(() {
@@ -798,17 +811,18 @@ class NewEventScreentate extends State<EventDetails> {
                       },
                       child: Text('Close',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           )),
                     ),
                   ),
                   TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.shadow,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
                       ),
                       child: Text('Save',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           )),
                       onPressed: () {
                         if (_appFormKey.currentState!.validate()) {

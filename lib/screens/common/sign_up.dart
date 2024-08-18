@@ -268,7 +268,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             'I would like to receive T-Emails',
                             softWrap: true,
                             style: TextStyle(
-                                color: Theme.of(context).colorScheme.secondary),
+                                color: Theme.of(context).colorScheme.onPrimary),
                           ),
                         ),
                       ],
@@ -294,7 +294,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               child: Text('Sign Up',
                                   style: TextStyle(
                                     color:
-                                        Theme.of(context).colorScheme.secondary,
+                                        Theme.of(context).colorScheme.onPrimary,
                                   )),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
