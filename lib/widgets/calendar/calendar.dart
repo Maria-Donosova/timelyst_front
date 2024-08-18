@@ -36,6 +36,21 @@ class _CalendarWState extends State<CalendarW> {
       _cellDateText;
   double? width, cellWidth;
 
+//function that updates eventOfDay: _subjectText to the event title where the start time is equal to 00:00 and the end time is equal to 23:59 for all the events in the data source
+  void updateEventOfDay() {
+    final List<CustomAppointment> events = getEvents();
+    final List<CustomAppointment> allDayEvents = events
+        .where((event) =>
+            event.startTime.hour == 0 &&
+            event.startTime.minute == 0 &&
+            event.endTime.hour == 23 &&
+            event.endTime.minute == 59)
+        .toList();
+    if (allDayEvents.isNotEmpty) {
+      _subjectText = allDayEvents[0].subject;
+    }
+  }
+
   @override
   void initState() {
     _headerText = 'header';
@@ -49,6 +64,8 @@ class _CalendarWState extends State<CalendarW> {
 
     width = 0.0;
     cellWidth = 0.0;
+
+    updateEventOfDay();
 
     // _getEvents().then((results) {
     //   setState(() {
@@ -331,8 +348,8 @@ List<Event> events = [
     eventOrganizer: 'Maria Donosova',
     eventTitle: 'Meeting with Team',
     dateText: DateTime.now().add(Duration(days: 1)),
-    from: DateTime(2024, 08, 17, 0, 10, 0),
-    to: DateTime(2024, 08, 17, 23, 0, 0),
+    from: DateTime(2024, 08, 18, 0, 10, 0),
+    to: DateTime(2024, 08, 18, 23, 0, 0),
     isAllDay: false,
     eventBody: 'Discuss project updates',
     catTitle: 'Work',
