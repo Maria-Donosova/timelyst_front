@@ -181,7 +181,6 @@ class NewEventScreentate extends State<EventDetails> {
   }
 
   //function that updates _eventStartDateController and _eventEndDateController to (2024, 08, 18, 0, 00, 0) and (2024, 08, 18, 23, 59, 59) respectively once _allDay is set to true
-
   void _setAllDay() {
     if (_allDay == true) {
       setState(() {

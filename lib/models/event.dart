@@ -9,7 +9,7 @@ class Event {
   // List<UserProfile> userProfiles;
   // List<UserCalendar> userCalendars;
   String eventTitle;
-  DateTime? dateText;
+  // DateTime? dateText;
   DateTime from;
   DateTime to;
   bool isAllDay;
@@ -34,7 +34,7 @@ class Event {
     // required this.userProfiles,
     // required this.userCalendars,
     this.eventTitle = '',
-    required this.dateText,
+    // required this.dateText,
     required this.from,
     required this.to,
     this.isAllDay = false,

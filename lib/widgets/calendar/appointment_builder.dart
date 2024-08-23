@@ -11,8 +11,10 @@ import '../shared/categories.dart';
 Widget appointmentBuilder(BuildContext context,
     CalendarAppointmentDetails calendarAppointmentDetails) {
   final Appointment appointment = calendarAppointmentDetails.appointments.first;
-  final CustomAppointment customAppointment =
-      calendarAppointmentDetails.appointments.first;
+  final categoryColor = appointment.color;
+
+  //final selectedCategory = 'Friends';
+  //final categoryColor = catColor(selectedCategory);
 
   final width = MediaQuery.of(context).size.width;
 
@@ -35,7 +37,7 @@ Widget appointmentBuilder(BuildContext context,
               child: Align(
                 alignment: Alignment(-1.005, -1.05),
                 child: CircleAvatar(
-                  backgroundColor: catColor(customAppointment.catTitle),
+                  backgroundColor: appointment.color,
                   radius: 3.5,
                 ),
               ),
@@ -45,7 +47,7 @@ Widget appointmentBuilder(BuildContext context,
               decoration: BoxDecoration(
                 border: Border(
                   left: BorderSide(
-                    color: catColor(customAppointment.catTitle),
+                    color: appointment.color,
                     width: 3,
                     style: BorderStyle.solid,
                   ),
