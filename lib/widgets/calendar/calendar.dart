@@ -37,19 +37,19 @@ class _CalendarWState extends State<CalendarW> {
   double? width, cellWidth;
 
 //function that updates eventOfDay: _subjectText to the event title where the start time is equal to 00:00 and the end time is equal to 23:59 for all the events in the data source
-  void updateEventOfDay() {
-    final List<CustomAppointment> events = getEvents();
-    final List<CustomAppointment> allDayEvents = events
-        .where((event) =>
-            event.startTime.hour == 0 &&
-            event.startTime.minute == 0 &&
-            event.endTime.hour == 23 &&
-            event.endTime.minute == 59)
-        .toList();
-    if (allDayEvents.isNotEmpty) {
-      _subjectText = allDayEvents[0].subject;
-    }
-  }
+  // void updateEventOfDay() {
+  //   final List<Event> events = getEvents();
+  //   final List<Appointment> allDayEvents = events
+  //       .where((event) =>
+  //           event.startTime.hour == 0 &&
+  //           event.startTime.minute == 0 &&
+  //           event.endTime.hour == 23 &&
+  //           event.endTime.minute == 59)
+  //       .toList();
+  //   if (allDayEvents.isNotEmpty) {
+  //     _subjectText = allDayEvents[0].subject;
+  //   }
+  // }
 
   @override
   void initState() {
@@ -65,7 +65,7 @@ class _CalendarWState extends State<CalendarW> {
     width = 0.0;
     cellWidth = 0.0;
 
-    updateEventOfDay();
+    // updateEventOfDay();
 
     // _getEvents().then((results) {
     //   setState(() {
@@ -288,7 +288,7 @@ class _CalendarWState extends State<CalendarW> {
       _endTimeText =
           DateFormat('hh:mm a').format(appointmentDetails.endTime).toString();
 
-      final CustomAppointment event = details.appointments![0];
+      final Event event = details.appointments![0];
 
       showDialog(
           context: context,
@@ -305,11 +305,11 @@ class _CalendarWState extends State<CalendarW> {
                 catTitle: event.catTitle,
                 catColor: catColor(event.catTitle),
                 participants: '',
-                eventBody: event.notes,
+                eventBody: event.eventBody,
                 eventLocation: '',
                 allDay: event.isAllDay,
                 recurrenceId: '',
-                recurrenceRule: '',
+                recurrenceRule: event.recurrenceRule,
                 recurrenceExceptions: [],
               ),
             );
@@ -347,9 +347,8 @@ List<Event> events = [
   Event(
     eventOrganizer: 'Maria Donosova',
     eventTitle: 'Meeting with Team',
-    dateText: DateTime.now().add(Duration(days: 1)),
-    from: DateTime(2024, 08, 18, 0, 10, 0),
-    to: DateTime(2024, 08, 18, 23, 0, 0),
+    from: DateTime(2024, 08, 23, 0, 10, 0),
+    to: DateTime(2024, 08, 23, 23, 0, 0),
     isAllDay: false,
     eventBody: 'Discuss project updates',
     catTitle: 'Work',
@@ -358,7 +357,6 @@ List<Event> events = [
   Event(
     eventOrganizer: 'Maria Donosova',
     eventTitle: 'Get Together',
-    dateText: DateTime.now().add(Duration(days: 1)),
     from: DateTime.now().add(Duration(hours: 2)),
     to: DateTime.now().add(Duration(hours: 4)),
     isAllDay: false,
@@ -392,7 +390,7 @@ List<CustomAppointment> getEvents() {
   }).toList();
 }
 
-// flutter data source connector
+//data source connector
 class _EventDataSource extends CalendarDataSource {
   _EventDataSource(List<CustomAppointment> source) {
     appointments = source;
@@ -421,6 +419,17 @@ class _EventDataSource extends CalendarDataSource {
   Color getCategory(int index) {
     return appointments![index].catTitle;
   }
+
+  // @override
+  // CustomAppointment convertAppointmentToObject(
+  //     CustomAppointment events, Appointment appointment) {
+  //   return CustomAppointment(
+  //       from: appointment.startTime,
+  //       to: appointment.endTime,
+  //       content: appointment.subject,
+  //       background: appointment.color,
+  //       isAllDay: appointment.isAllDay);
+  // }
 }
 
 class CustomAppointment extends Appointment {
@@ -464,7 +473,7 @@ class CustomAppointment extends Appointment {
           startTime: startTime,
           endTime: endTime,
           subject: subject ?? '',
-          color: color ?? Colors.red,
+          color: catColor,
           isAllDay: isAllDay,
           startTimeZone: startTimeZone,
           endTimeZone: endTimeZone,
