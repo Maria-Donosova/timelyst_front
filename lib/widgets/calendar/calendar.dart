@@ -288,7 +288,7 @@ class _CalendarWState extends State<CalendarW> {
       _endTimeText =
           DateFormat('hh:mm a').format(appointmentDetails.endTime).toString();
 
-      final Event event = details.appointments![0];
+      final CustomAppointment customAppointment = details.appointments![0];
 
       showDialog(
           context: context,
@@ -302,14 +302,14 @@ class _CalendarWState extends State<CalendarW> {
                 dateText: _dateText,
                 from: _startTimeText,
                 to: _endTimeText,
-                catTitle: event.catTitle,
-                catColor: catColor(event.catTitle),
+                catTitle: customAppointment.catTitle,
+                catColor: catColor(customAppointment.catTitle),
                 participants: '',
-                eventBody: event.eventBody,
+                eventBody: customAppointment.eventBody,
                 eventLocation: '',
-                allDay: event.isAllDay,
+                allDay: customAppointment.isAllDay,
                 recurrenceId: '',
-                recurrenceRule: event.recurrenceRule,
+                recurrenceRule: customAppointment.recurrenceRule,
                 recurrenceExceptions: [],
               ),
             );
@@ -391,9 +391,18 @@ List<CustomAppointment> getEvents() {
 }
 
 //data source connector
-class _EventDataSource extends CalendarDataSource {
+class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   _EventDataSource(List<CustomAppointment> source) {
     appointments = source;
+  }
+  @override
+  Object? getId(int index) {
+    return appointments![index].id;
+  }
+
+  @override
+  String getSubject(int index) {
+    return appointments![index].eventTitle;
   }
 
   @override
@@ -407,29 +416,46 @@ class _EventDataSource extends CalendarDataSource {
   }
 
   @override
-  String getSubject(int index) {
-    return appointments![index].eventTitle;
-  }
-
-  @override
   bool isAllDay(int index) {
     return appointments![index].isAllDay;
   }
 
-  Color getCategory(int index) {
-    return appointments![index].catTitle;
+  @override
+  Object? getRecurrenceId(int index) {
+    return appointments![index].recurrenceId as Object?;
   }
 
-  // @override
-  // CustomAppointment convertAppointmentToObject(
-  //     CustomAppointment events, Appointment appointment) {
-  //   return CustomAppointment(
-  //       from: appointment.startTime,
-  //       to: appointment.endTime,
-  //       content: appointment.subject,
-  //       background: appointment.color,
-  //       isAllDay: appointment.isAllDay);
-  // }
+  @override
+  List<DateTime>? getRecurrenceExceptionDates(int index) {
+    return appointments![index].exceptionDates as List<DateTime>?;
+  }
+
+  @override
+  String? getRecurrenceRule(int index) {
+    return appointments![index].recurrenceRule;
+  }
+
+  @override
+  Color getColor(int index) {
+    return appointments![index].catColor as Color;
+  }
+
+  @override
+  CustomAppointment convertAppointmentToObject(
+      CustomAppointment events, Appointment appointment) {
+    return CustomAppointment(
+            //id: appointment.id,
+            subject: appointment.subject,
+            startTime: appointment.startTime,
+            endTime: appointment.endTime,
+            catColor: appointment.color,
+            isAllDay: appointment.isAllDay)
+//          recurrenceRule: appointment.recurrenceRule,
+//         recurrenceId: appointment.recurrenceId,
+//         exceptionDates: appointment.recurrenceExceptionDates);
+//   }
+        ;
+  }
 }
 
 class CustomAppointment extends Appointment {
@@ -437,7 +463,7 @@ class CustomAppointment extends Appointment {
   final String eventOrganizer;
   // List<UserProfile> userProfiles;
   // List<UserCalendar> userCalendars;
-  DateTime? dateText;
+
   // bool reminder;
   // bool holiday;
   final String catTitle;
@@ -454,7 +480,7 @@ class CustomAppointment extends Appointment {
     // List<UserCalendar> userCalendars = '',
     required DateTime startTime,
     required DateTime endTime,
-    required this.eventOrganizer,
+    this.eventOrganizer = '',
     String? subject,
     Color? color,
     required bool isAllDay,
@@ -466,7 +492,7 @@ class CustomAppointment extends Appointment {
     String? notes,
     String? location,
     List<Object>? resourceIds,
-    required this.catTitle,
+    this.catTitle = '',
     required this.catColor,
     this.participants = '',
   }) : super(
