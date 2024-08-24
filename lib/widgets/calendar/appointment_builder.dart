@@ -3,18 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:timelyst_flutter/widgets/calendar/calendar.dart';
 
-// import '../../models/user_calendar.dart';
-// import '../../models/user_profile.dart';
-
-import '../shared/categories.dart';
-
 Widget appointmentBuilder(BuildContext context,
     CalendarAppointmentDetails calendarAppointmentDetails) {
-  final Appointment appointment = calendarAppointmentDetails.appointments.first;
-  final categoryColor = appointment.color;
-
-  //final selectedCategory = 'Friends';
-  //final categoryColor = catColor(selectedCategory);
+  final CustomAppointment customAppointment =
+      calendarAppointmentDetails.appointments.first as CustomAppointment;
 
   final width = MediaQuery.of(context).size.width;
 
@@ -29,7 +21,7 @@ Widget appointmentBuilder(BuildContext context,
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: Text(
-                appointment.subject,
+                customAppointment.subject,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
@@ -37,7 +29,7 @@ Widget appointmentBuilder(BuildContext context,
               child: Align(
                 alignment: Alignment(-1.005, -1.05),
                 child: CircleAvatar(
-                  backgroundColor: appointment.color,
+                  backgroundColor: customAppointment.color,
                   radius: 3.5,
                 ),
               ),
@@ -47,7 +39,7 @@ Widget appointmentBuilder(BuildContext context,
               decoration: BoxDecoration(
                 border: Border(
                   left: BorderSide(
-                    color: appointment.color,
+                    color: customAppointment.color,
                     width: 3,
                     style: BorderStyle.solid,
                   ),

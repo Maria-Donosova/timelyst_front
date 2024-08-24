@@ -278,17 +278,22 @@ class _CalendarWState extends State<CalendarW> {
           .toString();
     }
     if (details.targetElement == CalendarElement.appointment) {
-      final Appointment appointmentDetails = details.appointments![0];
-
-      _subjectText = appointmentDetails.subject;
-      _dateText =
-          DateFormat('MMMM dd').format(appointmentDetails.startTime).toString();
-      _startTimeText =
-          DateFormat('hh:mm a').format(appointmentDetails.startTime).toString();
-      _endTimeText =
-          DateFormat('hh:mm a').format(appointmentDetails.endTime).toString();
-
+      //final Appointment appointmentDetails = details.appointments![0];
       final CustomAppointment customAppointment = details.appointments![0];
+
+      // _subjectText = appointmentDetails.subject;
+      // _dateText =
+      //     DateFormat('MMMM dd').format(appointmentDetails.startTime).toString();
+      _dateText =
+          DateFormat('MMMM dd').format(customAppointment.startTime).toString();
+      // _startTimeText =
+      //     DateFormat('hh:mm a').format(appointmentDetails.startTime).toString();
+      _startTimeText =
+          DateFormat('hh:mm a').format(customAppointment.startTime).toString();
+      // _endTimeText =
+      //     DateFormat('hh:mm a').format(appointmentDetails.endTime).toString();
+      _endTimeText =
+          DateFormat('hh:mm a').format(customAppointment.endTime).toString();
 
       showDialog(
           context: context,
@@ -298,14 +303,17 @@ class _CalendarWState extends State<CalendarW> {
                 eventOrganizer: '',
                 userProfiles: [],
                 userCalendars: [],
-                eventTitle: _subjectText,
+                //eventTitle: _subjectText,
+                eventTitle: customAppointment.subject,
                 dateText: _dateText,
-                from: _startTimeText,
-                to: _endTimeText,
+                //from: _startTimeText,
+                from: customAppointment.startTime.toString(),
+                //to: _endTimeText,
+                to: customAppointment.endTime.toString(),
                 catTitle: customAppointment.catTitle,
                 catColor: catColor(customAppointment.catTitle),
                 participants: '',
-                eventBody: customAppointment.eventBody,
+                eventBody: customAppointment.notes,
                 eventLocation: '',
                 allDay: customAppointment.isAllDay,
                 recurrenceId: '',
@@ -451,8 +459,8 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
             catColor: appointment.color,
             isAllDay: appointment.isAllDay)
 //          recurrenceRule: appointment.recurrenceRule,
-//         recurrenceId: appointment.recurrenceId,
-//         exceptionDates: appointment.recurrenceExceptionDates);
+//          recurrenceId: appointment.recurrenceId,
+//          exceptionDates: appointment.recurrenceExceptionDates);
 //   }
         ;
   }
@@ -463,19 +471,17 @@ class CustomAppointment extends Appointment {
   final String eventOrganizer;
   // List<UserProfile> userProfiles;
   // List<UserCalendar> userCalendars;
-
   // bool reminder;
   // bool holiday;
   final String catTitle;
   final Color catColor;
   final String participants;
-  String? eventBody;
-  // List<DateTime>? exceptionDates;
+
   // DateTime dateCreated;
   // DateTime dateChanged;
 
   CustomAppointment({
-    this.creator = 'Maria',
+    this.creator = '',
     // List<UserProfile> userProfiles = '',
     // List<UserCalendar> userCalendars = '',
     required DateTime startTime,
