@@ -8,9 +8,15 @@ Widget appointmentBuilder(BuildContext context,
   final CustomAppointment customAppointment =
       calendarAppointmentDetails.appointments.first as CustomAppointment;
 
+  bool isSameDate = customAppointment.startTime.year ==
+          customAppointment.endTime.year &&
+      customAppointment.startTime.month == customAppointment.endTime.month &&
+      customAppointment.startTime.day == customAppointment.endTime.day;
+
   final width = MediaQuery.of(context).size.width;
 
-  return Container(
+  if (isSameDate) {
+    return Container(
       width: width,
       height: calendarAppointmentDetails.bounds.height,
       child: Card(
@@ -29,7 +35,7 @@ Widget appointmentBuilder(BuildContext context,
               child: Align(
                 alignment: Alignment(-1.005, -1.05),
                 child: CircleAvatar(
-                  backgroundColor: customAppointment.color,
+                  backgroundColor: customAppointment.catColor,
                   radius: 3.5,
                 ),
               ),
@@ -39,7 +45,7 @@ Widget appointmentBuilder(BuildContext context,
               decoration: BoxDecoration(
                 border: Border(
                   left: BorderSide(
-                    color: customAppointment.color,
+                    color: customAppointment.catColor,
                     width: 3,
                     style: BorderStyle.solid,
                   ),
@@ -49,5 +55,18 @@ Widget appointmentBuilder(BuildContext context,
             ),
           ]),
         ),
-      ));
+      ),
+    );
+  } else
+    return Container(
+      width: width,
+      color: Theme.of(context).colorScheme.secondary,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: Text(
+          customAppointment.subject,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ),
+    );
 }

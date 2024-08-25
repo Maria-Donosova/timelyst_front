@@ -7,9 +7,9 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:timelyst_flutter/models/event.dart';
 import 'package:timelyst_flutter/widgets/shared/categories.dart';
 
+import 'appointment_builder.dart';
 import '/widgets/calendar/week_days.dart';
 // import '../shared/categories.dart';
-import 'appointment_builder.dart';
 import 'event_of_day.dart';
 import 'month_cell_builder.dart';
 import 'event_details.dart';
@@ -36,21 +36,6 @@ class _CalendarWState extends State<CalendarW> {
       _cellDateText;
   double? width, cellWidth;
 
-//function that updates eventOfDay: _subjectText to the event title where the start time is equal to 00:00 and the end time is equal to 23:59 for all the events in the data source
-  // void updateEventOfDay() {
-  //   final List<Event> events = getEvents();
-  //   final List<Appointment> allDayEvents = events
-  //       .where((event) =>
-  //           event.startTime.hour == 0 &&
-  //           event.startTime.minute == 0 &&
-  //           event.endTime.hour == 23 &&
-  //           event.endTime.minute == 59)
-  //       .toList();
-  //   if (allDayEvents.isNotEmpty) {
-  //     _subjectText = allDayEvents[0].subject;
-  //   }
-  // }
-
   @override
   void initState() {
     _headerText = 'header';
@@ -65,15 +50,6 @@ class _CalendarWState extends State<CalendarW> {
     width = 0.0;
     cellWidth = 0.0;
 
-    // updateEventOfDay();
-
-    // _getEvents().then((results) {
-    //   setState(() {
-    //     if (results != null) {
-    //       querySnapshot = results;
-    //     }
-    //   });
-    // });
     super.initState();
   }
 
@@ -90,16 +66,6 @@ class _CalendarWState extends State<CalendarW> {
         children: [
           Column(children: [
             calendarHeader(mediaQuery, context),
-            Container(
-              width: width,
-              color: const Color.fromRGBO(238, 243, 246, 1.0),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                child: EventOfDayW(
-                  eventOfDay: _subjectText,
-                ),
-              ),
-            ),
             isMonth
                 ? Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -307,9 +273,9 @@ class _CalendarWState extends State<CalendarW> {
                 eventTitle: customAppointment.subject,
                 dateText: _dateText,
                 //from: _startTimeText,
-                from: customAppointment.startTime.toString(),
+                from: _startTimeText,
                 //to: _endTimeText,
-                to: customAppointment.endTime.toString(),
+                to: _endTimeText,
                 catTitle: customAppointment.catTitle,
                 catColor: catColor(customAppointment.catTitle),
                 participants: '',
@@ -355,8 +321,8 @@ List<Event> events = [
   Event(
     eventOrganizer: 'Maria Donosova',
     eventTitle: 'Meeting with Team',
-    from: DateTime(2024, 08, 23, 0, 10, 0),
-    to: DateTime(2024, 08, 23, 23, 0, 0),
+    from: DateTime(2024, 08, 25, 0, 10, 0),
+    to: DateTime(2024, 08, 27, 23, 0, 0),
     isAllDay: false,
     eventBody: 'Discuss project updates',
     catTitle: 'Work',
@@ -403,24 +369,24 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   _EventDataSource(List<CustomAppointment> source) {
     appointments = source;
   }
-  @override
-  Object? getId(int index) {
-    return appointments![index].id;
-  }
+  // @override
+  // String? getId(int index) {
+  //   return appointments![index].id;
+  // }
 
   @override
   String getSubject(int index) {
-    return appointments![index].eventTitle;
+    return appointments![index].subject;
   }
 
   @override
   DateTime getStartTime(int index) {
-    return appointments![index].from;
+    return appointments![index].startTime;
   }
 
   @override
   DateTime getEndTime(int index) {
-    return appointments![index].to;
+    return appointments![index].endTime;
   }
 
   @override
@@ -435,7 +401,7 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
 
   @override
   List<DateTime>? getRecurrenceExceptionDates(int index) {
-    return appointments![index].exceptionDates as List<DateTime>?;
+    return appointments![index].recurrenceExceptionDates as List<DateTime>?;
   }
 
   @override
@@ -466,54 +432,100 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   }
 }
 
-class CustomAppointment extends Appointment {
-  final String creator;
-  final String eventOrganizer;
-  // List<UserProfile> userProfiles;
-  // List<UserCalendar> userCalendars;
-  // bool reminder;
-  // bool holiday;
-  final String catTitle;
-  final Color catColor;
-  final String participants;
-
-  // DateTime dateCreated;
-  // DateTime dateChanged;
-
+class CustomAppointment {
   CustomAppointment({
+    this.id = '',
     this.creator = '',
     // List<UserProfile> userProfiles = '',
     // List<UserCalendar> userCalendars = '',
-    required DateTime startTime,
-    required DateTime endTime,
+    required this.startTime,
+    required this.endTime,
     this.eventOrganizer = '',
-    String? subject,
-    Color? color,
-    required bool isAllDay,
-    String? startTimeZone,
-    String? endTimeZone,
-    String? recurrenceRule,
-    List<DateTime>? recurrenceExceptionDates,
-    Object? recurrenceId,
-    String? notes,
-    String? location,
-    List<Object>? resourceIds,
+    this.subject = '',
+    this.isAllDay = false,
+    this.startTimeZone,
+    this.endTimeZone,
+    this.recurrenceRule,
+    this.recurrenceExceptionDates,
+    this.recurrenceId,
+    this.notes,
+    this.location,
+    this.resourceIds,
     this.catTitle = '',
     required this.catColor,
     this.participants = '',
-  }) : super(
-          startTime: startTime,
-          endTime: endTime,
-          subject: subject ?? '',
-          color: catColor,
-          isAllDay: isAllDay,
-          startTimeZone: startTimeZone,
-          endTimeZone: endTimeZone,
-          recurrenceRule: recurrenceRule,
-          recurrenceExceptionDates: recurrenceExceptionDates,
-          recurrenceId: recurrenceId,
-          notes: notes,
-          location: location,
-          resourceIds: resourceIds,
-        );
+  });
+  String id;
+  String? creator;
+  // List<UserProfile> userProfiles;
+  // List<UserCalendar> userCalendars;
+  DateTime startTime;
+  DateTime endTime;
+
+  String? eventOrganizer;
+  String subject;
+  bool isAllDay;
+  String? startTimeZone;
+  String? endTimeZone;
+  String? recurrenceRule;
+  List<DateTime>? recurrenceExceptionDates;
+  Object? recurrenceId;
+  String? notes;
+  String? location;
+  List<Object>? resourceIds;
+  String catTitle;
+  Color catColor;
+  String? participants;
 }
+
+// class CustomAppointment extends Appointment {
+//   final String creator;
+//   final String eventOrganizer;
+//   // List<UserProfile> userProfiles;
+//   // List<UserCalendar> userCalendars;
+//   // bool reminder;
+//   // bool holiday;
+//   final String catTitle;
+//   final Color catColor;
+//   final String participants;
+
+//   // DateTime dateCreated;
+//   // DateTime dateChanged;
+
+//   CustomAppointment({
+//     this.creator = '',
+//     // List<UserProfile> userProfiles = '',
+//     // List<UserCalendar> userCalendars = '',
+//     required DateTime startTime,
+//     required DateTime endTime,
+//     this.eventOrganizer = '',
+//     String? subject,
+//     Color? color,
+//     required bool isAllDay,
+//     String? startTimeZone,
+//     String? endTimeZone,
+//     String? recurrenceRule,
+//     List<DateTime>? recurrenceExceptionDates,
+//     Object? recurrenceId,
+//     String? notes,
+//     String? location,
+//     List<Object>? resourceIds,
+//     this.catTitle = '',
+//     required this.catColor,
+//     this.participants = '',
+//   }) : super(
+//           startTime: startTime,
+//           endTime: endTime,
+//           subject: subject ?? '',
+//           color: catColor,
+//           isAllDay: isAllDay,
+//           startTimeZone: startTimeZone,
+//           endTimeZone: endTimeZone,
+//           recurrenceRule: recurrenceRule,
+//           recurrenceExceptionDates: recurrenceExceptionDates,
+//           recurrenceId: recurrenceId,
+//           notes: notes,
+//           location: location,
+//           resourceIds: resourceIds,
+//         );
+// }
