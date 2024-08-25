@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:timelyst_flutter/widgets/calendar/calendar.dart';
-
-import 'event_of_day.dart';
 
 double? width, cellWidth;
 

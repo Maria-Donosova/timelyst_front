@@ -327,6 +327,7 @@ List<Event> events = [
     eventBody: 'Discuss project updates',
     catTitle: 'Work',
     catColor: Colors.green,
+    recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
   ),
   Event(
     eventOrganizer: 'Maria Donosova',
@@ -337,6 +338,7 @@ List<Event> events = [
     eventBody: 'Have a lot of fun',
     catTitle: 'Friends',
     catColor: Colors.yellow,
+    recurrenceRule: 'FREQ=DAILY;INTERVAL=2;COUNT=10',
   )
 ];
 
@@ -350,7 +352,7 @@ List<CustomAppointment> getEvents() {
       endTime: event.to,
       isAllDay: event.isAllDay,
       recurrenceId: '',
-      recurrenceRule: '',
+      recurrenceRule: event.recurrenceRule,
       catTitle: event.catTitle,
       catColor: catColor(event.catTitle),
       eventOrganizer: '',
@@ -418,17 +420,17 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   CustomAppointment convertAppointmentToObject(
       CustomAppointment events, Appointment appointment) {
     return CustomAppointment(
-            //id: appointment.id,
-            subject: appointment.subject,
-            startTime: appointment.startTime,
-            endTime: appointment.endTime,
-            catColor: appointment.color,
-            isAllDay: appointment.isAllDay)
-//          recurrenceRule: appointment.recurrenceRule,
+      //id: appointment.id,
+      subject: appointment.subject,
+      startTime: appointment.startTime,
+      endTime: appointment.endTime,
+      catColor: appointment.color,
+      isAllDay: appointment.isAllDay,
+      recurrenceRule: appointment.recurrenceRule,
 //          recurrenceId: appointment.recurrenceId,
 //          exceptionDates: appointment.recurrenceExceptionDates);
 //   }
-        ;
+    );
   }
 }
 
