@@ -25,7 +25,7 @@ class CustomTheme with ChangeNotifier {
         onSurface: Colors.grey[900]!,
         shadow: const Color.fromRGBO(207, 204, 215, 100),
       ),
-      fontFamily: 'FontAwesome',
+      fontFamily: 'Lora',
       iconTheme: IconThemeData(
         color: Colors.grey[800],
         size: 16,

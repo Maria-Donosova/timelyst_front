@@ -39,7 +39,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  # flutter_launcher_icons: "^0.10.0"
 
 flutter_icons:
   android: true
@@ -65,7 +64,6 @@ flutter:
     - assets/images/   
     - assets/images/logos/timelyst_logo.png
     - assets/images/photos/web/landing_background.png
-    #- assets/images/photos/mobile_landing/timelyst_logo_mini.png
     - assets/images/icons/
     - assets/images/photos/
   # To add assets to your application, add an assets section, like this:
@@ -80,13 +78,15 @@ flutter:
   # https://flutter.dev/assets-and-images/#from-packages
 
   fonts:
-    - family: FontAwesome
+    - family: Lora
       fonts:
-         - asset: assets/fonts/FontAwesome_5_Free-Regular-400.otf
-           weight: 400
+        - asset: assets/fonts/Lora-Regular.ttf
+          weight: 400
+  #       - asset: assets/fonts/FontAwesome_5_Free-Regular-400.otf
+  #         weight: 400
   #       - asset: assets/fonts/FontAwesome 5 Free-Solid-900.otf
   #        weight: 900
-  #      - asset: assets/fonts/FontAwesome 5 Brands-Regular-400.otf
+  #       - asset: assets/fonts/FontAwesome 5 Brands-Regular-400.otf
   #       weight: 400
   #
   # For details regarding fonts from package dependencies,
