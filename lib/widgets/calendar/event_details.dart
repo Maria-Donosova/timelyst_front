@@ -18,9 +18,9 @@ class EventDetails extends StatefulWidget {
     required String? from,
     required String? to,
     required bool allDay,
-    required String? recurrenceId,
-    required String? recurrenceRule,
-    required List<DateTime>? recurrenceExceptions,
+    // required String? recurrenceId,
+    // required String? recurrenceRule,
+    // required List<DateTime>? recurrenceExceptionDates,
     // required bool reminder,
     // required bool holiday,
     required String? catTitle,
@@ -28,7 +28,7 @@ class EventDetails extends StatefulWidget {
     required String participants,
     required String? eventBody,
     required String eventLocation,
-    //required List<DateTime>? exceptionDates,
+
     // required DateTime dateCreated,
     // required DateTime dateChanged,
   })  : //_id = id,
@@ -41,9 +41,9 @@ class EventDetails extends StatefulWidget {
         _startTimeText = from,
         _endTimeText = to,
         _allDay = allDay,
-        _recurrenceId = recurrenceId,
-        _recurrenceRule = recurrenceRule,
-        _recurrenceExceptions = recurrenceExceptions,
+        // _recurrenceId = recurrenceId,
+        // _recurrenceRule = recurrenceRule,
+        // _recurrenceExceptionDates = recurrenceExceptionDates,
         // _reminder = reminder,
         // _holiday = holiday,
         _catTitle = catTitle,
@@ -51,7 +51,6 @@ class EventDetails extends StatefulWidget {
         _participants = participants,
         _eventBody = eventBody,
         _eventLocation = eventLocation;
-  // _exceptionDates = exceptionDates,
   // _dateCreated = dateCreated,
   // _dateChanged = dateChanged,
 
@@ -65,9 +64,9 @@ class EventDetails extends StatefulWidget {
   final String? _startTimeText;
   final String? _endTimeText;
   final bool _allDay;
-  final String? _recurrenceId;
-  final String? _recurrenceRule;
-  final List<DateTime>? _recurrenceExceptions;
+  // final String? _recurrenceId;
+  // final String? _recurrenceRule;
+  // final List<DateTime>? _recurrenceExceptionDates;
   // final String? _reminder;
   // final String? _holiday;
   final String? _catTitle;
@@ -75,7 +74,7 @@ class EventDetails extends StatefulWidget {
   final String? _participants;
   final String? _eventBody;
   final String _eventLocation;
-  // final List<DateTime>? _exceptionDates;
+
   // final DateTime _dateCreated;
   // final DateTime _dateChanged;
 

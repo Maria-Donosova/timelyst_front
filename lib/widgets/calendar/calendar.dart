@@ -4,13 +4,11 @@ import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:timelyst_flutter/models/event.dart';
-import 'package:timelyst_flutter/widgets/shared/categories.dart';
 
-import 'appointment_builder.dart';
+import 'package:timelyst_flutter/models/custom_appointment.dart';
+
 import '/widgets/calendar/week_days.dart';
-// import '../shared/categories.dart';
-import 'event_of_day.dart';
+import 'appointment_builder.dart';
 import 'month_cell_builder.dart';
 import 'event_details.dart';
 
@@ -244,22 +242,16 @@ class _CalendarWState extends State<CalendarW> {
           .toString();
     }
     if (details.targetElement == CalendarElement.appointment) {
-      //final Appointment appointmentDetails = details.appointments![0];
-      final CustomAppointment customAppointment = details.appointments![0];
+      final CustomAppointment _customAppointment = details.appointments![0];
 
-      // _subjectText = appointmentDetails.subject;
-      // _dateText =
-      //     DateFormat('MMMM dd').format(appointmentDetails.startTime).toString();
       _dateText =
-          DateFormat('MMMM dd').format(customAppointment.startTime).toString();
-      // _startTimeText =
-      //     DateFormat('hh:mm a').format(appointmentDetails.startTime).toString();
+          DateFormat('MMMM dd').format(_customAppointment.startTime).toString();
+
       _startTimeText =
-          DateFormat('hh:mm a').format(customAppointment.startTime).toString();
-      // _endTimeText =
-      //     DateFormat('hh:mm a').format(appointmentDetails.endTime).toString();
+          DateFormat('hh:mm a').format(_customAppointment.startTime).toString();
+
       _endTimeText =
-          DateFormat('hh:mm a').format(customAppointment.endTime).toString();
+          DateFormat('hh:mm a').format(_customAppointment.endTime).toString();
 
       showDialog(
           context: context,
@@ -269,22 +261,19 @@ class _CalendarWState extends State<CalendarW> {
                 eventOrganizer: '',
                 userProfiles: [],
                 userCalendars: [],
-                //eventTitle: _subjectText,
-                eventTitle: customAppointment.subject,
+                eventTitle: _customAppointment.subject,
                 dateText: _dateText,
-                //from: _startTimeText,
                 from: _startTimeText,
-                //to: _endTimeText,
                 to: _endTimeText,
-                catTitle: customAppointment.catTitle,
-                catColor: catColor(customAppointment.catTitle),
+                catTitle: _customAppointment.catTitle,
+                catColor: _customAppointment.catColor,
                 participants: '',
-                eventBody: customAppointment.notes,
+                eventBody: _customAppointment.body,
                 eventLocation: '',
-                allDay: customAppointment.isAllDay,
-                recurrenceId: '',
-                recurrenceRule: customAppointment.recurrenceRule,
-                recurrenceExceptions: [],
+                allDay: _customAppointment.isAllDay,
+                // recurrenceId: '',
+                // recurrenceRule: _customAppointment.recurrenceRule,
+                // recurrenceExceptionDates: [],
               ),
             );
           });
@@ -307,9 +296,9 @@ class _CalendarWState extends State<CalendarW> {
                 eventBody: '',
                 eventLocation: '',
                 allDay: false,
-                recurrenceId: '',
-                recurrenceRule: '',
-                recurrenceExceptions: [],
+                // recurrenceId: '',
+                // recurrenceRule: '',
+                // recurrenceExceptionDates: [],
               ),
             );
           });
@@ -317,47 +306,47 @@ class _CalendarWState extends State<CalendarW> {
 }
 
 //dummy events
-List<Event> events = [
-  Event(
-    eventOrganizer: 'Maria Donosova',
-    eventTitle: 'Meeting with Team',
-    from: DateTime(2024, 08, 25, 0, 10, 0),
-    to: DateTime(2024, 08, 27, 23, 0, 0),
+List<CustomAppointment> _appointments = [
+  CustomAppointment(
+    subject: 'Meeting with Team',
+    startTime: DateTime(2024, 08, 31, 0, 10, 0),
+    endTime: DateTime(2024, 09, 02, 23, 0, 0),
     isAllDay: false,
-    eventBody: 'Discuss project updates',
+    recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
     catTitle: 'Work',
     catColor: Colors.green,
-    recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
+    participants: 'John, Jane, Jim',
+    body: 'Discuss project updates',
   ),
-  Event(
-    eventOrganizer: 'Maria Donosova',
-    eventTitle: 'Get Together',
-    from: DateTime.now().add(Duration(hours: 2)),
-    to: DateTime.now().add(Duration(hours: 4)),
+  CustomAppointment(
+    subject: 'Get Together',
+    startTime: DateTime.now().add(Duration(hours: 1)),
+    endTime: DateTime.now().add(Duration(hours: 3)),
     isAllDay: false,
-    eventBody: 'Have a lot of fun',
+    recurrenceRule: 'FREQ=DAILY;INTERVAL=2;COUNT=10',
     catTitle: 'Friends',
     catColor: Colors.yellow,
-    recurrenceRule: 'FREQ=DAILY;INTERVAL=2;COUNT=10',
+    participants: 'John, Jane, Jim',
+    body: 'Have a lot of fun',
   )
 ];
 
 //map syncfusion appointment properties to event properties
 List<CustomAppointment> getEvents() {
-  return events.map((event) {
+  return _appointments.map((appointment) {
     return CustomAppointment(
       // id: '123',
-      subject: event.eventTitle,
-      startTime: event.from,
-      endTime: event.to,
-      isAllDay: event.isAllDay,
-      recurrenceId: '',
-      recurrenceRule: event.recurrenceRule,
-      catTitle: event.catTitle,
-      catColor: catColor(event.catTitle),
-      eventOrganizer: '',
+      subject: appointment.subject,
+      startTime: appointment.startTime,
+      endTime: appointment.endTime,
+      isAllDay: appointment.isAllDay,
+      // recurrenceId: '',
+      recurrenceRule: appointment.recurrenceRule,
+      catTitle: appointment.catTitle,
+      catColor: appointment.catColor,
+      // eventOrganizer: '',
       // participants: '',
-      notes: event.eventBody,
+      body: appointment.body,
       // eventConferenceDetails: '',
       // exceptionDates: ,
       // dateChanged: ,
@@ -378,42 +367,42 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
 
   @override
   String getSubject(int index) {
-    return appointments![index].subject;
+    return _appointments[index].subject;
   }
 
   @override
   DateTime getStartTime(int index) {
-    return appointments![index].startTime;
+    return _appointments[index].startTime;
   }
 
   @override
   DateTime getEndTime(int index) {
-    return appointments![index].endTime;
+    return _appointments[index].endTime;
   }
 
   @override
   bool isAllDay(int index) {
-    return appointments![index].isAllDay;
+    return _appointments[index].isAllDay;
   }
 
-  @override
-  Object? getRecurrenceId(int index) {
-    return appointments![index].recurrenceId as Object?;
-  }
+  // @override
+  // Object? getRecurrenceId(int index) {
+  //   return appointments[index].recurrenceId as Object?;
+  // }
 
-  @override
-  List<DateTime>? getRecurrenceExceptionDates(int index) {
-    return appointments![index].recurrenceExceptionDates as List<DateTime>?;
-  }
+  // @override
+  // List<DateTime>? getRecurrenceExceptionDates(int index) {
+  //   return appointments[index].recurrenceExceptionDates as List<DateTime>?;
+  // }
 
   @override
   String? getRecurrenceRule(int index) {
-    return appointments![index].recurrenceRule;
+    return _appointments[index].recurrenceRule;
   }
 
   @override
   Color getColor(int index) {
-    return appointments![index].catColor as Color;
+    return _appointments[index].catColor;
   }
 
   @override
@@ -427,107 +416,9 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
       catColor: appointment.color,
       isAllDay: appointment.isAllDay,
       recurrenceRule: appointment.recurrenceRule,
-//          recurrenceId: appointment.recurrenceId,
-//          exceptionDates: appointment.recurrenceExceptionDates);
+//    recurrenceId: appointment.recurrenceId,
+//    recurrenceExceptionDates: appointment.recurrenceExceptionDates);
 //   }
     );
   }
 }
-
-class CustomAppointment {
-  CustomAppointment({
-    this.id = '',
-    this.creator = '',
-    // List<UserProfile> userProfiles = '',
-    // List<UserCalendar> userCalendars = '',
-    required this.startTime,
-    required this.endTime,
-    this.eventOrganizer = '',
-    this.subject = '',
-    this.isAllDay = false,
-    this.startTimeZone,
-    this.endTimeZone,
-    this.recurrenceRule,
-    this.recurrenceExceptionDates,
-    this.recurrenceId,
-    this.notes,
-    this.location,
-    this.resourceIds,
-    this.catTitle = '',
-    required this.catColor,
-    this.participants = '',
-  });
-  String id;
-  String? creator;
-  // List<UserProfile> userProfiles;
-  // List<UserCalendar> userCalendars;
-  DateTime startTime;
-  DateTime endTime;
-
-  String? eventOrganizer;
-  String subject;
-  bool isAllDay;
-  String? startTimeZone;
-  String? endTimeZone;
-  String? recurrenceRule;
-  List<DateTime>? recurrenceExceptionDates;
-  Object? recurrenceId;
-  String? notes;
-  String? location;
-  List<Object>? resourceIds;
-  String catTitle;
-  Color catColor;
-  String? participants;
-}
-
-// class CustomAppointment extends Appointment {
-//   final String creator;
-//   final String eventOrganizer;
-//   // List<UserProfile> userProfiles;
-//   // List<UserCalendar> userCalendars;
-//   // bool reminder;
-//   // bool holiday;
-//   final String catTitle;
-//   final Color catColor;
-//   final String participants;
-
-//   // DateTime dateCreated;
-//   // DateTime dateChanged;
-
-//   CustomAppointment({
-//     this.creator = '',
-//     // List<UserProfile> userProfiles = '',
-//     // List<UserCalendar> userCalendars = '',
-//     required DateTime startTime,
-//     required DateTime endTime,
-//     this.eventOrganizer = '',
-//     String? subject,
-//     Color? color,
-//     required bool isAllDay,
-//     String? startTimeZone,
-//     String? endTimeZone,
-//     String? recurrenceRule,
-//     List<DateTime>? recurrenceExceptionDates,
-//     Object? recurrenceId,
-//     String? notes,
-//     String? location,
-//     List<Object>? resourceIds,
-//     this.catTitle = '',
-//     required this.catColor,
-//     this.participants = '',
-//   }) : super(
-//           startTime: startTime,
-//           endTime: endTime,
-//           subject: subject ?? '',
-//           color: catColor,
-//           isAllDay: isAllDay,
-//           startTimeZone: startTimeZone,
-//           endTimeZone: endTimeZone,
-//           recurrenceRule: recurrenceRule,
-//           recurrenceExceptionDates: recurrenceExceptionDates,
-//           recurrenceId: recurrenceId,
-//           notes: notes,
-//           location: location,
-//           resourceIds: resourceIds,
-//         );
-// }
