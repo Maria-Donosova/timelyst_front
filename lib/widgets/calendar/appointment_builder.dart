@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:timelyst_flutter/widgets/calendar/calendar.dart';
+import '/models/custom_appointment.dart';
 
 Widget appointmentBuilder(BuildContext context,
     CalendarAppointmentDetails calendarAppointmentDetails) {
