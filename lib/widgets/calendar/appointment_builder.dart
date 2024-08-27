@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:timelyst_flutter/widgets/shared/categories.dart';
 import '/models/custom_appointment.dart';
 
 Widget appointmentBuilder(BuildContext context,
@@ -35,7 +36,7 @@ Widget appointmentBuilder(BuildContext context,
               child: Align(
                 alignment: Alignment(-1.005, -1.05),
                 child: CircleAvatar(
-                  backgroundColor: customAppointment.catColor,
+                  backgroundColor: catColor(customAppointment.catTitle),
                   radius: 3.5,
                 ),
               ),
@@ -45,7 +46,7 @@ Widget appointmentBuilder(BuildContext context,
               decoration: BoxDecoration(
                 border: Border(
                   left: BorderSide(
-                    color: customAppointment.catColor,
+                    color: catColor(customAppointment.catTitle),
                     width: 3,
                     style: BorderStyle.solid,
                   ),
@@ -60,12 +61,14 @@ Widget appointmentBuilder(BuildContext context,
   } else
     return Container(
       width: width,
-      color: Theme.of(context).colorScheme.secondary,
+      color: catColor(customAppointment.catTitle),
       child: Padding(
         padding: const EdgeInsets.only(left: 8.0),
         child: Text(
           customAppointment.subject,
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
       ),
     );

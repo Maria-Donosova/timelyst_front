@@ -6,66 +6,63 @@ import '../../models/user_profile.dart'; // Imports the file that contains the U
 import '../../models/user_calendar.dart';
 
 class EventDetails extends StatefulWidget {
-  const EventDetails({
-    super.key,
+  EventDetails({
     //required String? id,
     //required String creator,
-    required String eventOrganizer,
-    required List<UserProfile> userProfiles,
-    required List<UserCalendar> userCalendars,
-    required String? eventTitle,
-    required String? dateText,
-    required String? from,
-    required String? to,
-    required bool allDay,
+    // List<UserProfile> userProfiles,
+    // List<UserCalendar> userCalendars,
+    // String eventOrganizer,
+    String? subject,
+    String? dateText,
+    String? startTime,
+    String? endTime,
+    // this.startTimeZone,
+    // this.endTimeZone,
+    bool? isAllDay,
     // required String? recurrenceId,
-    // required String? recurrenceRule,
+    String? recurrenceRule,
     // required List<DateTime>? recurrenceExceptionDates,
-    // required bool reminder,
-    // required bool holiday,
-    required String? catTitle,
-    required Color? catColor,
-    required String participants,
-    required String? eventBody,
-    required String eventLocation,
-
+    String? catTitle,
+    Color? catColor,
+    String? participants,
+    String? body,
+    String? location,
+    // this.resourceIds,
     // required DateTime dateCreated,
     // required DateTime dateChanged,
   })  : //_id = id,
         // _creator = creator,
-        _eventOrganizer = eventOrganizer,
-        _userProfiles = userProfiles,
-        _userCalendars = userCalendars,
-        _eventTitle = eventTitle,
+        // _userProfiles = userProfiles,
+        // _userCalendars = userCalendars,
+        // _eventOrganizer = eventOrganizer,
+        _subject = subject,
         _dateText = dateText,
-        _startTimeText = from,
-        _endTimeText = to,
-        _allDay = allDay,
+        _startTimeText = startTime,
+        _endTimeText = endTime,
+        _allDay = isAllDay,
         // _recurrenceId = recurrenceId,
-        // _recurrenceRule = recurrenceRule,
+        _recurrenceRule = recurrenceRule,
         // _recurrenceExceptionDates = recurrenceExceptionDates,
-        // _reminder = reminder,
-        // _holiday = holiday,
         _catTitle = catTitle,
         _catColor = catColor,
         _participants = participants,
-        _eventBody = eventBody,
-        _eventLocation = eventLocation;
+        _eventBody = body,
+        _eventLocation = location;
   // _dateCreated = dateCreated,
   // _dateChanged = dateChanged,
 
   //final String? _id;
   // final String _creator;
-  final String _eventOrganizer;
-  final List<UserProfile> _userProfiles;
-  final List<UserCalendar> _userCalendars;
-  final String? _eventTitle;
+  // final String _eventOrganizer;
+  // final List<UserProfile> _userProfiles;
+  // final List<UserCalendar> _userCalendars;
+  String? _subject;
   final String? _dateText;
   final String? _startTimeText;
   final String? _endTimeText;
-  final bool _allDay;
+  final bool? _allDay;
   // final String? _recurrenceId;
-  // final String? _recurrenceRule;
+  final String? _recurrenceRule;
   // final List<DateTime>? _recurrenceExceptionDates;
   // final String? _reminder;
   // final String? _holiday;
@@ -73,16 +70,16 @@ class EventDetails extends StatefulWidget {
   final Color? _catColor;
   final String? _participants;
   final String? _eventBody;
-  final String _eventLocation;
+  final String? _eventLocation;
 
   // final DateTime _dateCreated;
   // final DateTime _dateChanged;
 
   @override
-  State<EventDetails> createState() => NewEventScreentate();
+  State<EventDetails> createState() => EventDetailsScreentate();
 }
 
-class NewEventScreentate extends State<EventDetails> {
+class EventDetailsScreentate extends State<EventDetails> {
   late TextEditingController _eventSourceCalendar;
   late TextEditingController _eventTitleController;
   late TextEditingController _eventDateController;
@@ -91,7 +88,7 @@ class NewEventScreentate extends State<EventDetails> {
   late TextEditingController _eventDescriptionController;
   late TextEditingController _eventLocation;
   late TextEditingController _eventRecurrenceRule;
-  late TextEditingController _eventAttendees;
+  late TextEditingController _eventParticipants;
 
   final _appFormKey = GlobalKey<FormState>();
   bool isChecked = false;
@@ -105,7 +102,7 @@ class NewEventScreentate extends State<EventDetails> {
   @override
   void initState() {
     super.initState();
-    _eventTitleController = TextEditingController(text: widget._eventTitle);
+    _eventTitleController = TextEditingController(text: widget._subject);
     _eventDateController = TextEditingController(text: widget._dateText);
     _eventStartTimeController =
         TextEditingController(text: widget._startTimeText);
@@ -115,8 +112,8 @@ class NewEventScreentate extends State<EventDetails> {
     _eventDescriptionController =
         TextEditingController(text: widget._eventBody);
     _selectedCategory = widget._catTitle!;
-    _eventAttendees = TextEditingController(text: widget._participants);
-    _allDay = widget._allDay;
+    _eventParticipants = TextEditingController(text: widget._participants);
+    _allDay = widget._allDay!;
   }
 
 //function to select date

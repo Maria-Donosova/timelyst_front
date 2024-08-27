@@ -27,7 +27,6 @@ class _CalendarWState extends State<CalendarW> {
       _weekStart,
       _weekEnd,
       _month,
-      _subjectText,
       _startTimeText,
       _endTimeText,
       _dateText,
@@ -38,7 +37,6 @@ class _CalendarWState extends State<CalendarW> {
   void initState() {
     _headerText = 'header';
 
-    _subjectText = '';
     _startTimeText = '';
     _endTimeText = '';
     _dateText = '';
@@ -82,13 +80,13 @@ class _CalendarWState extends State<CalendarW> {
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: WeekDaysW(
                             cellWidth: cellWidth,
-                            viewHeaderText6: 'S',
-                            viewHeaderText: 'M',
-                            viewHeaderText1: 'T',
-                            viewHeaderText2: 'W',
-                            viewHeaderText3: 'T',
-                            viewHeaderText4: 'F',
-                            viewHeaderText5: 'S'),
+                            viewHeaderText6: 'Sun',
+                            viewHeaderText: 'Mon',
+                            viewHeaderText1: 'Tue',
+                            viewHeaderText2: 'Wed',
+                            viewHeaderText3: 'Thur',
+                            viewHeaderText4: 'Fri',
+                            viewHeaderText5: 'Sun'),
                       )
                     : Container(),
           ]),
@@ -132,6 +130,8 @@ class _CalendarWState extends State<CalendarW> {
                 appointmentBuilder: appointmentBuilder,
                 allowAppointmentResize: true,
                 allowDragAndDrop: true,
+                dragAndDropSettings:
+                    DragAndDropSettings(showTimeIndicator: true),
                 dataSource: _EventDataSource(getEvents()),
                 onTap: _calendarTapped,
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
@@ -242,7 +242,8 @@ class _CalendarWState extends State<CalendarW> {
           .toString();
     }
     if (details.targetElement == CalendarElement.appointment) {
-      final CustomAppointment _customAppointment = details.appointments![0];
+      final CustomAppointment _customAppointment =
+          details.appointments![0] as CustomAppointment;
 
       _dateText =
           DateFormat('MMMM dd').format(_customAppointment.startTime).toString();
@@ -258,19 +259,21 @@ class _CalendarWState extends State<CalendarW> {
           builder: (BuildContext context) {
             return AlertDialog(
               content: EventDetails(
-                eventOrganizer: '',
-                userProfiles: [],
-                userCalendars: [],
-                eventTitle: _customAppointment.subject,
+                // id: '',
+                // creator: '',
+                // userProfiles: [],
+                // userCalendars: [],
+                // eventOrganizer: '',
+                subject: _customAppointment.subject,
                 dateText: _dateText,
-                from: _startTimeText,
-                to: _endTimeText,
+                startTime: _startTimeText,
+                endTime: _endTimeText,
                 catTitle: _customAppointment.catTitle,
                 catColor: _customAppointment.catColor,
-                participants: '',
-                eventBody: _customAppointment.body,
-                eventLocation: '',
-                allDay: _customAppointment.isAllDay,
+                participants: _customAppointment.participants,
+                body: _customAppointment.body,
+                location: _customAppointment.location,
+                isAllDay: _customAppointment.isAllDay,
                 // recurrenceId: '',
                 // recurrenceRule: _customAppointment.recurrenceRule,
                 // recurrenceExceptionDates: [],
@@ -283,21 +286,21 @@ class _CalendarWState extends State<CalendarW> {
           builder: (BuildContext context) {
             return AlertDialog(
               content: EventDetails(
-                eventOrganizer: '',
-                userProfiles: [],
-                userCalendars: [],
-                eventTitle: '',
+                // eventOrganizer: '',
+                // userProfiles: [],
+                // userCalendars: [],
+                subject: '',
                 dateText: _cellDateText,
-                from: _startTimeText,
-                to: _endTimeText,
+                startTime: _startTimeText,
+                endTime: _endTimeText,
                 catTitle: '',
                 catColor: Colors.grey,
                 participants: '',
-                eventBody: '',
-                eventLocation: '',
-                allDay: false,
+                body: '',
+                isAllDay: false,
                 // recurrenceId: '',
                 // recurrenceRule: '',
+                location: '',
                 // recurrenceExceptionDates: [],
               ),
             );
@@ -309,12 +312,11 @@ class _CalendarWState extends State<CalendarW> {
 List<CustomAppointment> _appointments = [
   CustomAppointment(
     subject: 'Meeting with Team',
-    startTime: DateTime(2024, 08, 31, 0, 10, 0),
-    endTime: DateTime(2024, 09, 02, 23, 0, 0),
+    startTime: DateTime(2024, 08, 31, 0, 00, 0),
+    endTime: DateTime(2024, 09, 02, 23, 59, 0),
     isAllDay: false,
-    recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
+    // recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
     catTitle: 'Work',
-    catColor: Colors.green,
     participants: 'John, Jane, Jim',
     body: 'Discuss project updates',
   ),
@@ -323,15 +325,14 @@ List<CustomAppointment> _appointments = [
     startTime: DateTime.now().add(Duration(hours: 1)),
     endTime: DateTime.now().add(Duration(hours: 3)),
     isAllDay: false,
-    recurrenceRule: 'FREQ=DAILY;INTERVAL=2;COUNT=10',
+    // recurrenceRule: 'FREQ=DAILY;INTERVAL=2;COUNT=10',
     catTitle: 'Friends',
-    catColor: Colors.yellow,
     participants: 'John, Jane, Jim',
     body: 'Have a lot of fun',
   )
 ];
 
-//map syncfusion appointment properties to event properties
+//map syncfusion appointment properties to custom appointment properties
 List<CustomAppointment> getEvents() {
   return _appointments.map((appointment) {
     return CustomAppointment(
@@ -341,7 +342,7 @@ List<CustomAppointment> getEvents() {
       endTime: appointment.endTime,
       isAllDay: appointment.isAllDay,
       // recurrenceId: '',
-      recurrenceRule: appointment.recurrenceRule,
+      // recurrenceRule: appointment.recurrenceRule,
       catTitle: appointment.catTitle,
       catColor: appointment.catColor,
       // eventOrganizer: '',
@@ -395,10 +396,10 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   //   return appointments[index].recurrenceExceptionDates as List<DateTime>?;
   // }
 
-  @override
-  String? getRecurrenceRule(int index) {
-    return _appointments[index].recurrenceRule;
-  }
+  // @override
+  // String? getRecurrenceRule(int index) {
+  //   return _appointments[index].recurrenceRule;
+  // }
 
   @override
   Color getColor(int index) {
@@ -415,7 +416,7 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
       endTime: appointment.endTime,
       catColor: appointment.color,
       isAllDay: appointment.isAllDay,
-      recurrenceRule: appointment.recurrenceRule,
+      // recurrenceRule: appointment.recurrenceRule,
 //    recurrenceId: appointment.recurrenceId,
 //    recurrenceExceptionDates: appointment.recurrenceExceptionDates);
 //   }
