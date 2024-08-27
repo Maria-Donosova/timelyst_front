@@ -14,14 +14,16 @@ class CustomAppointment {
     // this.endTimeZone,
     this.isAllDay = false,
     // this.recurrenceId,
-    this.recurrenceRule,
+    this.recurrenceRule = '',
     // this.recurrenceExceptionDates,
     this.catTitle = '',
     this.catColor = Colors.grey,
     this.participants = '',
-    this.body,
-    // this.location,
+    this.body = '',
+    this.location = '',
     // this.resourceIds,
+    // required DateTime dateCreated,
+    // required DateTime dateChanged,
   });
   // String id;
   // String? creator;
@@ -39,8 +41,74 @@ class CustomAppointment {
   // List<DateTime>? recurrenceExceptionDates;
   String catTitle;
   Color catColor;
-  String? participants;
-  String? body;
-  // String? location;
+  String participants;
+  String body;
+  String location;
   // List<Object>? resourceIds;
+  // DateTime dateCreated;
+  // DateTime dateChanged;
 }
+
+// class CustomAppointment extends Appointment {
+//   // String id;
+//   // String? creator;
+//   // List<UserProfile> userProfiles;
+//   // List<UserCalendar> userCalendars;
+//   // String? eventOrganizer;
+//   String subject;
+//   DateTime startTime;
+//   DateTime endTime;
+//   // String? startTimeZone;
+//   // String? endTimeZone;
+//   bool isAllDay;
+//   // Object? recurrenceId;
+//   String? recurrenceRule;
+//   // List<DateTime>? recurrenceExceptionDates;
+//   String catTitle;
+//   Color catColor;
+//   String participants;
+//   String? body;
+//   String? location;
+//   // List<Object>? resourceIds;
+//   // DateTime dateCreated;
+//   // DateTime dateChanged;
+
+//   CustomAppointment({
+//     // this.id = '',
+//     // this.creator = '',
+//     // List<UserProfile> userProfiles = '',
+//     // List<UserCalendar> userCalendars = '',
+//     // this.eventOrganizer = '',
+//     this.subject = '',
+//     required this.startTime,
+//     required this.endTime,
+//     // this.startTimeZone,
+//     // this.endTimeZone,
+//     this.isAllDay = false,
+//     // this.recurrenceId,
+//     this.recurrenceRule = '',
+//     // this.recurrenceExceptionDates,
+//     this.catTitle = '',
+//     this.catColor = Colors.grey,
+//     this.participants = '',
+//     this.body = '',
+//     this.location = '',
+//     // this.resourceIds,
+//     // required DateTime dateCreated,
+//     // required DateTime dateChanged,
+//   }) : super(
+//           subject: subject,
+//           startTime: startTime,
+//           endTime: endTime,
+//           isAllDay: isAllDay,
+//           color: catColor,
+//           // startTimeZone: startTimeZone,
+//           // endTimeZone: endTimeZone,
+//           // resourceIds: resourceIds,
+//           recurrenceRule: recurrenceRule,
+//           // recurrenceExceptionDates: recurrenceExceptionDates,
+//           // recurrenceId: recurrenceId,
+//           notes: body,
+//           location: location,
+//         );
+// }
