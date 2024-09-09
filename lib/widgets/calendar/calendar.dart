@@ -246,7 +246,7 @@ class _CalendarWState extends State<CalendarW> {
           details.appointments![0] as CustomAppointment;
 
       _dateText =
-          DateFormat('MMMM dd').format(_customAppointment.startTime).toString();
+          DateFormat('MMM dd').format(_customAppointment.startTime).toString();
 
       _startTimeText =
           DateFormat('hh:mm a').format(_customAppointment.startTime).toString();
@@ -259,7 +259,7 @@ class _CalendarWState extends State<CalendarW> {
           builder: (BuildContext context) {
             return AlertDialog(
               content: EventDetails(
-                // id: '',
+                id: _customAppointment.id,
                 // creator: '',
                 // userProfiles: [],
                 // userCalendars: [],
@@ -286,6 +286,7 @@ class _CalendarWState extends State<CalendarW> {
           builder: (BuildContext context) {
             return AlertDialog(
               content: EventDetails(
+                id: '',
                 // eventOrganizer: '',
                 // userProfiles: [],
                 // userCalendars: [],
@@ -317,8 +318,9 @@ List<CustomAppointment> _appointments = [
     isAllDay: false,
     // recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
     catTitle: 'Work',
-    participants: 'John, Jane, Jim',
+    participants: 'Tim, Tom, Cook',
     body: 'Discuss project updates',
+    location: 'Conference Room 1',
   ),
   CustomAppointment(
     subject: 'Get Together',
@@ -329,6 +331,7 @@ List<CustomAppointment> _appointments = [
     catTitle: 'Friends',
     participants: 'John, Jane, Jim',
     body: 'Have a lot of fun',
+    location: 'Cafe',
   )
 ];
 
@@ -336,7 +339,7 @@ List<CustomAppointment> _appointments = [
 List<CustomAppointment> getEvents() {
   return _appointments.map((appointment) {
     return CustomAppointment(
-      // id: '123',
+      id: '123',
       subject: appointment.subject,
       startTime: appointment.startTime,
       endTime: appointment.endTime,
@@ -346,9 +349,10 @@ List<CustomAppointment> getEvents() {
       catTitle: appointment.catTitle,
       catColor: appointment.catColor,
       // eventOrganizer: '',
-      // participants: '',
+      participants: appointment.participants,
       body: appointment.body,
       // eventConferenceDetails: '',
+      location: appointment.location,
       // exceptionDates: ,
       // dateChanged: ,
       // dateCreated:
@@ -356,15 +360,15 @@ List<CustomAppointment> getEvents() {
   }).toList();
 }
 
-//data source connector
+//datasource connector: override syncfusion appointment properties with custom appointment properties
 class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   _EventDataSource(List<CustomAppointment> source) {
     appointments = source;
   }
-  // @override
-  // String? getId(int index) {
-  //   return appointments![index].id;
-  // }
+  @override
+  String? getId(int index) {
+    return appointments![index].id;
+  }
 
   @override
   String getSubject(int index) {
@@ -410,7 +414,7 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   CustomAppointment convertAppointmentToObject(
       CustomAppointment events, Appointment appointment) {
     return CustomAppointment(
-      //id: appointment.id,
+      id: appointment.id.toString(),
       subject: appointment.subject,
       startTime: appointment.startTime,
       endTime: appointment.endTime,
