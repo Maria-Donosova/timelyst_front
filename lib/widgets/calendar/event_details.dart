@@ -7,7 +7,7 @@ import '../../models/user_calendar.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
-    //required String? id,
+    required String? id,
     //required String creator,
     // List<UserProfile> userProfiles,
     // List<UserCalendar> userCalendars,
@@ -30,7 +30,7 @@ class EventDetails extends StatefulWidget {
     // this.resourceIds,
     // required DateTime dateCreated,
     // required DateTime dateChanged,
-  })  : //_id = id,
+  })  : _id = id,
         // _creator = creator,
         // _userProfiles = userProfiles,
         // _userCalendars = userCalendars,
@@ -51,7 +51,7 @@ class EventDetails extends StatefulWidget {
   // _dateCreated = dateCreated,
   // _dateChanged = dateChanged,
 
-  //final String? _id;
+  final String? _id;
   // final String _creator;
   // final String _eventOrganizer;
   // final List<UserProfile> _userProfiles;
@@ -748,7 +748,7 @@ class EventDetailsScreentate extends State<EventDetails> {
                 width: width * 0.8,
                 child: TextFormField(
                     autocorrect: true,
-                    //Rcontroller: ,
+                    controller: _eventParticipants,
                     style: Theme.of(context).textTheme.displaySmall,
                     maxLines: null,
                     decoration: const InputDecoration(
