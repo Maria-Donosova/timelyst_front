@@ -34,14 +34,12 @@ class WeekDaysW extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Container(
-            width: 20, //make flexible depending on width
-            child: Text('')),
+        Container(width: 20, child: Text('')),
         Container(
           width: cellWidth,
           child: Text(
             _viewHeaderText6!,
-            style: TextStyle(fontSize: 10),
+            style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
         ),
@@ -49,7 +47,7 @@ class WeekDaysW extends StatelessWidget {
           width: cellWidth,
           child: Text(
             _viewHeaderText!,
-            style: TextStyle(fontSize: 10),
+            style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
         ),
@@ -57,7 +55,7 @@ class WeekDaysW extends StatelessWidget {
           width: cellWidth,
           child: Text(
             _viewHeaderText1!,
-            style: TextStyle(fontSize: 10),
+            style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
         ),
@@ -65,7 +63,7 @@ class WeekDaysW extends StatelessWidget {
           width: cellWidth,
           child: Text(
             _viewHeaderText2!,
-            style: TextStyle(fontSize: 10),
+            style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
         ),
@@ -73,7 +71,7 @@ class WeekDaysW extends StatelessWidget {
           width: cellWidth,
           child: Text(
             _viewHeaderText3!,
-            style: TextStyle(fontSize: 10),
+            style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
         ),
@@ -81,7 +79,7 @@ class WeekDaysW extends StatelessWidget {
           width: cellWidth,
           child: Text(
             _viewHeaderText4!,
-            style: TextStyle(fontSize: 10),
+            style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
         ),
@@ -89,7 +87,7 @@ class WeekDaysW extends StatelessWidget {
           width: cellWidth,
           child: Text(
             _viewHeaderText5!,
-            style: TextStyle(fontSize: 10),
+            style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
         ),

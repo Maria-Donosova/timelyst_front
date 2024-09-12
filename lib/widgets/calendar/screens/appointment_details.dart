@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../shared/categories.dart'; // Imports the categories and their colors
+import '../../shared/categories.dart'; // Imports the categories and their colors
 
 class EventDetails extends StatefulWidget {
   EventDetails({
