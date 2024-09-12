@@ -9,8 +9,8 @@ import 'package:timelyst_flutter/widgets/calendar/models/custom_appointment.dart
 
 import 'screens/week_days.dart';
 import 'screens/appointment_builder.dart';
-import 'screens/month_cell_builder.dart';
-import 'event_details.dart';
+import 'screens/monthly_appointment_builder.dart';
+import 'screens/appointment_details.dart';
 
 enum _calView { day, week, month }
 
