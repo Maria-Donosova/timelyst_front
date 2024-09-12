@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:timelyst_flutter/widgets/shared/categories.dart';
+import 'package:timelyst_flutter/widgets/calendar/models/custom_appointment.dart';
 
 /// The width of the widget (local variable).
 double? width, cellWidth;
