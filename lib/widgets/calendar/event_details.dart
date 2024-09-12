@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 
 import '../shared/categories.dart'; // Imports the categories and their colors
 import '../../models/user_profile.dart'; // Imports the file that contains the UserProfile class
-import '../../models/user_calendar.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
