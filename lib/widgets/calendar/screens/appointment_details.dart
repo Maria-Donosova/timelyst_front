@@ -54,7 +54,7 @@ class EventDetails extends StatefulWidget {
   // final String _eventOrganizer;
   // final List<UserProfile> _userProfiles;
   // final List<UserCalendar> _userCalendars;
-  String? _subject;
+  final String? _subject;
   final String? _dateText;
   final String? _startTimeText;
   final String? _endTimeText;

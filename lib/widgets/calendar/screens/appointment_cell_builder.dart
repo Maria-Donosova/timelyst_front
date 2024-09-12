@@ -27,14 +27,13 @@ Widget appointmentBuilder(BuildContext context,
         customAppointment.startTime.month == customAppointment.endTime.month &&
         customAppointment.startTime.day == customAppointment.endTime.day;
 
-    if (isSameDate == false && 
+    if (isSameDate == false &&
         customAppointment.startTime.year == customAppointment.endTime.year &&
         customAppointment.startTime.month == customAppointment.endTime.month &&
         customAppointment.startTime.day == customAppointment.endTime.day) {
       isSameDate = true;
     }
 
-    // Get the width of the screen
     final width = MediaQuery.of(context).size.width;
 
     /**
@@ -42,56 +41,43 @@ Widget appointmentBuilder(BuildContext context,
      */
     if (isSameDate) {
       return Container(
-        // Set the width of the Container to the width of the screen
         width: width,
         // Set the height of the Container to the height of the appointment in the calendar
         height: calendarAppointmentDetails.bounds.height,
         child: Card(
-          // Add a shadow effect to the Card
           elevation: 4,
           child: InkWell(
-            // Change the color of the splash effect on tap
             splashColor: Colors.blueGrey.withAlpha(30),
             child: Stack(children: [
-              // Add some padding to the stack
               Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Text(
                   // Display the appointment subject
                   customAppointment.subject,
-                  // Style the text with the bodyLarge TextStyle
+
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
-              // Add a CircleAvatar to the stack with a single pixel radius
               SizedBox(
                 child: Align(
                   // Position the CircleAvatar at the top-left of the stack
                   alignment: Alignment(-1.005, -1.05),
                   child: CircleAvatar(
-                    // Set the background color of the CircleAvatar to the category color
                     backgroundColor: catColor(customAppointment.catTitle),
-                    // Set the radius of the CircleAvatar
                     radius: 3.5,
                   ),
                 ),
               ),
-              // Add a Container to the stack with some padding
               Container(
                 padding: const EdgeInsets.all(10.0),
-                // Add a decoration to the Container
                 decoration: BoxDecoration(
-                  // Add a border to the Container
                   border: Border(
                     left: BorderSide(
-                      // Add a border to the left of the Container with the category color
                       color: catColor(customAppointment.catTitle),
-                      // Set the width and style of the border
                       width: 3,
                       style: BorderStyle.solid,
                     ),
                   ),
-                  // Set the shape of the Container to a rectangle
                   shape: BoxShape.rectangle,
                 ),
               ),
@@ -99,24 +85,19 @@ Widget appointmentBuilder(BuildContext context,
           ),
         ),
       );
-    } 
+    }
     /**
      * If the appointment has a multi-day duration, return a colored rectangle with the appointment title
      */
     else {
       return Container(
-        // Set the width of the Container to the width of the screen
         width: width,
-        // Set the color of the Container to the category color
         color: catColor(customAppointment.catTitle),
         child: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Text(
-            // Display the appointment subject
             customAppointment.subject,
-            // Style the text with a TextStyle
             style: TextStyle(
-              // Set the text color to the primary color of the theme
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
@@ -124,6 +105,6 @@ Widget appointmentBuilder(BuildContext context,
       );
     }
   } catch (error) {
-    return Text('An error occurred');
+    return Text('Appointment cell builder error: $error');
   }
 }
