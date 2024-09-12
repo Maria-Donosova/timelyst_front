@@ -7,7 +7,7 @@ import '/models/custom_appointment.dart';
 Widget appointmentBuilder(BuildContext context,
     CalendarAppointmentDetails calendarAppointmentDetails) {
   final CustomAppointment customAppointment =
-      calendarAppointmentDetails.appointments.first as CustomAppointment;
+      calendarAppointmentDetails.appointments.first;
 
   bool isSameDate = customAppointment.startTime.year ==
           customAppointment.endTime.year &&

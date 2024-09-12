@@ -242,8 +242,7 @@ class _CalendarWState extends State<CalendarW> {
           .toString();
     }
     if (details.targetElement == CalendarElement.appointment) {
-      final CustomAppointment _customAppointment =
-          details.appointments![0] as CustomAppointment;
+      final CustomAppointment _customAppointment = details.appointments![0];
 
       _dateText =
           DateFormat('MMM dd').format(_customAppointment.startTime).toString();
