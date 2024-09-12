@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../shared/categories.dart'; // Imports the categories and their colors
-import '../../models/user_profile.dart'; // Imports the file that contains the UserProfile class
 
 class EventDetails extends StatefulWidget {
   EventDetails({
