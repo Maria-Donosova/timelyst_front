@@ -312,9 +312,9 @@ class _CalendarWState extends State<CalendarW> {
 List<CustomAppointment> _appointments = [
   CustomAppointment(
     subject: 'Meeting with Team',
-    startTime: DateTime(2024, 09, 12, 0, 00, 0),
-    endTime: DateTime(2024, 09, 12, 23, 59, 0),
-    isAllDay: false,
+    startTime: DateTime(2024, 09, 13, 0, 00, 0),
+    endTime: DateTime(2024, 09, 13, 23, 59, 0),
+    isAllDay: true,
     // recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
     catTitle: 'Work',
     participants: 'Tim, Tom, Cook',
