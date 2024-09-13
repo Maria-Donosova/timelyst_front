@@ -19,11 +19,13 @@ class CustomAppointment {
     this.catTitle = '',
     this.catColor = Colors.grey,
     this.participants = '',
-    this.body = '',
+    this.description = '',
     this.location = '',
     // this.resourceIds,
     // required DateTime dateCreated,
     // required DateTime dateChanged,
+    this.startTimeZone = '',
+    this.endTimeZone = '',
   });
   String id;
   // String? creator;
@@ -42,9 +44,11 @@ class CustomAppointment {
   String catTitle;
   Color catColor;
   String participants;
-  String body;
+  String description;
   String location;
   // List<Object>? resourceIds;
   // DateTime dateCreated;
   // DateTime dateChanged;
+  String startTimeZone;
+  String endTimeZone;
 }

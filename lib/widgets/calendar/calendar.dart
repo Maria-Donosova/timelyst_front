@@ -23,6 +23,7 @@ class CalendarW extends StatefulWidget {
 
 class _CalendarWState extends State<CalendarW> {
   final CalendarController _controller = CalendarController();
+
   String? _headerText,
       _weekStart,
       _weekEnd,
@@ -270,7 +271,7 @@ class _CalendarWState extends State<CalendarW> {
                 catTitle: _customAppointment.catTitle,
                 catColor: _customAppointment.catColor,
                 participants: _customAppointment.participants,
-                body: _customAppointment.body,
+                body: _customAppointment.description,
                 location: _customAppointment.location,
                 isAllDay: _customAppointment.isAllDay,
                 // recurrenceId: '',
@@ -313,12 +314,13 @@ List<CustomAppointment> _appointments = [
   CustomAppointment(
     subject: 'Meeting with Team',
     startTime: DateTime(2024, 09, 13, 0, 00, 0),
-    endTime: DateTime(2024, 09, 13, 23, 59, 0),
+    endTime: DateTime(2024, 09, 16, 23, 59, 0),
     isAllDay: true,
     // recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
     catTitle: 'Work',
-    participants: 'Tim, Tom, Cook',
-    body: 'Discuss project updates',
+    catColor: Color.fromRGBO(8, 100, 237, 1),
+    participants: 'tim@gmail.com, tom@gmail.com, cook@test.com',
+    description: 'Discuss project updates',
     location: 'Conference Room 1',
   ),
   CustomAppointment(
@@ -328,8 +330,9 @@ List<CustomAppointment> _appointments = [
     isAllDay: false,
     // recurrenceRule: 'FREQ=DAILY;INTERVAL=2;COUNT=10',
     catTitle: 'Friends',
-    participants: 'John, Jane, Jim',
-    body: 'Have a lot of fun',
+    catColor: Color.fromRGBO(255, 239, 91, 1),
+    participants: 'john@test.com, jane@test.com, jim@test.com',
+    description: 'Have a lot of fun',
     location: 'Cafe',
   )
 ];
@@ -364,15 +367,6 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   _EventDataSource(List<CustomAppointment> source) {
     appointments = source;
   }
-  @override
-  String? getId(int index) {
-    return appointments![index].id;
-  }
-
-  @override
-  String getSubject(int index) {
-    return _appointments[index].subject;
-  }
 
   @override
   DateTime getStartTime(int index) {
@@ -385,8 +379,43 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   }
 
   @override
+  String getStartTimeZone(int index) {
+    return _appointments[index].startTimeZone;
+  }
+
+  @override
+  String getEndTimeZone(int index) {
+    return _appointments[index].endTimeZone;
+  }
+
+  @override
+  String getSubject(int index) {
+    return _appointments[index].subject;
+  }
+
+  @override
+  Color getColor(int index) {
+    return _appointments[index].catColor;
+  }
+
+  @override
   bool isAllDay(int index) {
     return _appointments[index].isAllDay;
+  }
+
+  // @override
+  // String? getRecurrenceRule(int index) {
+  //   return _appointments[index].recurrenceRule;
+  // }
+
+  @override
+  String getNotes(int index) {
+    return _appointments[index].description;
+  }
+
+  @override
+  String getLocation(int index) {
+    return _appointments[index].location;
   }
 
   // @override
@@ -399,26 +428,20 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   //   return appointments[index].recurrenceExceptionDates as List<DateTime>?;
   // }
 
-  // @override
-  // String? getRecurrenceRule(int index) {
-  //   return _appointments[index].recurrenceRule;
-  // }
-
-  @override
-  Color getColor(int index) {
-    return _appointments[index].catColor;
-  }
-
   @override
   CustomAppointment convertAppointmentToObject(
-      CustomAppointment events, Appointment appointment) {
+      CustomAppointment _customAppointment, Appointment appointment) {
     return CustomAppointment(
       id: appointment.id.toString(),
       subject: appointment.subject,
       startTime: appointment.startTime,
       endTime: appointment.endTime,
-      catColor: appointment.color,
+      catTitle: _customAppointment.catTitle,
+      // catColor: appointment.color,
       isAllDay: appointment.isAllDay,
+      description: _customAppointment.description,
+      location: _customAppointment.location,
+      participants: _customAppointment.participants,
       // recurrenceRule: appointment.recurrenceRule,
 //    recurrenceId: appointment.recurrenceId,
 //    recurrenceExceptionDates: appointment.recurrenceExceptionDates);

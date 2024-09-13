@@ -478,6 +478,7 @@ class EventDetailsScreentate extends State<EventDetails> {
     //bool _isSelected = false;
     final selectedCategory = widget._catTitle;
     var categoryColor = catColor(selectedCategory!);
+    var isAllDay = widget._allDay;
     final width = MediaQuery.of(context).size.width;
 
     return Form(
@@ -623,6 +624,7 @@ class EventDetailsScreentate extends State<EventDetails> {
                     setState(() {
                       _allDay = !_allDay;
                       _setAllDay();
+                      isAllDay = !isAllDay!;
                     });
                   },
                   color: _allDay
