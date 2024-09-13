@@ -132,7 +132,7 @@ class _CalendarWState extends State<CalendarW> {
                 allowDragAndDrop: true,
                 dragAndDropSettings:
                     DragAndDropSettings(showTimeIndicator: true),
-                dataSource: _EventDataSource(getEvents()),
+                dataSource: _EventDataSource(_appointments),
                 onTap: _calendarTapped,
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
                   if (_controller.view == CalendarView.month) {
@@ -312,8 +312,8 @@ class _CalendarWState extends State<CalendarW> {
 List<CustomAppointment> _appointments = [
   CustomAppointment(
     subject: 'Meeting with Team',
-    startTime: DateTime(2024, 08, 31, 0, 00, 0),
-    endTime: DateTime(2024, 09, 02, 23, 59, 0),
+    startTime: DateTime(2024, 09, 12, 0, 00, 0),
+    endTime: DateTime(2024, 09, 12, 23, 59, 0),
     isAllDay: false,
     // recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
     catTitle: 'Work',
@@ -334,30 +334,30 @@ List<CustomAppointment> _appointments = [
   )
 ];
 
-//map syncfusion appointment properties to custom appointment properties
-List<CustomAppointment> getEvents() {
-  return _appointments.map((appointment) {
-    return CustomAppointment(
-      id: '123',
-      subject: appointment.subject,
-      startTime: appointment.startTime,
-      endTime: appointment.endTime,
-      isAllDay: appointment.isAllDay,
-      // recurrenceId: '',
-      // recurrenceRule: appointment.recurrenceRule,
-      catTitle: appointment.catTitle,
-      catColor: appointment.catColor,
-      // eventOrganizer: '',
-      participants: appointment.participants,
-      body: appointment.body,
-      // eventConferenceDetails: '',
-      location: appointment.location,
-      // exceptionDates: ,
-      // dateChanged: ,
-      // dateCreated:
-    );
-  }).toList();
-}
+// //map syncfusion appointment properties to custom appointment properties
+// List<CustomAppointment> getEvents() {
+//   return _appointments.map((appointment) {
+//     return CustomAppointment(
+//       id: appointment.id,
+//       subject: appointment.subject,
+//       startTime: appointment.startTime,
+//       endTime: appointment.endTime,
+//       isAllDay: appointment.isAllDay,
+//       // recurrenceId: appointment.recurrenceId,
+//       // recurrenceRule: appointment.recurrenceRule,
+//       //catTitle: appointment.catTitle,
+//       catColor: appointment.catColor,
+//       // eventOrganizer: '',
+//       participants: appointment.participants,
+//       body: appointment.body,
+//       // eventConferenceDetails: '',
+//       location: appointment.location,
+//       // exceptionDates: ,
+//       // dateChanged: ,
+//       // dateCreated:
+//     );
+//   }).toList();
+// }
 
 //datasource connector: override syncfusion appointment properties with custom appointment properties
 class _EventDataSource extends CalendarDataSource<CustomAppointment> {
