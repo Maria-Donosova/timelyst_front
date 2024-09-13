@@ -275,7 +275,7 @@ class _CalendarWState extends State<CalendarW> {
                 location: _customAppointment.location,
                 isAllDay: _customAppointment.isAllDay,
                 // recurrenceId: '',
-                // recurrenceRule: _customAppointment.recurrenceRule,
+                recurrenceRule: _customAppointment.recurrenceRule,
                 // recurrenceExceptionDates: [],
               ),
             );
@@ -300,7 +300,7 @@ class _CalendarWState extends State<CalendarW> {
                 body: '',
                 isAllDay: false,
                 // recurrenceId: '',
-                // recurrenceRule: '',
+                recurrenceRule: '',
                 location: '',
                 // recurrenceExceptionDates: [],
               ),
@@ -316,7 +316,7 @@ List<CustomAppointment> _appointments = [
     startTime: DateTime(2024, 09, 13, 0, 00, 0),
     endTime: DateTime(2024, 09, 16, 23, 59, 0),
     isAllDay: true,
-    // recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
+    recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
     catTitle: 'Work',
     catColor: Color.fromRGBO(8, 100, 237, 1),
     participants: 'tim@gmail.com, tom@gmail.com, cook@test.com',
@@ -328,7 +328,7 @@ List<CustomAppointment> _appointments = [
     startTime: DateTime.now().add(Duration(hours: 1)),
     endTime: DateTime.now().add(Duration(hours: 3)),
     isAllDay: false,
-    // recurrenceRule: 'FREQ=DAILY;INTERVAL=2;COUNT=10',
+    recurrenceRule: 'FREQ=DAILY;INTERVAL=2;COUNT=10',
     catTitle: 'Friends',
     catColor: Color.fromRGBO(255, 239, 91, 1),
     participants: 'john@test.com, jane@test.com, jim@test.com',
@@ -403,10 +403,10 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
     return _appointments[index].isAllDay;
   }
 
-  // @override
-  // String? getRecurrenceRule(int index) {
-  //   return _appointments[index].recurrenceRule;
-  // }
+  @override
+  String? getRecurrenceRule(int index) {
+    return _appointments[index].recurrenceRule;
+  }
 
   @override
   String getNotes(int index) {
@@ -437,12 +437,11 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
       startTime: appointment.startTime,
       endTime: appointment.endTime,
       catTitle: _customAppointment.catTitle,
-      // catColor: appointment.color,
       isAllDay: appointment.isAllDay,
       description: _customAppointment.description,
       location: _customAppointment.location,
       participants: _customAppointment.participants,
-      // recurrenceRule: appointment.recurrenceRule,
+      recurrenceRule: appointment.recurrenceRule,
 //    recurrenceId: appointment.recurrenceId,
 //    recurrenceExceptionDates: appointment.recurrenceExceptionDates);
 //   }
