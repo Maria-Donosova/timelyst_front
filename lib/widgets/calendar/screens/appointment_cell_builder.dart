@@ -22,21 +22,6 @@ Widget appointmentBuilder(BuildContext context,
 
     // Check if the appointment has a single day duration
     // If the end time and start time have the same year, month, and day, it's a single day duration
-    DateTime startOfDay = DateTime(
-        customAppointment.startTime.year,
-        customAppointment.startTime.month,
-        customAppointment.startTime.day + 1,
-        0,
-        0,
-        0);
-
-    DateTime endOfDay = DateTime(
-        customAppointment.endTime.year,
-        customAppointment.endTime.month,
-        customAppointment.endTime.day,
-        23,
-        59,
-        59);
 
     bool isSameDay = customAppointment.startTime.year ==
             customAppointment.endTime.year &&
