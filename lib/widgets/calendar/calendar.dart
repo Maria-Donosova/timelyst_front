@@ -399,8 +399,8 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   // }
 
   // @override
-  // List<DateTime>? getRecurrenceExceptionDates(int index) {
-  //   return appointments[index].recurrenceExceptionDates as List<DateTime>?;
+  // List<DateTime> getRecurrenceExceptionDates(int index) {
+  //   return appointments![index].recurrenceExceptionDates;
   // }
 
   @override

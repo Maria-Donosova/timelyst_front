@@ -214,7 +214,7 @@ class EventDetailsScreentate extends State<EventDetails> {
                       style: ElevatedButton.styleFrom(
                           backgroundColor:
                               Theme.of(context).colorScheme.secondary),
-                      child: Text('Cancel',
+                      child: Text('Delete',
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onPrimary,
                           )),
