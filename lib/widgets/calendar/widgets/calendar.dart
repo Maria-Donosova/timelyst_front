@@ -7,10 +7,10 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import 'package:timelyst_flutter/widgets/calendar/models/custom_appointment.dart';
 
-import 'screens/week_days.dart';
-import 'screens/appointment_cell_builder.dart';
-import 'screens/monthly_appointment_cell_builder.dart';
-import 'screens/appointment_details.dart';
+import '../screens/week_days.dart';
+import '../screens/appointment_cell_builder.dart';
+import '../screens/monthly_appointment_cell_builder.dart';
+import '../screens/appointment_details.dart';
 
 enum _calView { day, week, month }
 
@@ -234,6 +234,8 @@ class _CalendarWState extends State<CalendarW> {
     );
   }
 
+  //function that updates datasource collection to reflect the changes on UI that fs an appointment added to the datasource or removed from the datasource
+
   void _calendarTapped(CalendarTapDetails details) {
     if (details.targetElement == CalendarElement.calendarCell) {
       _cellDateText = DateFormat('MMMM dd').format(details.date!).toString();
@@ -328,7 +330,7 @@ List<CustomAppointment> _appointments = [
     startTime: DateTime.now().add(Duration(hours: 1)),
     endTime: DateTime.now().add(Duration(hours: 3)),
     isAllDay: false,
-    // recurrenceRule: 'FREQ=DAILY;INTERVAL=2;COUNT=10',
+    recurrenceRule: 'FREQ=DAILY;INTERVAL=2;COUNT=10',
     catTitle: 'Friends',
     catColor: Color.fromRGBO(255, 239, 91, 1),
     participants: 'john@test.com, jane@test.com, jim@test.com',

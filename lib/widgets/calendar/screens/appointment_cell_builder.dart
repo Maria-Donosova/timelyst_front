@@ -45,9 +45,7 @@ Widget appointmentBuilder(BuildContext context,
               Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Text(
-                  // Display the appointment subject
                   customAppointment.subject,
-
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
