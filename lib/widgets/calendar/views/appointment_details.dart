@@ -680,7 +680,9 @@ class EventDetailsScreentate extends State<EventDetails> {
                               size: Theme.of(context).iconTheme.size,
                               Icons.event_repeat_rounded),
                           onPressed: () {
-                            RecurrentAppointmentsPopUp;
+                            RecurrentAppointmentsPopUp(
+                              recurrenceRule: _recurrence,
+                            );
                             //_selectRecurrenceRule(context);
                             setState(() {
                               // _isRecurring = !_isRecurring;

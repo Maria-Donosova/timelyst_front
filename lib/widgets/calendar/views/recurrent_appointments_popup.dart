@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 class RecurrentAppointmentsPopUp extends StatefulWidget {
   RecurrentAppointmentsPopUp(
       {required this.recurrenceRule,
-      required this.onRecurrenceRuleChange,
-      required this.onRecurrenceRuleClose,
-      required this.isRecurring,
-      required this.selectedDays});
+      //this.onRecurrenceRuleChange,
+      //this.onRecurrenceRuleClose,
+      this.isRecurring = false,
+      this.selectedDays = const <String>[]});
 
   String recurrenceRule;
-  ValueChanged<String> onRecurrenceRuleChange;
-  VoidCallback onRecurrenceRuleClose;
+  late ValueChanged<String> onRecurrenceRuleChange;
+  late VoidCallback onRecurrenceRuleClose;
   bool isRecurring;
   List<String> selectedDays;
 
