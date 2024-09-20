@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 
-class RecurrentAppointmentsDetails extends StatefulWidget {
-  RecurrentAppointmentsDetails(
+class RecurrentAppointmentsPopUp extends StatefulWidget {
+  RecurrentAppointmentsPopUp(
       {required this.recurrenceRule,
       required this.onRecurrenceRuleChange,
       required this.onRecurrenceRuleClose});
@@ -13,20 +13,20 @@ class RecurrentAppointmentsDetails extends StatefulWidget {
   VoidCallback onRecurrenceRuleClose;
 
   @override
-  _RecurrentAppointmentsDetailsState createState() =>
-      _RecurrentAppointmentsDetailsState();
+  _RecurrentAppointmentsPopUpState createState() =>
+      _RecurrentAppointmentsPopUpState();
 }
 
-class _RecurrentAppointmentsDetailsState
-    extends State<RecurrentAppointmentsDetails> {
-  late TextEditingController _eventRecurrenceRule;
+class _RecurrentAppointmentsPopUpState
+    extends State<RecurrentAppointmentsPopUp> {
+  //late TextEditingController _eventRecurrenceRule;
   late String _recurrence;
   late List<String> _selectedDays;
   bool _isRecurring = false;
 
   @override
   void initState() {
-    _eventRecurrenceRule = TextEditingController();
+    //_eventRecurrenceRule = TextEditingController();
     _recurrence = 'None';
     _selectedDays = <String>[];
     super.initState();
