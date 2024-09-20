@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../calendar/widgets/calendar.dart';
+import '../calendar/controllers/calendar.dart';
 
 class RightPanel extends StatelessWidget {
   const RightPanel({Key? key}) : super(key: key);
