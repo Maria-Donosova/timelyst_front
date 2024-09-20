@@ -112,15 +112,15 @@ class _NewTaskWState extends State<NewTaskW> {
                                       },
                                       onFieldSubmitted: (_) {
                                         FocusScope.of(context)
-                                            .requestFocus(_taskFocusNode);
+                                           .requestFocus(_taskFocusNode);
                                       },
                                     ),
                                     DropdownButton<String>(
                                       hint: Text(
                                         'Category',
                                         style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall,
+                                           .textTheme
+                                           .titleSmall,
                                       ),
                                       icon: const Icon(Icons.arrow_downward),
                                       iconSize: 14,
@@ -132,7 +132,7 @@ class _NewTaskWState extends State<NewTaskW> {
                                             // runMutation({
                                             //   "task_description":
                                             //       _taskDescriptionController.text
-                                            //           .trim(),
+                                            //          .trim(),
                                             //   // "task_type":
                                             //   //  _taskTypeController.text.trim(),
                                             //   "category": _selectedCategory,
@@ -178,4 +178,6 @@ class _NewTaskWState extends State<NewTaskW> {
 // // // }
 // // // """;
 // // //   }
-// // // }
+// // // }```
+
+lib/widgets/ToDo/task_list.dart
