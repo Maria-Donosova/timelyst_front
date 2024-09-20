@@ -73,6 +73,8 @@ class _RecurrentAppointmentsPopUpState
             onPressed: () {
               _changeRecurringColor();
               _changeRecurringPattern();
+              //widget.onRecurrenceRuleChange(_recurrence);
+
               Navigator.of(context).pop();
             },
           )

@@ -7,10 +7,10 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import 'package:timelyst_flutter/widgets/calendar/models/custom_appointment.dart';
 
-import '../screens/week_days.dart';
-import '../screens/appointment_cell_builder.dart';
-import '../screens/monthly_appointment_cell_builder.dart';
-import '../screens/appointment_details.dart';
+import '../views/week_days.dart';
+import '../views/appointment_cell_builder.dart';
+import '../views/monthly_appointment_cell_builder.dart';
+import '../views/appointment_details.dart';
 
 enum _calView { day, week, month }
 
