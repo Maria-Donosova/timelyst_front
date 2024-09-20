@@ -6,11 +6,15 @@ class RecurrentAppointmentsPopUp extends StatefulWidget {
   RecurrentAppointmentsPopUp(
       {required this.recurrenceRule,
       required this.onRecurrenceRuleChange,
-      required this.onRecurrenceRuleClose});
+      required this.onRecurrenceRuleClose,
+      required this.isRecurring,
+      required this.selectedDays});
 
   String recurrenceRule;
   ValueChanged<String> onRecurrenceRuleChange;
   VoidCallback onRecurrenceRuleClose;
+  bool isRecurring;
+  List<String> selectedDays;
 
   @override
   _RecurrentAppointmentsPopUpState createState() =>
@@ -20,30 +24,30 @@ class RecurrentAppointmentsPopUp extends StatefulWidget {
 class _RecurrentAppointmentsPopUpState
     extends State<RecurrentAppointmentsPopUp> {
   //late TextEditingController _eventRecurrenceRule;
-  late String _recurrence;
-  late List<String> _selectedDays;
-  bool _isRecurring = false;
+  //late String _recurrence;
+  //late List<String> _selectedDays;
+  //bool _isRecurring = false;
 
   @override
   void initState() {
     //_eventRecurrenceRule = TextEditingController();
-    _recurrence = 'None';
-    _selectedDays = <String>[];
+    widget.recurrenceRule = 'None';
+    widget.selectedDays = <String>[];
     super.initState();
   }
 
   void _changeRecurringColor() {
-    if (_recurrence != 'None') {
+    if (widget.recurrenceRule != 'None') {
       setState(() {
-        _isRecurring = true;
+        widget.isRecurring = true;
       });
     }
   }
 
   void _changeRecurringPattern() {
-    if (_recurrence != 'None') {
+    if (widget.recurrenceRule != 'None') {
       setState(() {
-        _recurrence = _recurrence;
+        widget.recurrenceRule = widget.recurrenceRule;
       });
     }
   }
@@ -85,135 +89,135 @@ class _RecurrentAppointmentsPopUpState
             activeColor: Theme.of(context).colorScheme.onPrimary,
             title: Text('None'),
             value: 'None',
-            groupValue: _recurrence,
+            groupValue: widget.recurrenceRule,
             onChanged: (value) {
               setState(() {
-                _recurrence = value!;
-                _selectedDays.clear();
+                widget.recurrenceRule = value!;
+                widget.selectedDays.clear();
               });
             },
           ),
           RadioListTile<String>(
             title: Text('Daily'),
             value: 'Daily',
-            groupValue: _recurrence,
+            groupValue: widget.recurrenceRule,
             onChanged: (value) {
               setState(() {
-                _recurrence = value!;
-                _selectedDays.clear();
+                widget.recurrenceRule = value!;
+                widget.selectedDays.clear();
               });
             },
           ),
           RadioListTile<String>(
             title: Text('Weekly'),
             value: 'Weekly',
-            groupValue: _recurrence,
+            groupValue: widget.recurrenceRule,
             onChanged: (value) {
               setState(() {
-                _recurrence = value!;
+                widget.recurrenceRule = value!;
               });
             },
           ),
           RadioListTile<String>(
             title: Text('Yearly'),
             value: 'Yearly',
-            groupValue: _recurrence,
+            groupValue: widget.recurrenceRule,
             onChanged: (value) {
               setState(() {
-                _recurrence = value!;
-                _selectedDays.clear();
+                widget.recurrenceRule = value!;
+                widget.selectedDays.clear();
               });
             },
           ),
-          if (_recurrence == 'Weekly')
+          if (widget.recurrenceRule == 'Weekly')
             Column(children: [
               CheckboxListTile(
                 title: Text('Monday'),
-                value: _selectedDays.contains('Monday'),
+                value: widget.selectedDays.contains('Monday'),
                 onChanged: (bool? value) {
                   setState(() {
                     if (value == true) {
-                      _selectedDays.add('Monday');
+                      widget.selectedDays.add('Monday');
                     } else {
-                      _selectedDays.remove('Monday');
+                      widget.selectedDays.remove('Monday');
                     }
                   });
                 },
               ),
               CheckboxListTile(
                 title: Text('Tuesday'),
-                value: _selectedDays.contains('Tuesday'),
+                value: widget.selectedDays.contains('Tuesday'),
                 onChanged: (bool? value) {
                   setState(() {
                     if (value == true) {
-                      _selectedDays.add('Tuesday');
+                      widget.selectedDays.add('Tuesday');
                     } else {
-                      _selectedDays.remove('Tuesday');
+                      widget.selectedDays.remove('Tuesday');
                     }
                   });
                 },
               ),
               CheckboxListTile(
                 title: Text('Wednesday'),
-                value: _selectedDays.contains('Wednesday'),
+                value: widget.selectedDays.contains('Wednesday'),
                 onChanged: (bool? value) {
                   setState(() {
                     if (value == true) {
-                      _selectedDays.add('Wednesday');
+                      widget.selectedDays.add('Wednesday');
                     } else {
-                      _selectedDays.remove('Wednesday');
+                      widget.selectedDays.remove('Wednesday');
                     }
                   });
                 },
               ),
               CheckboxListTile(
                 title: Text('Thursday'),
-                value: _selectedDays.contains('Thursday'),
+                value: widget.selectedDays.contains('Thursday'),
                 onChanged: (bool? value) {
                   setState(() {
                     if (value == true) {
-                      _selectedDays.add('Thursday');
+                      widget.selectedDays.add('Thursday');
                     } else {
-                      _selectedDays.remove('Thursday');
+                      widget.selectedDays.remove('Thursday');
                     }
                   });
                 },
               ),
               CheckboxListTile(
                 title: Text('Friday'),
-                value: _selectedDays.contains('Friday'),
+                value: widget.selectedDays.contains('Friday'),
                 onChanged: (bool? value) {
                   setState(() {
                     if (value == true) {
-                      _selectedDays.add('Friday');
+                      widget.selectedDays.add('Friday');
                     } else {
-                      _selectedDays.remove('Friday');
+                      widget.selectedDays.remove('Friday');
                     }
                   });
                 },
               ),
               CheckboxListTile(
                 title: Text('Saturday'),
-                value: _selectedDays.contains('Saturday'),
+                value: widget.selectedDays.contains('Saturday'),
                 onChanged: (bool? value) {
                   setState(() {
                     if (value == true) {
-                      _selectedDays.add('Saturday');
+                      widget.selectedDays.add('Saturday');
                     } else {
-                      _selectedDays.remove('Saturday');
+                      widget.selectedDays.remove('Saturday');
                     }
                   });
                 },
               ),
               CheckboxListTile(
                 title: Text('Sunday'),
-                value: _selectedDays.contains('Sunday'),
+                value: widget.selectedDays.contains('Sunday'),
                 onChanged: (bool? value) {
                   setState(() {
                     if (value == true) {
-                      _selectedDays.add('Sunday');
+                      widget.selectedDays.add('Sunday');
                     } else {
-                      _selectedDays.remove('Sunday');
+                      widget.selectedDays.remove('Sunday');
                     }
                   });
                 },

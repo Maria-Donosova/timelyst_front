@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../shared/categories.dart'; // Imports the categories and their colors
+import '../../calendar/views/recurrent_appointments_popup.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
@@ -185,208 +186,208 @@ class EventDetailsScreentate extends State<EventDetails> {
   }
 
   //function the changes the color of eventrepeat icon once the user chooses a recurrence pattern and clicked Saved within the _selectRecurrenceRule function
-  void _changeRecurringColor() {
-    if (_recurrence != 'None') {
-      setState(() {
-        _isRecurring = true;
-      });
-    }
-  }
+  // void _changeRecurringColor() {
+  //   if (_recurrence != 'None') {
+  //     setState(() {
+  //       _isRecurring = true;
+  //     });
+  //   }
+  // }
 
-  void _changeRecurringPattern() {
-    if (_recurrence != 'None') {
-      setState(() {
-        _recurrence = _recurrence;
-      });
-    }
-  }
+  // void _changeRecurringPattern() {
+  //   if (_recurrence != 'None') {
+  //     setState(() {
+  //       _recurrence = _recurrence;
+  //     });
+  //   }
+  // }
 
   //function to pick up the recurrence rule for the event based on user input. the recurrent pattern can be daily, weekly, monthly or yearly or custom set by day of the week
-  Future<void> _selectRecurrenceRule(BuildContext context) async {
-    final selectedRecurrenceRule = await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                  actions: [
-                    TextButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary),
-                      child: Text('Delete',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          )),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                    TextButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary),
-                      child: Text('Save',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          )),
-                      onPressed: () {
-                        _changeRecurringColor();
-                        _changeRecurringPattern();
-                        Navigator.of(context).pop();
-                      },
-                    )
-                  ],
-                  title: const Text('Select Recurrence'),
-                  content: Column(mainAxisSize: MainAxisSize.min, children: [
-                    RadioListTile<String>(
-                      activeColor: Theme.of(context).colorScheme.onPrimary,
-                      title: Text('None'),
-                      value: 'None',
-                      groupValue: _recurrence,
-                      onChanged: (value) {
-                        setState(() {
-                          _recurrence = value!;
-                          _selectedDays.clear();
-                        });
-                      },
-                    ),
-                    RadioListTile<String>(
-                      title: Text('Daily'),
-                      value: 'Daily',
-                      groupValue: _recurrence,
-                      onChanged: (value) {
-                        setState(() {
-                          _recurrence = value!;
-                          _selectedDays.clear();
-                        });
-                      },
-                    ),
-                    RadioListTile<String>(
-                      title: Text('Weekly'),
-                      value: 'Weekly',
-                      groupValue: _recurrence,
-                      onChanged: (value) {
-                        setState(() {
-                          _recurrence = value!;
-                        });
-                      },
-                    ),
-                    RadioListTile<String>(
-                      title: Text('Yearly'),
-                      value: 'Yearly',
-                      groupValue: _recurrence,
-                      onChanged: (value) {
-                        setState(() {
-                          _recurrence = value!;
-                          _selectedDays.clear();
-                        });
-                      },
-                    ),
-                    if (_recurrence == 'Weekly')
-                      Column(children: [
-                        CheckboxListTile(
-                          title: Text('Monday'),
-                          value: _selectedDays.contains('Monday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Monday');
-                              } else {
-                                _selectedDays.remove('Monday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Tuesday'),
-                          value: _selectedDays.contains('Tuesday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Tuesday');
-                              } else {
-                                _selectedDays.remove('Tuesday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Wednesday'),
-                          value: _selectedDays.contains('Wednesday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Wednesday');
-                              } else {
-                                _selectedDays.remove('Wednesday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Thursday'),
-                          value: _selectedDays.contains('Thursday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Thursday');
-                              } else {
-                                _selectedDays.remove('Thursday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Friday'),
-                          value: _selectedDays.contains('Friday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Friday');
-                              } else {
-                                _selectedDays.remove('Friday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Saturday'),
-                          value: _selectedDays.contains('Saturday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Saturday');
-                              } else {
-                                _selectedDays.remove('Saturday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Sunday'),
-                          value: _selectedDays.contains('Sunday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Sunday');
-                              } else {
-                                _selectedDays.remove('Sunday');
-                              }
-                            });
-                          },
-                        )
-                      ])
-                  ]));
-            },
-          );
-        });
-    if (selectedRecurrenceRule != null) {
-      setState(() {
-        _eventRecurrenceRule.text = selectedRecurrenceRule;
-      });
-    }
-  }
+  // Future<void> _selectRecurrenceRule(BuildContext context) async {
+  //   final selectedRecurrenceRule = await showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return StatefulBuilder(
+  //           builder: (context, setState) {
+  //             return AlertDialog(
+  //                 actions: [
+  //                   TextButton(
+  //                     style: ElevatedButton.styleFrom(
+  //                         backgroundColor:
+  //                             Theme.of(context).colorScheme.secondary),
+  //                     child: Text('Delete',
+  //                         style: TextStyle(
+  //                           color: Theme.of(context).colorScheme.onPrimary,
+  //                         )),
+  //                     onPressed: () {
+  //                       Navigator.of(context).pop();
+  //                     },
+  //                   ),
+  //                   TextButton(
+  //                     style: ElevatedButton.styleFrom(
+  //                         backgroundColor:
+  //                             Theme.of(context).colorScheme.secondary),
+  //                     child: Text('Save',
+  //                         style: TextStyle(
+  //                           color: Theme.of(context).colorScheme.onPrimary,
+  //                         )),
+  //                     onPressed: () {
+  //                       _changeRecurringColor();
+  //                       _changeRecurringPattern();
+  //                       Navigator.of(context).pop();
+  //                     },
+  //                   )
+  //                 ],
+  //                 title: const Text('Select Recurrence'),
+  //                 content: Column(mainAxisSize: MainAxisSize.min, children: [
+  //                   RadioListTile<String>(
+  //                     activeColor: Theme.of(context).colorScheme.onPrimary,
+  //                     title: Text('None'),
+  //                     value: 'None',
+  //                     groupValue: _recurrence,
+  //                     onChanged: (value) {
+  //                       setState(() {
+  //                         _recurrence = value!;
+  //                         _selectedDays.clear();
+  //                       });
+  //                     },
+  //                   ),
+  //                   RadioListTile<String>(
+  //                     title: Text('Daily'),
+  //                     value: 'Daily',
+  //                     groupValue: _recurrence,
+  //                     onChanged: (value) {
+  //                       setState(() {
+  //                         _recurrence = value!;
+  //                         _selectedDays.clear();
+  //                       });
+  //                     },
+  //                   ),
+  //                   RadioListTile<String>(
+  //                     title: Text('Weekly'),
+  //                     value: 'Weekly',
+  //                     groupValue: _recurrence,
+  //                     onChanged: (value) {
+  //                       setState(() {
+  //                         _recurrence = value!;
+  //                       });
+  //                     },
+  //                   ),
+  //                   RadioListTile<String>(
+  //                     title: Text('Yearly'),
+  //                     value: 'Yearly',
+  //                     groupValue: _recurrence,
+  //                     onChanged: (value) {
+  //                       setState(() {
+  //                         _recurrence = value!;
+  //                         _selectedDays.clear();
+  //                       });
+  //                     },
+  //                   ),
+  //                   if (_recurrence == 'Weekly')
+  //                     Column(children: [
+  //                       CheckboxListTile(
+  //                         title: Text('Monday'),
+  //                         value: _selectedDays.contains('Monday'),
+  //                         onChanged: (bool? value) {
+  //                           setState(() {
+  //                             if (value == true) {
+  //                               _selectedDays.add('Monday');
+  //                             } else {
+  //                               _selectedDays.remove('Monday');
+  //                             }
+  //                           });
+  //                         },
+  //                       ),
+  //                       CheckboxListTile(
+  //                         title: Text('Tuesday'),
+  //                         value: _selectedDays.contains('Tuesday'),
+  //                         onChanged: (bool? value) {
+  //                           setState(() {
+  //                             if (value == true) {
+  //                               _selectedDays.add('Tuesday');
+  //                             } else {
+  //                               _selectedDays.remove('Tuesday');
+  //                             }
+  //                           });
+  //                         },
+  //                       ),
+  //                       CheckboxListTile(
+  //                         title: Text('Wednesday'),
+  //                         value: _selectedDays.contains('Wednesday'),
+  //                         onChanged: (bool? value) {
+  //                           setState(() {
+  //                             if (value == true) {
+  //                               _selectedDays.add('Wednesday');
+  //                             } else {
+  //                               _selectedDays.remove('Wednesday');
+  //                             }
+  //                           });
+  //                         },
+  //                       ),
+  //                       CheckboxListTile(
+  //                         title: Text('Thursday'),
+  //                         value: _selectedDays.contains('Thursday'),
+  //                         onChanged: (bool? value) {
+  //                           setState(() {
+  //                             if (value == true) {
+  //                               _selectedDays.add('Thursday');
+  //                             } else {
+  //                               _selectedDays.remove('Thursday');
+  //                             }
+  //                           });
+  //                         },
+  //                       ),
+  //                       CheckboxListTile(
+  //                         title: Text('Friday'),
+  //                         value: _selectedDays.contains('Friday'),
+  //                         onChanged: (bool? value) {
+  //                           setState(() {
+  //                             if (value == true) {
+  //                               _selectedDays.add('Friday');
+  //                             } else {
+  //                               _selectedDays.remove('Friday');
+  //                             }
+  //                           });
+  //                         },
+  //                       ),
+  //                       CheckboxListTile(
+  //                         title: Text('Saturday'),
+  //                         value: _selectedDays.contains('Saturday'),
+  //                         onChanged: (bool? value) {
+  //                           setState(() {
+  //                             if (value == true) {
+  //                               _selectedDays.add('Saturday');
+  //                             } else {
+  //                               _selectedDays.remove('Saturday');
+  //                             }
+  //                           });
+  //                         },
+  //                       ),
+  //                       CheckboxListTile(
+  //                         title: Text('Sunday'),
+  //                         value: _selectedDays.contains('Sunday'),
+  //                         onChanged: (bool? value) {
+  //                           setState(() {
+  //                             if (value == true) {
+  //                               _selectedDays.add('Sunday');
+  //                             } else {
+  //                               _selectedDays.remove('Sunday');
+  //                             }
+  //                           });
+  //                         },
+  //                       )
+  //                     ])
+  //                 ]));
+  //           },
+  //         );
+  //       });
+  //   if (selectedRecurrenceRule != null) {
+  //     setState(() {
+  //       _eventRecurrenceRule.text = selectedRecurrenceRule;
+  //     });
+  //   }
+  // }
 
   //function returns a dialog and displays the external profiles and calendars to which the event can be added
   Future<void> _selectSourceCalendar(BuildContext context) async {
@@ -653,7 +654,8 @@ class EventDetailsScreentate extends State<EventDetails> {
                                 size: Theme.of(context).iconTheme.size,
                                 Icons.event_repeat_rounded),
                             onPressed: () {
-                              _selectRecurrenceRule(context);
+                              RecurrentAppointmentsPopUp;
+                              //_selectRecurrenceRule(context);
                               setState(() {
                                 // _isRecurring = !_isRecurring;
                               });
@@ -678,7 +680,8 @@ class EventDetailsScreentate extends State<EventDetails> {
                               size: Theme.of(context).iconTheme.size,
                               Icons.event_repeat_rounded),
                           onPressed: () {
-                            _selectRecurrenceRule(context);
+                            RecurrentAppointmentsPopUp;
+                            //_selectRecurrenceRule(context);
                             setState(() {
                               // _isRecurring = !_isRecurring;
                             });

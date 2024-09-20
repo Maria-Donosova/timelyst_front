@@ -112,15 +112,15 @@ class _NewTaskWState extends State<NewTaskW> {
                                       },
                                       onFieldSubmitted: (_) {
                                         FocusScope.of(context)
-                                           .requestFocus(_taskFocusNode);
+                                            .requestFocus(_taskFocusNode);
                                       },
                                     ),
                                     DropdownButton<String>(
                                       hint: Text(
                                         'Category',
                                         style: Theme.of(context)
-                                           .textTheme
-                                           .titleSmall,
+                                            .textTheme
+                                            .titleSmall,
                                       ),
                                       icon: const Icon(Icons.arrow_downward),
                                       iconSize: 14,
@@ -180,4 +180,4 @@ class _NewTaskWState extends State<NewTaskW> {
 // // //   }
 // // // }```
 
-lib/widgets/ToDo/task_list.dart
+
