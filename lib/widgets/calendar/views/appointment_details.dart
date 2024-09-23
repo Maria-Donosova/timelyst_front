@@ -396,109 +396,121 @@ class EventDetailsScreentate extends State<EventDetails> {
     final selectedSourceCalendar = await showDialog(
         context: context,
         builder: (BuildContext context) {
+          // Use a Set to store unique categories
+          Set<String> uniqueCategories = {};
+          Map<String, List<Calendars>> categoryCalendarsMap = {};
+
+          // Populate the Set and Map with unique categories and their calendars
+          for (var calendar in calendars) {
+            final category = calendar.category;
+
+            if (!uniqueCategories.contains(category)) {
+              uniqueCategories.add(category);
+              categoryCalendarsMap[category] =
+                  []; // Initialize with an empty list
+            }
+
+            categoryCalendarsMap[category]!.add(calendar);
+          }
+
           return AlertDialog(
             title: Text('Calendars',
                 style: Theme.of(context).textTheme.displayMedium),
-            content: SingleChildScrollView(
-              child: Column(
-                children: [
-                  for (var calendar in calendars)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            content: Column(
+              children: uniqueCategories.map((category) {
+                final categoryCalendars = categoryCalendarsMap[category]!;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: catColor(calendar.category),
-                              radius: 4.5,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(calendar.category,
-                                  style: Theme.of(context).textTheme.bodyLarge),
-                            ),
-                          ],
+                        CircleAvatar(
+                          backgroundColor: catColor(category),
+                          radius: 4.5,
                         ),
-                        Row(
-                          children: [
-                            CheckboxMenuButton(
-                              child: Text(
-                                  calendar.calendarName +
-                                      ' ' +
-                                      calendar.calendarSource,
-                                  style:
-                                      Theme.of(context).textTheme.bodyMedium),
-                              value: isChecked,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  isChecked = value!;
-                                });
-                              },
-                            ),
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            category,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
                         ),
                       ],
                     ),
-
-                  //   Text('test@gmail.com',
-                  //       style: Theme.of(context).textTheme.bodyLarge),
-                  //   Padding(
-                  //     padding: const EdgeInsets.only(bottom: 10.0),
-                  //     child: Row(
-                  //       children: [
-                  //         CheckboxMenuButton(
-                  //             value: isChecked,
-                  //             onChanged: (bool? value) {
-                  //               setState(() {
-                  //                 isChecked = value!;
-                  //               });
-                  //             },
-                  //             child: Text('US Holidays')),
-                  //         CheckboxMenuButton(
-                  //             value: isChecked,
-                  //             onChanged: (bool? value) {
-                  //               setState(() {
-                  //                 isChecked = value!;
-                  //               });
-                  //             },
-                  //             child: Text('Russian Holidays')),
-                  //         CheckboxMenuButton(
-                  //             value: isChecked,
-                  //             onChanged: (bool? value) {
-                  //               setState(() {
-                  //                 isChecked = value!;
-                  //               });
-                  //             },
-                  //             child: Text('Birthdays')),
-                  //       ],
-                  //     ),
-                  //   ),
-                  //   Text('tryitout@gmail.com',
-                  //       style: Theme.of(context).textTheme.bodyLarge),
-                  //   CheckboxMenuButton(
-                  //       value: isChecked,
-                  //       onChanged: (bool? value) {
-                  //         setState(() {
-                  //           isChecked = value!;
-                  //         });
-                  //       },
-                  //       child: Text('Holidays')),
-                  //   Text('thisisit@icloud.com',
-                  //       style: Theme.of(context).textTheme.bodyLarge),
-                  //   CheckboxMenuButton(
-                  //       value: isChecked,
-                  //       onChanged: (bool? value) {
-                  //         setState(() {
-                  //           isChecked = value!;
-                  //         });
-                  //       },
-                  //       child: Text('Holidays'))
-                  //   ],
-                  // ),
-                  // ),
-                ],
-              ),
+                    if (categoryCalendars.isNotEmpty)
+                      Row(
+                        children: categoryCalendars.map((calendar) {
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: CheckboxMenuButton(
+                              style: ButtonStyle(),
+                              child: Text(
+                                calendar.calendarName +
+                                    ' ' +
+                                    calendar.calendarSource,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              value: isChecked,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  isChecked = isChecked!;
+                                });
+                              },
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                  ],
+                );
+              }).toList(),
             ),
+            // SingleChildScrollView(
+            //   child: Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       for (var category in categoryCalendarsMap.keys)
+            //         for (var calendar in categoryCalendarsMap[category]!)
+            //           Column(
+            //             children: [
+            //               Row(
+            //                 children: [
+            //                   CircleAvatar(
+            //                     backgroundColor: catColor(calendar.category),
+            //                     radius: 4.5,
+            //                   ),
+            //                   Padding(
+            //                     padding: const EdgeInsets.all(8.0),
+            //                     child: Text(calendar.category,
+            //                         style:
+            //                             Theme.of(context).textTheme.bodyLarge),
+            //                   ),
+            //                 ],
+            //               ),
+            //               Row(
+            //                 children: [
+            //                   CheckboxMenuButton(
+            //                     child: Text(
+            //                         calendar.calendarName +
+            //                             ' ' +
+            //                             calendar.calendarSource,
+            //                         style:
+            //                             Theme.of(context).textTheme.bodyMedium),
+            //                     value: isChecked,
+            //                     onChanged: (bool? value) {
+            //                       setState(() {
+            //                         isChecked = value!;
+            //                       });
+            //                     },
+            //                   ),
+            //                 ],
+            //               ),
+            //             ],
+            //           ),
+            //     ],
+            //   ),
+            // ),
           );
         });
 
