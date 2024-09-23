@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:timelyst_flutter/widgets/calendar/models/calendar_model.dart';
 
 class CustomAppointment {
   CustomAppointment({
     this.id = '',
     // this.creator = '',
     // List<UserProfile> userProfiles = '',
-    // List<UserCalendar> userCalendars = '',
+    this.userCalendars = const [],
     // this.eventOrganizer = '',
     this.subject = '',
     required this.startTime,
@@ -30,7 +31,7 @@ class CustomAppointment {
   String id;
   // String? creator;
   // List<UserProfile> userProfiles;
-  // List<UserCalendar> userCalendars;
+  late List<Calendars> userCalendars;
   // String? eventOrganizer;
   String subject;
   DateTime startTime;

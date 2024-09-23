@@ -264,7 +264,7 @@ class _CalendarWState extends State<CalendarW> {
                 id: _customAppointment.id,
                 // creator: '',
                 // userProfiles: [],
-                // userCalendars: [],
+                userCalendars: [],
                 // eventOrganizer: '',
                 subject: _customAppointment.subject,
                 dateText: _dateText,
@@ -291,7 +291,7 @@ class _CalendarWState extends State<CalendarW> {
                 id: '',
                 // eventOrganizer: '',
                 // userProfiles: [],
-                // userCalendars: [],
+                userCalendars: [],
                 subject: '',
                 dateText: _cellDateText,
                 startTime: _startTimeText,
@@ -327,6 +327,7 @@ List<CustomAppointment> _appointments = [
   ),
   CustomAppointment(
     subject: 'Get Together',
+    // userCalendars: ['Gmail', 'Outlook'],
     startTime: DateTime.now().add(Duration(hours: 1)),
     endTime: DateTime.now().add(Duration(hours: 3)),
     isAllDay: false,
@@ -410,6 +411,7 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
       CustomAppointment _customAppointment, Appointment appointment) {
     return CustomAppointment(
       id: appointment.id.toString(),
+      userCalendars: _customAppointment.userCalendars,
       subject: appointment.subject,
       startTime: appointment.startTime,
       endTime: appointment.endTime,
