@@ -10,7 +10,7 @@ class EventDetails extends StatefulWidget {
     required String? id,
     //required String creator,
     // List<UserProfile> userProfiles,
-    // List<UserCalendar> userCalendars,
+    List<Calendars>? userCalendars,
     // String eventOrganizer,
     String? subject,
     String? dateText,
@@ -33,7 +33,7 @@ class EventDetails extends StatefulWidget {
   })  : _id = id,
         // _creator = creator,
         // _userProfiles = userProfiles,
-        // _userCalendars = userCalendars,
+        _userCalendars = userCalendars,
         // _eventOrganizer = eventOrganizer,
         _subject = subject,
         _dateText = dateText,
@@ -55,7 +55,7 @@ class EventDetails extends StatefulWidget {
   // final String _creator;
   // final String _eventOrganizer;
   // final List<UserProfile> _userProfiles;
-  // final List<UserCalendar> _userCalendars;
+  final List<Calendars>? _userCalendars;
   final String? _subject;
   final String? _dateText;
   final String? _startTimeText;
@@ -80,7 +80,7 @@ class EventDetails extends StatefulWidget {
 }
 
 class EventDetailsScreentate extends State<EventDetails> {
-  late TextEditingController _eventSourceCalendar;
+  late TextEditingController _eventCalendar;
   late TextEditingController _eventTitleController;
   late TextEditingController _eventDateController;
   late TextEditingController _eventStartTimeController;
@@ -115,6 +115,10 @@ class EventDetailsScreentate extends State<EventDetails> {
     _eventParticipants = TextEditingController(text: widget._participants);
     _allDay = widget._allDay!;
     _eventRecurrenceRule = TextEditingController(text: widget._recurrenceRule);
+    _eventCalendar = TextEditingController(
+        text: widget._userCalendars != null && widget._userCalendars!.isNotEmpty
+            ? widget._userCalendars![0].calendarName
+            : '');
   }
 
 //function to select date
@@ -388,8 +392,8 @@ class EventDetailsScreentate extends State<EventDetails> {
   }
 
   //function returns a dialog and displays the external profiles and calendars to which the event can be added
-  Future<void> _selectSourceCalendar(BuildContext context) async {
-    final selectedSourceCalendar = await showDialog(
+  Future<void> _selectCalendar(BuildContext context) async {
+    final selectedCalendar = await showDialog(
         context: context,
         builder: (BuildContext context) {
           // Use a Set to store unique categories
@@ -408,7 +412,7 @@ class EventDetailsScreentate extends State<EventDetails> {
             }
             categoryCalendarsMap[category]!.add(calendar);
             checkedCalendars[calendar.calendarName] =
-                false; // Initialize with false
+                calendars.contains(widget._userCalendars);
           }
 
           return StatefulBuilder(
@@ -499,9 +503,9 @@ class EventDetailsScreentate extends State<EventDetails> {
             },
           );
         });
-    if (selectedSourceCalendar != null) {
+    if (selectedCalendar != null) {
       setState(() {
-        _eventSourceCalendar.text = selectedSourceCalendar;
+        _eventCalendar.text = selectedCalendar;
       });
     }
   }
@@ -560,14 +564,6 @@ class EventDetailsScreentate extends State<EventDetails> {
                             return 'Please provide a value.';
                           }
                         },
-                        // onTap: () {
-                        //   _eventTitleController.value = TextEditingValue(
-                        //     text: _eventTitleController.value.text,
-                        //     // selection: TextSelection.fromPosition(
-                        //     //   //TextPosition(offset: _newValue.length),
-                        //     // ),
-                        //   );
-                        // },
                       ),
                     ),
                   ),
@@ -576,7 +572,7 @@ class EventDetailsScreentate extends State<EventDetails> {
                     iconSize: Theme.of(context).iconTheme.size,
                     icon: Icon(Icons.person),
                     onPressed: () {
-                      _selectSourceCalendar(context);
+                      _selectCalendar(context);
                     },
                   ),
                 ],
