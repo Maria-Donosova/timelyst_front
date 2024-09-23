@@ -17,7 +17,7 @@ class _EditTaskWState extends State<EditTaskW> {
   // final _categoryController = TextEditingController();
 
   void clearInput() {
-    _taskDescriptionController.clear;
+    _taskDescriptionController.clear();
     selectedCategory = null;
   }
 
@@ -79,7 +79,6 @@ class _EditTaskWState extends State<EditTaskW> {
                             style: Theme.of(context).textTheme.bodyLarge,
                             maxLines: null,
                             decoration: const InputDecoration(
-                              //labelText: 'Add new task',
                               labelStyle: TextStyle(fontSize: 14),
                               border: InputBorder.none,
                               errorStyle: TextStyle(color: Colors.redAccent),
@@ -108,7 +107,7 @@ class _EditTaskWState extends State<EditTaskW> {
                             onChanged: (newValue) {
                               if (_form.currentState!.validate()) {
                                 setState(() {
-                                  // selectedCategory = newValue;
+                                  selectedCategory = newValue;
                                   // runMutation({
                                   //   "task_description":
                                   //       _taskDescriptionController.text
