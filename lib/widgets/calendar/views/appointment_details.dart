@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timelyst_flutter/widgets/calendar/controllers/recurrent_events.dart';
+import 'package:timelyst_flutter/widgets/calendar/models/calendar_model.dart';
 
 import '../../shared/categories.dart'; // Imports the categories and their colors
 
@@ -396,66 +397,91 @@ class EventDetailsScreentate extends State<EventDetails> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Accounts',
-                style: Theme.of(context).textTheme.displaySmall),
+            title: Text('Calendars',
+                style: Theme.of(context).textTheme.displayMedium),
             content: SingleChildScrollView(
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('test@gmail.com',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10.0),
-                      child: Row(
-                        children: [
-                          CheckboxMenuButton(
-                              value: isChecked,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  isChecked = value!;
-                                });
-                              },
-                              child: Text('US Holidays')),
-                          CheckboxMenuButton(
-                              value: isChecked,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  isChecked = value!;
-                                });
-                              },
-                              child: Text('Russian Holidays')),
-                          CheckboxMenuButton(
-                              value: isChecked,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  isChecked = value!;
-                                });
-                              },
-                              child: Text('Birthdays')),
-                        ],
-                      ),
+                children: [
+                  for (var calendar in calendars)
+                    ListTile(
+                      title: Text(calendar.calendarSource),
+                      subtitle: Text(calendar.email),
+                      onTap: () {
+                        Navigator.of(context).pop(calendar.calendarName);
+                      },
                     ),
-                    Text('tryitout@gmail.com',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    CheckboxMenuButton(
-                        value: isChecked,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isChecked = value!;
-                          });
-                        },
-                        child: Text('Holidays')),
-                    Text('thisisit@icloud.com',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                    CheckboxMenuButton(
-                        value: isChecked,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isChecked = value!;
-                          });
-                        },
-                        child: Text('Holidays'))
-                  ]),
+                  Row(
+                    children: [
+                      for (var calendar in calendars)
+                        CheckboxMenuButton(
+                          child: Text(calendar.calendarName),
+                          value: isChecked,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              isChecked = value!;
+                            });
+                          },
+                        )
+                    ],
+
+                    //   Text('test@gmail.com',
+                    //       style: Theme.of(context).textTheme.bodyLarge),
+                    //   Padding(
+                    //     padding: const EdgeInsets.only(bottom: 10.0),
+                    //     child: Row(
+                    //       children: [
+                    //         CheckboxMenuButton(
+                    //             value: isChecked,
+                    //             onChanged: (bool? value) {
+                    //               setState(() {
+                    //                 isChecked = value!;
+                    //               });
+                    //             },
+                    //             child: Text('US Holidays')),
+                    //         CheckboxMenuButton(
+                    //             value: isChecked,
+                    //             onChanged: (bool? value) {
+                    //               setState(() {
+                    //                 isChecked = value!;
+                    //               });
+                    //             },
+                    //             child: Text('Russian Holidays')),
+                    //         CheckboxMenuButton(
+                    //             value: isChecked,
+                    //             onChanged: (bool? value) {
+                    //               setState(() {
+                    //                 isChecked = value!;
+                    //               });
+                    //             },
+                    //             child: Text('Birthdays')),
+                    //       ],
+                    //     ),
+                    //   ),
+                    //   Text('tryitout@gmail.com',
+                    //       style: Theme.of(context).textTheme.bodyLarge),
+                    //   CheckboxMenuButton(
+                    //       value: isChecked,
+                    //       onChanged: (bool? value) {
+                    //         setState(() {
+                    //           isChecked = value!;
+                    //         });
+                    //       },
+                    //       child: Text('Holidays')),
+                    //   Text('thisisit@icloud.com',
+                    //       style: Theme.of(context).textTheme.bodyLarge),
+                    //   CheckboxMenuButton(
+                    //       value: isChecked,
+                    //       onChanged: (bool? value) {
+                    //         setState(() {
+                    //           isChecked = value!;
+                    //         });
+                    //       },
+                    //       child: Text('Holidays'))
+                    //   ],
+                    // ),
+                  ),
+                ],
+              ),
             ),
           );
         });
@@ -863,3 +889,65 @@ class EventDetailsScreentate extends State<EventDetails> {
     );
   }
 }
+
+//dummy events
+List<Calendars> calendars = [
+  Calendars(
+      calendarId: '1',
+      calendarSource: 'Google',
+      calendarName: 'Family',
+      email: 'test@gmail.com',
+      password: 'password',
+      category: 'Kids',
+      events: [],
+      dateImported: DateTime.now(),
+      dateCreated: DateTime.now(),
+      dateUpdated: DateTime.now()),
+  Calendars(
+      calendarId: '2',
+      calendarSource: 'Google',
+      calendarName: 'Work',
+      email: 'test@gmail.com',
+      password: 'password',
+      category: 'Work',
+      events: [],
+      dateImported: DateTime.now(),
+      dateCreated: DateTime.now(),
+      dateUpdated: DateTime.now()),
+  Calendars(
+    calendarId: '3',
+    calendarSource: 'Outlook',
+    calendarName: 'Holiday',
+    email: 'test@outlook.com',
+    password: 'password',
+    category: 'Holidays',
+    events: [],
+    dateImported: DateTime.now(),
+    dateCreated: DateTime.now(),
+    dateUpdated: DateTime.now(),
+  ),
+  Calendars(
+    calendarId: '3',
+    calendarSource: 'Apple',
+    calendarName: 'Apple Calendar',
+    email: 'test@apple.com',
+    password: 'password',
+    category: 'Work',
+    events: [],
+    dateImported: DateTime.now(),
+    dateCreated: DateTime.now(),
+    dateUpdated: DateTime.now(),
+  ),
+  Calendars(
+    calendarId: '4',
+    calendarSource: 'Google',
+    calendarName: '2Gmail 2 Calendar',
+    email: '2test2@gmail.com',
+    password: 'password',
+    category: 'Friends',
+    events: [],
+    dateImported: DateTime.now(),
+    dateCreated: DateTime.now(),
+    dateUpdated: DateTime.now(),
+  ),
+];

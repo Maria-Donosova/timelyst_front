@@ -19,8 +19,11 @@ class Calendars {
       required this.email,
       required this.password,
       required this.category,
-      required this.events,
-      required this.dateImported,
-      required this.dateCreated,
-      required this.dateUpdated});
+      this.events = const [],
+      DateTime? dateImported,
+      DateTime? dateCreated,
+      DateTime? dateUpdated})
+      : dateImported = dateImported ?? DateTime.now(),
+        dateCreated = dateCreated ?? DateTime.now(),
+        dateUpdated = dateUpdated ?? DateTime.now();
 }
