@@ -399,6 +399,7 @@ class EventDetailsScreentate extends State<EventDetails> {
           // Use a Set to store unique categories
           Set<String> uniqueCategories = {};
           Map<String, List<Calendars>> categoryCalendarsMap = {};
+          Map<String, bool> checkedCalendars = {};
 
           // Populate the Set and Map with unique categories and their calendars
           for (var calendar in calendars) {
@@ -409,106 +410,99 @@ class EventDetailsScreentate extends State<EventDetails> {
               categoryCalendarsMap[category] =
                   []; // Initialize with an empty list
             }
-
             categoryCalendarsMap[category]!.add(calendar);
+            checkedCalendars[calendar.calendarName] =
+                false; // Initialize with false
           }
 
-          return AlertDialog(
-            title: Text('Calendars',
-                style: Theme.of(context).textTheme.displayMedium),
-            content: Column(
-              children: uniqueCategories.map((category) {
-                final categoryCalendars = categoryCalendarsMap[category]!;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: Text('Calendars',
+                    style: Theme.of(context).textTheme.displayMedium),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: uniqueCategories.map((category) {
+                    final categoryCalendars = categoryCalendarsMap[category]!;
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            category,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                        ),
-                        CircleAvatar(
-                          backgroundColor: catColor(category),
-                          radius: 4.5,
-                        ),
-                      ],
-                    ),
-                    if (categoryCalendars.isNotEmpty)
-                      Row(
-                        children: categoryCalendars.map((calendar) {
-                          return CheckboxMenuButton(
-                            child: Text(
-                              calendar.calendarName +
-                                  ' ' +
-                                  calendar.calendarSource,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              overflow: TextOverflow.ellipsis,
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                category,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
                             ),
-                            value: isChecked,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isChecked = value!;
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                  ],
-                );
-              }).toList(),
-            ),
-            // SingleChildScrollView(
-            //   child: Column(
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: [
-            //       for (var category in categoryCalendarsMap.keys)
-            //         for (var calendar in categoryCalendarsMap[category]!)
-            //           Column(
-            //             children: [
-            //               Row(
-            //                 children: [
-            //                   CircleAvatar(
-            //                     backgroundColor: catColor(calendar.category),
-            //                     radius: 4.5,
-            //                   ),
-            //                   Padding(
-            //                     padding: const EdgeInsets.all(8.0),
-            //                     child: Text(calendar.category,
-            //                         style:
-            //                             Theme.of(context).textTheme.bodyLarge),
-            //                   ),
-            //                 ],
-            //               ),
-            //               Row(
-            //                 children: [
-            //                   CheckboxMenuButton(
-            //                     child: Text(
-            //                         calendar.calendarName +
-            //                             ' ' +
-            //                             calendar.calendarSource,
-            //                         style:
-            //                             Theme.of(context).textTheme.bodyMedium),
-            //                     value: isChecked,
-            //                     onChanged: (bool? value) {
-            //                       setState(() {
-            //                         isChecked = value!;
-            //                       });
-            //                     },
-            //                   ),
-            //                 ],
-            //               ),
-            //             ],
-            //           ),
-            //     ],
-            //   ),
-            // ),
+                            CircleAvatar(
+                              backgroundColor: catColor(category),
+                              radius: 4.5,
+                            ),
+                          ],
+                        ),
+                        if (categoryCalendars.isNotEmpty)
+                          Column(
+                            children: categoryCalendars.map((calendar) {
+                              return Tooltip(
+                                message: calendar.email,
+                                child: CheckboxListTile(
+                                  title: Text(
+                                    calendar.calendarName +
+                                        ' ' +
+                                        calendar.calendarSource,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  value:
+                                      checkedCalendars[calendar.calendarName],
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      checkedCalendars[calendar.calendarName] =
+                                          value!;
+                                    });
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+                actions: [
+                  TextButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary),
+                    child: Text('Cancel',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        )),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  TextButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary),
+                    child: Text('Save',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        )),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
           );
         });
-
     if (selectedSourceCalendar != null) {
       setState(() {
         _eventSourceCalendar.text = selectedSourceCalendar;

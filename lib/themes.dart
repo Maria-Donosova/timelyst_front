@@ -53,6 +53,7 @@ class CustomTheme with ChangeNotifier {
         // Color of the ripple effect
       ),
       checkboxTheme: CheckboxThemeData(
+        visualDensity: VisualDensity.compact,
         checkColor:
             WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
           if (states.contains(WidgetState.selected)) {
