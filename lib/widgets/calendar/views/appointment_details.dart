@@ -403,83 +403,99 @@ class EventDetailsScreentate extends State<EventDetails> {
               child: Column(
                 children: [
                   for (var calendar in calendars)
-                    ListTile(
-                      title: Text(calendar.calendarSource),
-                      subtitle: Text(calendar.email),
-                      onTap: () {
-                        Navigator.of(context).pop(calendar.calendarName);
-                      },
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: catColor(calendar.category),
+                              radius: 4.5,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(calendar.category,
+                                  style: Theme.of(context).textTheme.bodyLarge),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            CheckboxMenuButton(
+                              child: Text(
+                                  calendar.calendarName +
+                                      ' ' +
+                                      calendar.calendarSource,
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium),
+                              value: isChecked,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  isChecked = value!;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  Row(
-                    children: [
-                      for (var calendar in calendars)
-                        CheckboxMenuButton(
-                          child: Text(calendar.calendarName),
-                          value: isChecked,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              isChecked = value!;
-                            });
-                          },
-                        )
-                    ],
 
-                    //   Text('test@gmail.com',
-                    //       style: Theme.of(context).textTheme.bodyLarge),
-                    //   Padding(
-                    //     padding: const EdgeInsets.only(bottom: 10.0),
-                    //     child: Row(
-                    //       children: [
-                    //         CheckboxMenuButton(
-                    //             value: isChecked,
-                    //             onChanged: (bool? value) {
-                    //               setState(() {
-                    //                 isChecked = value!;
-                    //               });
-                    //             },
-                    //             child: Text('US Holidays')),
-                    //         CheckboxMenuButton(
-                    //             value: isChecked,
-                    //             onChanged: (bool? value) {
-                    //               setState(() {
-                    //                 isChecked = value!;
-                    //               });
-                    //             },
-                    //             child: Text('Russian Holidays')),
-                    //         CheckboxMenuButton(
-                    //             value: isChecked,
-                    //             onChanged: (bool? value) {
-                    //               setState(() {
-                    //                 isChecked = value!;
-                    //               });
-                    //             },
-                    //             child: Text('Birthdays')),
-                    //       ],
-                    //     ),
-                    //   ),
-                    //   Text('tryitout@gmail.com',
-                    //       style: Theme.of(context).textTheme.bodyLarge),
-                    //   CheckboxMenuButton(
-                    //       value: isChecked,
-                    //       onChanged: (bool? value) {
-                    //         setState(() {
-                    //           isChecked = value!;
-                    //         });
-                    //       },
-                    //       child: Text('Holidays')),
-                    //   Text('thisisit@icloud.com',
-                    //       style: Theme.of(context).textTheme.bodyLarge),
-                    //   CheckboxMenuButton(
-                    //       value: isChecked,
-                    //       onChanged: (bool? value) {
-                    //         setState(() {
-                    //           isChecked = value!;
-                    //         });
-                    //       },
-                    //       child: Text('Holidays'))
-                    //   ],
-                    // ),
-                  ),
+                  //   Text('test@gmail.com',
+                  //       style: Theme.of(context).textTheme.bodyLarge),
+                  //   Padding(
+                  //     padding: const EdgeInsets.only(bottom: 10.0),
+                  //     child: Row(
+                  //       children: [
+                  //         CheckboxMenuButton(
+                  //             value: isChecked,
+                  //             onChanged: (bool? value) {
+                  //               setState(() {
+                  //                 isChecked = value!;
+                  //               });
+                  //             },
+                  //             child: Text('US Holidays')),
+                  //         CheckboxMenuButton(
+                  //             value: isChecked,
+                  //             onChanged: (bool? value) {
+                  //               setState(() {
+                  //                 isChecked = value!;
+                  //               });
+                  //             },
+                  //             child: Text('Russian Holidays')),
+                  //         CheckboxMenuButton(
+                  //             value: isChecked,
+                  //             onChanged: (bool? value) {
+                  //               setState(() {
+                  //                 isChecked = value!;
+                  //               });
+                  //             },
+                  //             child: Text('Birthdays')),
+                  //       ],
+                  //     ),
+                  //   ),
+                  //   Text('tryitout@gmail.com',
+                  //       style: Theme.of(context).textTheme.bodyLarge),
+                  //   CheckboxMenuButton(
+                  //       value: isChecked,
+                  //       onChanged: (bool? value) {
+                  //         setState(() {
+                  //           isChecked = value!;
+                  //         });
+                  //       },
+                  //       child: Text('Holidays')),
+                  //   Text('thisisit@icloud.com',
+                  //       style: Theme.of(context).textTheme.bodyLarge),
+                  //   CheckboxMenuButton(
+                  //       value: isChecked,
+                  //       onChanged: (bool? value) {
+                  //         setState(() {
+                  //           isChecked = value!;
+                  //         });
+                  //       },
+                  //       child: Text('Holidays'))
+                  //   ],
+                  // ),
+                  // ),
                 ],
               ),
             ),
