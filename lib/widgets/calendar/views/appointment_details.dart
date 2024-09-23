@@ -114,6 +114,7 @@ class EventDetailsScreentate extends State<EventDetails> {
     _selectedCategory = widget._catTitle!;
     _eventParticipants = TextEditingController(text: widget._participants);
     _allDay = widget._allDay!;
+    _eventRecurrenceRule = TextEditingController(text: widget._recurrenceRule);
   }
 
 //function to select date
@@ -384,11 +385,6 @@ class EventDetailsScreentate extends State<EventDetails> {
             },
           );
         });
-    if (selectedRecurrenceRule != null) {
-      setState(() {
-        _eventRecurrenceRule.text = selectedRecurrenceRule;
-      });
-    }
   }
 
   //function returns a dialog and displays the external profiles and calendars to which the event can be added
