@@ -52,6 +52,18 @@ class CustomTheme with ChangeNotifier {
         }),
         // Color of the ripple effect
       ),
+      checkboxTheme: CheckboxThemeData(
+        checkColor:
+            WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors
+                .grey[900]!; // Color of the check icon when it's selected
+          }
+          return Colors
+              .transparent; // Color of the check icon when it's not selected
+        }),
+        side: BorderSide(color: Colors.grey[900]!),
+      ),
       textTheme: TextTheme(
         displayLarge: TextStyle(color: Colors.grey[900], fontSize: 20),
         displayMedium: TextStyle(color: Colors.grey[900], fontSize: 18),

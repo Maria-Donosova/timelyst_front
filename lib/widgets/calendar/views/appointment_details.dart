@@ -424,10 +424,6 @@ class EventDetailsScreentate extends State<EventDetails> {
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
-                          backgroundColor: catColor(category),
-                          radius: 4.5,
-                        ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
@@ -435,30 +431,29 @@ class EventDetailsScreentate extends State<EventDetails> {
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ),
+                        CircleAvatar(
+                          backgroundColor: catColor(category),
+                          radius: 4.5,
+                        ),
                       ],
                     ),
                     if (categoryCalendars.isNotEmpty)
                       Row(
                         children: categoryCalendars.map((calendar) {
-                          return Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: CheckboxMenuButton(
-                              style: ButtonStyle(),
-                              child: Text(
-                                calendar.calendarName +
-                                    ' ' +
-                                    calendar.calendarSource,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              value: isChecked,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  isChecked = isChecked!;
-                                });
-                              },
+                          return CheckboxMenuButton(
+                            child: Text(
+                              calendar.calendarName +
+                                  ' ' +
+                                  calendar.calendarSource,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              overflow: TextOverflow.ellipsis,
                             ),
+                            value: isChecked,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                isChecked = value!;
+                              });
+                            },
                           );
                         }).toList(),
                       ),
