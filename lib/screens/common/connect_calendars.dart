@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../widgets/shared/custom_appbar.dart';
 
+import '../../widgets/connects/google_calendar_service.dart'; // import the google calendar service
+
 import 'agenda.dart';
 import 'agenda_settings.dart';
 
@@ -26,6 +28,8 @@ class ConnectCal extends StatelessWidget {
     //final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final appBar = CustomAppBar();
 
+    final GoogleSignInService _signInService = GoogleSignInService();
+
     return Scaffold(
       appBar: appBar,
       body: SafeArea(
@@ -48,8 +52,7 @@ class ConnectCal extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       print('Gmail button pressed');
-                      // connectDummy(context);
-                      // print('connected!');
+                      _signInService.signIn();
                     },
                     child: const Text('Gmail'),
                     style: ElevatedButton.styleFrom(

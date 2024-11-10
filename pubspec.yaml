@@ -32,10 +32,14 @@ dependencies:
   flutter:
     sdk: flutter
   google_sign_in: ^6.2.2
+  http: ^0.13.3
+  googleapis: ^13.1.0
+  googleapis_auth: ^1.2.0
   graphql_flutter: ^5.1.2
   syncfusion_flutter_calendar: ^27.1.58
   syncfusion_flutter_core: ^27.1.58
   syncfusion_flutter_datepicker: ^27.1.58
+  google_sign_in_web: ^0.12.4+3
 
 dev_dependencies:
   flutter_test:
