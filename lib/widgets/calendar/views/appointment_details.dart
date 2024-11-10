@@ -562,11 +562,12 @@ class EventDetailsScreentate extends State<EventDetails> {
                           if (value!.isEmpty) {
                             return 'Please provide a value.';
                           }
+                          return 'Error';
                         },
                       ),
                     ),
                   ),
-                  //profile icon button to select the associated user profile and the calendar to which the event is to be added
+                  //profile icon button to select the associated the calendar to which the event is to be added
                   IconButton(
                     iconSize: Theme.of(context).iconTheme.size,
                     icon: Icon(Icons.person),
