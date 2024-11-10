@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timelyst_flutter/screens/common/connect_calendars.dart';
 
 import 'themes.dart';
 
@@ -18,10 +19,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Agenda',
+      title: 'Connect Calendars',
       theme: CustomTheme.lightTheme,
       themeMode: currentTheme.currentTheme,
-      home: const Agenda(),
+      home: const ConnectCal(),
     );
   }
 }
