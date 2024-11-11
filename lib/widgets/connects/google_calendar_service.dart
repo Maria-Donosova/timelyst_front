@@ -16,15 +16,18 @@ class GoogleSignInService {
 
   Future<void> signIn() async {
     try {
-      final GoogleSignInAccount? account = await _googleSignIn.signIn();
+      GoogleSignInAccount? account = await _googleSignIn.signInSilently();
+      print('Account: $account');
+
       if (account == null) {
-        print('User canceled sign in');
-        return;
+        // If silent sign-in fails, show the sign-in button
+        await _googleSignIn.signIn();
       }
 
-      final GoogleSignInAuthentication auth = await account.authentication;
+      final GoogleSignInAuthentication auth = await account!.authentication;
       // ignore: deprecated_member_use
       final String? authCode = auth.serverAuthCode;
+      print('Auth code: $authCode');
 
       if (authCode != null) {
         // Send the authorization code to the backend
