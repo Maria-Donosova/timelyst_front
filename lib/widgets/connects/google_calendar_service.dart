@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:googleapis/vmwareengine/v1.dart';
 import 'package:http/http.dart' as http;
 
 class GoogleSignInService {
@@ -14,6 +14,37 @@ class GoogleSignInService {
       'https://www.googleapis.com/auth/calendar',
     ],
   );
+
+//   const List<String> scopes = <String>[
+//   'email',
+//   'https://www.googleapis.com/auth/contacts.readonly',
+// ];
+
+// GoogleSignIn _googleSignIn = GoogleSignIn(
+//   // Optional clientId
+//   // clientId: 'your-client_id.apps.googleusercontent.com',
+//   scopes: scopes,
+//);
+
+  // GoogleSignInAccount? _currentUser;
+  // bool _isAuthorized = false;
+
+  // Prompts the user to authorize `scopes` (web implementation).
+  // On the web, this must be called from an user interaction (button click).
+  // Future<void> _handleAuthorizeScopes() async {
+  //   final bool isAuthorized = await _googleSignIn.requestScopes(scopes);
+
+  //   setState(() {
+  //     _isAuthorized = isAuthorized;
+  //   });
+
+  //   if (isAuthorized) {
+  //     unawaited(_handleGetContact(_currentUser!));
+  //   }
+  // }
+
+  //Sign out
+  //Future<void> _handleSignOut() => _googleSignIn.disconnect();
 
   Future<void> signIn() async {
     print("Entering SignIn future");
@@ -53,7 +84,6 @@ class GoogleSignInService {
         'access_token': accessToken,
       },
     );
-
     if (response.statusCode == 200) {
       print('Tokens sent to backend successfully');
     } else {
