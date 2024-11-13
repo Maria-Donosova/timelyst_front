@@ -32,7 +32,7 @@ dependencies:
   flutter:
     sdk: flutter
   google_sign_in: ^6.2.2
-  http: ^0.13.3
+  http: ^1.2.2
   googleapis: ^13.1.0
   googleapis_auth: ^1.2.0
   graphql_flutter: ^5.1.2

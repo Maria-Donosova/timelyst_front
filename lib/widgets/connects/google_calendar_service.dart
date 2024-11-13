@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
@@ -22,36 +23,41 @@ class GoogleSignInService {
 
       if (account == null) {
         // If silent sign-in fails, show the sign-in button
-        await _googleSignIn.signIn();
+        account = await _googleSignIn.signIn();
       }
+      if (account != null) {
+        final GoogleSignInAuthentication auth = await account.authentication;
+        final String? idToken = auth.idToken;
+        final String? accessToken = auth.accessToken;
 
-      final GoogleSignInAuthentication auth = await account!.authentication;
-      // ignore: deprecated_member_use
-      final String? authCode = auth.serverAuthCode;
-      print('Auth code: $authCode');
-
-      if (authCode != null) {
-        // Send the authorization code to the backend
-        await sendAuthCodeToBackend(authCode);
+        if (idToken != null && accessToken != null) {
+          // Send the tokens to the backend
+          await sendAuthTokensToBackend(idToken, accessToken);
+        } else {
+          print('No ID token or access token received');
+        }
       } else {
-        print('No authorization code received');
+        print('No Google account selected');
       }
     } catch (error) {
       print('Error signing in: $error');
     }
   }
 
-  Future<void> sendAuthCodeToBackend(String authCode) async {
+  Future<void> sendAuthTokensToBackend(
+      String idToken, String accessToken) async {
     final response = await http.post(
       Uri.parse('http://localhost:3000/auth/google/callback'),
-      body: {'code': authCode},
+      body: {
+        'id_token': idToken,
+        'access_token': accessToken,
+      },
     );
 
     if (response.statusCode == 200) {
-      print('Authorization code sent to backend successfully');
+      print('Tokens sent to backend successfully');
     } else {
-      print(
-          'Failed to send authorization code to backend: ${response.statusCode}');
+      print('Failed to send tokens to backend: ${response.statusCode}');
     }
   }
 }
