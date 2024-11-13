@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class GoogleSignInService {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     clientId:
-        '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com.apps.googleusercontent.com', // Set your client ID here
+        '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com', // Set your client ID here
     scopes: <String>[
       'openid',
       'profile',
@@ -15,6 +15,7 @@ class GoogleSignInService {
   );
 
   Future<void> signIn() async {
+    print("Entering SignIn future");
     try {
       GoogleSignInAccount? account = await _googleSignIn.signInSilently();
       print('Account: $account');
