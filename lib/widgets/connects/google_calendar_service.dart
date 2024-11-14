@@ -3,49 +3,23 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/vmwareengine/v1.dart';
 import 'package:http/http.dart' as http;
 
+// GoogleSignInService class to handle Google sign-in and sign-out operations using the GoogleSignIn plugin (web implementation).
 class GoogleSignInService {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     clientId:
-        '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com', // Set your client ID here
-    scopes: <String>[
-      'openid',
-      'profile',
-      'email',
-      'https://www.googleapis.com/auth/peopleapi.readonly',
-      'https://www.googleapis.com/auth/calendar',
-    ],
+        '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com',
+    scopes: _scopes,
   );
 
-//   const List<String> scopes = <String>[
-//   'email',
-//   'https://www.googleapis.com/auth/contacts.readonly',
-// ];
+  static const List<String> _scopes = <String>[
+    'openid',
+    'profile',
+    'email',
+    'https://www.googleapis.com/auth/peopleapi.readonly',
+    'https://www.googleapis.com/auth/calendar',
+  ];
 
-// GoogleSignIn _googleSignIn = GoogleSignIn(
-//   // Optional clientId
-//   // clientId: 'your-client_id.apps.googleusercontent.com',
-//   scopes: scopes,
-//);
-
-  // GoogleSignInAccount? _currentUser;
-  // bool _isAuthorized = false;
-
-  // Prompts the user to authorize `scopes` (web implementation).
-  // On the web, this must be called from an user interaction (button click).
-  // Future<void> _handleAuthorizeScopes() async {
-  //   final bool isAuthorized = await _googleSignIn.requestScopes(scopes);
-
-  //   setState(() {
-  //     _isAuthorized = isAuthorized;
-  //   });
-
-  //   if (isAuthorized) {
-  //     unawaited(_handleGetContact(_currentUser!));
-  //   }
-  // }
-
-  //Sign out
-  //Future<void> _handleSignOut() => _googleSignIn.disconnect();
+  GoogleSignInAccount? _currentUser;
 
   Future<void> signIn(BuildContext context) async {
     print("Entering SignIn Future");
@@ -65,6 +39,8 @@ class GoogleSignInService {
           showAboutDialog(context: context, children: [
             Text('Successful Google authentication'),
           ]);
+
+          await _handleAuthorizeScopes();
           // Send the tokens to the backend
           await sendAuthTokensToBackend(idToken);
         } else {
@@ -78,7 +54,28 @@ class GoogleSignInService {
     }
   }
 
+  // Prompts the user to authorize `scopes` (web implementation).
+  // On the web, this must be called from an user interaction (button click).
+  Future<void> _handleAuthorizeScopes() async {
+    print("Entering _handleAuthorizeScopes Future");
+
+    bool _isAuthorized = false;
+
+    final bool isAuthorized = await _googleSignIn.requestScopes(_scopes);
+    print('isAuthorized: $isAuthorized');
+    print('Auth headers: ${_googleSignIn.currentUser?.authHeaders}');
+
+    _isAuthorized = isAuthorized;
+
+    if (isAuthorized) {
+      print('Authorized');
+    } else {
+      print('Not authorized');
+    }
+  }
+
   Future<void> sendAuthTokensToBackend(String idToken) async {
+    print('Entering sendAuthTokensToBackend Future');
     final response = await http.post(
       Uri.parse('http://localhost:3000/auth/google/callback'),
       body: {
@@ -91,4 +88,7 @@ class GoogleSignInService {
       print('Failed to send tokens to backend: ${response.statusCode}');
     }
   }
+
+  //Sign out
+  Future<void> _handleSignOut() => _googleSignIn.disconnect();
 }
