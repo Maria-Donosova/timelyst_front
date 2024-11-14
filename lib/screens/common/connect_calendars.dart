@@ -52,7 +52,7 @@ class ConnectCal extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       print('Gmail button pressed');
-                      _signInService.signIn();
+                      _signInService.signIn(context);
                     },
                     child: const Text('Gmail'),
                     style: ElevatedButton.styleFrom(
