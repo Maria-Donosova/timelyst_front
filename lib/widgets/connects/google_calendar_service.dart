@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/vmwareengine/v1.dart';
 import 'package:http/http.dart' as http;
@@ -46,8 +47,8 @@ class GoogleSignInService {
   //Sign out
   //Future<void> _handleSignOut() => _googleSignIn.disconnect();
 
-  Future<void> signIn() async {
-    print("Entering SignIn future");
+  Future<void> signIn(BuildContext context) async {
+    print("Entering SignIn Future");
     try {
       GoogleSignInAccount? account = await _googleSignIn.signInSilently();
       print('Account: $account');
@@ -59,13 +60,15 @@ class GoogleSignInService {
       if (account != null) {
         final GoogleSignInAuthentication auth = await account.authentication;
         final String? idToken = auth.idToken;
-        final String? accessToken = auth.accessToken;
 
-        if (idToken != null && accessToken != null) {
+        if (idToken != null) {
+          showAboutDialog(context: context, children: [
+            Text('Successful Google authentication'),
+          ]);
           // Send the tokens to the backend
-          await sendAuthTokensToBackend(idToken, accessToken);
+          await sendAuthTokensToBackend(idToken);
         } else {
-          print('No ID token or access token received');
+          print('No ID token received');
         }
       } else {
         print('No Google account selected');
@@ -75,13 +78,11 @@ class GoogleSignInService {
     }
   }
 
-  Future<void> sendAuthTokensToBackend(
-      String idToken, String accessToken) async {
+  Future<void> sendAuthTokensToBackend(String idToken) async {
     final response = await http.post(
       Uri.parse('http://localhost:3000/auth/google/callback'),
       body: {
         'id_token': idToken,
-        'access_token': accessToken,
       },
     );
     if (response.statusCode == 200) {
