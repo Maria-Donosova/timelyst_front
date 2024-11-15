@@ -29,7 +29,7 @@ class GoogleService {
     'https://www.googleapis.com/auth/calendar',
   ];
 
-  Future<void> googleSignIn() async {
+  Future<void> googleSignIn(BuildContext context) async {
     if (kIsWeb) {
       try {
         GoogleSignInAccount? googleSignInAccount =
@@ -55,6 +55,9 @@ class GoogleService {
               print("Access Token: $accessToken");
               print("ID Token: $idToken");
               print("Refresh Token: $refreshtoken");
+              showAboutDialog(context: context, children: [
+                Text('Successful Google authentication'),
+              ]);
             } else {
               print("Failed to obtain tokens.");
             }
