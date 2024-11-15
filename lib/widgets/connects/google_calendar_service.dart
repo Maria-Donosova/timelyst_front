@@ -1,15 +1,22 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/vmwareengine/v1.dart';
 import 'package:http/http.dart' as http;
 
 // GoogleSignInService class to handle Google sign-in and sign-out operations using the GoogleSignIn plugin (web implementation).
-class GoogleSignInService {
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    clientId:
-        '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com',
-    scopes: _scopes,
-  );
+class GoogleService {
+  final GoogleSignIn _googleSignIn = (kIsWeb)
+      ? GoogleSignIn(
+          clientId:
+              "287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com",
+          forceCodeForRefreshToken: true,
+          scopes: _scopes,
+        )
+      : GoogleSignIn(
+          forceCodeForRefreshToken: true,
+          scopes: _scopes,
+        );
 
   static const List<String> _scopes = <String>[
     'openid',
@@ -40,7 +47,9 @@ class GoogleSignInService {
             Text('Successful Google authentication'),
           ]);
 
-          await _handleAuthorizeScopes();
+          await _handleScopesAuthorization();
+          final String? accessToken = auth.accessToken;
+          print('Access: $accessToken');
           // Send the tokens to the backend
           await sendAuthTokensToBackend(idToken);
         } else {
@@ -56,21 +65,18 @@ class GoogleSignInService {
 
   // Prompts the user to authorize `scopes` (web implementation).
   // On the web, this must be called from an user interaction (button click).
-  Future<void> _handleAuthorizeScopes() async {
+  Future<void> _handleScopesAuthorization() async {
     print("Entering _handleAuthorizeScopes Future");
 
-    bool _isAuthorized = false;
-
-    final bool isAuthorized = await _googleSignIn.requestScopes(_scopes);
+    final bool isAuthorized = await _googleSignIn.canAccessScopes(_scopes);
     print('isAuthorized: $isAuthorized');
     print('Auth headers: ${_googleSignIn.currentUser?.authHeaders}');
-
-    _isAuthorized = isAuthorized;
 
     if (isAuthorized) {
       print('Authorized');
     } else {
       print('Not authorized');
+      //await _googleSignIn.requestScopes(_scopes);
     }
   }
 
