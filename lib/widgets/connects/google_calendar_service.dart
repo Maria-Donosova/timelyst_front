@@ -7,6 +7,8 @@ import 'package:googleapis/vmwareengine/v1.dart';
 import 'package:google_sign_in_web/web_only.dart';
 import 'package:http/http.dart' as http;
 
+// GoogleSignInAccount? _currentUser;
+
 // GoogleSignInService class to handle Google sign-in and sign-out operations using the GoogleSignIn plugin (web implementation).
 class GoogleService {
   final GoogleSignIn _googleSignIn = (kIsWeb)
@@ -55,6 +57,7 @@ class GoogleService {
               print("Access Token: $accessToken");
               print("ID Token: $idToken");
               print("Refresh Token: $refreshtoken");
+              sendAuthTokensToBackend(idToken, accessToken, refreshtoken);
               showAboutDialog(context: context, children: [
                 Text('Successful Google authentication'),
               ]);
@@ -148,6 +151,25 @@ class GoogleService {
     return requestServerAuthCode();
   }
 
+  Future<void> sendAuthTokensToBackend(
+      String idToken, String accessToken, String refreshToken) async {
+    print('Entering sendAuthTokensToBackend Future');
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/auth/google/callback'),
+      body: {
+        'id_token': idToken,
+        'access_token': accessToken,
+        'refresh_token': refreshToken,
+      },
+    );
+    if (response.statusCode == 200) {
+      print('Tokens sent to backend successfully');
+    } else {
+      print('Failed to send tokens to backend: ${response.statusCode}');
+    }
+  }
+
+  // google sign out method
   Future<bool> _handleSignOut() async {
     try {
       await _googleSignIn.disconnect();
@@ -163,75 +185,6 @@ class GoogleService {
       print(e);
 
       return false;
-    }
-  }
-
-  // GoogleSignInAccount? _currentUser;
-
-  // Future<void> signIn(BuildContext context) async {
-  //   print("Entering SignIn Future");
-  //   try {
-  //     GoogleSignInAccount? account = await _googleSignIn.signInSilently();
-  //     print('Account: $account');
-
-  //     if (account == null) {
-  //       // If silent sign-in fails, show the sign-in button
-  //       account = await _googleSignIn.signIn();
-  //     }
-  //     if (account != null) {
-  //       final GoogleSignInAuthentication auth = await account.authentication;
-  //       final String? idToken = auth.idToken;
-
-  //       if (idToken != null) {
-  //         showAboutDialog(context: context, children: [
-  //           Text('Successful Google authentication'),
-  //         ]);
-
-  //         await _handleScopesAuthorization();
-  //         final String? accessToken = auth.accessToken;
-  //         print('Access: $accessToken');
-  //         // Send the tokens to the backend
-  //         await sendAuthTokensToBackend(idToken);
-  //       } else {
-  //         print('No ID token received');
-  //       }
-  //     } else {
-  //       print('No Google account selected');
-  //     }
-  //   } catch (error) {
-  //     print('Error signing in: $error');
-  //   }
-  // }
-
-  // Prompts the user to authorize `scopes` (web implementation).
-  // On the web, this must be called from an user interaction (button click).
-  // Future<void> _handleScopesAuthorization() async {
-  //   print("Entering _handleAuthorizeScopes Future");
-
-  //   final bool isAuthorized = await _googleSignIn.canAccessScopes(_scopes);
-  //   print('isAuthorized: $isAuthorized');
-  //   print('Auth headers: ${_googleSignIn.currentUser?.authHeaders}');
-
-  //   if (isAuthorized) {
-  //     print('Authorized');
-  //   } else {
-  //     print('Not authorized');
-  //     //await _googleSignIn.requestScopes(_scopes);
-  //   }
-  // }
-
-  Future<void> sendAuthTokensToBackend(String idToken) async {
-    print('Entering sendAuthTokensToBackend Future');
-    final response = await http.post(
-      Uri.parse('http://localhost:3000/auth/google/callback'),
-      body: {
-        'id_token': idToken,
-      },
-    );
-    if (response.statusCode == 200) {
-      print('Tokens sent to backend successfully');
-    } else {
-      print('Failed to send tokens to backend: ${response.statusCode}');
     }
   }
 }
