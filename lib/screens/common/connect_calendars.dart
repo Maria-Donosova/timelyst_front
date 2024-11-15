@@ -52,7 +52,8 @@ class ConnectCal extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       print('Gmail button pressed');
-                      _signInService.googleSignIn();
+                      _signInService.googleSignIn(
+                          context); // call the googleSignIn method from the GoogleService class);
                     },
                     child: const Text('Gmail'),
                     style: ElevatedButton.styleFrom(
