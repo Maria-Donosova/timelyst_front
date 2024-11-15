@@ -28,7 +28,7 @@ class ConnectCal extends StatelessWidget {
     //final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final appBar = CustomAppBar();
 
-    final GoogleSignInService _signInService = GoogleSignInService();
+    final GoogleService _signInService = GoogleService();
 
     return Scaffold(
       appBar: appBar,
