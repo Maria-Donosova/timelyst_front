@@ -31,33 +31,27 @@ class GoogleService {
 
   Future<void> googleSignIn() async {
     if (kIsWeb) {
-      // Web-specific code
-      GoogleSignInAccount? googleSignInAccount;
-
       try {
-        googleSignInAccount = await _googleSignIn.signIn();
+        GoogleSignInAccount? googleSignInAccount =
+            await _googleSignIn.signInSilently();
+        print('Google SignIn Silently Account');
 
-        final strin = await requestServerAuthenticatioinCode() ?? '';
+        if (googleSignInAccount == null) {
+          // If silent sign-in fails, show the sign-in button
+          googleSignInAccount = await _googleSignIn.signIn();
+        }
+
         if (googleSignInAccount != null) {
-          GoogleSignInAuthentication auth =
-              await googleSignInAccount.authentication;
+          final strin = await requestServerAuthenticatioinCode();
 
-          print("Access Token: ${auth.accessToken}");
-          print("ID Token: ${auth.idToken}");
-
-          print("Server Auth Code: $strin");
           // Use the tokens as needed
           if (strin != null) {
             final tokenResponse = await _exchangeCodeForTokens(strin);
 
             if (tokenResponse != null) {
-              print("token response not null");
-              print(tokenResponse);
               final accessToken = tokenResponse['access_token'];
               final idToken = tokenResponse['id_token'];
-
               final refreshtoken = tokenResponse['refresh_token'];
-
               print("Access Token: $accessToken");
               print("ID Token: $idToken");
               print("Refresh Token: $refreshtoken");
