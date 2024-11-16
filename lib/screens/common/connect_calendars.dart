@@ -1,14 +1,29 @@
+import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import '../../widgets/shared/custom_appbar.dart';
 
 import '../../widgets/connects/google_calendar_service.dart'; // import the google calendar service
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'agenda.dart';
 import 'agenda_settings.dart';
 
-class ConnectCal extends StatelessWidget {
+class ConnectCal extends StatefulWidget {
   const ConnectCal({Key? key}) : super(key: key);
   static const routeName = '/connect-screen';
+
+  @override
+  State<ConnectCal> createState() => _ConnectCalState();
+}
+
+class _ConnectCalState extends State<ConnectCal> {
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: <String>[
+      'email',
+      'https://www.googleapis.com/auth/calendar',
+    ],
+  );
 
   void startBlank(BuildContext ctx) {
     Navigator.of(ctx).pushNamed(
@@ -20,6 +35,26 @@ class ConnectCal extends StatelessWidget {
     Navigator.of(ctx).pushNamed(
       AgendaSettings.routeName,
     );
+  }
+
+  void initState() {
+    super.initState();
+
+    _googleSignIn.onCurrentUserChanged
+        .listen((GoogleSignInAccount? account) async {
+      if (kIsWeb && account != null) {
+        bool isAuthorized =
+            await _googleSignIn.canAccessScopes(['your scopes']);
+
+        if (!isAuthorized) {
+          await _googleSignIn.requestScopes(['your scopes']);
+        }
+      }
+    });
+
+    if (kIsWeb) {
+      _googleSignIn.signInSilently();
+    }
   }
 
   @override
