@@ -43,7 +43,6 @@ class EventDetails extends StatefulWidget {
         _recurrenceRule = recurrenceRule,
         // _recurrenceExceptionDates = recurrenceExceptionDates,
         _catTitle = catTitle,
-        _catColor = catColor,
         _participants = participants,
         _eventBody = body,
         _eventLocation = location;
@@ -66,7 +65,7 @@ class EventDetails extends StatefulWidget {
   // final String? _reminder;
   // final String? _holiday;
   final String? _catTitle;
-  final Color? _catColor;
+
   final String? _participants;
   final String? _eventBody;
   final String? _eventLocation;
