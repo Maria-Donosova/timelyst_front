@@ -18,12 +18,12 @@ class ConnectCal extends StatefulWidget {
 }
 
 class _ConnectCalState extends State<ConnectCal> {
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: <String>[
-      'email',
-      'https://www.googleapis.com/auth/calendar',
-    ],
-  );
+  // final GoogleSignIn _googleSignIn = GoogleSignIn(
+  //   scopes: <String>[
+  //     'email',
+  //     'https://www.googleapis.com/auth/calendar',
+  //   ],
+  // );
 
   void startBlank(BuildContext ctx) {
     Navigator.of(ctx).pushNamed(
@@ -37,25 +37,25 @@ class _ConnectCalState extends State<ConnectCal> {
     );
   }
 
-  void initState() {
-    super.initState();
+  // void initState() {
+  //   super.initState();
 
-    _googleSignIn.onCurrentUserChanged
-        .listen((GoogleSignInAccount? account) async {
-      if (kIsWeb && account != null) {
-        bool isAuthorized =
-            await _googleSignIn.canAccessScopes(['your scopes']);
+  //   _googleSignIn.onCurrentUserChanged
+  //       .listen((GoogleSignInAccount? account) async {
+  //     if (kIsWeb && account != null) {
+  //       bool isAuthorized =
+  //           await _googleSignIn.canAccessScopes(['your scopes']);
 
-        if (!isAuthorized) {
-          await _googleSignIn.requestScopes(['your scopes']);
-        }
-      }
-    });
+  //       if (!isAuthorized) {
+  //         await _googleSignIn.requestScopes(['your scopes']);
+  //       }
+  //     }
+  //   });
 
-    if (kIsWeb) {
-      _googleSignIn.signInSilently();
-    }
-  }
+  //   if (kIsWeb) {
+  //     _googleSignIn.signInSilently();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

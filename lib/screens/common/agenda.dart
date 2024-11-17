@@ -36,28 +36,3 @@ class Agenda extends StatelessWidget {
     );
   }
 }
-
-
-
-// void initState() {
-//    super.initState();
-
-// _googleSignIn.onCurrentUserChanged
-//     .listen((GoogleSignInAccount? account) async {
-//   if (kIsWeb && account != null) {
-//     bool isAuthorized = await _googleSignIn.canAccessScopes([
-//       'your scopes'
-//     ]);
-
-//     if (!isAuthorized) {
-//       await _googleSignIn.requestScopes([
-//         'your scopes'
-//       ]);
-//     }
-//   }
-// });
-
-// if (kIsWeb) {
-//   _googleSignIn.signInSilently();
-// }
-// }
