@@ -40,6 +40,7 @@ dependencies:
   syncfusion_flutter_core: ^27.1.58
   syncfusion_flutter_datepicker: ^27.1.58
   google_sign_in_web: ^0.12.4+3
+  flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
   flutter_test:
