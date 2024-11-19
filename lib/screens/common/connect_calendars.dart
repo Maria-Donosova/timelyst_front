@@ -1,10 +1,8 @@
-import 'package:flutter/foundation.dart';
-
 import 'package:flutter/material.dart';
-import '../../widgets/shared/custom_appbar.dart';
+//import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../widgets/shared/custom_appbar.dart';
 import '../../widgets/connects/google_calendar_service.dart'; // import the google calendar service
-import 'package:google_sign_in/google_sign_in.dart';
 
 import 'agenda.dart';
 import 'agenda_settings.dart';
@@ -18,12 +16,8 @@ class ConnectCal extends StatefulWidget {
 }
 
 class _ConnectCalState extends State<ConnectCal> {
-  // final GoogleSignIn _googleSignIn = GoogleSignIn(
-  //   scopes: <String>[
-  //     'email',
-  //     'https://www.googleapis.com/auth/calendar',
-  //   ],
-  // );
+  // final GoogleService _googleService = GoogleService();
+  // GoogleSignInAccount? _currentGoogleUser;
 
   void startBlank(BuildContext ctx) {
     Navigator.of(ctx).pushNamed(
@@ -37,25 +31,17 @@ class _ConnectCalState extends State<ConnectCal> {
     );
   }
 
-  // void initState() {
-  //   super.initState();
+  void initState() {
+    super.initState();
+    _checkIfUserIsSignedIn();
+  }
 
-  //   _googleSignIn.onCurrentUserChanged
-  //       .listen((GoogleSignInAccount? account) async {
-  //     if (kIsWeb && account != null) {
-  //       bool isAuthorized =
-  //           await _googleSignIn.canAccessScopes(['your scopes']);
-
-  //       if (!isAuthorized) {
-  //         await _googleSignIn.requestScopes(['your scopes']);
-  //       }
-  //     }
-  //   });
-
-  //   if (kIsWeb) {
-  //     _googleSignIn.signInSilently();
-  //   }
-  // }
+  Future<void> _checkIfUserIsSignedIn() async {
+    //final googleAccount = await _googleService.getCurrentUser();
+    setState(() {
+      //_currentGoogleUser = googleAccount;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +50,7 @@ class _ConnectCalState extends State<ConnectCal> {
     final appBar = CustomAppBar();
 
     final GoogleService _signInService = GoogleService();
+    print('GoogleService object created');
 
     return Scaffold(
       appBar: appBar,
@@ -84,17 +71,28 @@ class _ConnectCalState extends State<ConnectCal> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      print('Gmail button pressed');
-                      _signInService.googleSignIn(
-                          context); // call the googleSignIn method from the GoogleService class);
-                    },
-                    child: const Text('Gmail'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 198, 23, 10),
-                      textStyle: TextStyle(fontSize: 16),
-                    ),
+                  child: Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          print('Gmail button pressed');
+                          _signInService.googleSignIn(
+                              context); // call the googleSignIn method from the GoogleService class);
+                        },
+                        child: const Text('Gmail'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 198, 23, 10),
+                          textStyle: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      //if (_currentGoogleUser != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                            'Connected Account(s): test@gmail.com, todo@gmail.com, hereweare@gmail.com',
+                            style: Theme.of(context).textTheme.bodyLarge),
+                      ),
+                    ],
                   ),
                 ),
                 Padding(
