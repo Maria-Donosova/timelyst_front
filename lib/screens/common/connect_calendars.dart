@@ -61,11 +61,32 @@ class _ConnectCalState extends State<ConnectCal> {
             child: Padding(
               padding: const EdgeInsets.only(top: 150.0, left: 10, right: 10),
               child: Column(children: <Widget>[
+                //if (_currentGoogleUser != null)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 40.0),
+                  padding: const EdgeInsets.only(bottom: 60.0),
+                  //add a condition that Connected accounts are only visible if the user has connectedf external acounts
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
+                        child: Text(
+                          'Connected Accounts',
+                          style: Theme.of(context).textTheme.displayMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      Text(
+                          'test@gmail.com, todo@gmail.com, hereweare@gmail.com',
+                          style: Theme.of(context).textTheme.displaySmall),
+                    ],
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0),
                   child: Text(
-                    'Connect',
-                    style: Theme.of(context).textTheme.displayLarge,
+                    'Add your external accounts to get a 360 view on your schedules and ToDos.',
+                    style: Theme.of(context).textTheme.displayMedium,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -84,13 +105,6 @@ class _ConnectCalState extends State<ConnectCal> {
                           backgroundColor: Color.fromARGB(255, 198, 23, 10),
                           textStyle: TextStyle(fontSize: 16),
                         ),
-                      ),
-                      //if (_currentGoogleUser != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(
-                            'Connected Account(s): test@gmail.com, todo@gmail.com, hereweare@gmail.com',
-                            style: Theme.of(context).textTheme.bodyLarge),
                       ),
                     ],
                   ),
@@ -136,7 +150,7 @@ class _ConnectCalState extends State<ConnectCal> {
                         MaterialPageRoute(builder: (context) => const Agenda()),
                       );
                     },
-                    child: Text('Or Start Blank',
+                    child: Text('Or See My Agenda',
                         style: Theme.of(context).textTheme.bodyLarge),
                   ),
                 ),
