@@ -150,7 +150,7 @@ class _ConnectCalState extends State<ConnectCal> {
                         MaterialPageRoute(builder: (context) => const Agenda()),
                       );
                     },
-                    child: Text('Or See My Agenda',
+                    child: Text('Tame the Time',
                         style: Theme.of(context).textTheme.bodyLarge),
                   ),
                 ),
