@@ -30,7 +30,7 @@ class GoogleService {
     'https://www.googleapis.com/auth/calendar',
   ];
 
-  Future<void> googleSignIn(BuildContext context) async {
+  Future googleSignIn(BuildContext context) async {
     if (kIsWeb) {
       try {
         GoogleSignInAccount? googleSignInAccount =
