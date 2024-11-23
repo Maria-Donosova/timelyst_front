@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/screens/common/connect_calendars.dart';
+import 'package:timelyst_flutter/screens/common/log_in.dart';
+import 'package:timelyst_flutter/screens/common/sign_up.dart';
 
 import 'themes.dart';
 
@@ -19,10 +21,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Connect Calendars',
+      title: 'Sign Up',
       theme: CustomTheme.lightTheme,
       themeMode: currentTheme.currentTheme,
-      home: const ConnectCal(),
+      home: const LogInScreen(),
     );
   }
 }
