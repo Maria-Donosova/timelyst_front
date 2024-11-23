@@ -42,23 +42,6 @@ class _LogInScreenState extends State<LogInScreen> {
     return Scaffold(
       appBar: appBar,
       body: SafeArea(
-        // child: Mutation(
-        //   options: MutationOptions(
-        //     document: gql(insertUser()),
-        //     fetchPolicy: FetchPolicy.noCache,
-        //     onCompleted: (data) {
-        //       print(data.toString());
-        //       setState(() {
-        //         _isSaving = false;
-        //         currUserId = data!['createUser']["id"];
-        //         print(currUserId);
-        //       });
-        //     },
-        //   ),
-        //   builder: (runMutation, result) {
-        //     return Form(
-        //       //autovalidateMode: AutovalidateMode.onUserInteraction,
-        //        v
         child: SingleChildScrollView(
           child: Wrap(
             children: [
