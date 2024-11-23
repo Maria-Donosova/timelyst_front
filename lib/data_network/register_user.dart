@@ -1,11 +1,9 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-final storage = FlutterSecureStorage();
-
-Future<void> loginUser(String email, String password) async {
-  print("Entering loginUser in storage");
+Future<void> registerUser(String email, String password, String name,
+    String lastName, bool consent) async {
+  print("Entering registerUser in flutter");
   print('Logging in with email: $email and password: $password');
   final response = await http.post(
     Uri.parse('http://localhost:3000/'),
@@ -35,26 +33,7 @@ Future<void> loginUser(String email, String password) async {
     final token = data['data']['userLogin']['token'];
     final userId = data['data']['userLogin']['userId'];
     final role = data['data']['userLogin']['role'];
-
-    // Store the token securely
-    await storage.write(key: 'jwt', value: token);
-
-    // Optionally, store userId and role if needed
-    await storage.write(key: 'userId', value: userId);
-    await storage.write(key: 'role', value: role);
   } else {
-    throw Exception('Failed to login: ${response.statusCode}');
+    throw Exception('Failed to signup: ${response.statusCode}');
   }
-}
-
-Future<String?> getToken() async {
-  return await storage.read(key: 'jwt');
-}
-
-Future<void> saveRefreshToken(String refreshToken) async {
-  await storage.write(key: 'refreshToken', value: refreshToken);
-}
-
-Future<String?> getRefreshToken() async {
-  return await storage.read(key: 'refreshToken');
 }
