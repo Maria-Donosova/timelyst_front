@@ -19,11 +19,13 @@ class CustomTheme with ChangeNotifier {
         secondary: const Color.fromRGBO(238, 243, 246, 1.0),
         onSecondary: Colors.grey[900]!,
         tertiary: Colors.grey[600]!,
+        onTertiary: Colors.white,
         error: Colors.redAccent,
         onError: Colors.grey[900]!,
         surface: Colors.white,
         onSurface: Colors.grey[900]!,
         shadow: const Color.fromRGBO(207, 204, 215, 100),
+        outline: Colors.grey[900]!,
       ),
       fontFamily: 'Lora',
       iconTheme: IconThemeData(
@@ -51,6 +53,20 @@ class CustomTheme with ChangeNotifier {
               .grey[900]!; // Color when the radio button is not selected
         }),
         // Color of the ripple effect
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        labelStyle: TextStyle(color: Colors.grey[900]),
+        hintStyle: TextStyle(color: Colors.grey[800]),
+        hintFadeDuration: Duration(milliseconds: 100),
+        errorStyle: TextStyle(color: Colors.redAccent),
+        border: UnderlineInputBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(4.0),
+          ),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey[900]!),
+        ),
       ),
       checkboxTheme: CheckboxThemeData(
         visualDensity: VisualDensity.compact,

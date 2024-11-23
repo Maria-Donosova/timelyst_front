@@ -12,12 +12,6 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  void connect(BuildContext ctx) {
-    Navigator.of(ctx).pushNamed(
-      ConnectCal.routeName,
-    );
-  }
-
   final _lnFocusNode = FocusNode();
   final _passFocusNode = FocusNode();
   final _emailFocusNode = FocusNode();

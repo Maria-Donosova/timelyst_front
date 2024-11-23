@@ -170,7 +170,7 @@ class _LogInScreenState extends State<LogInScreen> {
                                 style: TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme
-                                        .secondary),
+                                        .onPrimary),
                               ),
                               onPressed: () => {},
                             ),
@@ -193,11 +193,11 @@ class _LogInScreenState extends State<LogInScreen> {
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
-                                          .secondary,
+                                          .onSecondary,
                                     )),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
-                                      Theme.of(context).colorScheme.shadow,
+                                      Theme.of(context).colorScheme.secondary,
                                 ),
                                 onPressed: () {
                                   //_saveForm,
@@ -219,11 +219,11 @@ class _LogInScreenState extends State<LogInScreen> {
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
-                                          .secondary,
+                                          .onSecondary,
                                     )),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
-                                      Theme.of(context).colorScheme.shadow,
+                                      Theme.of(context).colorScheme.secondary,
                                 ),
                                 onPressed: () async {
                                   print('log in button pressed');
