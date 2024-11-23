@@ -22,13 +22,11 @@ class _LogInScreenState extends State<LogInScreen> {
     );
   }
 
-  //final _form = GlobalKey<FormState>();
-
   final _passFocusNode = FocusNode();
   final _emailFocusNode = FocusNode();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _consentController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   //bool _isSaving = false;
   bool isChecked = false;
@@ -60,7 +58,7 @@ class _LogInScreenState extends State<LogInScreen> {
         //   builder: (runMutation, result) {
         //     return Form(
         //       //autovalidateMode: AutovalidateMode.onUserInteraction,
-        //       key: _form,
+        //        v
         child: SingleChildScrollView(
           child: Wrap(
             children: [
@@ -79,6 +77,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     ),
                     Form(
                       autovalidateMode: AutovalidateMode.onUserInteraction,
+                      key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -215,50 +214,34 @@ class _LogInScreenState extends State<LogInScreen> {
                                 ),
                                 onPressed: () async {
                                   print('log in button pressed');
-
                                   final email = _emailController.text.trim();
                                   final password =
                                       _passwordController.text.trim();
-                                  try {
-                                    await loginUser(email, password);
-                                    // Navigate to the agenda screen upon successful login
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => const Agenda()),
-                                    );
-                                  } catch (e) {
+                                  if (_formKey.currentState!.validate()) {
+                                    try {
+                                      await loginUser(email, password);
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const Agenda()),
+                                      );
+                                      // Navigate to the agenda screen upon successful login
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text('Login failed: $e')),
+                                      );
+                                      print("error: $e");
+                                    }
+                                  } else
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                          content: Text('Login failed: $e')),
+                                        content: Text(
+                                            'Please enter valid login information'),
+                                      ),
                                     );
-                                  }
-
-                                  // if (_form.currentState!.validate()) {
-                                  //   setState(() {
-                                  //     _isSaving = true;
-                                  //   });
-                                  // runMutation({
-                                  //   "name": _nameController.text.trim(),
-                                  //   "last_name": _lastNameController.text.trim(),
-                                  //   "email": _emailController.text.trim(),
-                                  //   "password": _passwordController.text.trim(),
-                                  //"consent":
-                                  //_consentController.text.trim(),
-                                  //"profession":
-                                  //_professionController.text.trim(),
-                                  //"age": int.parse(
-                                  //_ageController.text.trim()),
-                                  //     });
-                                  //     _nameController.clear();
-                                  //     _lastNameController.clear();
-                                  //     _emailController.clear();
-                                  //     _passwordController.clear();
-                                  //     //_consentController.clear();
-                                  //     //_professionController.clear();
-                                  //     //_ageController.clear();
-                                  //connect(context);
-                                  // }
                                 },
                               ),
                             ),
@@ -288,15 +271,3 @@ class _LogInScreenState extends State<LogInScreen> {
     );
   }
 }
-
-// String insertUser() {
-//   return """
-//     mutation createUser(\$name: String!, \$last_name: String!,\$email: String!, \$password: String!) {
-//       createUser(name: \$name, last_name: \$last_name, email: \$email, password: \$password) {
-//         id
-//         name
-//         last_name
-//    }
-// }
-//   """;
-// }
