@@ -5,8 +5,10 @@ import 'dart:convert';
 final storage = FlutterSecureStorage();
 
 Future<void> loginUser(String email, String password) async {
+  print("Entering loginUser in storage");
+  print('Logging in with email: $email and password: $password');
   final response = await http.post(
-    Uri.parse('http://localhost:3000/graphql'),
+    Uri.parse('http://localhost:3000/'),
     headers: {
       'Content-Type': 'application/json',
     },
@@ -26,6 +28,7 @@ Future<void> loginUser(String email, String password) async {
       },
     }),
   );
+  print("Response: ${response.body}");
 
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
