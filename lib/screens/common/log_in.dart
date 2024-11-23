@@ -89,12 +89,6 @@ class _LogInScreenState extends State<LogInScreen> {
                               controller: _emailController,
                               decoration: const InputDecoration(
                                 labelText: 'Email',
-                                labelStyle: TextStyle(fontSize: 14),
-                                border: UnderlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(4.0),
-                                  ),
-                                ),
                                 errorStyle: TextStyle(color: Colors.redAccent),
                               ),
                               style: Theme.of(context).textTheme.bodyLarge,
@@ -125,12 +119,6 @@ class _LogInScreenState extends State<LogInScreen> {
                               controller: _passwordController,
                               decoration: const InputDecoration(
                                 labelText: 'Password',
-                                labelStyle: TextStyle(fontSize: 14),
-                                border: UnderlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(4.0),
-                                  ),
-                                ),
                                 errorStyle: TextStyle(color: Colors.redAccent),
                               ),
                               style: Theme.of(context).textTheme.bodyLarge,
