@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import 'package:timelyst_flutter/screens/common/sign_up.dart';
-
+import '/screens/common/sign_up.dart';
+import '../../date_network/storage.dart';
 import '../../widgets/shared/custom_appbar.dart';
 import 'agenda.dart';
 
@@ -32,8 +29,6 @@ class _LogInScreenState extends State<LogInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _consentController = TextEditingController();
-
-  final storage = FlutterSecureStorage();
 
   //bool _isSaving = false;
   bool isChecked = false;
@@ -230,15 +225,26 @@ class _LogInScreenState extends State<LogInScreen> {
                                   backgroundColor:
                                       Theme.of(context).colorScheme.shadow,
                                 ),
-                                onPressed: () {
-                                  //_saveForm,
+                                onPressed: () async {
                                   print('log in button pressed');
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => const Agenda()),
-                                  );
-                                  //connect(context);
+
+                                  final email = _emailController.text.trim();
+                                  final password =
+                                      _passwordController.text.trim();
+                                  try {
+                                    await loginUser(email, password);
+                                    // Navigate to the agenda screen upon successful login
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => const Agenda()),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text('Login failed: $e')),
+                                    );
+                                  }
 
                                   // if (_form.currentState!.validate()) {
                                   //   setState(() {
