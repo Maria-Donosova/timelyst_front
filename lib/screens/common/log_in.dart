@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'package:timelyst_flutter/screens/common/sign_up.dart';
 
 import '../../widgets/shared/custom_appbar.dart';
@@ -8,10 +12,12 @@ class LogInScreen extends StatefulWidget {
   const LogInScreen({Key? key}) : super(key: key);
   static const routeName = '/log-in';
 
+// override the createState method to return the state
   @override
   _LogInScreenState createState() => _LogInScreenState();
 }
 
+// navigate to agenda screen
 class _LogInScreenState extends State<LogInScreen> {
   void connect(BuildContext ctx) {
     Navigator.of(ctx).pushNamed(
@@ -19,14 +25,15 @@ class _LogInScreenState extends State<LogInScreen> {
     );
   }
 
-  final _passFocusNode = FocusNode();
-  final _emailFocusNode = FocusNode();
-
   //final _form = GlobalKey<FormState>();
 
+  final _passFocusNode = FocusNode();
+  final _emailFocusNode = FocusNode();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  //final _consentController = TextEditingController();
+  final _consentController = TextEditingController();
+
+  final storage = FlutterSecureStorage();
 
   //bool _isSaving = false;
   bool isChecked = false;
@@ -93,8 +100,7 @@ class _LogInScreenState extends State<LogInScreen> {
                                     topLeft: Radius.circular(4.0),
                                   ),
                                 ),
-                                // errorStyle:
-                                //     TextStyle(color: Colors.redAccent),
+                                errorStyle: TextStyle(color: Colors.redAccent),
                               ),
                               style: Theme.of(context).textTheme.bodyLarge,
                               textInputAction: TextInputAction.next,
@@ -110,8 +116,6 @@ class _LogInScreenState extends State<LogInScreen> {
                                 if (!regExp.hasMatch(value)) {
                                   return 'Please enter a valid email';
                                 }
-                                // add a check for the non-existing user
-                                //if ()
                                 return null;
                               },
                               onFieldSubmitted: (_) {
@@ -132,8 +136,7 @@ class _LogInScreenState extends State<LogInScreen> {
                                     topLeft: Radius.circular(4.0),
                                   ),
                                 ),
-                                // errorStyle:
-                                //     TextStyle(color: Colors.redAccent),
+                                errorStyle: TextStyle(color: Colors.redAccent),
                               ),
                               style: Theme.of(context).textTheme.bodyLarge,
                               textInputAction: TextInputAction.next,
@@ -144,16 +147,23 @@ class _LogInScreenState extends State<LogInScreen> {
                                 if (value!.isEmpty) {
                                   return 'Please provide a value.';
                                 }
-                                // add a check for the invalid password
-                                // if ()
+                                //add a check for the short password, password should contain numbers, letters and special characters
+                                if (value.length < 11) {
+                                  return 'Password must be at least 11 characters long';
+                                }
+                                if (!RegExp(r'[a-z]').hasMatch(value)) {
+                                  return 'Password must contain at least one lowercase letter';
+                                }
+
+                                if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                                  return 'Password must contain at least one uppercase letter';
+                                }
+
+                                if (!RegExp(r'\d').hasMatch(value)) {
+                                  return 'Password must contain at least one number';
+                                }
                                 return null;
                               },
-                              // onPressed: (value) {
-                              //   _signUpUser = User(
-                              //       id: _signUpUser.id,
-                              //       email: _signUpUser.email,
-                              //       password: value!,
-                              //       consent: _signUpUser.consent);                    // },
                             ),
                           ),
                           Padding(
