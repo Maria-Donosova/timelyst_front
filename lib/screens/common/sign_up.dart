@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:timelyst_flutter/data_network/register_user.dart';
+import 'package:timelyst_flutter/screens/common/log_in.dart';
 
 import '../../widgets/shared/custom_appbar.dart';
 import 'connect_calendars.dart';
@@ -16,13 +18,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passFocusNode = FocusNode();
   final _emailFocusNode = FocusNode();
 
-  //final _form = GlobalKey<FormState>();
+  final _form = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  //final _consentController = TextEditingController();
+  final _consentController = TextEditingController();
 
   bool _isSaving = false;
   bool isChecked = false;
@@ -58,6 +60,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           //       //autovalidateMode: AutovalidateMode.onUserInteraction,
           //       key: _form,
           child: Form(
+            key: _form,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             child: SingleChildScrollView(
               child: Column(
@@ -294,14 +297,47 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 backgroundColor:
                                     Theme.of(context).colorScheme.shadow,
                               ),
-                              onPressed: () {
+                              onPressed: () async {
                                 //_saveForm,
                                 print('sign up button pressed');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const ConnectCal()),
-                                );
+                                final email = _emailController.text.trim();
+                                final password =
+                                    _passwordController.text.trim();
+                                final name = _nameController.text.trim();
+                                final lastName =
+                                    _lastNameController.text.trim();
+                                final consent = isChecked;
+                                if (_form.currentState!.validate()) {
+                                  try {
+                                    await registerUser(email, password, name,
+                                        lastName, consent);
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const LogInScreen()),
+                                    );
+                                    // Navigate to the agenda screen upon successful login
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text('Login failed: $e')),
+                                    );
+                                    print("error: $e");
+                                  }
+                                } else
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Please enter valid sign up information'),
+                                    ),
+                                  );
+
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //       builder: (context) => const ConnectCal()),
+                                // );
                                 //connect(context);
 
                                 // if (_form.currentState!.validate()) {
