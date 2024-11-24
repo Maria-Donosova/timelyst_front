@@ -7,27 +7,22 @@ Future<void> registerUser(String email, String password, String name,
   print(
       'Regestring with email: $email, password: $password, name: $name, lastName: $lastName, consent: $consent');
   final response = await http.post(
-    Uri.parse('http://localhost:3000/'),
+    Uri.parse('http://localhost:3000/graphql'),
     headers: {
       'Content-Type': 'application/json',
     },
     body: jsonEncode({
       'query': '''
-        mutation createUser(\$name: String!, \$last_name: String!,\$email: String!, \$password: String!, \$consent: Boolean!) {
-        createUser(name: \$name, last_name: \$last_name, email: \$email, password: \$password, consent: \$consent) {
-          id
-          name
-          last_name
+        mutation {
+          registerUser(userInput: {email: $email, name: $name, last_name: $lastName, password:$password, consent: $consent}) 
+            {
+              id
+              name
+              last_name
+            }
+          } 
         }
-      }
-      ''',
-      'variables': {
-        'email': email,
-        'password': password,
-        'name': name,
-        'last_name': lastName,
-        'consent': consent,
-      },
+        ''',
     }),
   );
   print("Response: ${response.body}");
