@@ -10,9 +10,11 @@ Future<void> loginUser(String email, String password) async {
     print('Logging in with email: $email and password: $password');
     final response = await http.post(
       Uri.parse('http://localhost:3000/graphql'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      // headers: {
+      //   'Authorization':
+      //       'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzI4ZDU3MGNmMGFmNWQ1OWY1ZWM2ZjAiLCJpYXQiOjE3MzA3Mjk0MzEsImV4cCI6MTczODUwNTQzMX0.o7FiGqu7-lz1c3HMmOMFb6w_BMH51eBk7gcNtGRd_3A'
+      // },
+      //headers: { 'Authorization': 'Bearer ${storage.read(key: 'jwt')}' },
       body: jsonEncode({
         'query': '''
         mutation {

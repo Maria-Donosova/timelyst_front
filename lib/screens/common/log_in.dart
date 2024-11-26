@@ -113,19 +113,8 @@ class _LogInScreenState extends State<LogInScreen> {
                                   return 'Please provide a value.';
                                 }
                                 //add a check for the short password, password should contain numbers, letters and special characters
-                                if (value.length < 11) {
-                                  return 'Password must be at least 11 characters long';
-                                }
-                                if (!RegExp(r'[a-z]').hasMatch(value)) {
-                                  return 'Password must contain at least one lowercase letter';
-                                }
-
-                                if (!RegExp(r'[A-Z]').hasMatch(value)) {
-                                  return 'Password must contain at least one uppercase letter';
-                                }
-
-                                if (!RegExp(r'\d').hasMatch(value)) {
-                                  return 'Password must contain at least one number';
+                                if (value.length < 3) {
+                                  return 'Password must be at least 8 characters long';
                                 }
                                 return null;
                               },
