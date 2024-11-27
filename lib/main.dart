@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       title: 'Sign Up',
       theme: CustomTheme.lightTheme,
       themeMode: currentTheme.currentTheme,
-      home: const ConnectCal(),
+      home: const LogInScreen(),
     );
   }
 }
