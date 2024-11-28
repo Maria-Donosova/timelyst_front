@@ -2,7 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
   static const String _authTokenKey = 'authToken';
-  static const String _refreshTokenKey = 'refreshToken';
+  //static const String _refreshTokenKey = 'refreshToken';
 
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
@@ -46,21 +46,21 @@ class AuthService {
   }
 
   // Methods for managing the refresh token
-  Future<void> saveRefreshToken(String refreshToken) async {
-    try {
-      await _storage.write(key: _refreshTokenKey, value: refreshToken);
-    } catch (e) {
-      print('Error saving refresh token: $e');
-      rethrow;
-    }
-  }
+  // Future<void> saveRefreshToken(String refreshToken) async {
+  //   try {
+  //     await _storage.write(key: _refreshTokenKey, value: refreshToken);
+  //   } catch (e) {
+  //     print('Error saving refresh token: $e');
+  //     rethrow;
+  //   }
+  // }
 
-  Future<String?> getRefreshToken() async {
-    try {
-      return await _storage.read(key: _refreshTokenKey);
-    } catch (e) {
-      print('Error reading refresh token: $e');
-      return null;
-    }
-  }
+  // Future<String?> getRefreshToken() async {
+  //   try {
+  //     return await _storage.read(key: _refreshTokenKey);
+  //   } catch (e) {
+  //     print('Error reading refresh token: $e');
+  //     return null;
+  //   }
+  // }
 }
