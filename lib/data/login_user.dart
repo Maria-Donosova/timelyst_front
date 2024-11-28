@@ -45,25 +45,14 @@ Future<void> loginUser(String email, String password) async {
 
       // Extract token, userId, and role from the response
       final token = data['data']['userLogin']['token'];
-      final userId = data['data']['userLogin']['userId'];
-      final role = data['data']['userLogin']['role'];
-
-      // // Store the token securely
-      // await storage.write(key: 'jwt', value: token);
-      // print('Token stored in jwt storage: $token');
-
-      // // Optionally, store userId and role if needed
-      // await storage.write(key: 'userId', value: userId);
-      // await storage.write(key: 'role', value: role);
+      //final refreshToken = data['data']['userLogin']['refreshToken'];
 
       // Use AuthService to store the token securely
       final authService = AuthService();
       await authService.saveAuthToken(token);
+      //await authService.saveRefreshToken(refreshToken);
       print('Token stored in jwt storage: $token');
-
-      // Optionally, store userId and role if needed
-      // await authService.saveUserId(userId);
-      // await authService.saveRole(role);
+      //print('Refresh token stored in jwt storage: $refreshToken');
     } else {
       // If the server did not return a 200 OK response, throw an exception
       throw Exception('Failed to login: ${response.statusCode}');
