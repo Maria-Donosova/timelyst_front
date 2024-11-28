@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timelyst_flutter/screens/common/sign_up.dart';
 
+import '../../screens/common/sign_up.dart';
+import '../../screens/common/log_in.dart';
 import '../../providers/auth_provider.dart';
 
 //import '../shared/search.dart';
@@ -78,9 +79,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               value: _profileView.settings,
               child: Text('Settings'),
             ),
-            const PopupMenuItem<_profileView>(
+            PopupMenuItem<_profileView>(
               value: _profileView.logout,
               child: Text('Logout'),
+              onTap: () {
+                print('Logging out');
+                authProvider.logout();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => LogInScreen()),
+                );
+              },
             ),
           ],
         ),
