@@ -8,7 +8,7 @@ Future<void> loginUser(String email, String password) async {
   try {
     print("Entering loginUser in flutter");
     print('Logging in with email: $email and password: $password');
-    var url = Uri.parse('http://localhost:3000/graphql1');
+    var url = Uri.parse('http://localhost:3000/graphql');
 
     // Construct the GraphQL query or mutation
     String query = '''
