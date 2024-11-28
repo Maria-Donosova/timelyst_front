@@ -9,10 +9,6 @@ import 'package:timelyst_flutter/screens/common/connect_calendars.dart';
 
 import 'themes.dart';
 
-//import 'screens/common/sign_up.dart';
-// import 'screens/common/log_in.dart';
-//import 'screens/common/agenda.dart';
-
 void main() {
   runApp(const MyApp());
 }
@@ -25,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

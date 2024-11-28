@@ -39,7 +39,7 @@ class _LogInScreenState extends State<LogInScreen> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
 
-    final authProvider = Provider.of<AuthProvider>(context);
+    //final authProvider = Provider.of<AuthProvider>(context);
 
     //final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final appBar = CustomAppBar();
@@ -200,7 +200,10 @@ class _LogInScreenState extends State<LogInScreen> {
                                       _passwordController.text.trim();
                                   if (_formKey.currentState!.validate()) {
                                     try {
-                                      await loginUser(email, password);
+                                      //await loginUser(email, password);
+                                      await Provider.of<AuthProvider>(context,
+                                              listen: false)
+                                          .login(email, password);
                                       Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(

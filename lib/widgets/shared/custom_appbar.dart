@@ -15,6 +15,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Access the AuthProvider to listen to changes
+    final authProvider = Provider.of<AuthProvider>(context);
+
+    print('Building CustomAppBar');
+
     return AppBar(
       title: _buildTitle(),
       centerTitle: true,
@@ -22,7 +27,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 3,
       shadowColor: Theme.of(context).shadowColor,
       leading: _buildLeading(context),
-      actions: _buildActions(context),
+      actions: _buildActions(context, authProvider),
     );
   }
 
@@ -54,9 +59,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  List<Widget> _buildActions(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    // final mediaQuery = MediaQuery.of(context);
+  List<Widget> _buildActions(BuildContext context, AuthProvider authProvider) {
+    // Use the authProvider to determine the actions
     return [
       if (authProvider.isLoggedIn) ...[
         PopupMenuButton(
@@ -86,9 +90,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSecondary,
               )),
-          // style: TextButton.styleFrom(
-          //   backgroundColor: Theme.of(context).colorScheme.secondary,
-          // ),
           onPressed: () {
             //_saveForm,
             print('sign up button pressed');

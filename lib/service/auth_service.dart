@@ -37,6 +37,7 @@ class AuthService {
   Future<bool> isLoggedIn() async {
     try {
       final token = await getAuthToken();
+      print('getAuthToken: $token');
       return token != null;
     } catch (e) {
       print('Error checking login status: $e');

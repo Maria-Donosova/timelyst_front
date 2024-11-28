@@ -2,7 +2,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-final storage = FlutterSecureStorage();
+import '../service/auth_service.dart';
+
+//final storage = FlutterSecureStorage();
 
 Future<void> loginUser(String email, String password) async {
   try {
@@ -49,13 +51,22 @@ Future<void> loginUser(String email, String password) async {
       final userId = data['data']['userLogin']['userId'];
       final role = data['data']['userLogin']['role'];
 
-      // Store the token securely
-      await storage.write(key: 'jwt', value: token);
+      // // Store the token securely
+      // await storage.write(key: 'jwt', value: token);
+      // print('Token stored in jwt storage: $token');
+
+      // // Optionally, store userId and role if needed
+      // await storage.write(key: 'userId', value: userId);
+      // await storage.write(key: 'role', value: role);
+
+      // Use AuthService to store the token securely
+      final authService = AuthService();
+      await authService.saveAuthToken(token);
       print('Token stored in jwt storage: $token');
 
       // Optionally, store userId and role if needed
-      await storage.write(key: 'userId', value: userId);
-      await storage.write(key: 'role', value: role);
+      // await authService.saveUserId(userId);
+      // await authService.saveRole(role);
     } else {
       // If the server did not return a 200 OK response, throw an exception
       throw Exception('Failed to login: ${response.statusCode}');
