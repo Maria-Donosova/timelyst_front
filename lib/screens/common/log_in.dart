@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../providers/auth_provider.dart';
 import '/screens/common/sign_up.dart';
-import '../../data_network/login_user.dart';
+import '../../data/login_user.dart';
 import '../../widgets/shared/custom_appbar.dart';
 import 'agenda.dart';
 
@@ -36,6 +38,9 @@ class _LogInScreenState extends State<LogInScreen> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
+
+    final authProvider = Provider.of<AuthProvider>(context);
+
     //final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final appBar = CustomAppBar();
 
@@ -82,10 +87,11 @@ class _LogInScreenState extends State<LogInScreen> {
                                   return 'Please provide a value.';
                                 }
                                 const pattern =
-                                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+                                    r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
                                 final regExp = RegExp(pattern);
+
                                 if (!regExp.hasMatch(value)) {
-                                  return 'Please enter a valid email';
+                                  return 'Wrong password.';
                                 }
                                 return null;
                               },
