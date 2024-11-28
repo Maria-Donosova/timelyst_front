@@ -87,11 +87,11 @@ class _LogInScreenState extends State<LogInScreen> {
                                   return 'Please provide a value.';
                                 }
                                 const pattern =
-                                    r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
+                                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
                                 final regExp = RegExp(pattern);
 
                                 if (!regExp.hasMatch(value)) {
-                                  return 'Wrong password.';
+                                  return 'Please enter a valid email';
                                 }
                                 return null;
                               },
@@ -118,9 +118,12 @@ class _LogInScreenState extends State<LogInScreen> {
                                 if (value!.isEmpty) {
                                   return 'Please provide a value.';
                                 }
-                                //add a check for the short password, password should contain numbers, letters and special characters
-                                if (value.length < 3) {
-                                  return 'Password must be at least 8 characters long';
+                                const pattern =
+                                    r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$';
+                                final regExp = RegExp(pattern);
+
+                                if (!regExp.hasMatch(value)) {
+                                  return 'Wrong password.';
                                 }
                                 return null;
                               },
@@ -153,29 +156,29 @@ class _LogInScreenState extends State<LogInScreen> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: ElevatedButton(
-                                child: Text('Sign Up',
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSecondary,
-                                    )),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.secondary,
-                                ),
-                                onPressed: () {
-                                  //_saveForm,
-                                  print('sign up button pressed');
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const SignUpScreen()),
-                                  );
-                                  // }
-                                },
-                              ),
+                              // child: ElevatedButton(
+                              //   child: Text('Sign Up',
+                              //       style: TextStyle(
+                              //         color: Theme.of(context)
+                              //             .colorScheme
+                              //             .onSecondary,
+                              //       )),
+                              //   style: ElevatedButton.styleFrom(
+                              //     backgroundColor:
+                              //         Theme.of(context).colorScheme.secondary,
+                              //   ),
+                              //   onPressed: () {
+                              //     //_saveForm,
+                              //     print('sign up button pressed');
+                              //     Navigator.push(
+                              //       context,
+                              //       MaterialPageRoute(
+                              //           builder: (context) =>
+                              //               const SignUpScreen()),
+                              //     );
+                              //     // }
+                              //   },
+                              // ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(4.0),

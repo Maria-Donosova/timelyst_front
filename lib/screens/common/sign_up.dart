@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/data_network/register_user.dart';
+import 'package:timelyst_flutter/data/register_user.dart';
 import 'package:timelyst_flutter/screens/common/log_in.dart';
 
 import '../../widgets/shared/custom_appbar.dart';
