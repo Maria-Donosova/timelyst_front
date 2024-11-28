@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
-import '/screens/common/sign_up.dart';
-import '../../data/login_user.dart';
+
 import '../../widgets/shared/custom_appbar.dart';
 import 'agenda.dart';
 
@@ -30,7 +29,6 @@ class _LogInScreenState extends State<LogInScreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  //bool _isSaving = false;
   bool isChecked = false;
 
   var currUserId;
@@ -38,8 +36,6 @@ class _LogInScreenState extends State<LogInScreen> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-
-    //final authProvider = Provider.of<AuthProvider>(context);
 
     //final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final appBar = CustomAppBar();
@@ -149,87 +145,45 @@ class _LogInScreenState extends State<LogInScreen> {
                     Padding(
                       padding: const EdgeInsets.only(top: 30.0),
                       child: Container(
-                        width: mediaQuery.size.width * 0.2,
-                        child: Wrap(
-                          alignment: WrapAlignment.spaceAround,
-                          runAlignment: WrapAlignment.spaceAround,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              // child: ElevatedButton(
-                              //   child: Text('Sign Up',
-                              //       style: TextStyle(
-                              //         color: Theme.of(context)
-                              //             .colorScheme
-                              //             .onSecondary,
-                              //       )),
-                              //   style: ElevatedButton.styleFrom(
-                              //     backgroundColor:
-                              //         Theme.of(context).colorScheme.secondary,
-                              //   ),
-                              //   onPressed: () {
-                              //     //_saveForm,
-                              //     print('sign up button pressed');
-                              //     Navigator.push(
-                              //       context,
-                              //       MaterialPageRoute(
-                              //           builder: (context) =>
-                              //               const SignUpScreen()),
-                              //     );
-                              //     // }
-                              //   },
-                              // ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: ElevatedButton(
-                                child: Text('Log In',
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSecondary,
-                                    )),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.secondary,
+                        child: ElevatedButton(
+                          child: Text('Log In',
+                              style: TextStyle(
+                                color:
+                                    Theme.of(context).colorScheme.onSecondary,
+                              )),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.secondary,
+                          ),
+                          onPressed: () async {
+                            print('log in button pressed');
+                            final email = _emailController.text.trim();
+                            final password = _passwordController.text.trim();
+                            if (_formKey.currentState!.validate()) {
+                              try {
+                                await Provider.of<AuthProvider>(context,
+                                        listen: false)
+                                    .login(email, password);
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const Agenda()),
+                                );
+                                // Navigate to the agenda screen upon successful login
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Login failed: $e')),
+                                );
+                                print("error: $e");
+                              }
+                            } else
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Please enter valid login information'),
                                 ),
-                                onPressed: () async {
-                                  print('log in button pressed');
-                                  final email = _emailController.text.trim();
-                                  final password =
-                                      _passwordController.text.trim();
-                                  if (_formKey.currentState!.validate()) {
-                                    try {
-                                      //await loginUser(email, password);
-                                      await Provider.of<AuthProvider>(context,
-                                              listen: false)
-                                          .login(email, password);
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const Agenda()),
-                                      );
-                                      // Navigate to the agenda screen upon successful login
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                            content: Text('Login failed: $e')),
-                                      );
-                                      print("error: $e");
-                                    }
-                                  } else
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'Please enter valid login information'),
-                                      ),
-                                    );
-                                },
-                              ),
-                            ),
-                          ],
+                              );
+                          },
                         ),
                       ),
                     ),

@@ -4,8 +4,6 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 
 import 'package:timelyst_flutter/screens/common/log_in.dart';
-import 'package:timelyst_flutter/screens/common/sign_up.dart';
-import 'package:timelyst_flutter/screens/common/connect_calendars.dart';
 
 import 'themes.dart';
 
