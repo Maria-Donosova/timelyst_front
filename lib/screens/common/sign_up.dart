@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/data/register_user.dart';
-import 'package:timelyst_flutter/screens/common/log_in.dart';
+//import 'package:timelyst_flutter/screens/common/log_in.dart';
 
 import '../../widgets/shared/custom_appbar.dart';
 import 'connect_calendars.dart';
@@ -24,7 +24,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _consentController = TextEditingController();
 
   bool _isSaving = false;
   bool isChecked = false;
@@ -42,23 +41,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(top: 120.0, left: 30, right: 30),
-          // child: Mutation(
-          //   options: MutationOptions(
-          //     document: gql(insertUser()),
-          //     fetchPolicy: FetchPolicy.noCache,
-          //     onCompleted: (data) {
-          //       print(data.toString());
-          //       setState(() {
-          //         _isSaving = false;
-          //         currUserId = data!['createUser']["id"];
-          //         print(currUserId);
-          //       });
-          //     },
-          //   ),
-          //   builder: (runMutation, result) {
-          //     return Form(
-          //       //autovalidateMode: AutovalidateMode.onUserInteraction,
-          //       key: _form,
           child: Form(
             key: _form,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -70,7 +52,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       padding: const EdgeInsets.only(top: 5.0, bottom: 16.0),
                       child: Text(
                         'Tell us more about yourself',
-                        // ignore: deprecated_member_use
                         style: Theme.of(context).textTheme.displayLarge,
                         textAlign: TextAlign.center,
                       ),
@@ -78,16 +59,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     TextFormField(
                       autocorrect: true,
                       controller: _nameController,
-                      // ignore: deprecated_member_use
                       style: Theme.of(context).textTheme.bodyLarge,
                       decoration: const InputDecoration(
                         labelText: 'Name',
-                        labelStyle: TextStyle(fontSize: 14),
-                        border: UnderlineInputBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(4.0),
-                          ),
-                        ),
                         errorStyle: TextStyle(color: Colors.redAccent),
                       ),
                       textInputAction: TextInputAction.next,
@@ -102,27 +76,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       onFieldSubmitted: (_) {
                         FocusScope.of(context).requestFocus(_lnFocusNode);
                       },
-                      // onSaved: (value) {
-                      //   _signUpUser = User(
-                      //       id: _signUpUser.id,
-                      //       name: value!,
-                      //       lastName: _signUpUser.lastName,
-                      //       email: _signUpUser.email,
-                      //       password: _signUpUser.password,
-                      //       consent: _signUpUser.consent);
-                      // },
                     ),
                     TextFormField(
                       autocorrect: true,
                       controller: _lastNameController,
                       decoration: const InputDecoration(
                         labelText: 'Last Name',
-                        labelStyle: TextStyle(fontSize: 14),
-                        border: UnderlineInputBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(4.0),
-                          ),
-                        ),
                         errorStyle: TextStyle(color: Colors.redAccent),
                       ),
                       style: Theme.of(context).textTheme.bodyLarge,
@@ -138,27 +97,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       onFieldSubmitted: (_) {
                         FocusScope.of(context).requestFocus(_emailFocusNode);
                       },
-                      // onSaved: (value) {
-                      //   _signUpUser = User(
-                      //       id: _signUpUser.id,
-                      //       name: _signUpUser.name,
-                      //       lastName: value!,
-                      //       email: _signUpUser.email,
-                      //       password: _signUpUser.password,
-                      //       consent: _signUpUser.consent);
-                      // },
                     ),
                     TextFormField(
                       autocorrect: true,
                       controller: _emailController,
                       decoration: const InputDecoration(
                         labelText: 'Email',
-                        labelStyle: TextStyle(fontSize: 14),
-                        border: UnderlineInputBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(4.0),
-                          ),
-                        ),
                         errorStyle: TextStyle(color: Colors.redAccent),
                       ),
                       style: Theme.of(context).textTheme.bodyLarge,
@@ -180,26 +124,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       onFieldSubmitted: (_) {
                         FocusScope.of(context).requestFocus(_passFocusNode);
                       },
-                      // onSaved: (value) {
-                      //   _signUpUser = User(
-                      //       id: _signUpUser.id,
-                      //       name: _signUpUser.name,
-                      //       lastName: _signUpUser.lastName,
-                      //       email: value!,
-                      //       password: _signUpUser.password,
-                      //       consent: _signUpUser.consent);
-                      // },
                     ),
                     TextFormField(
                       controller: _passwordController,
                       decoration: const InputDecoration(
                         labelText: 'Password',
-                        labelStyle: TextStyle(fontSize: 14),
-                        border: UnderlineInputBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(4.0),
-                          ),
-                        ),
                         errorStyle: TextStyle(color: Colors.redAccent),
                       ),
                       style: Theme.of(context).textTheme.bodyLarge,
@@ -220,15 +149,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         }
                         return null;
                       },
-                      // onSaved: (value) {
-                      //   _signUpUser = User(
-                      //       id: _signUpUser.id,
-                      //       name: _signUpUser.name,
-                      //       lastName: _signUpUser.lastName,
-                      //       email: _signUpUser.email,
-                      //       password: value!,
-                      //       consent: _signUpUser.consent);
-                      // },
                     ),
                     Row(
                       children: [
@@ -243,19 +163,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               onChanged: (value) {
                                 setState(() {
                                   isChecked = value ?? false;
-                                  //state.didChange(value);
                                   print(isChecked);
                                 });
-                                if (value = true) {
-                                  // _signUpUser = User(
-                                  //   id: _signUpUser.id,
-                                  //   name: _signUpUser.name,
-                                  //   lastName: _signUpUser.lastName,
-                                  //   email: _signUpUser.email,
-                                  //   password: _signUpUser.password,
-                                  //   consent: value,
-                                  // );
-                                }
+                                if (value = true) {}
                                 return;
                               }),
                         ),
@@ -298,7 +208,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     Theme.of(context).colorScheme.shadow,
                               ),
                               onPressed: () async {
-                                //_saveForm,
                                 print('sign up button pressed');
                                 final email = _emailController.text.trim();
                                 final password =
@@ -315,9 +224,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              const LogInScreen()),
+                                              const ConnectCal()),
                                     );
-                                    // Navigate to the agenda screen upon successful login
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
@@ -332,39 +240,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           'Please enter valid sign up information'),
                                     ),
                                   );
-
-                                // Navigator.push(
-                                //   context,
-                                //   MaterialPageRoute(
-                                //       builder: (context) => const ConnectCal()),
-                                // );
-                                //connect(context);
-
-                                // if (_form.currentState!.validate()) {
-                                //   setState(() {
-                                //     _isSaving = true;
-                                //   });
-                                // runMutation({
-                                //   "name": _nameController.text.trim(),
-                                //   "last_name": _lastNameController.text.trim(),
-                                //   "email": _emailController.text.trim(),
-                                //   "password": _passwordController.text.trim(),
-                                //"consent":
-                                //_consentController.text.trim(),
-                                //"profession":
-                                //_professionController.text.trim(),
-                                //"age": int.parse(
-                                //_ageController.text.trim()),
-                                //     });
-                                //     _nameController.clear();
-                                //     _lastNameController.clear();
-                                //     _emailController.clear();
-                                //     _passwordController.clear();
-                                //     //_consentController.clear();
-                                //     //_professionController.clear();
-                                //     //_ageController.clear();
-                                //connect(context);
-                                // }
                               },
                             ),
                           ),
@@ -379,15 +254,3 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 }
-
-// String insertUser() {
-//   return """
-//     mutation createUser(\$name: String!, \$last_name: String!,\$email: String!, \$password: String!) {
-//       createUser(name: \$name, last_name: \$last_name, email: \$email, password: \$password) {
-//         id
-//         name
-//         last_name
-//    }
-// }
-//   """;
-// }
