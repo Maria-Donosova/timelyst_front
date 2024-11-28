@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:timelyst_flutter/screens/common/sign_up.dart';
+
+import '../../providers/auth_provider.dart';
 
 //import '../shared/search.dart';
 
@@ -51,29 +55,51 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   List<Widget> _buildActions(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
     // final mediaQuery = MediaQuery.of(context);
     return [
-      PopupMenuButton(
-        tooltip: 'Account',
-        icon: Icon(
-          Icons.menu_outlined,
+      if (authProvider.isLoggedIn) ...[
+        PopupMenuButton(
+          tooltip: 'Account',
+          icon: Icon(
+            Icons.menu_outlined,
+          ),
+          elevation: 8,
+          itemBuilder: (BuildContext context) => <PopupMenuEntry<_profileView>>[
+            const PopupMenuItem<_profileView>(
+              value: _profileView.profile,
+              child: Text('Account'),
+            ),
+            const PopupMenuItem<_profileView>(
+              value: _profileView.settings,
+              child: Text('Settings'),
+            ),
+            const PopupMenuItem<_profileView>(
+              value: _profileView.logout,
+              child: Text('Logout'),
+            ),
+          ],
         ),
-        elevation: 8,
-        itemBuilder: (BuildContext context) => <PopupMenuEntry<_profileView>>[
-          const PopupMenuItem<_profileView>(
-            value: _profileView.profile,
-            child: Text('Account'),
-          ),
-          const PopupMenuItem<_profileView>(
-            value: _profileView.settings,
-            child: Text('Settings'),
-          ),
-          const PopupMenuItem<_profileView>(
-            value: _profileView.logout,
-            child: Text('Logout'),
-          ),
-        ],
-      ),
+      ] else ...[
+        TextButton(
+          child: Text('Sign Up',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondary,
+              )),
+          // style: TextButton.styleFrom(
+          //   backgroundColor: Theme.of(context).colorScheme.secondary,
+          // ),
+          onPressed: () {
+            //_saveForm,
+            print('sign up button pressed');
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SignUpScreen()),
+            );
+            // }
+          },
+        ),
+      ]
     ];
   }
 }
