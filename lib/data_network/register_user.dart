@@ -8,9 +8,9 @@ Future<void> registerUser(String email, String password, String name,
       'Regestring with email: $email, password: $password, name: $name, lastName: $lastName, consent: $consent');
   final response = await http.post(
     Uri.parse('http://localhost:3000/graphql'),
-    // headers: {
-    //   'Content-Type': 'application/json',
-    // },
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: jsonEncode({
       'query': '''
         mutation {
