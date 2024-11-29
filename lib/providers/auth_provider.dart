@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../service/auth_service.dart';
 import '../data/login_user.dart';
+import '../data/register_user.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -32,6 +33,32 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       print('Error during login: $e');
       throw Exception('Failed to login: $e');
+    }
+  }
+
+  Future<void> register(String email, String password, String name,
+      String lastName, bool consent) async {
+    try {
+      // Call the registerUser function
+      final response =
+          await registerUser(email, password, name, lastName, consent);
+
+      // Extract token, userId, and role from the response
+      final token = response['token'];
+      // final userId = response['userId'];
+      // final role = response['role'];
+
+      // Save the token and userId
+      await _authService.saveAuthToken(token);
+      // await _authService.saveUserId(userId);
+      // await _authService.saveRole(role);
+
+      // Set _isLoggedIn to true
+      _isLoggedIn = true;
+      notifyListeners();
+    } catch (e) {
+      print('Error during registration: $e');
+      throw Exception('Failed to register: $e');
     }
   }
 
