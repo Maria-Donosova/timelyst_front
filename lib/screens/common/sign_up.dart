@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/data/register_user.dart';
-//import 'package:timelyst_flutter/screens/common/log_in.dart';
 
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../data/register_user.dart';
 import '../../widgets/shared/custom_appbar.dart';
+
 import 'connect_calendars.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -218,8 +220,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 final consent = isChecked;
                                 if (_form.currentState!.validate()) {
                                   try {
-                                    await registerUser(email, password, name,
-                                        lastName, consent);
+                                    setState(() {
+                                      _isSaving = true;
+                                    });
+                                    await Provider.of<AuthProvider>(context,
+                                            listen: false)
+                                        .register(email, password, name,
+                                            lastName, consent);
+                                    setState(() {
+                                      _isSaving = false;
+                                    });
+                                    // await registerUser(email, password, name,
+                                    //     lastName, consent);
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
@@ -227,9 +239,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               const ConnectCal()),
                                     );
                                   } catch (e) {
+                                    setState(() {
+                                      _isSaving = false;
+                                    });
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                          content: Text('Login failed: $e')),
+                                          content:
+                                              Text('Registration failed: $e')),
                                     );
                                     print("error: $e");
                                   }
