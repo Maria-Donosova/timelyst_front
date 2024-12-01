@@ -30,7 +30,7 @@ class GoogleService {
     'https://www.googleapis.com/auth/calendar',
   ];
 
-  Future<void> googleSignIn(BuildContext context) async {
+  Future<String> googleSignIn(BuildContext context) async {
     if (kIsWeb) {
       try {
         GoogleSignInAccount? googleSignInAccount =
@@ -50,9 +50,11 @@ class GoogleService {
             final tokenResponse = await _exchangeCodeForTokens(strin);
 
             if (tokenResponse != null) {
+              final googleAccount = tokenResponse['email'];
               final accessToken = tokenResponse['access_token'];
               final idToken = tokenResponse['id_token'];
               final refreshtoken = tokenResponse['refresh_token'];
+              print("Google Account: $googleAccount");
               print("Access Token: $accessToken");
               print("ID Token: $idToken");
               print("Refresh Token: $refreshtoken");
@@ -60,13 +62,16 @@ class GoogleService {
               showAboutDialog(context: context, children: [
                 Text('Successful Google authentication'),
               ]);
+              return 'Success';
             } else {
               print("Failed to obtain tokens.");
+              return 'Failed to obtain tokens';
             }
           }
         }
       } catch (error) {
         print('Error during web sign-in: $error');
+        return 'Error during web sign-in: $error';
       }
     } else {
       try {
@@ -74,6 +79,7 @@ class GoogleService {
 
         if (account != null) {
           GoogleSignInAuthentication auth = await account.authentication;
+          print("Google Account: ${account.email}");
           print("Id token : ${auth.idToken}");
           print("Access token: ${auth.accessToken}");
           String? serverAuthCode = account.serverAuthCode;
@@ -85,21 +91,26 @@ class GoogleService {
             if (tokenResponse != null) {
               final accessToken = tokenResponse['access_token'];
               final idToken = tokenResponse['id_token'];
-
               final refreshtoken = tokenResponse['refresh_token'];
+              final googleAccount = account.email;
 
               print("Access Token: $accessToken");
               print("ID Token: $idToken");
               print("Refresh Token: $refreshtoken");
+              print("Success");
+              return googleAccount;
             } else {
               print("Failed to obtain tokens.");
+              return 'Failed to obtain tokens';
             }
           }
         }
       } catch (error) {
         print(error);
+        return 'Error: $error';
       }
     }
+    return 'Sign-in failed';
   }
 
   Future<Map<String, dynamic>?> _exchangeCodeForTokens(String code) async {
@@ -169,21 +180,20 @@ class GoogleService {
   }
 
   // google sign out method
-  Future<bool> _handleSignOut() async {
+  Future<String> googleSignOut(BuildContext context) async {
     try {
       await _googleSignIn.disconnect();
       await _googleSignIn.signOut();
       if (_googleSignIn.currentUser == null) {
         print("User is signed out");
-        return true;
+        return "User is signed out";
       } else {
         print("Sign out failed");
-        return false;
+        return "Sign out failed";
       }
     } catch (e) {
       print(e);
-
-      return false;
+      return "Error: $e";
     }
   }
 }
