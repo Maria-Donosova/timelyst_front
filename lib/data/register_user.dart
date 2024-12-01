@@ -45,7 +45,24 @@ Future<Map<String, dynamic>> registerUser(String email, String password,
       //if the server returns a 200 OK response, the user was successfully registered, parse json
       final data = jsonDecode(response.body);
 
-      // Extract the user id, name, and last name from the response
+      // Check for GraphQL errors
+      if (data['errors'] != null && data['errors'].length > 0) {
+        final errors = data['errors'];
+        print('Registration failed with errors: $errors');
+        throw Exception(
+            'Registration failed: ${errors.map((e) => e['message']).join(", ")}');
+      }
+
+      // Check for data errors
+      if (data['data']['registerUser']['errors'] != null &&
+          data['data']['registerUser']['errors'].length > 0) {
+        // Handle errors
+        final errors = data['data']['registerUser']['errors'];
+        print('Registration failed with errors: $errors');
+        throw Exception(
+            'Registration failed: ${errors.map((e) => e['message']).join(", ")}');
+      }
+
       // Extract token, userId, and role from the response
       final token = data['data']['registerUser']['token'];
       final userId = data['data']['registerUser']['userId'];

@@ -172,9 +172,8 @@ class _LogInScreenState extends State<LogInScreen> {
                                 // Navigate to the agenda screen upon successful login
                               } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Login failed: $e')),
+                                  SnackBar(content: Text('$e')),
                                 );
-                                print("error: $e");
                               }
                             } else
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -202,9 +201,6 @@ class _LogInScreenState extends State<LogInScreen> {
             ],
           ),
         ),
-        //     );
-        //   },
-        // ),
       ),
     );
   }

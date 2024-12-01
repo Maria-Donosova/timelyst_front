@@ -37,6 +37,16 @@ Future<void> loginUser(String email, String password) async {
       }),
     );
 
+    // Parse the JSON response
+    final data = jsonDecode(response.body);
+    print('Data received: $data');
+
+    // Check for errors in the response
+    if (data['errors'] != null) {
+      final errorMessage = data['errors'][0]['message'];
+      throw Exception('Error during login: $errorMessage');
+    }
+
     // Check the status code
     if (response.statusCode == 200) {
       // If the server returns a 200 OK response, parse the JSON
@@ -45,20 +55,15 @@ Future<void> loginUser(String email, String password) async {
 
       // Extract token, userId, and role from the response
       final token = data['data']['userLogin']['token'];
-      //final refreshToken = data['data']['userLogin']['refreshToken'];
 
       // Use AuthService to store the token securely
       final authService = AuthService();
       await authService.saveAuthToken(token);
-      //await authService.saveRefreshToken(refreshToken);
+
       print('Token stored in jwt storage: $token');
-      //print('Refresh token stored in jwt storage: $refreshToken');
-    } else {
-      // If the server did not return a 200 OK response, throw an exception
-      throw Exception('Failed to login: ${response.statusCode}');
     }
   } catch (e) {
-    print('Error during login: $e');
-    throw Exception('Failed to login: $e');
+    print('PrintError for E: $e');
+    throw Exception('$e');
   }
 }

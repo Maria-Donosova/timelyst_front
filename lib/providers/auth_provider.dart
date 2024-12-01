@@ -9,20 +9,16 @@ class AuthProvider with ChangeNotifier {
   bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
 
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
   Future<void> checkAuthState() async {
     _isLoggedIn = await _authService.isLoggedIn();
     notifyListeners();
   }
 
-  // Future<void> login(String token, String refreshToken) async {
-  //   await _authService.saveAuthToken(token);
-  //   await _authService.saveRefreshToken(refreshToken);
-  //   _isLoggedIn = true;
-  //   print('Logged in: $_isLoggedIn');
-  //   notifyListeners();
-  // }
-
   Future<void> login(String email, String password) async {
+    _errorMessage = null; // Clear any previous error message
     try {
       // Call the loginUser function
       await loginUser(email, password);
@@ -31,7 +27,6 @@ class AuthProvider with ChangeNotifier {
       _isLoggedIn = true;
       notifyListeners();
     } catch (e) {
-      print('Error during login: $e');
       throw Exception('Failed to login: $e');
     }
   }
@@ -45,13 +40,9 @@ class AuthProvider with ChangeNotifier {
 
       // Extract token, userId, and role from the response
       final token = response['token'];
-      // final userId = response['userId'];
-      // final role = response['role'];
 
       // Save the token and userId
       await _authService.saveAuthToken(token);
-      // await _authService.saveUserId(userId);
-      // await _authService.saveRole(role);
 
       // Set _isLoggedIn to true
       _isLoggedIn = true;
