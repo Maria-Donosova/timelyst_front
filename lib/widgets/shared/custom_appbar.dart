@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../screens/common/connect_calendars.dart';
 
 import '../../screens/common/sign_up.dart';
 import '../../screens/common/log_in.dart';
@@ -75,9 +76,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               value: _profileView.profile,
               child: Text('Account'),
             ),
-            const PopupMenuItem<_profileView>(
+            PopupMenuItem<_profileView>(
               value: _profileView.settings,
               child: Text('Settings'),
+              onTap: () {
+                print('Settings');
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => ConnectCal()));
+              },
             ),
             PopupMenuItem<_profileView>(
               value: _profileView.logout,
