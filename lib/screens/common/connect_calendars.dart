@@ -1,23 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../service/connected.accounts.dart';
 //import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../widgets/shared/custom_appbar.dart';
-import '../../widgets/connects/google_calendar_service.dart'; // import the google calendar service
+import '../../service/connects/google_calendar_service.dart'; // import the google calendar service
 
 import 'agenda.dart';
 import 'agenda_settings.dart';
 
-class ConnectCal extends StatefulWidget {
+class ConnectCal extends StatelessWidget {
   const ConnectCal({Key? key}) : super(key: key);
   static const routeName = '/connect-screen';
 
   @override
-  State<ConnectCal> createState() => _ConnectCalState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => ConnectedAccounts(),
+      child: _ConnectCalBody(),
+    );
+  }
 }
 
-class _ConnectCalState extends State<ConnectCal> {
+class _ConnectCalBody extends StatelessWidget {
   // final GoogleService _googleService = GoogleService();
   // GoogleSignInAccount? _currentGoogleUser;
+  final ConnectedAccounts _connectedAccounts = ConnectedAccounts();
 
   void startBlank(BuildContext ctx) {
     Navigator.of(ctx).pushNamed(
@@ -31,17 +40,22 @@ class _ConnectCalState extends State<ConnectCal> {
     );
   }
 
-  void initState() {
-    super.initState();
-    _checkIfUserIsSignedIn();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _checkIfUserIsSignedIn();
+  // }
 
-  Future<void> _checkIfUserIsSignedIn() async {
-    //final googleAccount = await _googleService.getCurrentUser();
-    setState(() {
-      //_currentGoogleUser = googleAccount;
-    });
-  }
+  // Future<void> _checkIfUserIsSignedIn() async {
+  //   // Check if the user is signed in and update the state
+
+  //   //final googleAccount = await _googleService.getCurrentUser();
+  //   setState(() {
+  //     // Update the state based on the connection status
+
+  //     //_currentGoogleUser = googleAccount;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -64,29 +78,28 @@ class _ConnectCalState extends State<ConnectCal> {
                 //if (_currentGoogleUser != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 60.0),
-                  //add a condition that Connected accounts are only visible if the user has connectedf external acounts
                   child: Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: Text(
-                          'Connected Accounts',
-                          style: Theme.of(context).textTheme.displayMedium,
-                          textAlign: TextAlign.center,
+                      if (_connectedAccounts.connectedAccounts.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10.0),
+                          child: Text(
+                            'Connected Accounts',
+                            style: Theme.of(context).textTheme.displayMedium,
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                      ),
-                      Text(
-                          'test@gmail.com, todo@gmail.com, hereweare@gmail.com',
+                      Text(_connectedAccounts.connectedAccounts.join(', '),
                           style: Theme.of(context).textTheme.displaySmall),
                     ],
                   ),
                 ),
 
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 15.0),
+                  padding: const EdgeInsets.only(bottom: 30.0),
                   child: Text(
                     'Add your external accounts to get a 360 view on your schedules and ToDos.',
-                    style: Theme.of(context).textTheme.displayMedium,
+                    style: Theme.of(context).textTheme.displaySmall,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -97,7 +110,8 @@ class _ConnectCalState extends State<ConnectCal> {
                       ElevatedButton(
                         onPressed: () {
                           print('Gmail button pressed');
-                          _signInService.googleSignIn(
+                          _connectedAccounts.googleSignIn(
+                              //_signInService.googleSignIn(
                               context); // call the googleSignIn method from the GoogleService class);
                         },
                         child: const Text('Gmail'),
@@ -150,8 +164,8 @@ class _ConnectCalState extends State<ConnectCal> {
                         MaterialPageRoute(builder: (context) => const Agenda()),
                       );
                     },
-                    child: Text('Tame the Time',
-                        style: Theme.of(context).textTheme.bodyLarge),
+                    child: Text('Start Blank',
+                        style: Theme.of(context).textTheme.displayMedium),
                   ),
                 ),
               ]),
