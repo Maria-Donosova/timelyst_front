@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../service/connected.accounts.dart';
+import '../../service/connected_accounts.dart';
 //import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../widgets/shared/custom_appbar.dart';
-import '../../service/connects/google_calendar_service.dart'; // import the google calendar service
+import '../../service/google_connect.dart'; // import the google calendar service
 
 import 'agenda.dart';
 import 'agenda_settings.dart';
