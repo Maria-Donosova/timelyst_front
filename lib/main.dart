@@ -9,7 +9,7 @@ import 'package:timelyst_flutter/screens/common/log_in.dart';
 import 'themes.dart';
 
 Future main() async {
-  //await dotenv.load(fileName: '.env');
+  await dotenv.load(fileName: 'lib/.env');
   runApp(const MyApp());
 }
 
