@@ -28,6 +28,7 @@ class ConnectedAccounts with ChangeNotifier {
   Future<void> googleSignOut(BuildContext context) async {
     // Use GoogleService to sign out
     String account = await _googleService.googleSignOut(context);
+    //String account = await _googleService.googleSignIn.currentUser;
     removeAccount(account);
   }
 }
