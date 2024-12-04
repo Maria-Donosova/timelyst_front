@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_sign_in_web/web_only.dart';
 import 'package:http/http.dart' as http;
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // GoogleSignInAccount? _currentUser;
 
@@ -30,50 +33,86 @@ class GoogleService {
     'https://www.googleapis.com/auth/calendar',
   ];
 
-  Future<String> googleSignIn(BuildContext context) async {
-    if (kIsWeb) {
-      try {
-        GoogleSignInAccount? googleSignInAccount =
-            await _googleSignIn.signInSilently();
-        print('Google SignIn Silently Account');
-
-        if (googleSignInAccount == null) {
-          // If silent sign-in fails, show the sign-in button
-          googleSignInAccount = await _googleSignIn.signIn();
-        }
-
-        if (googleSignInAccount != null) {
-          final strin = await requestServerAuthenticatioinCode();
-
-          // Use the tokens as needed
-          if (strin != null) {
-            final tokenResponse = await _exchangeCodeForTokens(strin);
-
-            if (tokenResponse != null) {
-              final googleAccount = tokenResponse['email'];
-              final accessToken = tokenResponse['access_token'];
-              final idToken = tokenResponse['id_token'];
-              final refreshtoken = tokenResponse['refresh_token'];
-              print("Google Account: $googleAccount");
-              print("Access Token: $accessToken");
-              print("ID Token: $idToken");
-              print("Refresh Token: $refreshtoken");
-              sendAuthTokensToBackend(idToken, accessToken, refreshtoken);
-              showAboutDialog(context: context, children: [
-                Text('Successful Google authentication'),
-              ]);
-              return 'Success';
-            } else {
-              print("Failed to obtain tokens.");
-              return 'Failed to obtain tokens';
-            }
+  // google sign in silently method
+  Future<String> googleSignInSilently() async {
+    try {
+      GoogleSignInAccount? googleSignInAccount =
+          await _googleSignIn.signInSilently();
+      print('try Google SignIn Silently');
+      if (googleSignInAccount != null) {
+        final strin = await requestServerAuthenticatioinCode();
+        if (strin != null) {
+          final tokenResponse = await _exchangeCodeForTokens(strin);
+          if (tokenResponse != null) {
+            final googleAccount = tokenResponse['email'];
+            final accessToken = tokenResponse['access_token'];
+            final idToken = tokenResponse['id_token'];
+            final refreshtoken = tokenResponse['refresh_token'];
+            print("Google Account: $googleAccount");
+            print("Access Token: $accessToken");
+            print("ID Token: $idToken");
+            print("Refresh Token: $refreshtoken");
+            sendAuthTokensToBackend(idToken, accessToken, refreshtoken);
+            return 'Success';
+          } else {
+            print("Failed to obtain tokens.");
+            return 'Failed to obtain tokens';
           }
         }
-      } catch (error) {
-        print('Error during web sign-in: $error');
-        return 'Error during web sign-in: $error';
       }
-    } else {
+    } catch (error) {
+      print('Error during web sign-in: $error');
+      return 'Error during web sign-in: $error';
+    }
+    return 'Sign-in failed';
+  }
+
+  // implicit google sign in method
+  Future<String> googleSignIn(BuildContext context) async {
+    if (kIsWeb) {
+      //   try {
+      //     GoogleSignInAccount? googleSignInAccount =
+      //         await _googleSignIn.signInSilently();
+
+      //     print('try Google SignIn Silently');
+
+      //     if (googleSignInAccount == null) {
+      //       // If silent sign-in fails, show the sign-in button
+      //       googleSignInAccount = await _googleSignIn.signIn();
+      //     }
+
+      //     if (googleSignInAccount != null) {
+      //       final strin = await requestServerAuthenticatioinCode();
+
+      //       // Use the tokens as needed
+      //       if (strin != null) {
+      //         final tokenResponse = await _exchangeCodeForTokens(strin);
+
+      //         if (tokenResponse != null) {
+      //           final googleAccount = tokenResponse['email'];
+      //           final accessToken = tokenResponse['access_token'];
+      //           final idToken = tokenResponse['id_token'];
+      //           final refreshtoken = tokenResponse['refresh_token'];
+      //           print("Google Account: $googleAccount");
+      //           print("Access Token: $accessToken");
+      //           print("ID Token: $idToken");
+      //           print("Refresh Token: $refreshtoken");
+      //           sendAuthTokensToBackend(idToken, accessToken, refreshtoken);
+      //           showAboutDialog(context: context, children: [
+      //             Text('Successful Google authentication'),
+      //           ]);
+      //           return 'Success';
+      //         } else {
+      //           print("Failed to obtain tokens.");
+      //           return 'Failed to obtain tokens';
+      //         }
+      //       }
+      //     }
+      //   } catch (error) {
+      //     print('Error during web sign-in: $error');
+      //     return 'Error during web sign-in: $error';
+      //   }
+      // } else {
       try {
         GoogleSignInAccount? account = await _googleSignIn.signIn();
 
@@ -184,6 +223,7 @@ class GoogleService {
     try {
       await _googleSignIn.disconnect();
       await _googleSignIn.signOut();
+      //await storage.deleteAll();
       if (_googleSignIn.currentUser == null) {
         print("User is signed out");
         return "User is signed out";
