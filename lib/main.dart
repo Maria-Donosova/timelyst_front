@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:timelyst_flutter/screens/common/log_in.dart';
 
 import 'themes.dart';
 
-void main() {
+Future main() async {
+  //await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }
 

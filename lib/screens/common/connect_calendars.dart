@@ -5,7 +5,7 @@ import '../../service/connected_accounts.dart';
 //import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../widgets/shared/custom_appbar.dart';
-import '../../service/google_connect.dart'; // import the google calendar service
+import '../../data/google_connect.dart'; // import the google calendar service
 
 import 'agenda.dart';
 import 'agenda_settings.dart';
