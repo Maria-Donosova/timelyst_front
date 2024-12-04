@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'google_connect.dart';
+import '../data/google_connect.dart';
 
 class ConnectedAccounts with ChangeNotifier {
   final GoogleService _googleService = GoogleService();
