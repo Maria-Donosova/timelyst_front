@@ -8,15 +8,16 @@ import 'package:google_sign_in_web/web_only.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../config/env_variables_config.dart';
 
 // GoogleSignInAccount? _currentUser;
-
+// GoogleSignInAccount get currentUser => _currentUser!;
 // GoogleSignInService class to handle Google sign-in and sign-out operations using the GoogleSignIn plugin (web implementation).
 class GoogleService {
   final GoogleSignIn _googleSignIn = (kIsWeb)
       ? GoogleSignIn(
-          clientId:
-              "287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com",
+          clientId: Config.clientId,
+          //"287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com",
           forceCodeForRefreshToken: true,
           scopes: _scopes,
         )
@@ -64,7 +65,7 @@ class GoogleService {
       print('Error during web sign-in: $error');
       return 'Error during web sign-in: $error';
     }
-    return 'Sign-in failed';
+    return 'Sign-in silently failed';
   }
 
   // implicit google sign in method
@@ -155,7 +156,8 @@ class GoogleService {
   Future<Map<String, dynamic>?> _exchangeCodeForTokens(String code) async {
     if (kIsWeb) {
       final response = await http.post(
-        Uri.parse('https://oauth2.googleapis.com/token'),
+        Uri.parse('Config.backendUrl'),
+        //Uri.parse('https://oauth2.googleapis.com/token'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {
           'code': code,
@@ -175,13 +177,16 @@ class GoogleService {
       }
     } else {
       final response = await http.post(
-        Uri.parse('https://oauth2.googleapis.com/token'),
+        Uri.parse('Config.backendUrl'),
+        //Uri.parse('https://oauth2.googleapis.com/token'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {
           'code': code,
-          'client_id':
-              '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com',
-          'client_secret': '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',
+          'client_id': Config.clientId,
+          'client_secret': Config.clientSecret,
+          // 'client_id':
+          //     '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com',
+          // 'client_secret': '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',
           'redirect_uri': '',
           'grant_type': 'authorization_code',
         },
@@ -204,7 +209,8 @@ class GoogleService {
       String idToken, String accessToken, String refreshToken) async {
     print('Entering sendAuthTokensToBackend Future');
     final response = await http.post(
-      Uri.parse('http://localhost:3000/auth/google/callback'),
+      Uri.parse('Config.backendUrl'),
+      //Uri.parse('http://localhost:3000/auth/google/callback'),
       body: {
         'id_token': idToken,
         'access_token': accessToken,
