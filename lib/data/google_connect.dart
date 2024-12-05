@@ -8,8 +8,8 @@ import '../service/google_auth_service.dart';
 import '../config/env_variables_config.dart';
 
 // GoogleSignInService class to handle Google sign-in and sign-out operations using the GoogleSignIn plugin (web implementation).
-class GoogleService {
-  final googleAuthService = GoogleAuthService();
+class GoogleConnectService {
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
   final GoogleSignIn _googleSignIn = (kIsWeb)
       ? GoogleSignIn(
           clientId: Config.clientId,
@@ -37,10 +37,10 @@ class GoogleService {
       print('try Google SignIn Silently');
       if (googleSignInAccount != null) {
         final strin =
-            await googleAuthService.requestServerAuthenticatioinCode();
+            await _googleAuthService.requestServerAuthenticatioinCode();
         if (strin != null) {
           final tokenResponse =
-              await googleAuthService.exchangeCodeForTokens(strin);
+              await _googleAuthService.exchangeCodeForTokens(strin);
           if (tokenResponse != null) {
             final googleAccount = tokenResponse['email'];
             final accessToken = tokenResponse['access_token'];
@@ -50,7 +50,7 @@ class GoogleService {
             print("Access Token: $accessToken");
             print("ID Token: $idToken");
             print("Refresh Token: $refreshtoken");
-            googleAuthService.sendTokensToBackend(
+            _googleAuthService.sendTokensToBackend(
                 idToken, accessToken, refreshtoken);
             return 'Success';
           } else {
@@ -82,12 +82,12 @@ class GoogleService {
 
         if (googleSignInAccount != null) {
           final strin =
-              await googleAuthService.requestServerAuthenticatioinCode();
+              await _googleAuthService.requestServerAuthenticatioinCode();
 
           // Use the tokens as needed
           if (strin != null) {
             final tokenResponse =
-                await googleAuthService.exchangeCodeForTokens(strin);
+                await _googleAuthService.exchangeCodeForTokens(strin);
 
             if (tokenResponse != null) {
               final googleAccount = tokenResponse['email'];
@@ -98,7 +98,7 @@ class GoogleService {
               print("Access Token: $accessToken");
               print("ID Token: $idToken");
               print("Refresh Token: $refreshtoken");
-              googleAuthService.sendTokensToBackend(
+              _googleAuthService.sendTokensToBackend(
                   idToken, accessToken, refreshtoken);
               showAboutDialog(context: context, children: [
                 Text('Successful Google authentication'),
@@ -128,7 +128,7 @@ class GoogleService {
 
           if (serverAuthCode != null) {
             final tokenResponse =
-                await googleAuthService.exchangeCodeForTokens(serverAuthCode);
+                await _googleAuthService.exchangeCodeForTokens(serverAuthCode);
 
             if (tokenResponse != null) {
               final accessToken = tokenResponse['access_token'];
@@ -160,7 +160,7 @@ class GoogleService {
     try {
       await _googleSignIn.disconnect();
       await _googleSignIn.signOut();
-      await googleAuthService.clearTokensOnBackend();
+      await _googleAuthService.clearTokensOnBackend();
       if (_googleSignIn.currentUser == null) {
         return "User is signed out";
       } else {
