@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/google_connect.dart';
 
 class ConnectedAccounts with ChangeNotifier {
-  final GoogleConnectService _googleConnectService = GoogleConnectService();
+  late final GoogleConnectService _googleConnectService;
   List<String> _connectedAccounts = [];
 
   List<String> get connectedAccounts => _connectedAccounts;
