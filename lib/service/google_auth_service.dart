@@ -1,33 +1,37 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class GoogleAuthService {
-  static const String _authTokenKey = 'authToken';
-  //static const String _refreshTokenKey = 'refreshToken';
+  static const String _googleAccount = 'google_account';
+  static const String _accessToken = 'access_token';
+  static const String _idToken = 'id_token';
+  static const String _refreshToken = 'refreshToken';
+
+  static const String _serverAuthCode = 'server_auth_code';
 
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Methods for managing the authentication token
-  Future<void> saveAuthToken(String token) async {
+  Future<void> saveAccessToken(String token) async {
     try {
-      await _storage.write(key: _authTokenKey, value: token);
+      await _storage.write(key: _accessToken, value: token);
     } catch (e) {
       print('Error saving auth token: $e');
       rethrow;
     }
   }
 
-  Future<String?> getAuthToken() async {
+  Future<String?> getAccessToken() async {
     try {
-      return await _storage.read(key: _authTokenKey);
+      return await _storage.read(key: _accessToken);
     } catch (e) {
       print('Error reading auth token: $e');
       return null;
     }
   }
 
-  Future<void> clearAuthToken() async {
+  Future<void> clearAccessToken() async {
     try {
-      await _storage.delete(key: _authTokenKey);
+      await _storage.delete(key: _accessToken);
     } catch (e) {
       print('Error clearing auth token: $e');
       rethrow;
@@ -36,7 +40,7 @@ class GoogleAuthService {
 
   Future<bool> isLoggedIn() async {
     try {
-      final token = await getAuthToken();
+      final token = await getAccessToken();
       print('getAuthToken: $token');
       return token != null;
     } catch (e) {

@@ -42,7 +42,7 @@ class GoogleAuthProvider with ChangeNotifier {
       final token = response['token'];
 
       // Save the token and userId
-      await _googleAuthService.saveAuthToken(token);
+      await _googleAuthService.saveAccessToken(token);
 
       // Set _isLoggedIn to true
       _isLoggedIn = true;
@@ -54,7 +54,7 @@ class GoogleAuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _googleAuthService.clearAuthToken();
+    await _googleAuthService.clearAccessToken();
     _isLoggedIn = false;
     notifyListeners();
   }
