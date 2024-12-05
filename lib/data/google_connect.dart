@@ -7,7 +7,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:google_sign_in_web/web_only.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/env_variables_config.dart';
 
 // GoogleSignInAccount? _currentUser;
@@ -150,21 +149,23 @@ class GoogleService {
         return 'Error: $error';
       }
     }
-    return 'Sign-in failed';
+    return 'Regular sign-in failed';
   }
 
   Future<Map<String, dynamic>?> _exchangeCodeForTokens(String code) async {
     if (kIsWeb) {
       final response = await http.post(
-        Uri.parse('Config.backendUrl'),
+        Uri.parse('Config.googleOath'),
         //Uri.parse('https://oauth2.googleapis.com/token'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {
           'code': code,
-          'client_id':
-              '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com',
-          'client_secret': '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',
-          'redirect_uri': 'http://localhost:7357',
+          'client_id': Config.clientId,
+          //'287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com',
+          'client_secret': Config.clientSecret,
+          //'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',
+          'redirect_uri': Config.redirectUri,
+          //'http://localhost:7357',
           'grant_type': 'authorization_code',
         },
       );
@@ -177,7 +178,7 @@ class GoogleService {
       }
     } else {
       final response = await http.post(
-        Uri.parse('Config.backendUrl'),
+        Uri.parse('Config.googleOath'),
         //Uri.parse('https://oauth2.googleapis.com/token'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {
@@ -187,7 +188,8 @@ class GoogleService {
           // 'client_id':
           //     '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com',
           // 'client_secret': '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',
-          'redirect_uri': '',
+          'redirect_uri': Config.redirectUri,
+          //'',
           'grant_type': 'authorization_code',
         },
       );
@@ -209,7 +211,7 @@ class GoogleService {
       String idToken, String accessToken, String refreshToken) async {
     print('Entering sendAuthTokensToBackend Future');
     final response = await http.post(
-      Uri.parse('Config.backendUrl'),
+      Uri.parse('Config.backendGoogleCallback'),
       //Uri.parse('http://localhost:3000/auth/google/callback'),
       body: {
         'id_token': idToken,
