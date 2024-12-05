@@ -46,6 +46,7 @@ class GoogleAuthService {
   }
 
 // methods that manage exchanges with googleapis
+
   Future<Map<String, dynamic>?> exchangeCodeForTokens(String code) async {
     if (kIsWeb) {
       final response = await http.post(
