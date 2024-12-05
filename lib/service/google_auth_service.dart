@@ -1,17 +1,24 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in_web/web_only.dart';
+
+import '../config/env_variables_config.dart';
+
+import 'package:http/http.dart' as http;
 
 class GoogleAuthService {
-  static const String _googleAccount = 'google_account';
   static const String _accessToken = 'access_token';
   static const String _idToken = 'id_token';
   static const String _refreshToken = 'refreshToken';
-
   static const String _serverAuthCode = 'server_auth_code';
 
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  // Methods for managing the authentication token
-  Future<void> saveAccessToken(String token) async {
+  // Methods for managing the access token
+  Future<void> saveAccessTokenStorage(String token) async {
     try {
       await _storage.write(key: _accessToken, value: token);
     } catch (e) {
@@ -20,7 +27,7 @@ class GoogleAuthService {
     }
   }
 
-  Future<String?> getAccessToken() async {
+  Future<String?> getAccessTokenStorage() async {
     try {
       return await _storage.read(key: _accessToken);
     } catch (e) {
@@ -29,7 +36,7 @@ class GoogleAuthService {
     }
   }
 
-  Future<void> clearAccessToken() async {
+  Future<void> clearAccessTokenStorage() async {
     try {
       await _storage.delete(key: _accessToken);
     } catch (e) {
@@ -38,33 +45,100 @@ class GoogleAuthService {
     }
   }
 
-  Future<bool> isLoggedIn() async {
+// methods that manage exchanges with googleapis
+  Future<Map<String, dynamic>?> exchangeCodeForTokens(String code) async {
+    if (kIsWeb) {
+      final response = await http.post(
+        Uri.parse('Config.googleOath'),
+        //Uri.parse('https://oauth2.googleapis.com/token'),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {
+          'code': code,
+          'client_id': Config.clientId,
+          //'287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com',
+          'client_secret': Config.clientSecret,
+          //'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',
+          'redirect_uri': Config.redirectUri,
+          //'http://localhost:7357',
+          'grant_type': 'authorization_code',
+        },
+      );
+      print(response.body);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        print("Error: ${response.body}");
+        return null;
+      }
+    } else {
+      final response = await http.post(
+        Uri.parse('Config.googleOath'),
+        //Uri.parse('https://oauth2.googleapis.com/token'),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {
+          'code': code,
+          'client_id': Config.clientId,
+          'client_secret': Config.clientSecret,
+          // 'client_id':
+          //     '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com',
+          // 'client_secret': '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',
+          'redirect_uri': Config.redirectUri,
+          //'',
+          'grant_type': 'authorization_code',
+        },
+      );
+      print(response.body);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        print("Error: ${response.body}");
+        return null;
+      }
+    }
+  }
+
+  Future<String?> requestServerAuthenticatioinCode() async {
+    return requestServerAuthCode();
+  }
+
+  Future<bool> isGoogleLoggedIn() async {
     try {
-      final token = await getAccessToken();
-      print('getAuthToken: $token');
-      return token != null;
+      print('Google Logged Out');
+      return true;
     } catch (e) {
       print('Error checking login status: $e');
       return false;
     }
   }
 
-  // Methods for managing the refresh token
-  // Future<void> saveRefreshToken(String refreshToken) async {
-  //   try {
-  //     await _storage.write(key: _refreshTokenKey, value: refreshToken);
-  //   } catch (e) {
-  //     print('Error saving refresh token: $e');
-  //     rethrow;
-  //   }
-  // }
+  // methods to manage exchanges with backend
+  Future<void> sendTokensToBackend(
+      String idToken, String accessToken, String refreshToken) async {
+    print('Entering sendAuthTokensToBackend Future');
+    final response = await http.post(
+      Uri.parse('Config.backendGoogleCallback'),
+      //Uri.parse('http://localhost:3000/auth/google/callback'),
+      body: {
+        'id_token': idToken,
+        'access_token': accessToken,
+        'refresh_token': refreshToken,
+      },
+    );
+    if (response.statusCode == 200) {
+      print('Tokens sent to backend successfully');
+    } else {
+      print('Failed to send tokens to backend: ${response.statusCode}');
+    }
+  }
 
-  // Future<String?> getRefreshToken() async {
-  //   try {
-  //     return await _storage.read(key: _refreshTokenKey);
-  //   } catch (e) {
-  //     print('Error reading refresh token: $e');
-  //     return null;
-  //   }
-  // }
+  Future<bool> clearTokensOnBackend() async {
+    try {
+      //final token = await getTokens();
+      print('Tokens deleted');
+      return true;
+    } catch (e) {
+      print('Error clearing tokens: $e');
+      return false;
+    }
+  }
 }

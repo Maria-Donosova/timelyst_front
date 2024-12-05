@@ -13,7 +13,7 @@ class GoogleAuthProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   Future<void> checkAuthState() async {
-    _isLoggedIn = await _googleAuthService.isLoggedIn();
+    _isLoggedIn = await _googleAuthService.isGoogleLoggedIn();
     notifyListeners();
   }
 
@@ -41,8 +41,8 @@ class GoogleAuthProvider with ChangeNotifier {
       // Extract token, userId, and role from the response
       final token = response['token'];
 
-      // Save the token and userId
-      await _googleAuthService.saveAccessToken(token);
+      // // Save the token and userId
+      // await _googleAuthService.saveTokens(token);
 
       // Set _isLoggedIn to true
       _isLoggedIn = true;
@@ -54,7 +54,7 @@ class GoogleAuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _googleAuthService.clearAccessToken();
+    await _googleAuthService.clearTokensOnBackend();
     _isLoggedIn = false;
     notifyListeners();
   }
