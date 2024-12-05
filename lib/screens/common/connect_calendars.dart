@@ -63,7 +63,7 @@ class _ConnectCalBody extends StatelessWidget {
     //final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final appBar = CustomAppBar();
 
-    final GoogleService _signInService = GoogleService();
+    final GoogleConnectService _signInService = GoogleConnectService();
     print('GoogleService object created');
 
     return Scaffold(
