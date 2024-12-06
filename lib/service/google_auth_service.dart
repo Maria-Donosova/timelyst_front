@@ -102,6 +102,10 @@ class GoogleAuthService {
     return requestServerAuthCode();
   }
 
+  Future<String?> getIdToken() async {
+    return getIdToken();
+  }
+
   Future<bool> isGoogleLoggedIn() async {
     try {
       print('Google Logged Out');
