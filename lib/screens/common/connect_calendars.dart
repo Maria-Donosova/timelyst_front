@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../service/connected_accounts.dart';
-//import 'package:google_sign_in/google_sign_in.dart';
-
 import '../../widgets/shared/custom_appbar.dart';
+
 import '../../data/google_connect.dart'; // import the google calendar service
+import '../../service/connected_accounts.dart';
 
 import 'agenda.dart';
 import 'agenda_settings.dart';
@@ -24,8 +23,6 @@ class ConnectCal extends StatelessWidget {
 }
 
 class _ConnectCalBody extends StatelessWidget {
-  // final GoogleService _googleService = GoogleService();
-  // GoogleSignInAccount? _currentGoogleUser;
   final ConnectedAccounts _connectedAccounts = ConnectedAccounts();
 
   void startBlank(BuildContext ctx) {
@@ -40,31 +37,11 @@ class _ConnectCalBody extends StatelessWidget {
     );
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _checkIfUserIsSignedIn();
-  // }
-
-  // Future<void> _checkIfUserIsSignedIn() async {
-  //   // Check if the user is signed in and update the state
-
-  //   //final googleAccount = await _googleService.getCurrentUser();
-  //   setState(() {
-  //     // Update the state based on the connection status
-
-  //     //_currentGoogleUser = googleAccount;
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     //final mediaQuery = MediaQuery.of(context);
     //final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final appBar = CustomAppBar();
-
-    final GoogleConnectService _signInService = GoogleConnectService();
-    print('GoogleService object created');
 
     return Scaffold(
       appBar: appBar,
@@ -76,6 +53,7 @@ class _ConnectCalBody extends StatelessWidget {
               padding: const EdgeInsets.only(top: 150.0, left: 10, right: 10),
               child: Column(children: <Widget>[
                 //if (_currentGoogleUser != null)
+
                 Padding(
                   padding: const EdgeInsets.only(bottom: 60.0),
                   child: Column(
@@ -109,10 +87,11 @@ class _ConnectCalBody extends StatelessWidget {
                     children: [
                       ElevatedButton(
                         onPressed: () {
+                          final GoogleConnectService _signInService =
+                              GoogleConnectService();
+                          print('GoogleService object created');
                           print('Gmail button pressed');
-                          _connectedAccounts.googleSignIn(
-                              //_signInService.googleSignIn(
-                              context); // call the googleSignIn method from the GoogleService class);
+                          _signInService.googleSignIn(context);
                         },
                         child: const Text('Gmail'),
                         style: ElevatedButton.styleFrom(
