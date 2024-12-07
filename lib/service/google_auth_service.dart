@@ -99,6 +99,27 @@ class GoogleAuthService {
     }
   }
 
+  Future<String> requestLoggedInUserEmail(String accessToken) async {
+    print("entering requestLoggedInUserEmail");
+    final response = await http.get(
+      Uri.parse('https://www.googleapis.com/oauth2/v1/userinfo'),
+      headers: {
+        'Authorization': 'Bearer ${accessToken}',
+      },
+    );
+    print("access token: $accessToken");
+
+    if (response.statusCode == 200) {
+      final userInfo = json.decode(response.body);
+      String email = userInfo['email'];
+      print('User Email: $email');
+      return email;
+    } else {
+      print('Failed to get user info: ${response.statusCode}');
+      return 'Failed to get user info: ${response.statusCode}';
+    }
+  }
+
   Future<bool> isGoogleLoggedIn() async {
     try {
       print('Google Logged Out');

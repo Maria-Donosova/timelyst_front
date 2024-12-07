@@ -38,43 +38,32 @@ class GoogleConnectService {
     if (kIsWeb) {
       print("kIsWeb is true");
       try {
-        // if (await _googleSignIn.isSignedIn()) {
-        final user = _googleSignIn.currentUser;
-        print("User: $user");
-        String email = _googleSignIn.currentUser!.email;
-        print("User emaail: $email");
         final serverAuthCode =
             await _googleAuthService.requestServerAuthenticatioinCode();
         print("Server Auth Code: $serverAuthCode");
-
+        Map<String, dynamic>? tokenResponse;
         if (serverAuthCode != null) {
-          final tokenResponse =
+          tokenResponse =
               await _googleAuthService.exchangeCodeForTokens(serverAuthCode);
 
           if (tokenResponse != null) {
             final accessToken = tokenResponse['access_token'];
             final idToken = tokenResponse['id_token'];
             final refreshtoken = tokenResponse['refresh_token'];
-            print("Google Account: ${user?.email}");
             print("Access Token: $accessToken");
             print("ID Token: $idToken");
             print("Refresh Token: $refreshtoken");
             _googleAuthService.sendTokensToBackend(
                 idToken, accessToken, refreshtoken);
-            showAboutDialog(context: context, children: [
-              Text('Successful Google authentication'),
-            ]);
-            //print("Google Account logged in successfully: $googleAccount");
-            return "Google Account logged in successfully";
-            //googleAccount;
-          } else {
-            showAboutDialog(context: context, children: [
-              Text('Google authentication via SignIn failed'),
-            ]);
-            return "Failed to obtain tokens using SignIn";
+            try {
+              final email = await _googleAuthService
+                  .requestLoggedInUserEmail(accessToken);
+              return (email);
+            } catch (error) {
+              return 'Error getting email: $error';
+            }
           }
         }
-        // }
       } catch (error) {
         print('Error during web sign-in: $error');
         return 'Error during web sign-in: $error';
