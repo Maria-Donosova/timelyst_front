@@ -23,8 +23,6 @@ class ConnectCal extends StatelessWidget {
 }
 
 class _ConnectCalBody extends StatelessWidget {
-  final ConnectedAccounts _connectedAccounts = ConnectedAccounts();
-
   void startBlank(BuildContext ctx) {
     Navigator.of(ctx).pushNamed(
       Agenda.routeName,
@@ -52,29 +50,29 @@ class _ConnectCalBody extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: 150.0, left: 10, right: 10),
               child: Column(children: <Widget>[
-                //if (_currentGoogleUser != null)
-
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 60.0),
-                  child: Column(
-                    children: [
-                      if (_connectedAccounts.connectedAccounts.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10.0),
-                          child: Text(
-                            'Connected Accounts',
-                            style: Theme.of(context).textTheme.displayMedium,
-                            textAlign: TextAlign.center,
+                Consumer<ConnectedAccounts>(
+                  builder: (context, connectedAccounts, child) {
+                    return Column(
+                      children: [
+                        if (connectedAccounts.connectedAccounts.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10.0),
+                            child: Text(
+                              'Connected Accounts',
+                              style: Theme.of(context).textTheme.displayMedium,
+                              textAlign: TextAlign.center,
+                            ),
                           ),
+                        Text(
+                          connectedAccounts.connectedAccounts.join(', '),
+                          style: Theme.of(context).textTheme.displaySmall,
                         ),
-                      Text(_connectedAccounts.connectedAccounts.join(', '),
-                          style: Theme.of(context).textTheme.displaySmall),
-                    ],
-                  ),
+                      ],
+                    );
+                  },
                 ),
-
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 30.0),
+                  padding: const EdgeInsets.only(top: 90, bottom: 30.0),
                   child: Text(
                     'Add your external accounts to get a 360 view on your schedules and ToDos.',
                     style: Theme.of(context).textTheme.displaySmall,
@@ -86,10 +84,13 @@ class _ConnectCalBody extends StatelessWidget {
                   child: Column(
                     children: [
                       ElevatedButton(
-                        onPressed: () {
-                          print('GoogleService object created');
+                        onPressed: () async {
                           print('Gmail button pressed');
-                          GoogleConnectService().googleSignIn(context);
+                          //GoogleConnectService().googleSignIn(context);
+                          String? email = await GoogleConnectService()
+                              .googleSignIn(context);
+                          Provider.of<ConnectedAccounts>(context, listen: false)
+                              .addAccount(email);
                         },
                         child: const Text('Gmail'),
                         style: ElevatedButton.styleFrom(
