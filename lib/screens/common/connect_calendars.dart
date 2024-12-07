@@ -87,11 +87,9 @@ class _ConnectCalBody extends StatelessWidget {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          final GoogleConnectService _signInService =
-                              GoogleConnectService();
                           print('GoogleService object created');
                           print('Gmail button pressed');
-                          _signInService.googleSignIn(context);
+                          GoogleConnectService().googleSignIn(context);
                         },
                         child: const Text('Gmail'),
                         style: ElevatedButton.styleFrom(
