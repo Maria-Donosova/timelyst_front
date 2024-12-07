@@ -56,8 +56,8 @@ class GoogleConnectService {
             try {
               final email = await _googleAuthService
                   .requestLoggedInUserEmail(accessToken);
-              _connectedAccounts.addAccount(email);
-              //return (email);
+              //_connectedAccounts.addAccount(email);
+              return (email);
             } catch (error) {
               return 'Error adding account: $error';
             }
