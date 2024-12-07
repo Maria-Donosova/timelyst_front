@@ -1,14 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// import 'package:http/http.dart' as http;
+import '../config/env_variables_config.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
 import '../service/google_auth_service.dart';
-
-import '../config/env_variables_config.dart';
+import '../service/connected_accounts.dart';
 
 // GoogleSignInService class to handle Google sign-in and sign-out operations using the GoogleSignIn plugin (web implementation).
 class GoogleConnectService {
@@ -32,6 +29,7 @@ class GoogleConnectService {
   ];
 
   GoogleAuthService _googleAuthService = GoogleAuthService();
+  ConnectedAccounts _connectedAccounts = ConnectedAccounts();
 
   Future<String> googleSignIn(BuildContext context) async {
     print("entering googleSignIn");
@@ -58,9 +56,10 @@ class GoogleConnectService {
             try {
               final email = await _googleAuthService
                   .requestLoggedInUserEmail(accessToken);
-              return (email);
+              _connectedAccounts.addAccount(email);
+              //return (email);
             } catch (error) {
-              return 'Error getting email: $error';
+              return 'Error adding account: $error';
             }
           }
         }
