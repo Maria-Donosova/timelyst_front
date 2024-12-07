@@ -38,20 +38,24 @@ class GoogleConnectService {
     if (kIsWeb) {
       print("kIsWeb is true");
       try {
+        // if (await _googleSignIn.isSignedIn()) {
+        final user = _googleSignIn.currentUser;
+        print("User: $user");
+        String email = _googleSignIn.currentUser!.email;
+        print("User emaail: $email");
         final serverAuthCode =
             await _googleAuthService.requestServerAuthenticatioinCode();
         print("Server Auth Code: $serverAuthCode");
+
         if (serverAuthCode != null) {
           final tokenResponse =
               await _googleAuthService.exchangeCodeForTokens(serverAuthCode);
-          print("Token Response: $tokenResponse");
 
           if (tokenResponse != null) {
-            final googleAccount = tokenResponse['email'];
             final accessToken = tokenResponse['access_token'];
             final idToken = tokenResponse['id_token'];
             final refreshtoken = tokenResponse['refresh_token'];
-            print("Google Account: $googleAccount");
+            print("Google Account: ${user?.email}");
             print("Access Token: $accessToken");
             print("ID Token: $idToken");
             print("Refresh Token: $refreshtoken");
@@ -60,8 +64,9 @@ class GoogleConnectService {
             showAboutDialog(context: context, children: [
               Text('Successful Google authentication'),
             ]);
-            print("Google Account logged in successfully: $googleAccount");
-            return googleAccount;
+            //print("Google Account logged in successfully: $googleAccount");
+            return "Google Account logged in successfully";
+            //googleAccount;
           } else {
             showAboutDialog(context: context, children: [
               Text('Google authentication via SignIn failed'),
