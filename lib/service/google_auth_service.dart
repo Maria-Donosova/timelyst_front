@@ -46,11 +46,13 @@ class GoogleAuthService {
   }
 
 // methods that manage exchanges with googleapis
-
   Future<Map<String, dynamic>?> exchangeCodeForTokens(String code) async {
+    print("entering exchangeg code for tokens");
+    print("Code is: $code");
     if (kIsWeb) {
       final response = await http.post(
-        Uri.parse('Config.googleOath'),
+        //Uri.parse(Config.googleOath2Token),
+        Uri.parse("${Config.googleOath2Token}"),
         //Uri.parse('https://oauth2.googleapis.com/token'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {
@@ -64,7 +66,9 @@ class GoogleAuthService {
           'grant_type': 'authorization_code',
         },
       );
-      print(response.body);
+      // print("HTTP Response status code: ${response.statusCode}");
+      // print("HTTP Response body: ${response.body}");
+      // print("Response: ${response}");
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
@@ -73,7 +77,7 @@ class GoogleAuthService {
       }
     } else {
       final response = await http.post(
-        Uri.parse('Config.googleOath'),
+        Uri.parse("${Config.googleOath2Token}"),
         //Uri.parse('https://oauth2.googleapis.com/token'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {
@@ -100,10 +104,6 @@ class GoogleAuthService {
 
   Future<String?> requestServerAuthenticatioinCode() async {
     return requestServerAuthCode();
-  }
-
-  Future<String?> getIdToken() async {
-    return getIdToken();
   }
 
   Future<bool> isGoogleLoggedIn() async {

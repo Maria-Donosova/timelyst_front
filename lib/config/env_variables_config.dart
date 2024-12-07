@@ -8,6 +8,9 @@ class Config {
       dotenv.env['CLIENT_SECRET'] ?? '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';
   static String get googleOath =>
       dotenv.env['GOOGLE_OATH_URL'] ?? 'https://oauth2.googleapis.com/token';
+  static String get googleOath2Token =>
+      dotenv.env['GOOGLE_OATH2_TOKEN_URL'] ??
+      'https://accounts.google.com/o/oauth2/token';
 
   static String get backendGoogleCallback =>
       dotenv.env['BACKEND_GOOGLE_CALLBACK'] ??
