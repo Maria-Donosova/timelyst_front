@@ -51,24 +51,17 @@ class GoogleAuthService {
     print("Code is: $code");
     if (kIsWeb) {
       final response = await http.post(
-        //Uri.parse(Config.googleOath2Token),
         Uri.parse("${Config.googleOath2Token}"),
-        //Uri.parse('https://oauth2.googleapis.com/token'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {
           'code': code,
           'client_id': Config.clientId,
-          //'287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com',
           'client_secret': Config.clientSecret,
-          //'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',
           'redirect_uri': Config.redirectUri,
-          //'http://localhost:7357',
           'grant_type': 'authorization_code',
         },
       );
-      // print("HTTP Response status code: ${response.statusCode}");
-      // print("HTTP Response body: ${response.body}");
-      // print("Response: ${response}");
+
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
@@ -78,17 +71,12 @@ class GoogleAuthService {
     } else {
       final response = await http.post(
         Uri.parse("${Config.googleOath2Token}"),
-        //Uri.parse('https://oauth2.googleapis.com/token'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {
           'code': code,
           'client_id': Config.clientId,
           'client_secret': Config.clientSecret,
-          // 'client_id':
-          //     '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com',
-          // 'client_secret': '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',
           'redirect_uri': Config.redirectUri,
-          //'',
           'grant_type': 'authorization_code',
         },
       );
