@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import '../data/google_connect.dart';
 
 class ConnectedAccounts with ChangeNotifier {
-  //final GoogleConnectService _googleConnectService = GoogleConnectService();
   List<String> _connectedAccounts = [];
 
   List<String> get connectedAccounts => _connectedAccounts;
@@ -18,17 +16,4 @@ class ConnectedAccounts with ChangeNotifier {
     _connectedAccounts.remove(account);
     notifyListeners();
   }
-
-  // Future<void> googleSignIn(BuildContext context) async {
-  //   // Use GoogleService to sign in
-  //   String account = await _googleConnectService.googleSignIn(context);
-  //   addAccount(account);
-  // }
-
-  // Future<void> googleSignOut(BuildContext context) async {
-  //   // Use GoogleService to sign out
-  //   String account = await _googleConnectService.googleSignOut(context);
-  //   //String account = await _googleService.googleSignIn.currentUser;
-  //   removeAccount(account);
-  // }
 }
