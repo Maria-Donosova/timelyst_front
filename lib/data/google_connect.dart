@@ -37,17 +37,22 @@ class GoogleConnectService {
   GoogleAuthService _googleAuthService = GoogleAuthService();
 
   // google sign in silently method
-  Future<String> googleSignInSilently() async {
+  Future<String> googleSignInSilently(BuildContext context) async {
+    print("Entering GoogleSignInSilently");
     try {
       GoogleSignInAccount? googleSignInAccount =
           await _googleSignIn.signInSilently();
-      print('try Google SignIn Silently');
       if (googleSignInAccount != null) {
-        final strin =
+        print("Google Account: ${googleSignInAccount.email}");
+
+        final serverAuthCode =
             await _googleAuthService.requestServerAuthenticatioinCode();
-        if (strin != null) {
+        print("Server Auth Code: $serverAuthCode");
+        if (serverAuthCode != null) {
           final tokenResponse =
-              await _googleAuthService.exchangeCodeForTokens(strin);
+              await _googleAuthService.exchangeCodeForTokens(serverAuthCode);
+          print("Token Response: $tokenResponse");
+
           if (tokenResponse != null) {
             final googleAccount = tokenResponse['email'];
             final accessToken = tokenResponse['access_token'];
@@ -59,42 +64,49 @@ class GoogleConnectService {
             print("Refresh Token: $refreshtoken");
             _googleAuthService.sendTokensToBackend(
                 idToken, accessToken, refreshtoken);
-            return 'Success';
+            showAboutDialog(context: context, children: [
+              Text('Successful Google authentication via signInSilently'),
+            ]);
+            return googleAccount;
           } else {
-            print("Failed to obtain tokens.");
-            return 'Failed to obtain tokens';
+            showAboutDialog(context: context, children: [
+              Text('Google authentication via SignInSilently failed'),
+            ]);
+            print("Failed to obtain tokens via SignInSilently");
+            return 'Failed to obtain tokens via SignInSilently';
           }
         }
       }
     } catch (error) {
-      print('Error during web sign-in: $error');
-      return 'Error during web sign-in: $error';
+      print('Error during web sign-in silently: $error');
+      return 'Error during web sign-in silently: $error';
     }
     return 'Sign-in silently failed';
   }
 
   // implicit google sign in method
   Future<String> googleSignIn(BuildContext context) async {
+    print("entering googleSignIn");
     if (kIsWeb) {
       try {
         GoogleSignInAccount? googleSignInAccount =
             await _googleSignIn.signInSilently();
-
-        print('try Google SignIn Silently');
-
         if (googleSignInAccount == null) {
+          print("google account is null");
           // If silent sign-in fails, show the sign-in button
           googleSignInAccount = await _googleSignIn.signIn();
         }
 
         if (googleSignInAccount != null) {
-          final strin =
-              await _googleAuthService.requestServerAuthenticatioinCode();
+          print("Google Account: ${googleSignInAccount.email}");
 
-          // Use the tokens as needed
-          if (strin != null) {
+          final serverAuthCode =
+              await _googleAuthService.requestServerAuthenticatioinCode();
+          print("Server Auth Code: $serverAuthCode");
+          if (serverAuthCode != null) {
             final tokenResponse =
-                await _googleAuthService.exchangeCodeForTokens(strin);
+                await _googleAuthService.exchangeCodeForTokens(serverAuthCode);
+            print("Token Response: $tokenResponse");
 
             if (tokenResponse != null) {
               final googleAccount = tokenResponse['email'];
@@ -110,10 +122,13 @@ class GoogleConnectService {
               showAboutDialog(context: context, children: [
                 Text('Successful Google authentication'),
               ]);
-              return 'Success';
+              return googleAccount;
             } else {
-              print("Failed to obtain tokens.");
-              return 'Failed to obtain tokens';
+              showAboutDialog(context: context, children: [
+                Text('Google authentication via SignIn failed'),
+              ]);
+              print("Failed to obtain tokens using SignIn");
+              return "Failed to obtain tokens using SignIn";
             }
           }
         }
@@ -149,7 +164,7 @@ class GoogleConnectService {
               print("Success");
               return googleAccount;
             } else {
-              print("Failed to obtain tokens.");
+              print("Failed to obtain tokens");
               return 'Failed to obtain tokens';
             }
           }
@@ -241,6 +256,7 @@ class GoogleConnectService {
     try {
       await _googleSignIn.disconnect();
       await _googleSignIn.signOut();
+      await _googleAuthService.clearTokensOnBackend();
       //await storage.deleteAll();
       if (_googleSignIn.currentUser == null) {
         print("User is signed out");
