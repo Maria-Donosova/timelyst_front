@@ -45,7 +45,15 @@ class GoogleAuthService {
     }
   }
 
-// methods that manage exchanges with googleapis
+  // Methods that manage exchanges with googleapis
+
+  // Method for requesting server authentication code
+  Future<String?> requestServerAuthenticatioinCode() async {
+    print("entering request server auth code");
+    return requestServerAuthCode();
+  }
+
+  // Method for exchanging server authentication code for tokens (inclduing access token, id token, and refresh token)
   Future<Map<String, dynamic>?> exchangeCodeForTokens(String code) async {
     print("entering exchange code for tokens");
     print("Code is: $code");
@@ -63,6 +71,7 @@ class GoogleAuthService {
       );
 
       if (response.statusCode == 200) {
+        print("response body: ${response.body}");
         return jsonDecode(response.body);
       } else {
         print("Error: ${response.body}");
@@ -88,11 +97,6 @@ class GoogleAuthService {
         return null;
       }
     }
-  }
-
-  Future<String?> requestServerAuthenticatioinCode() async {
-    print("entering request server auth code");
-    return requestServerAuthCode();
   }
 
   Future<bool> isGoogleLoggedIn() async {
