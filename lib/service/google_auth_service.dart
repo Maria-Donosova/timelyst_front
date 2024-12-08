@@ -131,7 +131,7 @@ class GoogleAuthService {
   }
 
   // methods to manage exchanges with backend
-  Future<void> sendAuthCodeToBackend(String authCode) async {
+  Future<bool> sendAuthCodeToBackend(String authCode) async {
     print('Entering sendAuthCodeToBackend Future');
     print("Auth Code: $authCode");
     final response = await http.post(
@@ -144,8 +144,10 @@ class GoogleAuthService {
     );
     if (response.statusCode == 200) {
       print('Auth code sent to backend successfully');
+      return true;
     } else {
       print('Failed to send Auth code to backend: ${response.statusCode}');
+      return false;
     }
   }
 
