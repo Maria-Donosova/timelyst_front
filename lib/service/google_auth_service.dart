@@ -135,8 +135,8 @@ class GoogleAuthService {
     print('Entering sendAuthCodeToBackend Future');
     print("Auth Code: $authCode");
     final response = await http.post(
-      Uri.parse('Config.backendGoogleCallback'),
-      //Uri.parse('http://localhost:3000/auth/google/callback'),
+      //Uri.parse('Config.backendGoogleCallback'),
+      Uri.parse('http://localhost:3000/google/callback'),
       //Uri.parse('http://localhost:3000/graphql'),
       body: {
         'code': authCode,
