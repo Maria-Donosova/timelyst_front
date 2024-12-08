@@ -39,30 +39,33 @@ class GoogleConnectService {
         final serverAuthCode =
             await _googleAuthService.requestServerAuthenticatioinCode();
         print("Server Auth Code: $serverAuthCode");
-        Map<String, dynamic>? tokenResponse;
-        if (serverAuthCode != null) {
-          tokenResponse =
-              await _googleAuthService.exchangeCodeForTokens(serverAuthCode);
 
-          if (tokenResponse != null) {
-            final accessToken = tokenResponse['access_token'];
-            final idToken = tokenResponse['id_token'];
-            final refreshtoken = tokenResponse['refresh_token'];
-            print("Access Token: $accessToken");
-            print("ID Token: $idToken");
-            print("Refresh Token: $refreshtoken");
-            _googleAuthService.sendTokensToBackend(
-                idToken, accessToken, refreshtoken);
-            try {
-              final email = await _googleAuthService
-                  .requestLoggedInUserEmail(accessToken);
-              //_connectedAccounts.addAccount(email);
-              return (email);
-            } catch (error) {
-              return 'Error adding account: $error';
-            }
-          }
-        }
+        await _googleAuthService.sendAuthCodeToBackend(serverAuthCode!);
+
+        // // Map<String, dynamic>? tokenResponse;
+        // // if (serverAuthCode != null) {
+        // //   tokenResponse =
+        // //       await _googleAuthService.exchangeCodeForTokens(serverAuthCode);
+
+        // //   if (tokenResponse != null) {
+        // //     final accessToken = tokenResponse['access_token'];
+        // //     final idToken = tokenResponse['id_token'];
+        // //     final refreshtoken = tokenResponse['refresh_token'];
+        // //     print("Access Token: $accessToken");
+        // //     print("ID Token: $idToken");
+        // //     print("Refresh Token: $refreshtoken");
+        // //     _googleAuthService.sendTokensToBackend(
+        // //         idToken, accessToken, refreshtoken);
+        //     try {
+        //       final email = await _googleAuthService
+        //           .requestLoggedInUserEmail(accessToken);
+        //       //_connectedAccounts.addAccount(email);
+        //       return (email);
+        //     } catch (error) {
+        //       return 'Error adding account: $error';
+        //     }
+        //   }
+        // }
       } catch (error) {
         print('Error during web sign-in: $error');
         return 'Error during web sign-in: $error';
@@ -79,26 +82,26 @@ class GoogleConnectService {
           String? serverAuthCode = account.serverAuthCode;
           print("Server Auth Code: $serverAuthCode");
 
-          if (serverAuthCode != null) {
-            final tokenResponse =
-                await _googleAuthService.exchangeCodeForTokens(serverAuthCode);
+          // if (serverAuthCode != null) {
+          //   final tokenResponse =
+          //       await _googleAuthService.exchangeCodeForTokens(serverAuthCode);
 
-            if (tokenResponse != null) {
-              final accessToken = tokenResponse['access_token'];
-              final idToken = tokenResponse['id_token'];
-              final refreshtoken = tokenResponse['refresh_token'];
-              final googleAccount = account.email;
+          //   if (tokenResponse != null) {
+          //     final accessToken = tokenResponse['access_token'];
+          //     final idToken = tokenResponse['id_token'];
+          //     final refreshtoken = tokenResponse['refresh_token'];
+          //     final googleAccount = account.email;
 
-              print("Access Token: $accessToken");
-              print("ID Token: $idToken");
-              print("Refresh Token: $refreshtoken");
-              print("Success");
-              return googleAccount;
-            } else {
-              print("Failed to obtain tokens");
-              return 'Failed to obtain tokens';
-            }
-          }
+          //     print("Access Token: $accessToken");
+          //     print("ID Token: $idToken");
+          //     print("Refresh Token: $refreshtoken");
+          //     print("Success");
+          //     return googleAccount;
+          //   } else {
+          //     print("Failed to obtain tokens");
+          //     return 'Failed to obtain tokens';
+          //   }
+          // }
         }
       } catch (error) {
         print(error);
@@ -113,7 +116,7 @@ class GoogleConnectService {
     try {
       await _googleSignIn.disconnect();
       await _googleSignIn.signOut();
-      await _googleAuthService.clearTokensOnBackend();
+      //await _googleAuthService.clearTokensOnBackend();
       //await storage.deleteAll();
       if (_googleSignIn.currentUser == null) {
         print("User is signed out");

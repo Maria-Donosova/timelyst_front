@@ -53,9 +53,9 @@ class GoogleAuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> logout() async {
-    await _googleAuthService.clearTokensOnBackend();
-    _isLoggedIn = false;
-    notifyListeners();
-  }
+  // Future<void> logout() async {
+  //   await _googleAuthService.clearTokensOnBackend();
+  //   _isLoggedIn = false;
+  //   notifyListeners();
+  // }
 }
