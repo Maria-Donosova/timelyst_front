@@ -16,7 +16,8 @@ class Config {
       dotenv.env['BACKEND_GOOGLE_CALLBACK'] ??
       'http://localhost:3000/auth/google/callback';
   static String get redirectUri =>
-      dotenv.env['REDIRECT_URI'] ?? 'http://localhost:7357';
+      dotenv.env['REDIRECT_URI'] ??
+      'http://localhost:3000/auth/google/callback';
   static String get frontendURL =>
       dotenv.env['FRONTEND_URL'] ?? 'http://localhost:7357';
 }
