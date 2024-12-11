@@ -38,36 +38,19 @@ class GoogleConnectService {
       try {
         final serverAuthCode =
             await _googleAuthService.requestServerAuthenticatioinCode();
-        print("Server Auth Code: $serverAuthCode");
+        //print("Server Auth Code: $serverAuthCode");
+        if (serverAuthCode != null) {
+          final response =
+              await _googleAuthService.sendAuthCodeToBackend(serverAuthCode);
 
-        await _googleAuthService.sendAuthCodeToBackend(serverAuthCode!);
-
-        // // Map<String, dynamic>? tokenResponse;
-        // // if (serverAuthCode != null) {
-        // //   tokenResponse =
-        // //       await _googleAuthService.exchangeCodeForTokens(serverAuthCode);
-
-        // //   if (tokenResponse != null) {
-        // //     final accessToken = tokenResponse['access_token'];
-        // //     final idToken = tokenResponse['id_token'];
-        // //     final refreshtoken = tokenResponse['refresh_token'];
-        // //     print("Access Token: $accessToken");
-        // //     print("ID Token: $idToken");
-        // //     print("Refresh Token: $refreshtoken");
-        // //     _googleAuthService.sendTokensToBackend(
-        // //         idToken, accessToken, refreshtoken);
-        //     try {
-        //       final email = await _googleAuthService
-        //           .requestLoggedInUserEmail(accessToken);
-        //       //_connectedAccounts.addAccount(email);
-        //       return (email);
-        //     } catch (error) {
-        //       return 'Error adding account: $error';
-        //     }
-        //   }
-        // }
+          if (response['success']) {
+            print('Success: ${response['message']}');
+            print('User email: ${response['email']}'); // Optional: Handle email
+          } else {
+            print('Error: ${response['message']}');
+          }
+        }
       } catch (error) {
-        print('Error during web sign-in: $error');
         return 'Error during web sign-in: $error';
       }
     } else {
