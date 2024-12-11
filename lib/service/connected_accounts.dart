@@ -6,9 +6,14 @@ class ConnectedAccounts with ChangeNotifier {
   List<String> get connectedAccounts => _connectedAccounts;
 
   void addAccount(String account) {
-    print('Adding account: $account');
-    _connectedAccounts.add(account);
-    notifyListeners();
+    // Check if the account is already in the list
+    if (!_connectedAccounts.contains(account)) {
+      print('Adding account: $account');
+      _connectedAccounts.add(account);
+      notifyListeners();
+    } else {
+      print('Account already exists: $account');
+    }
   }
 
   void removeAccount(String account) {
