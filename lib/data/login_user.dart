@@ -37,30 +37,39 @@ Future<void> loginUser(String email, String password) async {
       }),
     );
 
-    // Parse the JSON response
-    final data = jsonDecode(response.body);
-    print('Data received: $data');
-
-    // Check for errors in the response
-    if (data['errors'] != null) {
-      final errorMessage = data['errors'][0]['message'];
-      throw Exception('Error during login: $errorMessage');
-    }
-
     // Check the status code
     if (response.statusCode == 200) {
-      // If the server returns a 200 OK response, parse the JSON
+      //if the server returns a 200 OK response, the user was successfully registered, parse json
       final data = jsonDecode(response.body);
-      print('Data received: $data');
+
+      // Check for GraphQL errors
+      if (data['errors'] != null && data['errors'].length > 0) {
+        final errors = data['errors'];
+        print('Login failed with errors: $errors');
+        throw Exception(
+            'Login failed: ${errors.map((e) => e['message']).join(", ")}');
+      }
+      // Check for data errors
+      if (data['data']['userLogin']['errors'] != null &&
+          data['data']['userLogin']['errors'].length > 0) {
+        // Handle errors
+        final errors = data['data']['userLogin']['errors'];
+        print('Login failed with errors: $errors');
+        throw Exception(
+            'Login failed: ${errors.map((e) => e['message']).join(", ")}');
+      }
 
       // Extract token, userId, and role from the response
       final token = data['data']['userLogin']['token'];
+      final userId = data['data']['userLogin']['userId'];
+      final role = data['data']['userLogin']['role'];
+      print('User created with token: $token, userId: $userId, role: $role');
 
       // Use AuthService to store the token securely
       final authService = AuthService();
       await authService.saveAuthToken(token);
 
-      print('Token stored in jwt storage: $token');
+      print('Token stored in jwt storage for logged in user: $token');
     }
   } catch (e) {
     print('PrintError for E: $e');
