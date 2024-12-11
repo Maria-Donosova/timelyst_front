@@ -29,7 +29,7 @@ class GoogleConnectService {
   ];
 
   GoogleAuthService _googleAuthService = GoogleAuthService();
-  ConnectedAccounts _connectedAccounts = ConnectedAccounts();
+  //ConnectedAccounts _connectedAccounts = ConnectedAccounts();
 
   Future<Map<String, dynamic>> googleSignIn(
       BuildContext context, ConnectedAccounts connectedAccounts) async {

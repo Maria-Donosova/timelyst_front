@@ -48,6 +48,7 @@ class GoogleAuthService {
         return {
           'success': true,
           'message': 'Auth code sent to backend successfully',
+          'email': responseData['email'],
           'data': responseData,
         };
       } else {
