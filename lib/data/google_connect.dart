@@ -31,27 +31,61 @@ class GoogleConnectService {
   GoogleAuthService _googleAuthService = GoogleAuthService();
   ConnectedAccounts _connectedAccounts = ConnectedAccounts();
 
-  Future<String> googleSignIn(BuildContext context) async {
+  Future<Map<String, dynamic>> googleSignIn(
+      BuildContext context, ConnectedAccounts connectedAccounts) async {
     print("entering googleSignIn");
     if (kIsWeb) {
       print("kIsWeb is true");
       try {
         final serverAuthCode =
             await _googleAuthService.requestServerAuthenticatioinCode();
-        //print("Server Auth Code: $serverAuthCode");
+
         if (serverAuthCode != null) {
           final response =
               await _googleAuthService.sendAuthCodeToBackend(serverAuthCode);
 
-          if (response['success']) {
-            print('Success: ${response['message']}');
-            print('User email: ${response['email']}'); // Optional: Handle email
+          // Check if the response is valid
+          if (response.containsKey('success')) {
+            if (response['success']) {
+              print('Success: ${response['message']}');
+              print(
+                  'User email: ${response['email']}'); // Optional: Handle email
+
+              // Add the email to the connected accounts
+              connectedAccounts.addAccount(response['email']);
+
+              // Return the email and success message
+              return {
+                'email': response['email'],
+                'message': response['message'],
+              };
+              //return 'Success: ${response['message']}';
+            } else {
+              print('Error: ${response['message']}');
+              return {
+                'email': null,
+                'message': 'Error: ${response['message']}',
+              };
+            }
           } else {
-            print('Error: ${response['message']}');
+            print('Invalid response from backend: $response');
+            return {
+              'email': null,
+              'message': 'Invalid response from backend',
+            };
           }
+        } else {
+          return {
+            'email': null,
+            'message': 'Failed to get auth code from Google',
+          };
         }
       } catch (error) {
-        return 'Error during web sign-in: $error';
+        print('Error during web sign-in: $error');
+        return {
+          'email': null,
+          'message': 'Error during web sign-in: $error',
+        };
       }
     } else {
       try {
@@ -64,34 +98,19 @@ class GoogleConnectService {
           print("Access token: ${auth.accessToken}");
           String? serverAuthCode = account.serverAuthCode;
           print("Server Auth Code: $serverAuthCode");
-
-          // if (serverAuthCode != null) {
-          //   final tokenResponse =
-          //       await _googleAuthService.exchangeCodeForTokens(serverAuthCode);
-
-          //   if (tokenResponse != null) {
-          //     final accessToken = tokenResponse['access_token'];
-          //     final idToken = tokenResponse['id_token'];
-          //     final refreshtoken = tokenResponse['refresh_token'];
-          //     final googleAccount = account.email;
-
-          //     print("Access Token: $accessToken");
-          //     print("ID Token: $idToken");
-          //     print("Refresh Token: $refreshtoken");
-          //     print("Success");
-          //     return googleAccount;
-          //   } else {
-          //     print("Failed to obtain tokens");
-          //     return 'Failed to obtain tokens';
-          //   }
-          // }
         }
       } catch (error) {
         print(error);
-        return 'Error: $error';
+        return {
+          'email': null,
+          'message': 'Invalid response from backend',
+        };
       }
     }
-    return 'Regular sign-in failed';
+    return {
+      'email': null,
+      'message': 'Signed in failed',
+    };
   }
 
   // google sign out method
