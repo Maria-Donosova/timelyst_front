@@ -86,11 +86,27 @@ class _ConnectCalBody extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () async {
                           print('Gmail button pressed');
-                          //GoogleConnectService().googleSignIn(context);
-                          String? email = await GoogleConnectService()
-                              .googleSignIn(context);
-                          Provider.of<ConnectedAccounts>(context, listen: false)
-                              .addAccount(email);
+                          // Call googleSignIn and get the result
+                          // Call googleSignIn and get the result
+                          Map<String, dynamic> result =
+                              await GoogleConnectService().googleSignIn(
+                            context,
+                            Provider.of<ConnectedAccounts>(context,
+                                listen: false),
+                          );
+
+                          // Check if the email is not null (success case)
+                          if (result['email'] != null) {
+                            // Show a success message in the SnackBar
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(result['message'])),
+                            );
+                          } else {
+                            // Show an error message in the SnackBar
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(result['message'])),
+                            );
+                          }
                         },
                         child: const Text('Gmail'),
                         style: ElevatedButton.styleFrom(
