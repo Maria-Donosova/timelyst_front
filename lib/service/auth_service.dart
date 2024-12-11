@@ -8,6 +8,7 @@ class AuthService {
 
   // Methods for managing the authentication token
   Future<void> saveAuthToken(String token) async {
+    print("Entering saveAuthToken, token: $token");
     try {
       await _storage.write(key: _authTokenKey, value: token);
     } catch (e) {
@@ -17,6 +18,7 @@ class AuthService {
   }
 
   Future<String?> getAuthToken() async {
+    print("Entering getAuthToken, key: $_authTokenKey");
     try {
       return await _storage.read(key: _authTokenKey);
     } catch (e) {
@@ -26,6 +28,7 @@ class AuthService {
   }
 
   Future<void> clearAuthToken() async {
+    print("Entering clearAuthToken");
     try {
       await _storage.delete(key: _authTokenKey);
     } catch (e) {
