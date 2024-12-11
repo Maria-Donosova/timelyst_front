@@ -1,6 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../service/auth_service.dart';
+
 Future<Map<String, dynamic>> registerUser(String email, String password,
     String name, String lastName, bool consent) async {
   print("Entering registerUser in flutter");
@@ -38,7 +40,6 @@ Future<Map<String, dynamic>> registerUser(String email, String password,
         'variables': variables,
       }),
     );
-    print("Response: ${response.body}");
 
     // Check the status code
     if (response.statusCode == 200) {
@@ -68,6 +69,12 @@ Future<Map<String, dynamic>> registerUser(String email, String password,
       final userId = data['data']['registerUser']['userId'];
       final role = data['data']['registerUser']['role'];
       print('User created with token: $token, userId: $userId, role: $role');
+
+      // Use AuthService to store the token securely
+      final authService = AuthService();
+      await authService.saveAuthToken(token);
+
+      print('Token stored in jwt storage for registered user: $token');
 
       // Return the token and userId
       return {
