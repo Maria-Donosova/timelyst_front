@@ -12,10 +12,10 @@ class GoogleAuthProvider with ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  Future<void> checkAuthState() async {
-    _isLoggedIn = await _googleAuthService.isGoogleLoggedIn();
-    notifyListeners();
-  }
+  // Future<void> checkAuthState() async {
+  //   _isLoggedIn = await _googleAuthService.isGoogleLoggedIn();
+  //   notifyListeners();
+  // }
 
   Future<void> login(String email, String password) async {
     _errorMessage = null; // Clear any previous error message
