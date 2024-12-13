@@ -64,44 +64,6 @@ class GoogleAuthService {
           'error': errorData,
         };
       }
-
-      // // Parse the response body as JSON
-      // Map<String, dynamic> responseData;
-      // try {
-      //   responseData = json.decode(response.body);
-      // } catch (e) {
-      //   print('Error parsing response JSON: $e');
-      //   return {
-      //     'success': false,
-      //     'message': 'Failed to parse backend response',
-      //   };
-      // }
-
-      // // Check the response status code
-      // if (response.statusCode == 200) {
-      //   print('Auth code sent to backend successfully');
-      //   final responseData = jsonDecode(response.body);
-      //   print('Response data: $responseData');
-
-      //   // Return the response data as a JSON object
-      //   return {
-      //     'success': true,
-      //     'message': 'Auth code sent to backend successfully',
-      //     'data': responseData,
-      //   };
-      // } else {
-      //   print('Failed to send Auth code to backend: ${response.statusCode}');
-      //   final errorData = jsonDecode(response.body);
-      //   print('Error data: $errorData');
-
-      //   // Return the error data as a JSON object
-      //   return {
-      //     'success': false,
-      //     'message':
-      //         'Failed to send Auth code to backend: ${response.statusCode}',
-      //     'error': errorData,
-      //   };
-      // }
     } catch (e) {
       print('Error sending Auth code to backend: $e');
       return {
