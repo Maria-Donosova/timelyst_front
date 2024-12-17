@@ -48,8 +48,7 @@ class GoogleConnectService {
           if (response.containsKey('success')) {
             if (response['success']) {
               print('Success: ${response['message']}');
-              print(
-                  'User email: ${response['email']}'); // Optional: Handle email
+              print('User email: ${response['email']}');
 
               // Add the email to the connected accounts
               connectedAccounts.addAccount(response['email']);
@@ -111,6 +110,36 @@ class GoogleConnectService {
       'email': null,
       'message': 'Signed in failed',
     };
+  }
+
+  // fetch google user calendars
+  Future<void> fetchGoogleCalendars() async {
+    try {
+      final googleSignInAccount = _googleSignIn.currentUser;
+      if (googleSignInAccount != null) {
+        final googleSignInAuthentication =
+            await googleSignInAccount.authentication;
+        final accessToken = googleSignInAuthentication.accessToken;
+        print("Access Token: $accessToken");
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // fetch google user events
+  Future<void> fetchGoogleEvents() async {
+    try {
+      final googleSignInAccount = _googleSignIn.currentUser;
+      if (googleSignInAccount != null) {
+        final googleSignInAuthentication =
+            await googleSignInAccount.authentication;
+        final accessToken = googleSignInAuthentication.accessToken;
+        print("Access Token: $accessToken");
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   // google sign out method
