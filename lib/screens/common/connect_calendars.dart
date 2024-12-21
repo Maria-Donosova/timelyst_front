@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../widgets/shared/custom_appbar.dart';
 
-import '../../data/google_connect.dart'; // import the google calendar service
+import '../../data/googleSignInOut.dart'; // import the google calendar service
 import '../../service/connected_accounts.dart';
 
 import 'agenda.dart';
@@ -89,7 +89,7 @@ class _ConnectCalBody extends StatelessWidget {
                           // Call googleSignIn and get the result
                           // Call googleSignIn and get the result
                           Map<String, dynamic> result =
-                              await GoogleConnectService().googleSignIn(
+                              await GoogleSignInOutService().googleSignIn(
                             context,
                             Provider.of<ConnectedAccounts>(context,
                                 listen: false),

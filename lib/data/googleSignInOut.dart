@@ -1,9 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import 'package:http/http.dart' as http;
 
 import '../config/env_variables_config.dart';
 
@@ -11,8 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../service/google_auth_service.dart';
 import '../service/connected_accounts.dart';
 
-// GoogleSignInService class to handle Google sign-in and sign-out operations using the GoogleSignIn plugin (web implementation).
-class GoogleConnectService {
+class GoogleSignInOutService {
   final GoogleSignIn _googleSignIn = (kIsWeb)
       ? GoogleSignIn(
           clientId: Config.clientId,
@@ -115,55 +110,6 @@ class GoogleConnectService {
       'message': 'Signed in failed',
     };
   }
-
-//   //PLACEHODLER fetch google user calendars
-//   Future<List<Calendar>> fetchGoogleCalendars(
-//       String userId, String email) async {
-//     final response = await http.get(
-//       Uri.parse('/fetch-calendars?userId=$userId&email=$email'),
-//     );
-
-//     if (response.statusCode == 200) {
-//       final List<dynamic> data = json.decode(response.body)['data'];
-//       return data.map((calendar) => Calendar.fromJson(calendar)).toList();
-//     } else {
-//       throw Exception('Failed to load calendars');
-//     }
-//   }
-
-//   //fetch google user events
-//   Future<void> saveSelectedCalendars(String userId, List<Calendar> selectedCalendars) async {
-//     final response = await http.post(
-//       Uri.parse('/save-calendars'),
-//       headers: {'Content-Type': 'application/json'},
-//       body: json.encode({
-//         'userId': userId,
-//         'selectedCalendars': selectedCalendars.map((calendar) => calendar?.toJson()).toList(),
-//       }),
-//     );
-
-//     class Calendar {
-//   final String summary;
-
-//   Calendar({required this.summary});
-
-//   factory Calendar.fromJson(Map<String, dynamic> json) {
-//     return Calendar(
-//       summary: json['summary'],
-//     );
-//   }
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'summary': summary,
-//     };
-//   }
-// }
-
-  //   if (response.statusCode != 200) {
-  //     throw Exception('Failed to save calendars');
-  //   }
-  // }
 
   // google sign out method
   Future<String> googleSignOut(BuildContext context) async {
