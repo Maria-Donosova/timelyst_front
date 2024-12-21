@@ -13,6 +13,7 @@ class GoogleAuthService {
     return requestServerAuthCode();
   }
 
+  // Method for sending the authentication code to the backend
   Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode) async {
     print('Entering sendAuthCodeToBackend Future');
     print("Auth Code: $authCode");
@@ -73,6 +74,7 @@ class GoogleAuthService {
     }
   }
 
+  // Method for logging out the user
   // Future<bool> isGoogleLoggedIn() async {
   //   try {
   //     print('Google Logged Out');
