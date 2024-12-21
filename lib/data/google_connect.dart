@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import 'package:http/http.dart' as http;
 
 import '../config/env_variables_config.dart';
 
@@ -112,35 +116,54 @@ class GoogleConnectService {
     };
   }
 
-  // fetch google user calendars
-  Future<void> fetchGoogleCalendars() async {
-    try {
-      final googleSignInAccount = _googleSignIn.currentUser;
-      if (googleSignInAccount != null) {
-        final googleSignInAuthentication =
-            await googleSignInAccount.authentication;
-        final accessToken = googleSignInAuthentication.accessToken;
-        print("Access Token: $accessToken");
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
+//   //PLACEHODLER fetch google user calendars
+//   Future<List<Calendar>> fetchGoogleCalendars(
+//       String userId, String email) async {
+//     final response = await http.get(
+//       Uri.parse('/fetch-calendars?userId=$userId&email=$email'),
+//     );
 
-  // fetch google user events
-  Future<void> fetchGoogleEvents() async {
-    try {
-      final googleSignInAccount = _googleSignIn.currentUser;
-      if (googleSignInAccount != null) {
-        final googleSignInAuthentication =
-            await googleSignInAccount.authentication;
-        final accessToken = googleSignInAuthentication.accessToken;
-        print("Access Token: $accessToken");
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
+//     if (response.statusCode == 200) {
+//       final List<dynamic> data = json.decode(response.body)['data'];
+//       return data.map((calendar) => Calendar.fromJson(calendar)).toList();
+//     } else {
+//       throw Exception('Failed to load calendars');
+//     }
+//   }
+
+//   //fetch google user events
+//   Future<void> saveSelectedCalendars(String userId, List<Calendar> selectedCalendars) async {
+//     final response = await http.post(
+//       Uri.parse('/save-calendars'),
+//       headers: {'Content-Type': 'application/json'},
+//       body: json.encode({
+//         'userId': userId,
+//         'selectedCalendars': selectedCalendars.map((calendar) => calendar?.toJson()).toList(),
+//       }),
+//     );
+
+//     class Calendar {
+//   final String summary;
+
+//   Calendar({required this.summary});
+
+//   factory Calendar.fromJson(Map<String, dynamic> json) {
+//     return Calendar(
+//       summary: json['summary'],
+//     );
+//   }
+
+//   Map<String, dynamic> toJson() {
+//     return {
+//       'summary': summary,
+//     };
+//   }
+// }
+
+  //   if (response.statusCode != 200) {
+  //     throw Exception('Failed to save calendars');
+  //   }
+  // }
 
   // google sign out method
   Future<String> googleSignOut(BuildContext context) async {
