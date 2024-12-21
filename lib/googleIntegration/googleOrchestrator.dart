@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../models/calendar.dart';
 import './googleAuthService.dart';
 import './googleCalendarService.dart';
 import '../service/connected_accounts.dart';
@@ -51,14 +52,15 @@ class GoogleOrchestrator {
     }
   }
 
-  // // Orchestrate the Calendar Saving Process
-  // Future<void> saveSelectedCalendars(String userId, List<Calendar> selectedCalendars) async {
-  //   try {
-  //     await _googleCalendarService.saveSelectedCalendars(
-  //         userId, selectedCalendars);
-  //     print('Calendars saved successfully!');
-  //   } catch (e) {
-  //     print('Error saving calendars: $e');
-  //   }
-  // }
+  // Orchestrate the Calendar Saving Process
+  Future<void> saveSelectedCalendars(
+      String userId, List<Calendar> selectedCalendars) async {
+    try {
+      await _googleCalendarService.saveSelectedCalendars(
+          userId, selectedCalendars);
+      print('Calendars saved successfully!');
+    } catch (e) {
+      print('Error saving calendars: $e');
+    }
+  }
 }
