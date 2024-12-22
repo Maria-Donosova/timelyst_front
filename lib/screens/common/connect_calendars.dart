@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../widgets/shared/custom_appbar.dart';
 
-import '../../data/googleSignInOut.dart'; // import the google calendar service
+import '../../googleIntegration/googleSignInOut.dart'; // import the google calendar service
 import '../../service/connected_accounts.dart';
 
 import 'agenda.dart';

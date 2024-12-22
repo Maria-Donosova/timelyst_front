@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:google_sign_in/google_sign_in.dart';
+
 import '../config/env_variables_config.dart';
 
-import 'package:google_sign_in/google_sign_in.dart';
-import '../service/google_auth_service.dart';
+import 'googleAuthService.dart';
 import '../service/connected_accounts.dart';
 
 class GoogleSignInOutService {
