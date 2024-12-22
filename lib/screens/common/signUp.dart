@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
+import '../../providers/authProvider.dart';
 
-import '../../widgets/shared/custom_appbar.dart';
+import '../../widgets/shared/customAppbar.dart';
 
-import 'connect_calendars.dart';
+import 'connectCalendars.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);

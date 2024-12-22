@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-import 'package:timelyst_flutter/widgets/calendar/models/custom_appointment.dart';
+import 'package:timelyst_flutter/models/customApp.dart';
 
 import '../views/week_days.dart';
 import '../views/appointment_cell_builder.dart';

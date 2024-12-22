@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../service/auth_service.dart';
+import '../services/authService.dart';
 
 Future<Map<String, dynamic>> registerUser(String email, String password,
     String name, String lastName, bool consent) async {

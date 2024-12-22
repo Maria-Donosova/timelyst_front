@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../models/calendar.dart';
-import './googleAuthService.dart';
-import './googleCalendarService.dart';
-import '../service/connected_accounts.dart';
+import '../../models/calendars.dart';
+import 'googleAuthService.dart';
+import 'googleCalendarService.dart';
+import '../connected_accounts.dart';
 
 class GoogleOrchestrator {
   final GoogleAuthService _googleAuthService = GoogleAuthService();

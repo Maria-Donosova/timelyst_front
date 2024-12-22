@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/widgets/calendar/models/calendar_model.dart';
+import '../models/calendars.dart';
 
 class CustomAppointment {
   CustomAppointment({

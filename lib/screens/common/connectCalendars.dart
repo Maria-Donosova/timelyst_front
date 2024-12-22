@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../widgets/shared/custom_appbar.dart';
+import '../../widgets/shared/customAppbar.dart';
 
-import '../../googleIntegration/googleSignInOut.dart'; // import the google calendar service
-import '../../service/connected_accounts.dart';
+import '../../services/googleIntegration/googleSignInOut.dart'; // import the google calendar service
+import '../../services/connected_accounts.dart';
 
 import 'agenda.dart';
-import 'agenda_settings.dart';
+import 'agendaSettings.dart';
 
 class ConnectCal extends StatelessWidget {
   const ConnectCal({Key? key}) : super(key: key);
