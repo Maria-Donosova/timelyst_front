@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../screens/common/connect_calendars.dart';
+import '../../screens/common/connectCalendars.dart';
 
-import '../../screens/common/sign_up.dart';
-import '../../screens/common/log_in.dart';
-import '../../providers/auth_provider.dart';
+import '../../screens/common/signUp.dart';
+import '../../screens/common/logIn.dart';
+import '../../providers/authProvider.dart';
 
 //import '../shared/search.dart';
 

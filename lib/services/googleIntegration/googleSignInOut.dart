@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../config/env_variables_config.dart';
+import '../../config/env_variables_config.dart';
 
 import 'googleAuthService.dart';
-import '../service/connected_accounts.dart';
+import '../connected_accounts.dart';
 
 class GoogleSignInOutService {
   final GoogleSignIn _googleSignIn = (kIsWeb)

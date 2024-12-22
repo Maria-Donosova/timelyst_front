@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:timelyst_flutter/widgets/shared/categories.dart';
-import '../models/custom_appointment.dart';
+import '../../../models/customApp.dart';
 
 /**
  * Method to build the UI for a single appointment.

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/shared/custom_appbar.dart';
+import '../../widgets/shared/customAppbar.dart';
 
 class Account extends StatelessWidget {
   const Account({Key? key}) : super(key: key);

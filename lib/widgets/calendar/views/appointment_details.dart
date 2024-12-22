@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:timelyst_flutter/widgets/calendar/models/calendar_model.dart';
+import '../../../models/calendars.dart';
 
 import '../../shared/categories.dart'; // Imports the categories and their colors
 
