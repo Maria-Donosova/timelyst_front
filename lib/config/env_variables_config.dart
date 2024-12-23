@@ -2,16 +2,25 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Config {
   // Google OAuth2
-  static String? get clientId => dotenv.env['CLIENT_ID']!;
-  static String? get clientSecret => dotenv.env['CLIENT_SECRET']!;
-  static String? get googleOath => dotenv.env['GOOGLE_OATH_URL']!;
-  static String? get googleOath2Token => dotenv.env['GOOGLE_OATH2_TOKEN_URL']!;
+  static String? get clientId =>
+      dotenv.env['CLIENT_ID'] ??
+      '287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com';
+  static String? get clientSecret =>
+      dotenv.env['CLIENT_SECRET'] ?? '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';
+  static String? get googleOath =>
+      dotenv.env['GOOGLE_OATH_URL'] ??
+      'https://accounts.google.com/o/oauth2/auth';
+  static String? get googleOath2Token =>
+      dotenv.env['GOOGLE_OATH2_TOKEN_URL'] ??
+      'https://accounts.google.com/o/oauth2/token';
 
 // Backend google APIs
   static String get backendGoogleCallback =>
-      dotenv.env['BACKEND_GOOGLE_CALLBACK']!;
+      dotenv.env['BACKEND_GOOGLE_CALLBACK'] ??
+      'http://localhost:3000/google/callback';
   static String get backendGoogleCalendars =>
-      dotenv.env['BACKEND_GOOGLE_CALENDARS']!;
+      dotenv.env['BACKEND_GOOGLE_CALENDARS'] ??
+      'http://localhost:3000/google/calendars';
   //static String? get redirectUri => dotenv.env['REDIRECT_URI'];
 
   static String get frontendURL =>
