@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timelyst_flutter/services/googleIntegration/googleSignInOut.dart';
 
 import '../../widgets/shared/customAppbar.dart';
 
-import '../../services/googleIntegration/googleSignInOut.dart'; // import the google calendar service
+import '../../services/googleIntegration/googleOrchestrator.dart';
+//import '../../services/googleIntegration/googleSignInOut.dart';
 import '../../services/connected_accounts.dart';
 
 import 'agenda.dart';
@@ -86,14 +88,19 @@ class _ConnectCalBody extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () async {
                           print('Gmail button pressed');
-                          // Call googleSignIn and get the result
-                          // Call googleSignIn and get the result
+
                           Map<String, dynamic> result =
-                              await GoogleSignInOutService().googleSignIn(
-                            context,
-                            Provider.of<ConnectedAccounts>(context,
-                                listen: false),
-                          );
+                              await GoogleOrchestrator()
+                                  .signInAndFetchCalendars(
+                                      context,
+                                      Provider.of<ConnectedAccounts>(context,
+                                          listen: false));
+
+                          //     await GoogleSignInOutService().googleSignIn(
+                          //   context,
+                          //   Provider.of<ConnectedAccounts>(context,
+                          //       listen: false),
+                          // );
 
                           // Check if the email is not null (success case)
                           if (result['email'] != null) {

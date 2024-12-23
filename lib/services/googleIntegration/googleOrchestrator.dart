@@ -1,55 +1,60 @@
 import 'package:flutter/material.dart';
 
 import '../../models/calendars.dart';
+import 'googleSignInOut.dart';
 import 'googleAuthService.dart';
 import 'googleCalendarService.dart';
 import '../connected_accounts.dart';
 
 class GoogleOrchestrator {
-  final GoogleAuthService _googleAuthService = GoogleAuthService();
+  //final GoogleAuthService _googleAuthService = GoogleAuthService();
   final GoogleCalendarService _googleCalendarService = GoogleCalendarService();
+  final GoogleSignInOutService _googleSingInOutService =
+      GoogleSignInOutService();
 
   // Orchestrate the Google Sign-In and Calendar Fetching Process
-  Future<void> signInAndFetchCalendars(
+  Future<Map<String, dynamic>> signInAndFetchCalendars(
     BuildContext context,
     ConnectedAccounts connectedAccounts,
   ) async {
+    print("Entering signInAndFetchCalendars");
     try {
-      // Step 1: Authenticate the user
-      final authResult =
-          await _googleAuthService.requestServerAuthenticatioinCode();
+      // Step 1: Sign in with Google
+      final signInResult = await _googleSingInOutService.googleSignIn(
+        context,
+        connectedAccounts,
+      );
+      print("Sign-in result: $signInResult");
 
-      // if (authResult['email'] != null) {
-      //   final email = authResult['email'];
-      //   final userId =
-      //       'USER_ID_FROM_AUTH_RESULT'; // Replace with actual user ID
+      // Step 2: Fetch Google Calendars
+      final userId = signInResult['userId'];
+      final email = signInResult['email'];
+      print("userID: $userId");
+      print("email: $email");
 
-      //   // Step 2: Fetch Google Calendars
-      //   final calendars =
-      //       await _googleCalendarService.fetchGoogleCalendars(userId, email);
+      final calendars =
+          await _googleCalendarService.fetchGoogleCalendars(userId, email);
+      print("Calendars: $calendars");
 
-      //   // Step 3: Display Calendars to the User (You can navigate to a new screen here)
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => Container(),
-      //       // CalendarSelectionScreen(
-      //       //   userId: userId,
-      //       //   email: email,
-      //       //   calendars: calendars,
-      //       // ),
-      //     ),
-      //   );
-      // } else {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     //SnackBar(content: Text('Sign-in failed: ${authResult['message']}')),
-      //   );
-      // }
+      // Step 3: Display Calendars to the User (You can navigate to a new screen here)
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Container(),
+          // CalendarSelectionScreen(
+          //   userId: userId,
+          //   email: email,
+          //   calendars: calendars,
+          // ),
+        ),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
+      return {'error': e.toString()};
     }
+    return {'status': 'success'};
   }
 
   // Orchestrate the Calendar Saving Process
