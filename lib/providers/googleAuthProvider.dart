@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../service/google_auth_service.dart';
-import '../data/login_user.dart';
-import '../data/register_user.dart';
+import '../services/googleIntegration/googleAuthService.dart';
+import '../data/loginUser.dart';
+import '../data/registerUser.dart';
 
 class GoogleAuthProvider with ChangeNotifier {
   final GoogleAuthService _googleAuthService = GoogleAuthService();
