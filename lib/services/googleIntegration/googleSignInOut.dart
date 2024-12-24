@@ -55,6 +55,7 @@ class GoogleSignInOutService {
 
               // Return the email and success message
               return {
+                'userId': response['data']['userId'],
                 'email': response['email'],
                 'message': response['message'],
               };
