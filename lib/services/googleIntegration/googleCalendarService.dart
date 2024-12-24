@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:timelyst_flutter/config/env_variables_config.dart';
+import 'package:timelyst_flutter/services/authService.dart';
 
 import '../../models/calendars.dart';
 
@@ -7,16 +9,33 @@ class GoogleCalendarService {
   // Fetch Google calendars from the backend
   Future<List<Calendar>> fetchGoogleCalendars(
       String userId, String email) async {
+    print("Entering fetchGoogleCalendars");
+    print("userId: $userId");
+    print("email: $email");
+
+    // Retrieve the JWT token from secure storage
+    final authService = AuthService();
+    final token = await authService.getAuthToken();
+    print("Token: $token");
+
+    if (token == null) {
+      throw Exception('No JWT token found. Please log in again.');
+    }
+
     try {
-      final response = await http.get(
-        Uri.parse(
-            'https://your-backend-url.com/fetch-calendars?userId=$userId&email=$email'),
+      final response = await http.post(
+        Uri.parse(Config.backendGoogleCalendars),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization':
-              'Bearer YOUR_JWT_TOKEN', // Include your JWT token for authentication
+          'Authorization': 'Bearer $token',
         },
+        body: json.encode({
+          'userId': userId,
+          'email': email,
+        }),
       );
+
+      print("Response: ${response}");
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body)['data'];
