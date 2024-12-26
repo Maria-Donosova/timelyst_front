@@ -40,8 +40,17 @@ class GoogleCalendarService {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseBody = json.decode(response.body);
-        final List<dynamic> data = responseBody['data'];
-        return data.map((calendar) => Calendar.fromJson(calendar)).toList();
+        print("Response body (decoded): $responseBody");
+
+        if (responseBody.containsKey('data') && responseBody['data'] is List) {
+          final List<dynamic> data = responseBody['data'];
+          print("Data: $data");
+
+          return data.map((calendar) => Calendar.fromJson(calendar)).toList();
+        } else {
+          throw Exception(
+              'Invalid response format: "data" field is missing or not a list');
+        }
       } else {
         throw Exception('Failed to load calendars: ${response.statusCode}');
       }
