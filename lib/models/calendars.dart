@@ -1,24 +1,28 @@
-import 'dart:ui';
+import 'package:flutter/material.dart';
 
 class Calendar {
+  final String user;
   final String kind;
   final String etag;
   final String id;
   final String title;
   final String? description;
+  final String sourceCalendar;
   final String timeZone;
-  final String? category;
+  final String category;
   final Color? catColor;
   final String? defaultReminders;
   final String? notificationSettings;
   final String? conferenceProperties;
 
   Calendar({
+    required this.user,
     required this.kind,
     required this.etag,
     required this.id,
     required this.title,
     this.description,
+    this.sourceCalendar = '',
     this.timeZone = '',
     this.category = '',
     this.catColor = const Color(0xFF000000),
@@ -30,14 +34,16 @@ class Calendar {
   // Convert JSON to Calendar object
   factory Calendar.fromJson(Map<String, dynamic> json) {
     return Calendar(
+      user: json['user'] ?? '',
       kind: json['kind'] ?? '',
       etag: json['etag'] ?? '',
       id: json['id'] ?? '',
       title: json['summary'] ?? '',
       description: json['description'] ?? '',
+      sourceCalendar: json['sourceCalendar'] ?? '',
       timeZone: json['timeZone'] ?? '',
       category: json['category'] ?? '',
-      catColor: json['catColor'] ?? '',
+      catColor: _parseColor(json['calendarColor']) ?? Colors.grey,
       defaultReminders: json['defaultReminders'] ?? '',
       notificationSettings: json['notificationSettings'] ?? '',
       conferenceProperties: json['conferenceProperties'] ?? '',
@@ -47,11 +53,13 @@ class Calendar {
   // Convert Calendar object to JSON
   Map<String, dynamic> toJson() {
     return {
+      'user': user,
       'kind': kind,
       'etag': etag,
       'id': id,
       'summary': title,
       'description': description,
+      'sourceCalendar': sourceCalendar,
       'timeZone': timeZone,
       'category': category,
       'catColor': catColor,
@@ -60,34 +68,16 @@ class Calendar {
       'conferenceProperties': conferenceProperties,
     };
   }
-}
 
-//boiler plate code for calendar model
-
-class Calendars {
-  String calendarId;
-  String calendarSource;
-  String calendarName;
-  String email;
-  String password;
-  String category;
-  List events;
-  DateTime dateImported;
-  DateTime dateCreated;
-  DateTime dateUpdated;
-
-  Calendars(
-      {required this.calendarId,
-      required this.calendarSource,
-      required this.calendarName,
-      required this.email,
-      required this.password,
-      required this.category,
-      this.events = const [],
-      DateTime? dateImported,
-      DateTime? dateCreated,
-      DateTime? dateUpdated})
-      : dateImported = dateImported ?? DateTime.now(),
-        dateCreated = dateCreated ?? DateTime.now(),
-        dateUpdated = dateUpdated ?? DateTime.now();
+// Helper function to convert hex color string to Color
+  static Color _parseColor(String? hexColor) {
+    if (hexColor == null || hexColor.isEmpty) {
+      return Colors.transparent; // Default color if null or empty
+    }
+    hexColor = hexColor.replaceAll('#', ''); // Remove '#' if present
+    if (hexColor.length == 6) {
+      hexColor = 'FF$hexColor'; // Add opacity if missing
+    }
+    return Color(int.parse(hexColor, radix: 16));
+  }
 }
