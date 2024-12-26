@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timelyst_flutter/widgets/shared/calendarSelection.dart';
 
 import '../../models/calendars.dart';
 import 'googleSignInOut.dart';
@@ -33,18 +34,18 @@ class GoogleOrchestrator {
 
       final calendars =
           await _googleCalendarService.fetchGoogleCalendars(userId, email);
-      print("Calendars: $calendars");
+      print(
+          "Google calendars returned by the backend: ${calendars.map((calendar) => calendar.toString()).join('\n')}");
 
       // Step 3: Display Calendars to the User (You can navigate to a new screen here)
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => Container(),
-          // CalendarSelectionScreen(
-          //   userId: userId,
-          //   email: email,
-          //   calendars: calendars,
-          // ),
+          builder: (context) => CalendarSelectionScreen(
+            userId: userId,
+            email: email,
+            calendars: calendars,
+          ),
         ),
       );
     } catch (e) {
