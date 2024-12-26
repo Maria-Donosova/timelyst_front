@@ -35,10 +35,12 @@ class GoogleCalendarService {
         }),
       );
 
-      print("Response: ${response}");
+      print("Response status code: ${response.statusCode}");
+      print("Response body: ${response.body}");
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body)['data'];
+        final Map<String, dynamic> responseBody = json.decode(response.body);
+        final List<dynamic> data = responseBody['data'];
         return data.map((calendar) => Calendar.fromJson(calendar)).toList();
       } else {
         throw Exception('Failed to load calendars: ${response.statusCode}');

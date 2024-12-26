@@ -33,7 +33,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
           final calendar = widget.calendars[index];
           return CheckboxListTile(
             title: Text(calendar.title),
-            subtitle: Text(calendar.description),
+            subtitle: Text(calendar.description ?? ''),
             value: _selectedCalendars.contains(calendar),
             onChanged: (isSelected) {
               setState(() {
