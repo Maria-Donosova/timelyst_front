@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../models/calendars.dart';
 import 'googleSignInOut.dart';
-import 'googleAuthService.dart';
 import 'googleCalendarService.dart';
 import '../connected_accounts.dart';
 
