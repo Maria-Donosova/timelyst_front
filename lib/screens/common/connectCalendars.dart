@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timelyst_flutter/services/googleIntegration/googleSignInOut.dart';
 
 import '../../widgets/shared/customAppbar.dart';
-
 import '../../services/googleIntegration/googleOrchestrator.dart';
-//import '../../services/googleIntegration/googleSignInOut.dart';
 import '../../services/connected_accounts.dart';
 
 import 'agenda.dart';
@@ -96,12 +93,6 @@ class _ConnectCalBody extends StatelessWidget {
                                       Provider.of<ConnectedAccounts>(context,
                                           listen: false));
 
-                          //     await GoogleSignInOutService().googleSignIn(
-                          //   context,
-                          //   Provider.of<ConnectedAccounts>(context,
-                          //       listen: false),
-                          // );
-
                           // Check if the email is not null (success case)
                           if (result['email'] != null) {
                             // Show a success message in the SnackBar
@@ -159,7 +150,6 @@ class _ConnectCalBody extends StatelessWidget {
                   child: TextButton(
                     onPressed: () {
                       print('Start Blank button pressed');
-                      //startBlank(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const Agenda()),
