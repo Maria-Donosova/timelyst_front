@@ -9,7 +9,7 @@ class EventDetails extends StatefulWidget {
     required String? id,
     //required String creator,
     // List<UserProfile> userProfiles,
-    List<Calendars>? userCalendars,
+    List<Calendar>? userCalendars,
     // String eventOrganizer,
     String? subject,
     String? dateText,
@@ -53,7 +53,7 @@ class EventDetails extends StatefulWidget {
   // final String _creator;
   // final String _eventOrganizer;
   // final List<UserProfile> _userProfiles;
-  final List<Calendars>? _userCalendars;
+  final List<Calendar>? _userCalendars;
   final String? _subject;
   final String? _dateText;
   final String? _startTimeText;
@@ -115,7 +115,7 @@ class EventDetailsScreentate extends State<EventDetails> {
     _eventRecurrenceRule = TextEditingController(text: widget._recurrenceRule);
     _eventCalendar = TextEditingController(
         text: widget._userCalendars != null && widget._userCalendars!.isNotEmpty
-            ? widget._userCalendars![0].calendarName
+            ? widget._userCalendars![0].title
             : '');
   }
 
@@ -396,7 +396,7 @@ class EventDetailsScreentate extends State<EventDetails> {
         builder: (BuildContext context) {
           // Use a Set to store unique categories
           Set<String> uniqueCategories = {};
-          Map<String, List<Calendars>> categoryCalendarsMap = {};
+          Map<String, List<Calendar>> categoryCalendarsMap = {};
           Map<String, bool> checkedCalendars = {};
 
           // Populate the Set and Map with unique categories and their calendars
@@ -409,7 +409,7 @@ class EventDetailsScreentate extends State<EventDetails> {
                   []; // Initialize with an empty list
             }
             categoryCalendarsMap[category]!.add(calendar);
-            checkedCalendars[calendar.calendarName] =
+            checkedCalendars[calendar.title] =
                 calendars.contains(widget._userCalendars);
           }
 
@@ -445,22 +445,20 @@ class EventDetailsScreentate extends State<EventDetails> {
                           Column(
                             children: categoryCalendars.map((calendar) {
                               return Tooltip(
-                                message: calendar.email,
+                                message: calendar.user,
                                 child: CheckboxListTile(
                                   title: Text(
-                                    calendar.calendarName +
+                                    calendar.title +
                                         ' ' +
-                                        calendar.calendarSource,
+                                        calendar.sourceCalendar,
                                     style:
                                         Theme.of(context).textTheme.bodyMedium,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  value:
-                                      checkedCalendars[calendar.calendarName],
+                                  value: checkedCalendars[calendar.title],
                                   onChanged: (bool? value) {
                                     setState(() {
-                                      checkedCalendars[calendar.calendarName] =
-                                          value!;
+                                      checkedCalendars[calendar.title] = value!;
                                     });
                                   },
                                 ),
@@ -899,63 +897,53 @@ class EventDetailsScreentate extends State<EventDetails> {
 }
 
 //dummy events
-List<Calendars> calendars = [
-  Calendars(
-      calendarId: '1',
-      calendarSource: 'Google',
-      calendarName: 'Family',
-      email: 'test@gmail.com',
-      password: 'password',
-      category: 'Kids',
-      events: [],
-      dateImported: DateTime.now(),
-      dateCreated: DateTime.now(),
-      dateUpdated: DateTime.now()),
-  Calendars(
-      calendarId: '2',
-      calendarSource: 'Google',
-      calendarName: 'Work',
-      email: 'test@gmail.com',
-      password: 'password',
-      category: 'Work',
-      events: [],
-      dateImported: DateTime.now(),
-      dateCreated: DateTime.now(),
-      dateUpdated: DateTime.now()),
-  Calendars(
-    calendarId: '3',
-    calendarSource: 'Outlook',
-    calendarName: 'Holiday',
-    email: 'test@outlook.com',
-    password: 'password',
-    category: 'Holidays',
-    events: [],
-    dateImported: DateTime.now(),
-    dateCreated: DateTime.now(),
-    dateUpdated: DateTime.now(),
+List<Calendar> calendars = [
+  Calendar(
+    user: '',
+    kind: '',
+    etag: '',
+    id: '',
+    //calendarId: '1',
+    sourceCalendar: 'Google',
+    title: 'Family',
+    //email: 'test@gmail.com',
+    //password: 'password',
+    category: 'Kids',
+    // events: [],
+    // dateImported: DateTime.now(),
+    // dateCreated: DateTime.now(),
+    // dateUpdated: DateTime.now()
   ),
-  Calendars(
-    calendarId: '3',
-    calendarSource: 'Apple',
-    calendarName: 'Apple Calendar',
-    email: 'test@apple.com',
-    password: 'password',
+  Calendar(
+    user: '',
+    kind: '',
+    etag: '',
+    id: '',
+    //calendarId: '1',
+    sourceCalendar: 'Outlook',
+    title: 'Work',
+    //email: 'test@gmail.com',
+    //password: 'password',
     category: 'Work',
-    events: [],
-    dateImported: DateTime.now(),
-    dateCreated: DateTime.now(),
-    dateUpdated: DateTime.now(),
+    // events: [],
+    // dateImported: DateTime.now(),
+    // dateCreated: DateTime.now(),
+    // dateUpdated: DateTime.now()
   ),
-  Calendars(
-    calendarId: '4',
-    calendarSource: 'Google',
-    calendarName: '2Gmail 2 Calendar',
-    email: '2test2@gmail.com',
-    password: 'password',
-    category: 'Friends',
-    events: [],
-    dateImported: DateTime.now(),
-    dateCreated: DateTime.now(),
-    dateUpdated: DateTime.now(),
+  Calendar(
+    user: '',
+    kind: '',
+    etag: '',
+    id: '',
+    //calendarId: '1',
+    sourceCalendar: 'Google',
+    title: 'Personal',
+    //email: 'test@gmail.com',
+    //password: 'password',
+    category: 'Study',
+    // events: [],
+    // dateImported: DateTime.now(),
+    // dateCreated: DateTime.now(),
+    // dateUpdated: DateTime.now()
   ),
 ];

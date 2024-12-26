@@ -31,7 +31,7 @@ class CustomAppointment {
   String id;
   // String? creator;
   // List<UserProfile> userProfiles;
-  late List<Calendars> userCalendars;
+  late List<Calendar> userCalendars;
   // String? eventOrganizer;
   String subject;
   DateTime startTime;
