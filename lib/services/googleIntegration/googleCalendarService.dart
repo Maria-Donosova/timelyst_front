@@ -24,7 +24,7 @@ class GoogleCalendarService {
 
     try {
       final response = await http.post(
-        Uri.parse(Config.backendGoogleCalendars),
+        Uri.parse(Config.backendFetchGoogleCalendars),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -52,13 +52,22 @@ class GoogleCalendarService {
   // Save selected calendars to the backend
   Future<void> saveSelectedCalendars(
       String userId, List<Calendar> selectedCalendars) async {
+    // Retrieve the JWT token from secure storage
+    final authService = AuthService();
+    final token = await authService.getAuthToken();
+    print("Token: $token");
+
+    if (token == null) {
+      throw Exception('No JWT token found. Please log in again.');
+    }
+
     try {
       final response = await http.post(
-        Uri.parse('https://your-backend-url.com/save-calendars'),
+        Uri.parse(Config.backendSaveSelectedGoogleCalendars),
         headers: {
           'Content-Type': 'application/json',
           'Authorization':
-              'Bearer YOUR_JWT_TOKEN', // Include your JWT token for authentication
+              'Bearer $token', // Include your JWT token for authentication
         },
         body: json.encode({
           'userId': userId,
