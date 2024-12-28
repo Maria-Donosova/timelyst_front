@@ -59,10 +59,10 @@ class GoogleOrchestrator {
 
   // Orchestrate the Calendar Saving Process
   Future<void> saveSelectedCalendars(
-      String userId, List<Calendar> selectedCalendars) async {
+      String userId, googleAccount, List<Calendar> selectedCalendars) async {
     try {
       await _googleCalendarService.saveSelectedCalendars(
-          userId, selectedCalendars);
+          userId, googleAccount, selectedCalendars);
       print('Calendars saved successfully!');
     } catch (e) {
       print('Error saving calendars: $e');
