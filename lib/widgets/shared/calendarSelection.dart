@@ -52,8 +52,8 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
           if (_selectedCalendars.isNotEmpty) {
             try {
               // Save selected calendars using the orchestrator
-              await GoogleOrchestrator()
-                  .saveSelectedCalendars(widget.userId, _selectedCalendars);
+              await GoogleOrchestrator().saveSelectedCalendars(
+                  widget.userId, widget.email, _selectedCalendars);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Calendars saved successfully!')),
               );
