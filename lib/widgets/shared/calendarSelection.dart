@@ -23,6 +23,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("Enter calendar selection screen");
     return Scaffold(
       appBar: AppBar(
         title: Text('Select Calendars'),
@@ -47,13 +48,22 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: ElevatedButton(
+        child: Text('Save Selected Calendars',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSecondary,
+            )),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Theme.of(context).colorScheme.secondary,
+        ),
         onPressed: () async {
           if (_selectedCalendars.isNotEmpty) {
             try {
               // Save selected calendars using the orchestrator
               await GoogleOrchestrator().saveSelectedCalendars(
                   widget.userId, widget.email, _selectedCalendars);
+              print("Widget User ID: ${widget.userId}");
+              print("Widget email: ${widget.email}");
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Calendars saved successfully!')),
               );
@@ -68,7 +78,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
             );
           }
         },
-        child: Icon(Icons.save),
+        //child: Icon(Icons.save),
       ),
     );
   }
