@@ -85,7 +85,7 @@ class EventDetailsScreentate extends State<EventDetails> {
   late TextEditingController _eventEndTimeController;
   late TextEditingController _eventDescriptionController;
   late TextEditingController _eventLocation;
-  late TextEditingController _eventRecurrenceRule;
+  //late TextEditingController _eventRecurrenceRule;
   late TextEditingController _eventParticipants;
 
   final _appFormKey = GlobalKey<FormState>();
@@ -112,7 +112,7 @@ class EventDetailsScreentate extends State<EventDetails> {
     _selectedCategory = widget._catTitle!;
     _eventParticipants = TextEditingController(text: widget._participants);
     _allDay = widget._allDay!;
-    _eventRecurrenceRule = TextEditingController(text: widget._recurrenceRule);
+    //_eventRecurrenceRule = TextEditingController(text: widget._recurrenceRule);
     _eventCalendar = TextEditingController(
         text: widget._userCalendars != null && widget._userCalendars!.isNotEmpty
             ? widget._userCalendars![0].title
@@ -404,7 +404,7 @@ class EventDetailsScreentate extends State<EventDetails> {
             final category = calendar.category;
 
             if (!uniqueCategories.contains(category)) {
-              uniqueCategories.add(category);
+              uniqueCategories.add(category!);
               categoryCalendarsMap[category] =
                   []; // Initialize with an empty list
             }
@@ -448,9 +448,11 @@ class EventDetailsScreentate extends State<EventDetails> {
                                 message: calendar.user,
                                 child: CheckboxListTile(
                                   title: Text(
-                                    calendar.title +
-                                        ' ' +
-                                        calendar.sourceCalendar,
+                                    calendar.title
+                                    //+
+                                    // ' ' +
+                                    // calendar.sourceCalendar
+                                    ,
                                     style:
                                         Theme.of(context).textTheme.bodyMedium,
                                     overflow: TextOverflow.ellipsis,
