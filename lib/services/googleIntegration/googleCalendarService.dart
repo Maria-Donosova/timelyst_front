@@ -62,7 +62,7 @@ class GoogleCalendarService {
 
   // Save selected calendars to the backend
   Future<void> saveSelectedCalendars(
-      String userId, List<Calendar> selectedCalendars) async {
+      String userId, googleAccount, List<Calendar> selectedCalendars) async {
     // Retrieve the JWT token from secure storage
     final authService = AuthService();
     final token = await authService.getAuthToken();
