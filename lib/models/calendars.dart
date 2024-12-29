@@ -55,7 +55,7 @@ class Calendar {
   }
 
   // Convert Calendar object to JSON
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({required String email}) {
     return {
       'user': user,
       'kind': kind,
@@ -63,7 +63,7 @@ class Calendar {
       'id': id,
       'summary': title,
       'description': description,
-      'sourceCalendar': sourceCalendar,
+      'sourceCalendar': _getSourceCalendarFromEmail(email),
       'timeZone': timeZone,
       'category': category,
       'catColor': _colorToHex(catColor),
@@ -91,5 +91,24 @@ class Calendar {
       return '#000000'; // Default color if null
     }
     return '#${color.value.toRadixString(16).padLeft(8, '0')}';
+  }
+
+  // Helper function to identify the source calendar
+  String _getSourceCalendarFromEmail(String email) {
+    final lowercaseEmail = email.toLowerCase();
+
+    if (lowercaseEmail.endsWith('@gmail.com')) {
+      return 'Google';
+    } else if (lowercaseEmail.endsWith('@outlook.com') ||
+        lowercaseEmail.endsWith('@hotmail.com') ||
+        lowercaseEmail.endsWith('@live.com')) {
+      return 'Outlook';
+    } else if (lowercaseEmail.endsWith('@icloud.com') ||
+        lowercaseEmail.endsWith('@me.com') ||
+        lowercaseEmail.endsWith('@mac.com')) {
+      return 'Apple';
+    } else {
+      throw ArgumentError('Unsupported email domain: $email');
+    }
   }
 }
