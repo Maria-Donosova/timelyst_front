@@ -68,7 +68,7 @@ class GoogleCalendarService {
     final token = await authService.getAuthToken();
     print("Token: $token");
     print(
-        'Selected Calendars JSON: ${selectedCalendars.map((c) => c.toJson()).toList()}');
+        'Selected Calendars JSON: ${selectedCalendars.map((c) => c.toJson(email: googleEmail)).toList()}');
 
     if (token == null) {
       throw Exception('No JWT token found. Please log in again.');
@@ -79,7 +79,7 @@ class GoogleCalendarService {
       print('userId: $userId');
       print('googleEmail: $googleEmail');
       print(
-          'selectedCalendars: ${selectedCalendars.map((c) => c.toJson()).toList()}');
+          'selectedCalendars: ${selectedCalendars.map((c) => c.toJson(email: googleEmail)).toList()}');
 
       final response = await http.post(
         Uri.parse(Config.backendSaveSelectedGoogleCalendars),
@@ -91,8 +91,9 @@ class GoogleCalendarService {
         body: json.encode({
           'user': userId,
           'email': googleEmail,
-          'calendars':
-              selectedCalendars.map((calendar) => calendar.toJson()).toList(),
+          'calendars': selectedCalendars
+              .map((calendar) => calendar.toJson(email: googleEmail))
+              .toList(),
         }),
       );
 
