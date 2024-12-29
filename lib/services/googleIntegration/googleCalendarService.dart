@@ -62,17 +62,25 @@ class GoogleCalendarService {
 
   // Save selected calendars to the backend
   Future<void> saveSelectedCalendars(
-      String userId, googleAccount, List<Calendar> selectedCalendars) async {
+      String userId, googleEmail, List<Calendar> selectedCalendars) async {
     // Retrieve the JWT token from secure storage
     final authService = AuthService();
     final token = await authService.getAuthToken();
     print("Token: $token");
+    print(
+        'Selected Calendars JSON: ${selectedCalendars.map((c) => c.toJson()).toList()}');
 
     if (token == null) {
       throw Exception('No JWT token found. Please log in again.');
     }
 
     try {
+      print('Sending data to backend:');
+      print('userId: $userId');
+      print('googleEmail: $googleEmail');
+      print(
+          'selectedCalendars: ${selectedCalendars.map((c) => c.toJson()).toList()}');
+
       final response = await http.post(
         Uri.parse(Config.backendSaveSelectedGoogleCalendars),
         headers: {
@@ -81,14 +89,15 @@ class GoogleCalendarService {
               'Bearer $token', // Include your JWT token for authentication
         },
         body: json.encode({
-          'userId': userId,
-          'selectedCalendars': selectedCalendars
-              .map((calendar) => (calendar as Calendar).toJson())
-              .toList(),
+          'user': userId,
+          'email': googleEmail,
+          'calendars':
+              selectedCalendars.map((calendar) => calendar.toJson()).toList(),
         }),
       );
 
       if (response.statusCode != 200) {
+        print('Backend error: ${response.body}');
         throw Exception('Failed to save calendars: ${response.statusCode}');
       }
     } catch (e) {
