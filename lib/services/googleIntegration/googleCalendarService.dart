@@ -18,13 +18,9 @@ class GoogleCalendarService {
     final token = await authService.getAuthToken();
     print("Token: $token");
 
-    if (token == null) {
-      throw Exception('No JWT token found. Please log in again.');
-    }
-
     try {
       final response = await http.post(
-        Uri.parse(Config.backendFetchGoogleCalendars),
+        Uri.parse(Config.backendGoogleCalendars),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -35,24 +31,29 @@ class GoogleCalendarService {
         }),
       );
 
-      print("Response status code: ${response.statusCode}");
-      print("Response body: ${response.body}");
-
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseBody = json.decode(response.body);
+        final responseBody = json.decode(response.body);
         print("Response body (decoded): $responseBody");
 
-        if (responseBody.containsKey('data') && responseBody['data'] is List) {
-          final List<dynamic> data = responseBody['data'];
-          print("Data: $data");
+        // Check if the response contains the expected data
+        if (responseBody['success'] == true && responseBody['data'] != null) {
+          final calendarsData =
+              responseBody['data']['calendars']; // Access the 'calendars' array
+          print("Calendars data: $calendarsData");
 
-          return data.map((calendar) => Calendar.fromJson(calendar)).toList();
+          // Convert the JSON data to a list of Calendar objects
+          final calendars = calendarsData.map<Calendar>((calendarJson) {
+            return Calendar.fromJson(calendarJson);
+          }).toList();
+
+          print("Calendars fetched successfully: $calendars");
+          return calendars;
         } else {
           throw Exception(
               'Invalid response format: "data" field is missing or not a list');
         }
       } else {
-        throw Exception('Failed to load calendars: ${response.statusCode}');
+        throw Exception('Failed to fetch calendars: ${response.statusCode}');
       }
     } catch (e) {
       print('Error fetching calendars: $e');
@@ -60,9 +61,64 @@ class GoogleCalendarService {
     }
   }
 
+  // Future<List<Calendar>> fetchGoogleCalendars(
+  //     String userId, String email) async {
+  //   print("Entering fetchGoogleCalendars");
+  //   print("userId: $userId");
+  //   print("email: $email");
+
+  //   // Retrieve the JWT token from secure storage
+  //   final authService = AuthService();
+  //   final token = await authService.getAuthToken();
+  //   print("Token: $token");
+
+  //   if (token == null) {
+  //     throw Exception('No JWT token found. Please log in again.');
+  //   }
+
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(Config.backendGoogleCalendars),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Bearer $token',
+  //       },
+  //       body: json.encode({
+  //         'userId': userId,
+  //         'email': email,
+  //       }),
+  //     );
+
+  //     print("Response status code: ${response.statusCode}");
+  //     print("Response body: ${response.body}");
+
+  //     if (response.statusCode == 200) {
+  //       final Map<String, dynamic> responseBody = json.decode(response.body);
+  //       print("Response body (decoded): $responseBody");
+
+  //       if (responseBody.containsKey('data') && responseBody['data'] is List) {
+  //         final List<dynamic> data = responseBody['data'];
+  //         print("Data: $data");
+
+  //         return data.map((calendar) => Calendar.fromJson(calendar)).toList();
+  //       } else {
+  //         throw Exception(
+  //             'Invalid response format: "data" field is missing or not a list');
+  //       }
+  //     } else {
+  //       throw Exception('Failed to load calendars: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching calendars: $e');
+  //     throw Exception('Error fetching calendars: $e');
+  //   }
+  // }
+
   // Save selected calendars to the backend
   Future<void> saveSelectedCalendars(
       String userId, googleEmail, List<Calendar> selectedCalendars) async {
+    print("Entering saveSelectedCalendars");
+
     // Retrieve the JWT token from secure storage
     final authService = AuthService();
     final token = await authService.getAuthToken();
@@ -82,7 +138,7 @@ class GoogleCalendarService {
           'selectedCalendars: ${selectedCalendars.map((c) => c.toJson(email: googleEmail)).toList()}');
 
       final response = await http.post(
-        Uri.parse(Config.backendSaveSelectedGoogleCalendars),
+        Uri.parse(Config.backendGoogleCalendars),
         headers: {
           'Content-Type': 'application/json',
           'Authorization':
