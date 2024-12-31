@@ -18,16 +18,16 @@ class Config {
   static String get backendGoogleCallback =>
       dotenv.env['BACKEND_GOOGLE_CALLBACK'] ??
       'http://localhost:3000/google/callback';
-  static String get backendGoogleCalendars =>
-      dotenv.env['BACKEND_GOOGLE_CALENDARS'] ??
-      'http://localhost:3000/google/calendars';
-  // static String get backendFetchGoogleCalendars =>
-  //     dotenv.env['BACKEND_FETCH_GOOGLE_CALENDARS'] ??
-  //     'http://localhost:3000/google/fetch-calendars';
-  // static String get backendSaveSelectedGoogleCalendars =>
-  //     dotenv.env['BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS'] ??
-  //     'http://localhost:3000/google/save-calendars';
-  //static String? get redirectUri => dotenv.env['REDIRECT_URI'];
+  // static String get backendGoogleCalendars =>
+  //     dotenv.env['BACKEND_GOOGLE_CALENDARS'] ??
+  //     'http://localhost:3000/google/calendars';
+  static String get backendFetchGoogleCalendars =>
+      dotenv.env['BACKEND_FETCH_GOOGLE_CALENDARS'] ??
+      'http://localhost:3000/google/fetch-calendars';
+  static String get backendSaveGoogleCalendars =>
+      dotenv.env['BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS'] ??
+      'http://localhost:3000/google/save-calendars';
+  static String? get redirectUri => dotenv.env['REDIRECT_URI'];
 
   static String get frontendURL =>
       dotenv.env['FRONTEND_URL'] ?? 'http://localhost:7357';
