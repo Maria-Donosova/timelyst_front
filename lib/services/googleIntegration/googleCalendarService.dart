@@ -101,7 +101,9 @@ class GoogleCalendarService {
         }),
       );
 
-      if (response.statusCode != 200) {
+      if (response.statusCode == 200) {
+        print('Calendars saved!');
+      } else {
         print('Backend error: ${response.body}');
         throw Exception('Failed to save calendars: ${response.statusCode}');
       }

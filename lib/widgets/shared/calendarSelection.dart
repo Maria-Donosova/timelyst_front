@@ -58,24 +58,27 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
         ),
         onPressed: () async {
           if (_selectedCalendars.isNotEmpty) {
-            try {
-              // Save selected calendars using the orchestrator
-              await GoogleOrchestrator().saveSelectedCalendars(
-                  widget.userId, widget.email, _selectedCalendars);
-              print("Widget User ID: ${widget.userId}");
-              print("Widget email: ${widget.email}");
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Calendars saved successfully!')),
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Failed to save calendars: $e')),
-              );
-            }
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('No calendars selected.')),
-            );
+            //try {
+            // Save selected calendars using the orchestrator
+            await GoogleOrchestrator().saveSelectedCalendars(
+                widget.userId, widget.email, _selectedCalendars);
+            print("Widget User ID: ${widget.userId}");
+            print("Widget email: ${widget.email}");
+
+            //     // Show a success message
+            //     ScaffoldMessenger.of(context).showSnackBar(
+            //       SnackBar(content: Text('Calendars!')),
+            //     );
+            //   } catch (e) {
+            //     ScaffoldMessenger.of(context).showSnackBar(
+            //       SnackBar(
+            //           content: Text('Failed to save calendars: ${e.toString()}')),
+            //     );
+            //   }
+            // } else {
+            //   ScaffoldMessenger.of(context).showSnackBar(
+            //     SnackBar(content: Text('No calendars selected.')),
+            //   );
           }
         },
         //child: Icon(Icons.save),
