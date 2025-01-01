@@ -67,7 +67,8 @@ class GoogleOrchestrator {
     try {
       await _googleCalendarService.saveSelectedCalendars(
           userId, googleAccount, selectedCalendars);
-      print('Calendars saved successfully!');
+
+      print('Calendars saved now!');
     } catch (e) {
       print('Error saving calendars: $e');
     }
