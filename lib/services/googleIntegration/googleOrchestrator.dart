@@ -58,19 +58,18 @@ class GoogleOrchestrator {
   }
 
   // Orchestrate the Calendar Saving Process
-  Future<void> saveSelectedCalendars(
+  Future<Map<String, dynamic>> saveSelectedCalendars(
       String userId, googleAccount, List<Calendar> selectedCalendars) async {
     print("Entering saveSelectedCalendars");
     print("UserId: $userId");
     print("Google Account: $googleAccount");
-
     try {
       await _googleCalendarService.saveSelectedCalendars(
           userId, googleAccount, selectedCalendars);
 
-      print('Calendars saved now!');
+      return {'success': true, 'message': 'Calendars saved successfully!'};
     } catch (e) {
-      print('Error saving calendars: $e');
+      return {'success': false, 'message': 'Failed to save calendars: $e'};
     }
   }
 }
