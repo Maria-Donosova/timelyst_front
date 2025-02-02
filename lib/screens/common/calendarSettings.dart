@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'agenda.dart';
 import '../../widgets/shared/customAppbar.dart';
+import '../../widgets/shared/categories.dart';
 
 //import '../../utilities/index.dart';
 
@@ -21,6 +22,8 @@ class _CalendarSettingsState extends State<CalendarSettings> {
   }
 
   final _form = GlobalKey<FormState>();
+  String _selectedCategory = 'Work';
+
   // //var _dataPicked = SelectedCalData(
   //     id: '',
   //     all: false,
@@ -58,6 +61,37 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     // print(_dataPicked.recepients);
     //print(_dataPicked.subject);
     connectSignUp(context);
+  }
+
+  List<Widget> _buildCategoryRows() {
+    List<Widget> rows = [];
+    for (int i = 0; i < categories.length; i += 2) {
+      List<String> rowCategories = [];
+      if (i < categories.length) rowCategories.add(categories[i]);
+      if (i + 1 < categories.length) rowCategories.add(categories[i + 1]);
+
+      rows.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: rowCategories.map((category) {
+            return Container(
+              width: 150,
+              child: RadioListTile<String>(
+                activeColor: catColor(category),
+                dense: true,
+                value: category,
+                groupValue: _selectedCategory,
+                title: Text(category),
+                onChanged: (String? value) {
+                  setState(() => _selectedCategory = value!);
+                },
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    }
+    return rows;
   }
 
   @override
@@ -335,48 +369,6 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                     ],
                   ),
                 ),
-                // Container(
-                //   margin: const EdgeInsets.only(top: 15),
-                //   color: Colors.grey[200],
-                //   child: Container(
-                //     padding: const EdgeInsets.all(4),
-                //     width: double.infinity,
-                //     child: const Text('Assign Color'),
-                //   ),
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.all(8.0),
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                //     crossAxisAlignment: CrossAxisAlignment.center,
-                //     children: [
-                //       const CircleAvatar(
-                //         radius: 10,
-                //         backgroundColor: Colors.deepPurple,
-                //       ),
-                //       const CircleAvatar(
-                //         radius: 10,
-                //         backgroundColor: Colors.green,
-                //       ),
-                //       const CircleAvatar(
-                //         radius: 10,
-                //         backgroundColor: Colors.red,
-                //       ),
-                //       const CircleAvatar(
-                //         radius: 10,
-                //         backgroundColor: Colors.indigo,
-                //       ),
-                //       const CircleAvatar(
-                //         radius: 10,
-                //         backgroundColor: Colors.yellow,
-                //       ),
-                //       CircleAvatar(
-                //         radius: 10,
-                //         backgroundColor: Colors.cyan[600],
-                //       ),
-                //     ],
-                //   ),
-                // ),
                 Container(
                   margin: const EdgeInsets.only(top: 30),
                   color: Colors.grey[200],
@@ -386,130 +378,131 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                     child: const Text('Assign Category'),
                   ),
                 ),
-                Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            width: 150,
-                            // child: RadioListTile(
-                            //   activeColor: Colors.deepPurple,
-                            //   //visualDensity: VisualDensity.comfortable,
-                            //   dense: true,
-                            //   value: Categories.Work,
-                            //   groupValue: _category,
-                            //   title: const Text('Work'),
-                            //   onChanged: (Categories? value) {
-                            //     setState(() {
-                            //       _category = value!;
-                            //     });
-                            //     print(value);
-                            //   },
-                            // ),
-                          ),
-                          Container(
-                            width: 150,
-                            // child: RadioListTile(
-                            //   activeColor: Colors.green,
-                            //   //visualDensity: VisualDensity.comfortable,
-                            //   dense: true,
-                            //   value: Categories.Personal,
-                            //   groupValue: _category,
-                            //   title: const Text('Personal'),
-                            //   onChanged: (Categories? value) {
-                            //     setState(() {
-                            //       _category = value!;
-                            //     });
-                            //     print(value);
-                            //   },
-                            // ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 150,
-                          // child: RadioListTile(
-                          //   activeColor: Colors.red,
-                          //   //visualDensity: VisualDensity.comfortable,
-                          //   dense: true,
-                          //   value: Categories.Kids,
-                          //   groupValue: _category,
-                          //   title: const Text('Kids'),
-                          //   onChanged: (Categories? value) {
-                          //     setState(() {
-                          //       _category = value!;
-                          //     });
-                          //     print(value);
-                          //   },
-                          // ),
-                        ),
-                        Container(
-                          width: 150,
-                          // child: RadioListTile(
-                          //   activeColor: Colors.yellow,
-                          //   //visualDensity: VisualDensity.comfortable,
-                          //   dense: true,
-                          //   value: Categories.Friends,
-                          //   groupValue: _category,
-                          //   title: const Text('Friends'),
-                          //   onChanged: (Categories? value) {
-                          //     setState(() {
-                          //       _category = value!;
-                          //     });
-                          //     print(value);
-                          //   },
-                          // ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 150,
-                          // child: RadioListTile(
-                          //   activeColor: Colors.indigo,
-                          //   //visualDensity: VisualDensity.comfortable,
-                          //   dense: true,
-                          //   value: Categories.Parents,
-                          //   groupValue: _category,
-                          //   title: const Text('Parents'),
-                          //   onChanged: (Categories? value) {
-                          //     setState(() {
-                          //       _category = value!;
-                          //     });
-                          //     print(value);
-                          //   },
-                          // ),
-                        ),
-                        Container(
-                          width: 150,
-                          // child: RadioListTile(
-                          //   activeColor: Colors.cyan.shade600,
-                          //   //visualDensity: VisualDensity.comfortable,
-                          //   dense: true,
-                          //   value: Categories.Misc,
-                          //   groupValue: _category,
-                          //   title: const Text('Misc'),
-                          //   onChanged: (Categories? value) {
-                          //     setState(() {
-                          //       _category = value!;
-                          //     });
-                          //     print(value);
-                          //   },
-                          // ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                Column(children: _buildCategoryRows()),
+                // Column(
+                //   children: <Widget>[
+                //     Padding(
+                //       padding: const EdgeInsets.only(top: 8.0),
+                //       child: Row(
+                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //         children: [
+                //           Container(
+                //             width: 150,
+                //             child: RadioListTile(
+                //               activeColor: Colors.deepPurple,
+                //               //visualDensity: VisualDensity.comfortable,
+                //               dense: true,
+                //               value: Categories.Work,
+                //               groupValue: _category,
+                //               title: const Text('Work'),
+                //               onChanged: (Categories? value) {
+                //                 setState(() {
+                //                   _category = value!;
+                //                 });
+                //                 print(value);
+                //               },
+                //             ),
+                //           ),
+                //           Container(
+                //             width: 150,
+                //             child: RadioListTile(
+                //               activeColor: Colors.green,
+                //               //visualDensity: VisualDensity.comfortable,
+                //               dense: true,
+                //               value: Categories.Personal,
+                //               groupValue: _category,
+                //               title: const Text('Personal'),
+                //               onChanged: (Categories? value) {
+                //                 setState(() {
+                //                   _category = value!;
+                //                 });
+                //                 print(value);
+                //               },
+                //             // ),
+                //           ),
+                //         ],
+                //       ),
+                //     ),
+                //     Row(
+                //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //       children: [
+                //         Container(
+                //           width: 150,
+                //           child: RadioListTile(
+                //             activeColor: Colors.red,
+                //             //visualDensity: VisualDensity.comfortable,
+                //             dense: true,
+                //             value: Categories.Kids,
+                //             groupValue: _category,
+                //             title: const Text('Kids'),
+                //             onChanged: (Categories? value) {
+                //               setState(() {
+                //                 _category = value!;
+                //               });
+                //               print(value);
+                //             },
+                //           ),
+                //         ),
+                //         Container(
+                //           width: 150,
+                //           child: RadioListTile(
+                //             activeColor: Colors.yellow,
+                //             //visualDensity: VisualDensity.comfortable,
+                //             dense: true,
+                //             value: Categories.Friends,
+                //             groupValue: _category,
+                //             title: const Text('Friends'),
+                //             onChanged: (Categories? value) {
+                //               setState(() {
+                //                 _category = value!;
+                //               });
+                //               print(value);
+                //             },
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //     Row(
+                //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //       children: [
+                //         Container(
+                //           width: 150,
+                //           child: RadioListTile(
+                //             activeColor: Colors.indigo,
+                //             //visualDensity: VisualDensity.comfortable,
+                //             dense: true,
+                //             value: Categories.Parents,
+                //             groupValue: _category,
+                //             title: const Text('Parents'),
+                //             onChanged: (Categories? value) {
+                //               setState(() {
+                //                 _category = value!;
+                //               });
+                //               print(value);
+                //             },
+                //           ),
+                //         ),
+                //         Container(
+                //           width: 150,
+                //           child: RadioListTile(
+                //             activeColor: Colors.cyan.shade600,
+                //             //visualDensity: VisualDensity.comfortable,
+                //             dense: true,
+                //             value: Categories.Misc,
+                //             groupValue: _category,
+                //             title: const Text('Misc'),
+                //             onChanged: (Categories? value) {
+                //               setState(() {
+                //                 _category = value!;
+                //               });
+                //               print(value);
+                //             },
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ],
+                // ),
                 Padding(
                   padding: const EdgeInsets.only(top: 50.0),
                   child: ElevatedButton(
