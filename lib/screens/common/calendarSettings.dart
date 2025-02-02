@@ -5,15 +5,15 @@ import '../../widgets/shared/customAppbar.dart';
 
 //import '../../utilities/index.dart';
 
-class AgendaSettings extends StatefulWidget {
-  const AgendaSettings({Key? key}) : super(key: key);
+class CalendarSettings extends StatefulWidget {
+  const CalendarSettings({Key? key}) : super(key: key);
   static const routeName = '/landing-page-logo';
 
   @override
-  State<AgendaSettings> createState() => _AgendaSettingsState();
+  State<CalendarSettings> createState() => _CalendarSettingsState();
 }
 
-class _AgendaSettingsState extends State<AgendaSettings> {
+class _CalendarSettingsState extends State<CalendarSettings> {
   void connectSignUp(BuildContext ctx) {
     Navigator.of(ctx).pushNamed(
       Agenda.routeName,
