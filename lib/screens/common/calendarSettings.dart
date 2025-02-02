@@ -1,10 +1,27 @@
 import 'package:flutter/material.dart';
-
 import 'agenda.dart';
 import '../../widgets/shared/customAppbar.dart';
 import '../../widgets/shared/categories.dart';
 
-//import '../../utilities/index.dart';
+class ImportSettings {
+  bool all;
+  bool subject;
+  bool body;
+  bool attachments;
+  bool conferenceInfo;
+  bool organizer;
+  bool recipients;
+
+  ImportSettings({
+    this.all = false,
+    this.subject = false,
+    this.body = false,
+    this.attachments = false,
+    this.conferenceInfo = false,
+    this.organizer = false,
+    this.recipients = false,
+  });
+}
 
 class CalendarSettings extends StatefulWidget {
   const CalendarSettings({Key? key}) : super(key: key);
@@ -15,52 +32,37 @@ class CalendarSettings extends StatefulWidget {
 }
 
 class _CalendarSettingsState extends State<CalendarSettings> {
-  void connectSignUp(BuildContext ctx) {
-    Navigator.of(ctx).pushNamed(
-      Agenda.routeName,
-    );
-  }
-
-  final _form = GlobalKey<FormState>();
+  late ImportSettings _importSettings;
   String _selectedCategory = 'Work';
 
-  // //var _dataPicked = SelectedCalData(
-  //     id: '',
-  //     all: false,
-  //     subject: false,
-  //     body: false,
-  //     attachements: false,
-  //     conference_info: false,
-  //     organizer: false,
-  //     recepients: false);
+  @override
+  void initState() {
+    super.initState();
+    _importSettings = ImportSettings();
+  }
 
-  bool isCheckedAll = false;
-  bool isCheckedSubj = false;
-  bool isCheckedBody = false;
-  bool isCheckedAtt = false;
-  bool isCheckedConf = false;
-  bool isCheckedOrg = false;
-  bool isCheckedRec = false;
+  void _navigateToAgenda() {
+    Navigator.pushNamed(context, Agenda.routeName);
+  }
 
-  //Categories _category = Categories.Work;
-
-  void _saveForm() {
-    final isValid = _form.currentState!.validate();
-    if (!isValid) {
-      return;
-    }
-
-    _form.currentState!.save();
-    // print('saved');
-    // print(_dataPicked.all);
-    // print(_dataPicked.subject);
-    // print(_dataPicked.body);
-    // print(_dataPicked.attachements);
-    // print(_dataPicked.conference_info);
-    // print(_dataPicked.organizer);
-    // print(_dataPicked.recepients);
-    //print(_dataPicked.subject);
-    connectSignUp(context);
+  Widget _buildCheckbox(String label, bool value, Function(bool?) onChanged) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ),
+        Checkbox(
+          checkColor: Colors.grey[800],
+          activeColor: const Color.fromRGBO(207, 204, 215, 100),
+          visualDensity: VisualDensity.compact,
+          value: value,
+          onChanged: onChanged,
+        ),
+      ],
+    );
   }
 
   List<Widget> _buildCategoryRows() {
@@ -96,432 +98,113 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final appBar = CustomAppBar();
-
     return Scaffold(
-      appBar: appBar,
+      appBar: CustomAppBar(),
       body: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 50),
-          child: Form(
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            key: _form,
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(top: 30.0),
-                  child: Text(
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 20),
+                  Text(
                     'Choose what you’d like to import for',
-                    style: Theme.of(context).textTheme.displayMedium,
+                    style: Theme.of(context).textTheme.headlineMedium,
                     textAlign: TextAlign.center,
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 30),
-                  child: Text(
+                  const SizedBox(height: 20),
+                  Text(
                     'Maria Donosova calendar',
-                    style: Theme.of(context).textTheme.displayLarge,
-                    textAlign: TextAlign.left,
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                ),
-                Container(
-                  color: Colors.grey[200],
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    width: double.infinity,
-                    child: const Text(
-                      'Information that will be imported',
+                  const SizedBox(height: 20),
+                  _buildSectionHeader('Information that will be imported'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Column(
+                      children: [
+                        _buildCheckbox(
+                          'All',
+                          _importSettings.all,
+                          (value) => setState(
+                              () => _importSettings.all = value ?? false),
+                        ),
+                        _buildCheckbox(
+                          'Subject',
+                          _importSettings.subject,
+                          (value) => setState(
+                              () => _importSettings.subject = value ?? false),
+                        ),
+                        _buildCheckbox(
+                          'Body',
+                          _importSettings.body,
+                          (value) => setState(
+                              () => _importSettings.body = value ?? false),
+                        ),
+                        _buildCheckbox(
+                          'Attachments',
+                          _importSettings.attachments,
+                          (value) => setState(() =>
+                              _importSettings.attachments = value ?? false),
+                        ),
+                        _buildCheckbox(
+                          'Conference Info',
+                          _importSettings.conferenceInfo,
+                          (value) => setState(() =>
+                              _importSettings.conferenceInfo = value ?? false),
+                        ),
+                        _buildCheckbox(
+                          'Organizer',
+                          _importSettings.organizer,
+                          (value) => setState(
+                              () => _importSettings.organizer = value ?? false),
+                        ),
+                        _buildCheckbox(
+                          'Recipients Info',
+                          _importSettings.recipients,
+                          (value) => setState(() =>
+                              _importSettings.recipients = value ?? false),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 12.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'All',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                          Checkbox(
-                              checkColor: Colors.grey[800],
-                              activeColor:
-                                  const Color.fromRGBO(207, 204, 215, 100),
-                              visualDensity: VisualDensity.compact,
-                              value: isCheckedAll,
-                              onChanged: (value) {
-                                setState(() {
-                                  isCheckedAll = value ?? false;
-                                  print(isCheckedAll);
-                                });
-                                // _dataPicked = SelectedCalData(
-                                //     id: _dataPicked.id,
-                                //     all: value!,
-                                //     subject: _dataPicked.subject,
-                                //     body: _dataPicked.body,
-                                //     attachements: _dataPicked.attachements,
-                                //     conference_info:
-                                //         _dataPicked.conference_info,
-                                //     organizer: _dataPicked.organizer,
-                                //     recepients: _dataPicked.recepients);
-                              }),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'Subject',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                          Checkbox(
-                              checkColor: Colors.grey[800],
-                              activeColor:
-                                  const Color.fromRGBO(207, 204, 215, 100),
-                              visualDensity: VisualDensity.compact,
-                              value: isCheckedSubj,
-                              onChanged: (value) {
-                                setState(() {
-                                  isCheckedSubj = value ?? false;
-                                  print(isCheckedSubj);
-                                });
-                                // _dataPicked = SelectedCalData(
-                                //     id: _dataPicked.id,
-                                //     all: _dataPicked.all,
-                                //     subject: value!,
-                                //     body: _dataPicked.body,
-                                //     attachements: _dataPicked.attachements,
-                                //     conference_info:
-                                //         _dataPicked.conference_info,
-                                //     organizer: _dataPicked.organizer,
-                                //     recepients: _dataPicked.recepients);
-                              }),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'Body',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                          Checkbox(
-                              checkColor: Colors.grey[800],
-                              activeColor:
-                                  const Color.fromRGBO(207, 204, 215, 100),
-                              visualDensity: VisualDensity.compact,
-                              value: isCheckedBody,
-                              onChanged: (value) {
-                                setState(() {
-                                  isCheckedBody = value ?? false;
-                                  //state.didChange(value);
-                                  print(isCheckedBody);
-                                });
-                                // _dataPicked = SelectedCalData(
-                                //     id: _dataPicked.id,
-                                //     all: _dataPicked.all,
-                                //     subject: _dataPicked.subject,
-                                //     body: value!,
-                                //     attachements: _dataPicked.attachements,
-                                //     conference_info:
-                                //         _dataPicked.conference_info,
-                                //     organizer: _dataPicked.organizer,
-                                //     recepients: _dataPicked.recepients);
-                              }),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'Attachments',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                          Checkbox(
-                              checkColor: Colors.grey[800],
-                              activeColor:
-                                  const Color.fromRGBO(207, 204, 215, 100),
-                              visualDensity: VisualDensity.compact,
-                              value: isCheckedAtt,
-                              onChanged: (value) {
-                                setState(() {
-                                  isCheckedAtt = value ?? false;
-                                  //state.didChange(value);
-                                  print(isCheckedAtt);
-                                });
-                                // _dataPicked = SelectedCalData(
-                                //     id: _dataPicked.id,
-                                //     all: _dataPicked.all,
-                                //     subject: _dataPicked.subject,
-                                //     body: _dataPicked.body,
-                                //     attachements: value!,
-                                //     conference_info:
-                                //         _dataPicked.conference_info,
-                                //     organizer: _dataPicked.organizer,
-                                //     recepients: _dataPicked.recepients);
-                              }),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'Conference Info',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                          Checkbox(
-                              checkColor: Colors.grey[800],
-                              activeColor:
-                                  const Color.fromRGBO(207, 204, 215, 100),
-                              visualDensity: VisualDensity.compact,
-                              value: isCheckedConf,
-                              onChanged: (value) {
-                                setState(() {
-                                  isCheckedConf = value ?? false;
-                                  //state.didChange(value);
-                                  print(isCheckedConf);
-                                });
-                                // _dataPicked = SelectedCalData(
-                                //     id: _dataPicked.id,
-                                //     all: _dataPicked.all,
-                                //     subject: _dataPicked.subject,
-                                //     body: _dataPicked.body,
-                                //     attachements: _dataPicked.attachements,
-                                //     conference_info: value!,
-                                //     organizer: _dataPicked.organizer,
-                                //     recepients: _dataPicked.recepients);
-                              }),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'Organizer',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                          Checkbox(
-                              checkColor: Colors.grey[800],
-                              activeColor:
-                                  const Color.fromRGBO(207, 204, 215, 100),
-                              visualDensity: VisualDensity.compact,
-                              value: isCheckedOrg,
-                              onChanged: (value) {
-                                setState(() {
-                                  isCheckedOrg = value ?? false;
-                                  //state.didChange(value);
-                                  print(isCheckedOrg);
-                                });
-                                // _dataPicked = SelectedCalData(
-                                //     id: _dataPicked.id,
-                                //     all: _dataPicked.all,
-                                //     subject: _dataPicked.subject,
-                                //     body: _dataPicked.body,
-                                //     attachements: _dataPicked.attachements,
-                                //     conference_info:
-                                //         _dataPicked.conference_info,
-                                //     organizer: value!,
-                                //     recepients: _dataPicked.recepients);
-                              }),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'Recpeints Info',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                          Checkbox(
-                              checkColor: Colors.grey[800],
-                              activeColor:
-                                  const Color.fromRGBO(207, 204, 215, 100),
-                              visualDensity: VisualDensity.compact,
-                              value: isCheckedRec,
-                              onChanged: (value) {
-                                setState(() {
-                                  isCheckedRec = value ?? false;
-                                  //state.didChange(value);
-                                  print(isCheckedRec);
-                                });
-                                // // _dataPicked = SelectedCalData(
-                                // //     id: _dataPicked.id,
-                                // //     all: _dataPicked.all,
-                                // //     subject: _dataPicked.subject,
-                                // //     body: _dataPicked.body,
-                                // //     attachements: _dataPicked.attachements,
-                                // //     conference_info:
-                                // //         _dataPicked.conference_info,
-                                // //     organizer: _dataPicked.organizer,
-                                //     recepients: value!);
-                              }),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 30),
-                  color: Colors.grey[200],
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    width: double.infinity,
-                    child: const Text('Assign Category'),
-                  ),
-                ),
-                Column(children: _buildCategoryRows()),
-                // Column(
-                //   children: <Widget>[
-                //     Padding(
-                //       padding: const EdgeInsets.only(top: 8.0),
-                //       child: Row(
-                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //         children: [
-                //           Container(
-                //             width: 150,
-                //             child: RadioListTile(
-                //               activeColor: Colors.deepPurple,
-                //               //visualDensity: VisualDensity.comfortable,
-                //               dense: true,
-                //               value: Categories.Work,
-                //               groupValue: _category,
-                //               title: const Text('Work'),
-                //               onChanged: (Categories? value) {
-                //                 setState(() {
-                //                   _category = value!;
-                //                 });
-                //                 print(value);
-                //               },
-                //             ),
-                //           ),
-                //           Container(
-                //             width: 150,
-                //             child: RadioListTile(
-                //               activeColor: Colors.green,
-                //               //visualDensity: VisualDensity.comfortable,
-                //               dense: true,
-                //               value: Categories.Personal,
-                //               groupValue: _category,
-                //               title: const Text('Personal'),
-                //               onChanged: (Categories? value) {
-                //                 setState(() {
-                //                   _category = value!;
-                //                 });
-                //                 print(value);
-                //               },
-                //             // ),
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //     Row(
-                //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //       children: [
-                //         Container(
-                //           width: 150,
-                //           child: RadioListTile(
-                //             activeColor: Colors.red,
-                //             //visualDensity: VisualDensity.comfortable,
-                //             dense: true,
-                //             value: Categories.Kids,
-                //             groupValue: _category,
-                //             title: const Text('Kids'),
-                //             onChanged: (Categories? value) {
-                //               setState(() {
-                //                 _category = value!;
-                //               });
-                //               print(value);
-                //             },
-                //           ),
-                //         ),
-                //         Container(
-                //           width: 150,
-                //           child: RadioListTile(
-                //             activeColor: Colors.yellow,
-                //             //visualDensity: VisualDensity.comfortable,
-                //             dense: true,
-                //             value: Categories.Friends,
-                //             groupValue: _category,
-                //             title: const Text('Friends'),
-                //             onChanged: (Categories? value) {
-                //               setState(() {
-                //                 _category = value!;
-                //               });
-                //               print(value);
-                //             },
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //     Row(
-                //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //       children: [
-                //         Container(
-                //           width: 150,
-                //           child: RadioListTile(
-                //             activeColor: Colors.indigo,
-                //             //visualDensity: VisualDensity.comfortable,
-                //             dense: true,
-                //             value: Categories.Parents,
-                //             groupValue: _category,
-                //             title: const Text('Parents'),
-                //             onChanged: (Categories? value) {
-                //               setState(() {
-                //                 _category = value!;
-                //               });
-                //               print(value);
-                //             },
-                //           ),
-                //         ),
-                //         Container(
-                //           width: 150,
-                //           child: RadioListTile(
-                //             activeColor: Colors.cyan.shade600,
-                //             //visualDensity: VisualDensity.comfortable,
-                //             dense: true,
-                //             value: Categories.Misc,
-                //             groupValue: _category,
-                //             title: const Text('Misc'),
-                //             onChanged: (Categories? value) {
-                //               setState(() {
-                //                 _category = value!;
-                //               });
-                //               print(value);
-                //             },
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ],
-                // ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 50.0),
-                  child: ElevatedButton(
+                  const SizedBox(height: 30),
+                  _buildSectionHeader('Assign Category'),
+                  ..._buildCategoryRows(),
+                  const SizedBox(height: 40),
+                  ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[800],
+                      backgroundColor: Theme.of(context).primaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
+                    onPressed: _navigateToAgenda,
                     child: const Text('Next'),
-                    onPressed: () {
-                      _saveForm();
-                      print(
-                        'next button pressed',
-                      );
-                    },
                   ),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Container(
+      color: Colors.grey[200],
+      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
