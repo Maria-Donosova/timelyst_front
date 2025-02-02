@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
-import 'package:timelyst_flutter/screens/common/agendaSettings.dart';
+import 'package:timelyst_flutter/screens/common/calendarSettings.dart';
 import 'providers/authProvider.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         title: 'Sign Up',
         theme: CustomTheme.lightTheme,
         themeMode: currentTheme.currentTheme,
-        home: const AgendaSettings(),
+        home: const CalendarSettings(),
       ),
     );
   }

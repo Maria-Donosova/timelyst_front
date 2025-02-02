@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timelyst_flutter/screens/common/agendaSettings.dart';
+import 'package:timelyst_flutter/screens/common/calendarSettings.dart';
 import '../../screens/common/connectCalendars.dart';
 
 import '../../screens/common/signUp.dart';
@@ -77,7 +77,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               onTap: () {
                 print('Agenda Settings');
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => AgendaSettings()),
+                  MaterialPageRoute(builder: (context) => CalendarSettings()),
                 );
               },
             ),
