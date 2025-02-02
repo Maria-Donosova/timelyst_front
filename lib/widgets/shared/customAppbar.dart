@@ -77,7 +77,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               onTap: () {
                 print('Agenda Settings');
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => CalendarSettings()),
+                  MaterialPageRoute(
+                      builder: (context) => CalendarSettings(
+                            calendars: [], // Provide the appropriate list of calendars
+                            userId:
+                                "authProvider.userId", // Provide the userId from authProvider
+                            email:
+                                "authProvider.email", // Provide the email from authProvider
+                          )),
                 );
               },
             ),

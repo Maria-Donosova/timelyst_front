@@ -28,11 +28,11 @@ class _ConnectCalBody extends StatelessWidget {
     );
   }
 
-  void connectDummy(BuildContext ctx) {
-    Navigator.of(ctx).pushNamed(
-      CalendarSettings.routeName,
-    );
-  }
+  // void connectDummy(BuildContext ctx) {
+  //   Navigator.of(ctx).pushNamed(
+  //     CalendarSettings(calendars: calendars, userId: userId, email: email),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {

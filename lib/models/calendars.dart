@@ -1,5 +1,25 @@
 import 'package:flutter/material.dart';
 
+class ImportSettings {
+  bool all;
+  bool subject;
+  bool body;
+  bool attachments;
+  bool conferenceInfo;
+  bool organizer;
+  bool recipients;
+
+  ImportSettings({
+    this.all = false,
+    this.subject = false,
+    this.body = false,
+    this.attachments = false,
+    this.conferenceInfo = false,
+    this.organizer = false,
+    this.recipients = false,
+  });
+}
+
 class Calendar {
   final String user;
   final String? kind;

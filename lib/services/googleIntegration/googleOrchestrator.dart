@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timelyst_flutter/screens/common/calendarSettings.dart';
 import 'package:timelyst_flutter/widgets/shared/calendarSelection.dart';
 
 import '../../models/calendars.dart';
@@ -41,7 +42,7 @@ class GoogleOrchestrator {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CalendarSelectionScreen(
+          builder: (context) => CalendarSettings(
             userId: userId,
             email: email,
             calendars: calendars,
