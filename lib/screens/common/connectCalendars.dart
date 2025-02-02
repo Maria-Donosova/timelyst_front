@@ -6,7 +6,7 @@ import '../../services/googleIntegration/googleOrchestrator.dart';
 import '../../services/connected_accounts.dart';
 
 import 'agenda.dart';
-import 'agendaSettings.dart';
+import 'calendarSettings.dart';
 
 class ConnectCal extends StatelessWidget {
   const ConnectCal({Key? key}) : super(key: key);
@@ -30,7 +30,7 @@ class _ConnectCalBody extends StatelessWidget {
 
   void connectDummy(BuildContext ctx) {
     Navigator.of(ctx).pushNamed(
-      AgendaSettings.routeName,
+      CalendarSettings.routeName,
     );
   }
 
