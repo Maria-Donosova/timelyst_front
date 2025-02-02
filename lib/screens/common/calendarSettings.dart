@@ -107,22 +107,22 @@ class _CalendarSettingsState extends State<CalendarSettings> {
               minHeight: MediaQuery.of(context).size.height,
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 20),
                   Text(
                     'Choose what you’d like to import for',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: Theme.of(context).textTheme.titleMedium,
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Text(
                     'Maria Donosova calendar',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   _buildSectionHeader('Information that will be imported'),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
