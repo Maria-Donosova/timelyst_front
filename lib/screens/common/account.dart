@@ -14,11 +14,23 @@ class Account extends StatelessWidget {
       appBar: appBar,
       body: SafeArea(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text("Account User Name"),
-          Text("Account User Last Name"),
-          Text("Email"),
-          Text("Password"),
-          Text("Calendards Connected"),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Account User Name"),
+              Text("Account User Last Name"),
+              Text("Email"),
+              Text("Password"),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Connected accounts"),
+              Text("Email"),
+              Text("Calendards"),
+            ],
+          )
         ]),
       ),
     );
