@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timelyst_flutter/screens/common/agendaSettings.dart';
 import '../../screens/common/connectCalendars.dart';
 
 import '../../screens/common/signUp.dart';
 import '../../screens/common/logIn.dart';
 import '../../providers/authProvider.dart';
-import '../../screens/common/account.dart';
-
+//import '../../screens/common/account.dart';
 //import '../shared/search.dart';
 
 enum _timelystMenu { about, contact_us }
@@ -75,9 +75,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               value: _profileView.profile,
               child: Text('Account'),
               onTap: () {
-                print('Account');
+                print('Agenda Settings');
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => Account()),
+                  MaterialPageRoute(builder: (context) => AgendaSettings()),
                 );
               },
             ),
