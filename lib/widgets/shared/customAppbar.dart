@@ -5,6 +5,8 @@ import '../../screens/common/connectCalendars.dart';
 import '../../screens/common/signUp.dart';
 import '../../screens/common/logIn.dart';
 import '../../providers/authProvider.dart';
+import '../../screens/common/account.dart';
+import '../../screens/common/agendaSettings.dart';
 
 //import '../shared/search.dart';
 
@@ -72,9 +74,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           elevation: 8,
           itemBuilder: (BuildContext context) => <PopupMenuEntry<_profileView>>[
-            const PopupMenuItem<_profileView>(
+            PopupMenuItem<_profileView>(
               value: _profileView.profile,
               child: Text('Account'),
+              onTap: () {
+                print('Account');
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => Account()),
+                );
+              },
             ),
             PopupMenuItem<_profileView>(
               value: _profileView.settings,
