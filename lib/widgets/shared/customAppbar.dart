@@ -6,7 +6,6 @@ import '../../screens/common/signUp.dart';
 import '../../screens/common/logIn.dart';
 import '../../providers/authProvider.dart';
 import '../../screens/common/account.dart';
-import '../../screens/common/agendaSettings.dart';
 
 //import '../shared/search.dart';
 
@@ -21,8 +20,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     // Access the AuthProvider to listen to changes
     final authProvider = Provider.of<AuthProvider>(context);
-
-    print('Building CustomAppBar');
 
     return AppBar(
       title: _buildTitle(),

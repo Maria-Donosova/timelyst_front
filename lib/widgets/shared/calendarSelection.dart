@@ -100,21 +100,6 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
                 ),
               );
             }
-
-            //     // Show a success message
-            //     ScaffoldMessenger.of(context).showSnackBar(
-            //       SnackBar(content: Text('Calendars!')),
-            //     );
-            //   } catch (e) {
-            //     ScaffoldMessenger.of(context).showSnackBar(
-            //       SnackBar(
-            //           content: Text('Failed to save calendars: ${e.toString()}')),
-            //     );
-            //   }
-            // } else {
-            //   ScaffoldMessenger.of(context).showSnackBar(
-            //     SnackBar(content: Text('No calendars selected.')),
-            //   );
           }
         },
         //child: Icon(Icons.save),
