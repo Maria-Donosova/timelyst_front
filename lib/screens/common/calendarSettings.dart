@@ -87,7 +87,30 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                 (value) => setState(
                     () => _importSettingsList[index].all = value ?? false),
               ),
-              // Repeat for other checkboxes...
+              _buildCheckbox(
+                'Subject',
+                _importSettingsList[index].all,
+                (value) => setState(
+                    () => _importSettingsList[index].all = value ?? false),
+              ),
+              _buildCheckbox(
+                'Description',
+                _importSettingsList[index].all,
+                (value) => setState(
+                    () => _importSettingsList[index].all = value ?? false),
+              ),
+              _buildCheckbox(
+                'Organizer',
+                _importSettingsList[index].all,
+                (value) => setState(
+                    () => _importSettingsList[index].all = value ?? false),
+              ),
+              _buildCheckbox(
+                'Recipients',
+                _importSettingsList[index].all,
+                (value) => setState(
+                    () => _importSettingsList[index].all = value ?? false),
+              ),
             ],
           ),
         ),
