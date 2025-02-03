@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/screens/common/calendarSettings.dart';
-import 'package:timelyst_flutter/widgets/shared/calendarSelection.dart';
 
-import '../../models/calendars.dart';
 import 'googleSignInOut.dart';
 import 'googleCalendarService.dart';
+
+import '../../models/calendars.dart';
 import '../connected_accounts.dart';
+import '../../screens/common/calendarSettings.dart';
 
 class GoogleOrchestrator {
-  //final GoogleAuthService _googleAuthService = GoogleAuthService();
   final GoogleCalendarService _googleCalendarService = GoogleCalendarService();
   final GoogleSignInOutService _googleSingInOutService =
       GoogleSignInOutService();

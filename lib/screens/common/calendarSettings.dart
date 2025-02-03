@@ -38,7 +38,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
   }
 
   void _navigateToAgenda() {
-    final selectedCalendars = widget.calendars.asMap().entries.map((entry) {
+    final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
       final index = entry.key;
       return Calendar(
         user: entry.value.user,
