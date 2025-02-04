@@ -63,67 +63,78 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
   Widget _buildCalendarSection(int index) {
     final calendar = widget.calendars[index];
-    return ExpansionTile(
-      key: ValueKey(calendar.id),
-      title: Text(calendar.title),
-      children: [
-        _buildImportSettings(index),
-        _buildCategorySelection(index),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ExpansionTile(
+        key: ValueKey(calendar.id),
+        title: Text(calendar.title),
+        children: [
+          _buildImportSettings(index),
+          _buildCategorySelection(index),
+        ],
+      ),
     );
   }
 
   Widget _buildImportSettings(int index) {
-    return Column(
-      children: [
-        _buildSectionHeader('Information to import'),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: Column(
-            children: [
-              _buildCheckbox(
-                'All',
-                _importSettingsList[index].all,
-                (value) => setState(
-                    () => _importSettingsList[index].all = value ?? false),
-              ),
-              _buildCheckbox(
-                'Subject',
-                _importSettingsList[index].all,
-                (value) => setState(
-                    () => _importSettingsList[index].all = value ?? false),
-              ),
-              _buildCheckbox(
-                'Description',
-                _importSettingsList[index].all,
-                (value) => setState(
-                    () => _importSettingsList[index].all = value ?? false),
-              ),
-              _buildCheckbox(
-                'Organizer',
-                _importSettingsList[index].all,
-                (value) => setState(
-                    () => _importSettingsList[index].all = value ?? false),
-              ),
-              _buildCheckbox(
-                'Recipients',
-                _importSettingsList[index].all,
-                (value) => setState(
-                    () => _importSettingsList[index].all = value ?? false),
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildSectionHeader('Information to import'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Column(
+              children: [
+                _buildCheckbox(
+                  'All',
+                  _importSettingsList[index].all,
+                  (value) => setState(
+                      () => _importSettingsList[index].all = value ?? false),
+                ),
+                _buildCheckbox(
+                  'Subject',
+                  _importSettingsList[index].all,
+                  (value) => setState(() =>
+                      _importSettingsList[index].subject = value ?? false),
+                ),
+                _buildCheckbox(
+                  'Description',
+                  _importSettingsList[index].all,
+                  (value) => setState(
+                      () => _importSettingsList[index].body = value ?? false),
+                ),
+                _buildCheckbox(
+                  'Organizer',
+                  _importSettingsList[index].all,
+                  (value) => setState(() =>
+                      _importSettingsList[index].organizer = value ?? false),
+                ),
+                _buildCheckbox(
+                  'Recipients',
+                  _importSettingsList[index].all,
+                  (value) => setState(() =>
+                      _importSettingsList[index].recipients = value ?? false),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildCategorySelection(int index) {
-    return Column(
-      children: [
-        _buildSectionHeader('Assign Category'),
-        ..._buildCategoryRows(index),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildSectionHeader('Assign Category'),
+          ..._buildCategoryRows(index),
+        ],
+      ),
     );
   }
 
@@ -184,6 +195,15 @@ class _CalendarSettingsState extends State<CalendarSettings> {
           : SafeArea(
               child: Column(
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 10.0, right: 10.0, top: 15.0, bottom: 10.0),
+                    child: Text(
+                      "Choose what you'd like to import",
+                      style: Theme.of(context).textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),
@@ -196,11 +216,15 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                     padding: const EdgeInsets.all(16.0),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        minimumSize: const Size(double.infinity, 50),
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       onPressed: _navigateToAgenda,
-                      child: const Text('Next'),
+                      child: Text('Next',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSecondary,
+                          )),
                     ),
                   ),
                 ],
