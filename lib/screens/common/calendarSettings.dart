@@ -87,35 +87,53 @@ class _CalendarSettingsState extends State<CalendarSettings> {
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Column(
               children: [
+                // 'All' Checkbox
                 _buildCheckbox(
                   'All',
                   _importSettingsList[index].all,
-                  (value) => setState(
-                      () => _importSettingsList[index].all = value ?? false),
+                  (value) {
+                    bool newValue = value ?? false;
+                    setState(() {
+                      _importSettingsList[index].all = newValue;
+                      _importSettingsList[index].subject = newValue;
+                      _importSettingsList[index].body = newValue;
+                      _importSettingsList[index].organizer = newValue;
+                      _importSettingsList[index].recipients = newValue;
+                    });
+                  },
                 ),
+                // Individual Checkboxes
                 _buildCheckbox(
                   'Subject',
-                  _importSettingsList[index].all,
-                  (value) => setState(() =>
-                      _importSettingsList[index].subject = value ?? false),
+                  _importSettingsList[index].subject,
+                  (value) => setState(() {
+                    _importSettingsList[index].subject = value ?? false;
+                    _updateAllCheckboxState(index);
+                  }),
                 ),
                 _buildCheckbox(
                   'Description',
-                  _importSettingsList[index].all,
-                  (value) => setState(
-                      () => _importSettingsList[index].body = value ?? false),
+                  _importSettingsList[index].body,
+                  (value) => setState(() {
+                    _importSettingsList[index].body = value ?? false;
+                    _updateAllCheckboxState(index);
+                  }),
                 ),
                 _buildCheckbox(
                   'Organizer',
-                  _importSettingsList[index].all,
-                  (value) => setState(() =>
-                      _importSettingsList[index].organizer = value ?? false),
+                  _importSettingsList[index].organizer,
+                  (value) => setState(() {
+                    _importSettingsList[index].organizer = value ?? false;
+                    _updateAllCheckboxState(index);
+                  }),
                 ),
                 _buildCheckbox(
                   'Recipients',
-                  _importSettingsList[index].all,
-                  (value) => setState(() =>
-                      _importSettingsList[index].recipients = value ?? false),
+                  _importSettingsList[index].recipients,
+                  (value) => setState(() {
+                    _importSettingsList[index].recipients = value ?? false;
+                    _updateAllCheckboxState(index);
+                  }),
                 ),
               ],
             ),
@@ -125,17 +143,13 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     );
   }
 
-  Widget _buildCategorySelection(int index) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildSectionHeader('Assign Category'),
-          ..._buildCategoryRows(index),
-        ],
-      ),
-    );
+  // Helper method to update 'All' checkbox state
+  void _updateAllCheckboxState(int index) {
+    bool allChecked = _importSettingsList[index].subject &&
+        _importSettingsList[index].body &&
+        _importSettingsList[index].organizer &&
+        _importSettingsList[index].recipients;
+    _importSettingsList[index].all = allChecked;
   }
 
   Widget _buildCheckbox(String label, bool value, Function(bool?) onChanged) {
@@ -157,6 +171,88 @@ class _CalendarSettingsState extends State<CalendarSettings> {
       ],
     );
   }
+
+  // Widget _buildImportSettings(int index) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(bottom: 8.0),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.stretch,
+  //       children: [
+  //         _buildSectionHeader('Information to import'),
+  //         Padding(
+  //           padding: const EdgeInsets.symmetric(horizontal: 12.0),
+  //           child: Column(
+  //             children: [
+  //               _buildCheckbox(
+  //                 'All',
+  //                 _importSettingsList[index].all,
+  //                 (value) => setState(
+  //                     () => _importSettingsList[index].all = value ?? false),
+  //               ),
+  //               _buildCheckbox(
+  //                 'Subject',
+  //                 _importSettingsList[index].all,
+  //                 (value) => setState(() =>
+  //                     _importSettingsList[index].subject = value ?? false),
+  //               ),
+  //               _buildCheckbox(
+  //                 'Description',
+  //                 _importSettingsList[index].all,
+  //                 (value) => setState(
+  //                     () => _importSettingsList[index].body = value ?? false),
+  //               ),
+  //               _buildCheckbox(
+  //                 'Organizer',
+  //                 _importSettingsList[index].all,
+  //                 (value) => setState(() =>
+  //                     _importSettingsList[index].organizer = value ?? false),
+  //               ),
+  //               _buildCheckbox(
+  //                 'Recipients',
+  //                 _importSettingsList[index].all,
+  //                 (value) => setState(() =>
+  //                     _importSettingsList[index].recipients = value ?? false),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  Widget _buildCategorySelection(int index) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildSectionHeader('Assign Category'),
+          ..._buildCategoryRows(index),
+        ],
+      ),
+    );
+  }
+
+  // Widget _buildCheckbox(String label, bool value, Function(bool?) onChanged) {
+  //   return Row(
+  //     children: [
+  //       Expanded(
+  //         child: Text(
+  //           label,
+  //           style: const TextStyle(fontSize: 14),
+  //         ),
+  //       ),
+  //       Checkbox(
+  //         checkColor: Colors.grey[800],
+  //         activeColor: const Color.fromRGBO(207, 204, 215, 100),
+  //         visualDensity: VisualDensity.compact,
+  //         value: value,
+  //         onChanged: onChanged,
+  //       ),
+  //     ],
+  //   );
+  // }
 
   List<Widget> _buildCategoryRows(int index) {
     return categories.chunked(2).map((rowCategories) {
