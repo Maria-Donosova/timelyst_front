@@ -269,51 +269,58 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     print("- User ID: ${widget.userId}");
     print("- Email: ${widget.email}");
 
+    final mediaQuery = MediaQuery.of(context);
+
     return Scaffold(
       appBar: CustomAppBar(),
       body: widget.calendars.isEmpty
           ? Center(child: Text("No calendars found"))
           : SafeArea(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 10.0, right: 10.0, top: 15.0, bottom: 10.0),
-                    child: Text(
-                      "Choose what you'd like to import",
-                      style: Theme.of(context).textTheme.titleMedium,
-                      textAlign: TextAlign.center,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 10.0, right: 10.0, top: 15.0, bottom: 15.0),
+                      child: Text(
+                        "Choose what you'd like to import",
+                        style: Theme.of(context).textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ),
-                  SingleChildScrollView(
-                    child: Wrap(
-                      spacing: 16.0, // Horizontal space between items
-                      runSpacing: 16.0, // Vertical space between lines
-                      children: List.generate(
-                        widget.calendars.length,
-                        (index) => Container(
-                          width: 300, // Fixed width for each calendar card
-                          child: _buildCalendarSection(index),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Wrap(
+                        children: [
+                          Row(
+                            children: List.generate(
+                              widget.calendars.length,
+                              (index) => Container(
+                                width: mediaQuery.size.width * 0.3,
+                                child: _buildCalendarSection(index),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
+                        onPressed: _navigateToAgenda,
+                        child: Text('Next',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSecondary,
+                            )),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      onPressed: _navigateToAgenda,
-                      child: Text('Next',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          )),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
     );
