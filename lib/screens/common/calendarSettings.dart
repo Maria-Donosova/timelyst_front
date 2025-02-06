@@ -106,22 +106,21 @@ class _CalendarSettingsState extends State<CalendarSettings> {
   Widget _buildCalendarSection(int index) {
     final calendar = widget.calendars[index];
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
       child: Column(
         key: ValueKey(calendar.id),
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Calendar title header
-          Text(
-            calendar.title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              calendar.title,
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+              ),
             ),
           ),
-          const SizedBox(height: 12),
-
-          // Calendar content
           _buildImportSettings(index),
           const SizedBox(height: 12),
           _buildCategorySelection(index),
@@ -228,7 +227,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
   Widget _buildCategorySelection(int index) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 15.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -248,6 +247,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
             width: 150,
             child: RadioListTile<String>(
               activeColor: catColor(category),
+              fillColor: MaterialStateProperty.all(catColor(category)),
               dense: true,
               value: category,
               groupValue: _selectedCategories[index],
@@ -281,10 +281,18 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(
-                          left: 10.0, right: 10.0, top: 15.0, bottom: 15.0),
+                          left: 10.0, right: 10.0, top: 50.0),
                       child: Text(
                         "Choose what you'd like to import",
                         style: Theme.of(context).textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 40.0),
+                      child: Text(
+                        "Start and end time always get imported for the selected calendars",
+                        style: Theme.of(context).textTheme.titleSmall,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -296,7 +304,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                             children: List.generate(
                               widget.calendars.length,
                               (index) => Container(
-                                width: mediaQuery.size.width * 0.3,
+                                width: mediaQuery.size.width * 0.25,
                                 child: _buildCalendarSection(index),
                               ),
                             ),
@@ -313,7 +321,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         onPressed: _navigateToAgenda,
-                        child: Text('Next',
+                        child: Text('Save',
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onSecondary,
                             )),
@@ -328,14 +336,15 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
   Widget _buildSectionHeader(String title) {
     return Container(
-      color: Colors.grey[200],
+      color: Theme.of(context).colorScheme.secondary,
       padding: const EdgeInsets.all(8),
       margin: const EdgeInsets.only(bottom: 10),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSecondary,
+          fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
+        ),
       ),
     );
   }
