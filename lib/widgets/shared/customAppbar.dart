@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timelyst_flutter/screens/common/calendarSettings.dart';
+
 import '../../screens/common/connectCalendars.dart';
+import '../../screens/common/account.dart';
 
 import '../../screens/common/signUp.dart';
 import '../../screens/common/logIn.dart';
@@ -78,12 +79,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 print('Account Settings');
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                      builder: (context) => CalendarSettings(
-                            calendars: [], // Provide the appropriate list of calendars
-                            userId:
-                                "authProvider.userId", // Provide the userId from authProvider
-                            email:
-                                "authProvider.email", // Provide the email from authProvider
+                      builder: (context) => Account(
+                          // calendars: [], // Provide the appropriate list of calendars
+                          // userId:
+                          //     "authProvider.userId", // Provide the userId from authProvider
+                          // email:
+                          //     "authProvider.email", // Provide the email from authProvider
                           )),
                 );
               },
