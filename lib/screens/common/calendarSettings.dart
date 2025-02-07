@@ -61,48 +61,6 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     );
   }
 
-  // Widget _buildCalendarSection(int index) {
-  //   final calendar = widget.calendars[index];
-  //   return Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: ExpansionTile(
-  //       key: ValueKey(calendar.id),
-  //       title: Text(calendar.title),
-  //       children: [
-  //         _buildImportSettings(index),
-  //         _buildCategorySelection(index),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildCalendarSection(int index) {
-  //   final calendar = widget.calendars[index];
-  //   return Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: Column(
-  //       key: ValueKey(calendar.id),
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         // Calendar title header
-  //         Text(
-  //           calendar.title,
-  //           style: const TextStyle(
-  //             fontSize: 16,
-  //             fontWeight: FontWeight.bold,
-  //           ),
-  //         ),
-  //         const SizedBox(height: 12),
-
-  //         // Calendar content
-  //         _buildImportSettings(index),
-  //         const SizedBox(height: 12),
-  //         _buildCategorySelection(index),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget _buildCalendarSection(int index) {
     final calendar = widget.calendars[index];
     return Padding(
@@ -121,7 +79,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
               ),
             ),
           ),
-          _buildImportSettings(index),
+          _buildCalendarImportSettings(index),
           const SizedBox(height: 12),
           _buildCategorySelection(index),
         ],
@@ -129,7 +87,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     );
   }
 
-  Widget _buildImportSettings(int index) {
+  Widget _buildCalendarImportSettings(int index) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Column(
@@ -247,7 +205,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
             width: 150,
             child: RadioListTile<String>(
               activeColor: catColor(category),
-              fillColor: MaterialStateProperty.all(catColor(category)),
+              fillColor: WidgetStateProperty.all(catColor(category)),
               dense: true,
               value: category,
               groupValue: _selectedCategories[index],
