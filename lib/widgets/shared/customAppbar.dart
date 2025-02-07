@@ -73,9 +73,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           itemBuilder: (BuildContext context) => <PopupMenuEntry<_profileView>>[
             PopupMenuItem<_profileView>(
               value: _profileView.profile,
-              child: Text('Account'),
+              child: Text('Account Settings'),
               onTap: () {
-                print('Agenda Settings');
+                print('Account Settings');
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
                       builder: (context) => CalendarSettings(
@@ -90,9 +90,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             PopupMenuItem<_profileView>(
               value: _profileView.settings,
-              child: Text('Settings'),
+              child: Text('Connect Calendars'),
               onTap: () {
-                print('Settings');
+                print('Connect Calendars');
                 Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (context) => ConnectCal()));
               },
