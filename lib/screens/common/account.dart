@@ -19,7 +19,7 @@ class Account extends StatelessWidget {
           title,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSecondary,
-            fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
+            fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
           ),
         ),
       );
@@ -30,7 +30,8 @@ class Account extends StatelessWidget {
       body: SafeArea(
         child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
           Padding(
-            padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 50.0),
+            padding: const EdgeInsets.only(
+                left: 10.0, right: 10.0, top: 50.0, bottom: 20),
             child: Text(
               "Account Settings",
               style: Theme.of(context).textTheme.titleMedium,
@@ -40,9 +41,9 @@ class Account extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildSectionHeader("Connected accounts & calendars"),
+                _buildSectionHeader("Connected Accounts & Calendars"),
                 Row(
                   children: [
                     Text("Email"),
@@ -55,21 +56,19 @@ class Account extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildSectionHeader("User Settings"),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Column(
-                      //crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text("First Name"),
                         Text("Last Name"),
                       ],
                     ),
                     Column(
-                      //crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text("Email"),
                         Text("Password"),
