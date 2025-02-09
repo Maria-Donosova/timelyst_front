@@ -28,7 +28,10 @@ class MyApp extends StatelessWidget {
         title: 'Sign Up',
         theme: CustomTheme.lightTheme,
         themeMode: currentTheme.currentTheme,
-        home: const Account(),
+        home: Account(
+          email: 'dkfl.com',
+          calendars: 'skjfnh.com',
+        ),
       ),
     );
   }
