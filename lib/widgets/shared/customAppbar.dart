@@ -77,16 +77,28 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               child: Text('Account Settings'),
               onTap: () {
                 print('Account Settings');
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                      builder: (context) => Account(
-                          // calendars: [], // Provide the appropriate list of calendars
-                          // userId:
-                          //     "authProvider.userId", // Provide the userId from authProvider
-                          // email:
-                          //     "authProvider.email", // Provide the email from authProvider
-                          )),
+                Navigator.pushNamed(
+                  context,
+                  Account.routeName,
+                  arguments: {
+                    'email': 'user@example.com', // Replace with actual email
+                    'calendars': [
+                      'dfhiku@fkj.com',
+                      'fgnvd@gkk.com',
+                      'eurtgh@fg.com'
+                    ], // Provide the appropriate list of calendars
+                  },
                 );
+                // Navigator.of(context).pushReplacement(
+                //   MaterialPageRoute(
+                //       builder: (context) => Account(
+                //             calendars: [], // Provide the appropriate list of calendars
+                //             // userId:
+                //             //     "authProvider.userId", // Provide the userId from authProvider
+                //             email:
+                //                 "authProvider.email", // Provide the email from authProvider
+                //           )),
+                // );
               },
             ),
             PopupMenuItem<_profileView>(

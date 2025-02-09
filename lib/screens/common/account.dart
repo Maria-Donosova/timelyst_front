@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
+import '../../models/calendars.dart';
 
 import '../../widgets/shared/customAppbar.dart';
 
 class Account extends StatelessWidget {
-  const Account({Key? key}) : super(key: key);
+  final String email;
+  final String calendars;
+
+  const Account({
+    Key? key,
+    required this.email,
+    required this.calendars,
+  }) : super(key: key);
   static const routeName = '/account';
 
   @override
   Widget build(BuildContext context) {
     final appBar = CustomAppBar();
+    final routeArgs = ModalRoute.of(context)!.settings.arguments as Map;
+    final String email = routeArgs['email'];
+    final List<Calendar> calendars = routeArgs['calendars'];
 
     Widget _buildSectionHeader(String title) {
       return Container(
@@ -51,7 +62,7 @@ class Account extends StatelessWidget {
                       children: [
                         Container(
                             margin: const EdgeInsets.only(bottom: 10),
-                            child: Text('jfnekjgn@mf.com')),
+                            child: Text(email)),
                       ],
                     ),
                     Row(
@@ -66,9 +77,16 @@ class Account extends StatelessWidget {
                           ),
                         ),
                         Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            child: Text(
-                                'jfnekjgn@mf.com, Holidays, Birthdays, Test')),
+                          margin: const EdgeInsets.only(bottom: 10),
+                          child: Text(
+                            calendars.isNotEmpty
+                                ? calendars.map((c) => c.title).join(', ')
+                                : 'No calendars connected',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onBackground,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],
