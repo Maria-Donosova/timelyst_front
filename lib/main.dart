@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:provider/provider.dart';
-import 'package:timelyst_flutter/screens/common/logIn.dart';
+import 'package:timelyst_flutter/screens/common/account.dart';
+//import 'package:timelyst_flutter/screens/common/logIn.dart';
 import 'providers/authProvider.dart';
 
 import 'themes.dart';
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
         title: 'Sign Up',
         theme: CustomTheme.lightTheme,
         themeMode: currentTheme.currentTheme,
-        home: const LogInScreen(),
+        home: const Account(),
       ),
     );
   }
