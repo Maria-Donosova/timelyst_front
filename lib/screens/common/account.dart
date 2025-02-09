@@ -19,7 +19,7 @@ class Account extends StatelessWidget {
           title,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSecondary,
-            fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+            fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
           ),
         ),
       );
@@ -38,46 +38,74 @@ class Account extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildSectionHeader("Connected Accounts & Calendars"),
-                Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildSectionHeader("Connected Accounts & Calendars"),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                margin: const EdgeInsets.only(bottom: 10),
+                child: Column(
                   children: [
-                    Text("Email"),
-                    Text("Calendards"),
+                    Row(
+                      children: [
+                        Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: Text('jfnekjgn@mf.com')),
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.all(8),
+                          child: CircleAvatar(
+                            backgroundColor: Colors.cyan,
+                            //backgroundColor: catColor(customAppointment.catTitle),
+                            radius: 3.5,
+                          ),
+                        ),
+                        Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: Text(
+                                'jfnekjgn@mf.com, Holidays, Birthdays, Test')),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildSectionHeader("User Settings"),
-                Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildSectionHeader("User Settings"),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                margin: const EdgeInsets.only(bottom: 10),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Column(
-                      children: [
-                        Text("First Name"),
-                        Text("Last Name"),
-                      ],
+                    Container(
+                      child: Column(
+                        children: [
+                          Text("First Name"),
+                          Text("Last Name"),
+                        ],
+                      ),
                     ),
-                    Column(
-                      children: [
-                        Text("Email"),
-                        Text("Password"),
-                      ],
+                    Container(
+                      child: Column(
+                        children: [
+                          Text("Email"),
+                          Text("Password"),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ]),
       ),
