@@ -16,6 +16,8 @@ class CalendarSettings extends StatefulWidget {
     required this.email,
   }) : super(key: key);
 
+  static const routeName = '/calendarSettings';
+
   @override
   State<CalendarSettings> createState() => _CalendarSettingsState();
 }
