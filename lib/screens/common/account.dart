@@ -1,25 +1,90 @@
 import 'package:flutter/material.dart';
+import 'package:timelyst_flutter/screens/common/agenda.dart';
 import '../../models/calendars.dart';
 
 import '../../widgets/shared/customAppbar.dart';
 
-class Account extends StatelessWidget {
+class AccountSettings extends StatefulWidget {
+  final List<Calendar> calendars;
   final String email;
-  final String calendars;
 
-  const Account({
+  const AccountSettings({
     Key? key,
-    required this.email,
     required this.calendars,
+    required this.email,
   }) : super(key: key);
-  static const routeName = '/account';
+
+  static const routeName = '/accountSettings';
 
   @override
-  Widget build(BuildContext context) {
+  State<AccountSettings> createState() => _AccountSettingsState();
+}
+
+class _AccountSettingsState extends State<AccountSettings> {
+  //late List<ImportSettings> _importSettingsList;
+  // late List<String> _selectedCategories;
+
+  @override
+  void initState() {
+    assert(widget.calendars != null, "Calendars list must not be null");
+    assert(widget.email != null, "Email must not be null");
+    super.initState();
+  }
+
+  void _navigateToAgenda() {
+    final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
+      final index = entry.key;
+      return Calendar(
+        user: entry.value.user,
+        title: entry.value.title,
+        // Add other necessary fields from import settings
+        // ...
+      );
+    }).toList();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Agenda(
+            // calendars: selectedCalendars,
+            // userId: widget.userId,
+            // email: widget.email,
+            ),
+      ),
+    );
+  }
+
+  Widget _buildCalendarSection(int index) {
+    print("Entering build Calendar Section in within the account settings");
+    final calendar = widget.calendars[index];
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
+      child: Column(
+        key: ValueKey(calendar.id),
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Calendar title header
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              calendar.title,
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext contex) {
+    print("Building AccountSettings with:");
+    print("- Calendars count: ${widget.calendars.length}");
+    print("- Email: ${widget.email}");
+
     final appBar = CustomAppBar();
-    final routeArgs = ModalRoute.of(context)!.settings.arguments as Map;
-    final String email = routeArgs['email'];
-    final List<Calendar> calendars = routeArgs['calendars'];
 
     Widget _buildSectionHeader(String title) {
       return Container(
@@ -62,7 +127,7 @@ class Account extends StatelessWidget {
                       children: [
                         Container(
                             margin: const EdgeInsets.only(bottom: 10),
-                            child: Text(email)),
+                            child: Text(widget.email)),
                       ],
                     ),
                     Row(
@@ -78,13 +143,17 @@ class Account extends StatelessWidget {
                         ),
                         Container(
                           margin: const EdgeInsets.only(bottom: 10),
-                          child: Text(
-                            calendars.isNotEmpty
-                                ? calendars.map((c) => c.title).join(', ')
-                                : 'No calendars connected',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onBackground,
-                            ),
+                          child: Column(
+                            children: widget.calendars.map((calendar) {
+                              return Text(
+                                calendar.title,
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onBackground,
+                                ),
+                              );
+                            }).toList(),
                           ),
                         ),
                       ],
@@ -124,6 +193,20 @@ class Account extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              onPressed: _navigateToAgenda,
+              child: Text('Save',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondary,
+                  )),
+            ),
           ),
         ]),
       ),

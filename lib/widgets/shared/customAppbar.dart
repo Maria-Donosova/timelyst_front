@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timelyst_flutter/models/calendars.dart';
+import 'package:timelyst_flutter/services/connected_accounts.dart';
+import 'package:timelyst_flutter/services/googleIntegration/googleOrchestrator.dart';
 
 import '../../screens/common/connectCalendars.dart';
 import '../../screens/common/account.dart';
@@ -75,30 +78,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             PopupMenuItem<_profileView>(
               value: _profileView.profile,
               child: Text('Account Settings'),
-              onTap: () {
+              onTap: () async {
                 print('Account Settings');
-                Navigator.pushNamed(
-                  context,
-                  Account.routeName,
-                  arguments: {
-                    'email': 'user@example.com', // Replace with actual email
-                    'calendars': [
-                      'dfhiku@fkj.com',
-                      'fgnvd@gkk.com',
-                      'eurtgh@fg.com'
-                    ], // Provide the appropriate list of calendars
-                  },
-                );
-                // Navigator.of(context).pushReplacement(
-                //   MaterialPageRoute(
-                //       builder: (context) => Account(
-                //             calendars: [], // Provide the appropriate list of calendars
-                //             // userId:
-                //             //     "authProvider.userId", // Provide the userId from authProvider
-                //             email:
-                //                 "authProvider.email", // Provide the email from authProvider
-                //           )),
-                // );
+                //final result;
+
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => AccountSettings(
+                          email: 'placeholder email',
+                          calendars: [
+                            Calendar(
+                                id: 'dfoiejgie',
+                                title: 'Sample Calendar',
+                                user: 'fjwfpok'),
+                          ],
+                          //email: result['email'],
+                          //calendars: result['calendars'],
+                        )));
               },
             ),
             PopupMenuItem<_profileView>(
