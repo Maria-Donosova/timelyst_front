@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/screens/common/account.dart';
+import 'package:timelyst_flutter/screens/common/logIn.dart';
 //import 'package:timelyst_flutter/screens/common/logIn.dart';
 import 'providers/authProvider.dart';
 
@@ -28,10 +29,10 @@ class MyApp extends StatelessWidget {
         title: 'Sign Up',
         theme: CustomTheme.lightTheme,
         themeMode: currentTheme.currentTheme,
-        home: Account(
-          email: 'dkfl.com',
-          calendars: 'skjfnh.com',
-        ),
+        home: LogInScreen(
+            // email: 'dkfl.com',
+            // calendars: 'skjfnh.com',
+            ),
       ),
     );
   }
