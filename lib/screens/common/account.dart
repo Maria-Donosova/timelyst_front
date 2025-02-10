@@ -26,21 +26,21 @@ class _AccountSettingsState extends State<AccountSettings> {
 
   @override
   void initState() {
-    assert(widget.calendars != null, "Calendars list must not be null");
-    assert(widget.email != null, "Email must not be null");
+    //assert(widget.calendars != null, "Calendars list must not be null");
+    //assert(widget.email != null, "Email must not be null");
     super.initState();
   }
 
   void _navigateToAgenda() {
-    final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
-      final index = entry.key;
-      return Calendar(
-        user: entry.value.user,
-        title: entry.value.title,
-        // Add other necessary fields from import settings
-        // ...
-      );
-    }).toList();
+    // final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
+    //   final index = entry.key;
+    //   return Calendar(
+    //     // user: entry.value.user,
+    //     // title: entry.value.title,
+    //     // Add other necessary fields from import settings
+    //     // ...
+    //   );
+    // }).toList();
 
     Navigator.push(
       context,

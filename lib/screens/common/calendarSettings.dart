@@ -40,16 +40,16 @@ class _CalendarSettingsState extends State<CalendarSettings> {
   }
 
   void _navigateToAgenda() {
-    final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
-      final index = entry.key;
-      return Calendar(
-        user: entry.value.user,
-        title: entry.value.title,
-        category: _selectedCategories[index],
-        // Add other necessary fields from import settings
-        // ...
-      );
-    }).toList();
+    // final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
+    //   final index = entry.key;
+    //   return Calendar(
+    //     user: entry.value.user,
+    //     title: entry.value.title,
+    //     category: _selectedCategories[index],
+    //     // Add other necessary fields from import settings
+    //     // ...
+    //   );
+    // }).toList();
 
     Navigator.push(
       context,
