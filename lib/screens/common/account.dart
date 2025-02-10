@@ -5,13 +5,8 @@ import '../../models/calendars.dart';
 import '../../widgets/shared/customAppbar.dart';
 
 class AccountSettings extends StatefulWidget {
-  final List<Calendar> calendars;
-  final String email;
-
   const AccountSettings({
     Key? key,
-    required this.calendars,
-    required this.email,
   }) : super(key: key);
 
   static const routeName = '/accountSettings';
@@ -56,7 +51,7 @@ class _AccountSettingsState extends State<AccountSettings> {
 
   Widget _buildCalendarSection(int index) {
     print("Entering build Calendar Section in within the account settings");
-    final calendar = widget.calendars[index];
+    final calendar = [];
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
       child: Column(
@@ -81,8 +76,8 @@ class _AccountSettingsState extends State<AccountSettings> {
   @override
   Widget build(BuildContext contex) {
     print("Building AccountSettings with:");
-    print("- Calendars count: ${widget.calendars.length}");
-    print("- Email: ${widget.email}");
+    // print("- Calendars count: ${widget.calendars.length}");
+    // print("- Email: ${widget.email}");
 
     final appBar = CustomAppBar();
 
