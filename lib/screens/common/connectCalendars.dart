@@ -117,7 +117,13 @@ class _ConnectCalBody extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 30.0),
                   child: TextButton(
-                    onPressed: () => startBlank(context),
+                    onPressed: () {
+                      print('Start Blank button pressed');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Agenda()),
+                      );
+                    },
                     child: Text(
                       'Start Blank',
                       style: Theme.of(context).textTheme.displayMedium,
