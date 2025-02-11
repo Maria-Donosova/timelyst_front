@@ -29,16 +29,12 @@ class _AccountSettingsState extends State<AccountSettings> {
 
   Future<void> _fetchUserCalendars() async {
     try {
-      // Fetch user data from the service
-      final userData = await CalendarsService.fetchUserCalendars(
+      // Fetch calendars from the service
+      final calendars = await CalendarsService.fetchUserCalendars(
           'user@example.com'); // Replace with the actual user email
-
-      // Parse the calendars from the user data
-      final calendars = CalendarsService.parseCalendarsFromUserData(userData);
 
       // Update the state
       setState(() {
-        _email = userData['email'];
         _calendars = calendars;
         _isLoading = false;
       });
