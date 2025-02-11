@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/screens/common/agenda.dart';
-import '../../models/calendars.dart';
 
 import '../../widgets/shared/customAppbar.dart';
+import '../../screens/common/agenda.dart';
+import '../../models/calendars.dart';
+import '../../data/calendars.dart';
 
 class AccountSettings extends StatefulWidget {
   const AccountSettings({
@@ -16,34 +17,46 @@ class AccountSettings extends StatefulWidget {
 }
 
 class _AccountSettingsState extends State<AccountSettings> {
-  //late List<ImportSettings> _importSettingsList;
-  // late List<String> _selectedCategories;
+  List<Calendar> _calendars = [];
+  String _email = '';
+  bool _isLoading = true;
 
   @override
   void initState() {
-    //assert(widget.calendars != null, "Calendars list must not be null");
-    //assert(widget.email != null, "Email must not be null");
     super.initState();
+    _fetchUserCalendars();
+  }
+
+  Future<void> _fetchUserCalendars() async {
+    try {
+      // Fetch user data from the service
+      final userData = await CalendarsService.fetchUserCalendars(
+          'user@example.com'); // Replace with the actual user email
+
+      // Parse the calendars from the user data
+      final calendars = CalendarsService.parseCalendarsFromUserData(userData);
+
+      // Update the state
+      setState(() {
+        _email = userData['email'];
+        _calendars = calendars;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching calendars: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _navigateToAgenda() {
-    // final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
-    //   final index = entry.key;
-    //   return Calendar(
-    //     // user: entry.value.user,
-    //     // title: entry.value.title,
-    //     // Add other necessary fields from import settings
-    //     // ...
-    //   );
-    // }).toList();
-
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => Agenda(
-            // calendars: selectedCalendars,
-            // userId: widget.userId,
-            // email: widget.email,
+            //calendars: _calendars,
+            //email: _email,
             ),
       ),
     );
@@ -51,7 +64,7 @@ class _AccountSettingsState extends State<AccountSettings> {
 
   Widget _buildCalendarSection(int index) {
     print("Entering build Calendar Section in within the account settings");
-    final calendar = [];
+    final calendar = _calendars[index];
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
       child: Column(
@@ -76,8 +89,12 @@ class _AccountSettingsState extends State<AccountSettings> {
   @override
   Widget build(BuildContext contex) {
     print("Building AccountSettings with:");
-    // print("- Calendars count: ${widget.calendars.length}");
-    // print("- Email: ${widget.email}");
+    if (_isLoading) {
+      return Scaffold(
+        appBar: CustomAppBar(),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     final appBar = CustomAppBar();
 
@@ -122,7 +139,7 @@ class _AccountSettingsState extends State<AccountSettings> {
                       children: [
                         Container(
                             margin: const EdgeInsets.only(bottom: 10),
-                            child: Text(widget.email)),
+                            child: Text(_email)),
                       ],
                     ),
                     Row(
@@ -139,7 +156,7 @@ class _AccountSettingsState extends State<AccountSettings> {
                         Container(
                           margin: const EdgeInsets.only(bottom: 10),
                           child: Column(
-                            children: widget.calendars.map((calendar) {
+                            children: _calendars.map((calendar) {
                               return Text(
                                 calendar.title,
                                 style: TextStyle(
