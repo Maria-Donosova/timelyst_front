@@ -8,18 +8,19 @@ class CalendarsService {
 
     // Define the GraphQL query string
     final String query = '''
-      query GetUserCalendars(\$email: String!) {
-        user(email: \$email) {
+        query {user(id: "6796c7cae4edbe922aaded37")
+        {
+          id
+          name
+          googleAccounts: googleAccounts {
           email
-          calendars {
-            id
-            title
-            description
-            timeZone
-            type
-          }
+            selectedCalendars: selectedCalendars{
+              id
+              summary
+            }
         }
-      }
+        } 
+        }
     ''';
 
     // Define the variables
