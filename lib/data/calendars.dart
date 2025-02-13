@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:timelyst_flutter/models/calendars.dart';
 
 class CalendarsService {
-  static Future<List<Calendar>> fetchUserCalendars(String email) async {
+  static Future<List<Calendar>> fetchUserCalendars(
+      String email, String authToken) async {
     print("Entering fetchUserCalendars in CalendarsService");
 
     // Define the GraphQL query string
@@ -34,6 +35,7 @@ class CalendarsService {
           'http://localhost:3000/graphql'), // Replace with your GraphQL endpoint
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer $authToken',
       },
       body: jsonEncode({
         'query': query,

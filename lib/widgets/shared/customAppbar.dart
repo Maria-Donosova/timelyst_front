@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../../models/calendars.dart';
+import '../../services/authService.dart';
 
 import '../../screens/common/connectCalendars.dart';
 import '../../screens/common/account.dart';
@@ -17,12 +16,19 @@ enum _timelystMenu { about, contact_us }
 enum _profileView { profile, settings, logout }
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  CustomAppBar({Key? key}) : super(key: key);
+  // final AuthService authService;
+
+  CustomAppBar({
+    Key? key,
+    // required this.authService,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // Access the AuthProvider to listen to changes
     final authProvider = Provider.of<AuthProvider>(context);
+    // final AuthService authService = AuthService();
+    // final token = authService.getAuthToken();
 
     return AppBar(
       title: _buildTitle(),
@@ -64,6 +70,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   List<Widget> _buildActions(BuildContext context, AuthProvider authProvider) {
+    final AuthService authService = AuthService();
+
     // Use the authProvider to determine the actions
     return [
       if (authProvider.isLoggedIn) ...[
@@ -81,8 +89,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 print('Account Settings');
                 //final result;
 
-                Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => AccountSettings()));
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) =>
+                        AccountSettings(authService: authService)));
               },
             ),
             PopupMenuItem<_profileView>(
