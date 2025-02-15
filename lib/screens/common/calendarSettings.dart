@@ -51,6 +51,13 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     //   );
     // }).toList();
 
+    //Consider change the above to the below
+    // Save selected calendars using the orchestrator
+    // await GoogleOrchestrator().saveSelectedCalendars(
+    //     widget.userId, widget.email, _selectedCalendars);
+    // print("Widget User ID: ${widget.userId}");
+    // print("Widget email: ${widget.email}");
+
     Navigator.push(
       context,
       MaterialPageRoute(

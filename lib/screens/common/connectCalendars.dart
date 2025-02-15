@@ -43,19 +43,19 @@ class _ConnectCalBody extends StatelessWidget {
                   builder: (context, connectedAccounts, child) {
                     return Column(
                       children: [
-                        if (connectedAccounts.connectedAccounts.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10.0),
-                            child: Text(
-                              'Connected Accounts',
-                              style: Theme.of(context).textTheme.displayMedium,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        Text(
-                          connectedAccounts.connectedAccounts.join(', '),
-                          style: Theme.of(context).textTheme.displaySmall,
-                        ),
+                        // if (connectedAccounts.connectedAccounts.isNotEmpty)
+                        //   Padding(
+                        //     padding: const EdgeInsets.only(bottom: 10.0),
+                        //     child: Text(
+                        //       'Connected Accounts',
+                        //       style: Theme.of(context).textTheme.displayMedium,
+                        //       textAlign: TextAlign.center,
+                        //     ),
+                        //   ),
+                        // Text(
+                        //   connectedAccounts.connectedAccounts.join(', '),
+                        //   style: Theme.of(context).textTheme.displaySmall,
+                        // ),
                       ],
                     );
                   },
