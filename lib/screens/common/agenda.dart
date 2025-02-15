@@ -22,12 +22,10 @@ class Agenda extends StatelessWidget {
               : Expanded(flex: 1, child: LeftPanel()),
           !isLandscape
               ? Expanded(
-                  //width: mediaQuery.size.width * 0.57,
                   flex: 2,
                   child: const RightPanel(),
                 )
               : Expanded(
-                  //width: mediaQuery.size.width * 0.61,
                   flex: 2,
                   child: const RightPanel(),
                 ),

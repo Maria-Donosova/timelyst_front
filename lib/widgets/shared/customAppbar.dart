@@ -8,27 +8,18 @@ import '../../screens/common/signUp.dart';
 import '../../screens/common/logIn.dart';
 import '../../providers/authProvider.dart';
 
-//import '../../screens/common/account.dart';
-//import '../shared/search.dart';
-
 enum _timelystMenu { about, contact_us }
 
 enum _profileView { profile, settings, logout }
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  // final AuthService authService;
-
   CustomAppBar({
     Key? key,
-    // required this.authService,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Access the AuthProvider to listen to changes
     final authProvider = Provider.of<AuthProvider>(context);
-    // final AuthService authService = AuthService();
-    // final token = authService.getAuthToken();
 
     return AppBar(
       title: _buildTitle(),
