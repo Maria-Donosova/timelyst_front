@@ -9,10 +9,12 @@ import '../../data/calendars.dart';
 
 class AccountSettings extends StatefulWidget {
   final AuthService authService;
+  final userId;
 
   const AccountSettings({
     Key? key,
     required this.authService,
+    required this.userId,
   }) : super(key: key);
 
   static const routeName = '/accountSettings';
@@ -34,10 +36,14 @@ class _AccountSettingsState extends State<AccountSettings> {
 
   Future<void> _fetchUserCalendars() async {
     final token = await widget.authService.getAuthToken();
+    final userId = widget.userId;
+    print('Token: $token');
+    print('UserId: $userId');
+
     try {
       // Fetch calendars from the service
       final calendars = await CalendarsService.fetchUserCalendars(
-          'user@example.com', // Replace with the actual user email
+          widget.userId, // Replace with the actual user email
           token!);
 
       // Update the state

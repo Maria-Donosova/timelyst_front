@@ -81,8 +81,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 //final result;
 
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) =>
-                        AccountSettings(authService: authService)));
+                    builder: (context) => AccountSettings(
+                          authService: authService,
+                          userId: '6796c7cae4edbe922aaded37',
+                        )));
               },
             ),
             PopupMenuItem<_profileView>(

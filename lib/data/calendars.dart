@@ -4,8 +4,10 @@ import 'package:timelyst_flutter/models/calendars.dart';
 
 class CalendarsService {
   static Future<List<Calendar>> fetchUserCalendars(
-      String email, String authToken) async {
+      String userId, String authToken) async {
     print("Entering fetchUserCalendars in CalendarsService");
+    print("Email: $userId");
+    print("AuthToken: $authToken");
 
     // Define the GraphQL query string
     final String query = '''
@@ -25,9 +27,9 @@ class CalendarsService {
     ''';
 
     // Define the variables
-    final Map<String, dynamic> variables = {
-      'email': email,
-    };
+    // final Map<String, dynamic> variables = {
+    //   'email': email,
+    // };
 
     // Send the HTTP POST request
     final response = await http.post(
@@ -39,7 +41,7 @@ class CalendarsService {
       },
       body: jsonEncode({
         'query': query,
-        'variables': variables,
+        'variables': userId,
       }),
     );
 
