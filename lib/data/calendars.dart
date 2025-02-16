@@ -6,8 +6,8 @@ class CalendarsService {
   static Future<List<Calendar>> fetchUserCalendars(
       String userId, String authToken) async {
     print("Entering fetchUserCalendars in CalendarsService");
-    print("UserId: $userId");
-    print("AuthToken: $authToken");
+    // print("UserId: $userId");
+    // print("AuthToken: $authToken");
 
     // Define the GraphQL query string
     final String query = '''
@@ -46,9 +46,9 @@ class CalendarsService {
     // Check the status code
     if (response.statusCode == 200) {
       // If the server returns a 200 OK response, parse the JSON
-      print('Raw response: ${response.body}');
+      // print('Raw response: ${response.body}');
       final data = jsonDecode(response.body);
-      print('Parsed data: ${data}');
+      // print('Parsed data: ${data}');
 
       // Check for GraphQL errors
       if (data['errors'] != null && data['errors'].length > 0) {
@@ -67,7 +67,7 @@ class CalendarsService {
                   (googleAccount['selectedCalendars'] as List?)
                       ?.map((calendar) => Calendar.fromJson(calendar)) ??
                   <Calendar>[])
-              ?.toList() ??
+              .toList() ??
           [];
 
       if (calendars.isEmpty) {
