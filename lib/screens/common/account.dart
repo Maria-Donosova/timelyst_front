@@ -39,7 +39,7 @@ class _AccountSettingsState extends State<AccountSettings> {
 
   Future<void> _fetchUserCalendars() async {
     final token = await widget.authService.getAuthToken();
-    final userId = widget.userId;
+    //final userId = widget.userId;
 
     try {
       final calendars =
@@ -49,7 +49,7 @@ class _AccountSettingsState extends State<AccountSettings> {
       setState(() {
         _calendars = calendars;
         _userEmail = email;
-        groupedCalendars = _groupCalendarsByEmail(calendars);
+        groupedCalendars = _groupCalendarsByAccount(calendars);
         _isLoading = false;
       });
     } catch (e) {
@@ -58,7 +58,8 @@ class _AccountSettingsState extends State<AccountSettings> {
     }
   }
 
-  Map<String, List<Calendar>> _groupCalendarsByEmail(List<Calendar> calendars) {
+  Map<String, List<Calendar>> _groupCalendarsByAccount(
+      List<Calendar> calendars) {
     Map<String, List<Calendar>> grouped = {};
     for (var cal in calendars) {
       final email =
@@ -108,33 +109,33 @@ class _AccountSettingsState extends State<AccountSettings> {
     );
   }
 
-  Widget _buildCalendarSection(int index) {
-    print("Entering build Calendar Section in within the account settings");
-    final calendar = _calendars[index];
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
-      child: Column(
-        key: ValueKey(calendar.id),
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text("test@fng.com")),
-          _buildSectionHeader("Associated Calendars"),
-          // Padding(
-          //   padding: const EdgeInsets.only(bottom: 8.0),
-          //   child: Text(
-          //     calendar.title,
-          //     style: TextStyle(
-          //       fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
-          //     ),
-          //   ),
-          // ),
-          _buildCalendarTile(calendar),
-        ],
-      ),
-    );
-  }
+  // Widget _buildCalendarSection(int index) {
+  //   print("Entering build Calendar Section in within the account settings");
+  //   final calendar = _calendars[index];
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
+  //     child: Column(
+  //       key: ValueKey(calendar.id),
+  //       crossAxisAlignment: CrossAxisAlignment.center,
+  //       children: [
+  //         Padding(
+  //             padding: const EdgeInsets.only(bottom: 8.0),
+  //             child: Text("test@fng.com")),
+  //         _buildSectionHeader("Associated Calendars"),
+  //         // Padding(
+  //         //   padding: const EdgeInsets.only(bottom: 8.0),
+  //         //   child: Text(
+  //         //     calendar.title,
+  //         //     style: TextStyle(
+  //         //       fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+  //         //     ),
+  //         //   ),
+  //         // ),
+  //         _buildCalendarTile(calendar),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // Widget _buildCalendarTile(int index) {
   //   final calendar = _calendars[index];
@@ -180,7 +181,7 @@ class _AccountSettingsState extends State<AccountSettings> {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: catColor(calendar.category!),
-        radius: 4,
+        radius: 8,
       ),
       title: Text(
         calendar.title,
@@ -203,7 +204,6 @@ class _AccountSettingsState extends State<AccountSettings> {
 
   @override
   Widget build(BuildContext contex) {
-    print("Building AccountSettings with:");
     final appBar = CustomAppBar();
     final mediaQuery = MediaQuery.of(context);
 
@@ -215,48 +215,87 @@ class _AccountSettingsState extends State<AccountSettings> {
     }
 
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: appBar,
       body: groupedCalendars.isEmpty
           ? Center(child: Text("No accounts found"))
           : SafeArea(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        "Connected Accounts",
-                        style: Theme.of(context).textTheme.titleMedium,
+              child: Container(
+                width: mediaQuery.size.width * 0.99,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 10.0, right: 10.0, top: 50.0, bottom: 40),
+                        child: Text(
+                          "Connected Accounts",
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                       ),
-                    ),
-                    ...groupedCalendars.entries.map((entry) {
-                      final email = entry.key;
-                      final cals = entry.value;
-                      return Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Text(
-                              email,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                      ...groupedCalendars.entries.map((entry) {
+                        final email = entry.key;
+                        final cals = entry.value;
+                        return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Wrap(
+                              children: [
+                                Container(
+                                  width: mediaQuery.size.width * 0.25,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 16.0),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 8.0),
+                                          child: Text(
+                                            email,
+                                            style: TextStyle(
+                                              fontSize: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.fontSize,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      _buildSectionHeader(
+                                          'Associated Calendars'),
+                                      Column(
+                                        children: cals
+                                            .map((cal) =>
+                                                _buildCalendarTile(cal))
+                                            .toList(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ));
+                      }).toList(),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.secondary,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          Column(
-                            children: cals
-                                .map((cal) => _buildCalendarTile(cal))
-                                .toList(),
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: ElevatedButton(
-                        onPressed: _navigateToAgenda,
-                        child: Text('Save'),
+                          onPressed: _navigateToAgenda,
+                          child: Text('Save',
+                              style: TextStyle(
+                                color:
+                                    Theme.of(context).colorScheme.onSecondary,
+                              )),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
