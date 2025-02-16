@@ -39,33 +39,17 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     );
   }
 
-  void _navigateToAgenda() {
-    // final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
-    //   final index = entry.key;
-    //   return Calendar(
-    //     user: entry.value.user,
-    //     title: entry.value.title,
-    //     category: _selectedCategories[index],
-    //     // Add other necessary fields from import settings
-    //     // ...
-    //   );
-    // }).toList();
-
-    //Consider change the above to the below
-    // Save selected calendars using the orchestrator
-    // await GoogleOrchestrator().saveSelectedCalendars(
-    //     widget.userId, widget.email, _selectedCalendars);
-    // print("Widget User ID: ${widget.userId}");
-    // print("Widget email: ${widget.email}");
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Agenda(
-            // calendars: selectedCalendars,
-            // userId: widget.userId,
-            // email: widget.email,
-            ),
+  Widget _buildSectionHeader(String title) {
+    return Container(
+      color: Theme.of(context).colorScheme.secondary,
+      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSecondary,
+          fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
+        ),
       ),
     );
   }
@@ -229,6 +213,37 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     }).toList();
   }
 
+  void _navigateToAgenda() {
+    // final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
+    //   final index = entry.key;
+    //   return Calendar(
+    //     user: entry.value.user,
+    //     title: entry.value.title,
+    //     category: _selectedCategories[index],
+    //     // Add other necessary fields from import settings
+    //     // ...
+    //   );
+    // }).toList();
+
+    //Consider change the above to the below
+    // Save selected calendars using the orchestrator
+    // await GoogleOrchestrator().saveSelectedCalendars(
+    //     widget.userId, widget.email, _selectedCalendars);
+    // print("Widget User ID: ${widget.userId}");
+    // print("Widget email: ${widget.email}");
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Agenda(
+            // calendars: selectedCalendars,
+            // userId: widget.userId,
+            // email: widget.email,
+            ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     print("Building CalendarSettings with:");
@@ -298,21 +313,6 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Container(
-      color: Theme.of(context).colorScheme.secondary,
-      padding: const EdgeInsets.all(8),
-      margin: const EdgeInsets.only(bottom: 10),
-      child: Text(
-        title,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onSecondary,
-          fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
-        ),
-      ),
     );
   }
 }
