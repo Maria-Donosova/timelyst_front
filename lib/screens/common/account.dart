@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timelyst_flutter/widgets/shared/categories.dart';
 
 import '../../services/authService.dart';
 
@@ -24,17 +25,20 @@ class AccountSettings extends StatefulWidget {
 }
 
 class _AccountSettingsState extends State<AccountSettings> {
-  List<Calendar> _calendars = [];
-  String _email = '';
+  late List<Calendar> _calendars;
+  // String _email = 'test@test.com';
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    //   _calendars = List.generate(
+    // widget.calendars.length,
+    // (index) => Calendar(),
     _fetchUserCalendars();
   }
 
-  Future<void> _fetchUserCalendars() async {
+  Future<List<Calendar>> _fetchUserCalendars() async {
     final token = await widget.authService.getAuthToken();
     final userId = widget.userId;
     print('Token: $token');
@@ -42,9 +46,8 @@ class _AccountSettingsState extends State<AccountSettings> {
 
     try {
       // Fetch calendars from the service
-      final calendars = await CalendarsService.fetchUserCalendars(
-          widget.userId, // Replace with the actual user email
-          token!);
+      final calendars =
+          await CalendarsService.fetchUserCalendars(widget.userId, token!);
 
       // Update the state
       setState(() {
@@ -57,6 +60,90 @@ class _AccountSettingsState extends State<AccountSettings> {
         _isLoading = false;
       });
     }
+    return _calendars;
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Container(
+      color: Theme.of(context).colorScheme.secondary,
+      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSecondary,
+          fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalendarSection(int index) {
+    print("Entering build Calendar Section in within the account settings");
+    final calendar = _calendars[index];
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
+      child: Column(
+        key: ValueKey(calendar.id),
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text("test@fng.com")),
+          _buildSectionHeader("Associated Calendars"),
+          // Padding(
+          //   padding: const EdgeInsets.only(bottom: 8.0),
+          //   child: Text(
+          //     calendar.title,
+          //     style: TextStyle(
+          //       fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+          //     ),
+          //   ),
+          // ),
+          _buildCalendarTile(index),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCalendarTile(int index) {
+    final calendar = _calendars[index];
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
+      child: Row(
+        key: ValueKey(calendar.id),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.all(8),
+            child: CircleAvatar(
+              //backgroundColor: Colors.cyan,
+              backgroundColor: catColor(calendar.category!),
+              radius: 3.5,
+            ),
+          ),
+          Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              child: Text(
+                calendar.title,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onBackground,
+                ),
+              )
+              // Column(
+              //   children: _calendars.map((calendar) {
+              //     return Text(
+              //       calendar.title,
+              //       style: TextStyle(
+              //         color: Theme.of(context).colorScheme.onBackground,
+              //       ),
+              //     );
+              //   }).toList(),
+              // ),
+              ),
+        ],
+      ),
+    );
   }
 
   void _navigateToAgenda() {
@@ -71,33 +158,12 @@ class _AccountSettingsState extends State<AccountSettings> {
     );
   }
 
-  Widget _buildCalendarSection(int index) {
-    print("Entering build Calendar Section in within the account settings");
-    final calendar = _calendars[index];
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
-      child: Column(
-        key: ValueKey(calendar.id),
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Calendar title header
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              calendar.title,
-              style: TextStyle(
-                fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext contex) {
     print("Building AccountSettings with:");
+    final appBar = CustomAppBar();
+    final mediaQuery = MediaQuery.of(context);
+
     if (_isLoading) {
       return Scaffold(
         appBar: CustomAppBar(),
@@ -105,132 +171,106 @@ class _AccountSettingsState extends State<AccountSettings> {
       );
     }
 
-    final appBar = CustomAppBar();
-
-    Widget _buildSectionHeader(String title) {
-      return Container(
-        color: Theme.of(context).colorScheme.secondary,
-        padding: const EdgeInsets.all(8),
-        margin: const EdgeInsets.only(bottom: 10),
-        child: Text(
-          title,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSecondary,
-            fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: appBar,
-      body: SafeArea(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 10.0, right: 10.0, top: 50.0, bottom: 20),
-            child: Text(
-              "Account Settings",
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildSectionHeader("Connected Accounts & Calendars"),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                margin: const EdgeInsets.only(bottom: 10),
+      body: _calendars.isEmpty
+          ? Center(child: Text("No accounts found"))
+          : SafeArea(
+              child: SingleChildScrollView(
                 child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            child: Text(_email)),
-                      ],
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.all(8),
-                          child: CircleAvatar(
-                            backgroundColor: Colors.cyan,
-                            //backgroundColor: catColor(customAppointment.catTitle),
-                            radius: 3.5,
-                          ),
+                    //crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 10.0, right: 10.0, top: 50.0, bottom: 20),
+                        child: Text(
+                          "Connected Accounts",
+                          style: Theme.of(context).textTheme.titleMedium,
+                          textAlign: TextAlign.center,
                         ),
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          child: Column(
-                            children: _calendars.map((calendar) {
-                              return Text(
-                                calendar.title,
-                                style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onBackground,
+                      ),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Wrap(
+                          children: [
+                            Row(
+                              children: List.generate(
+                                _calendars.length,
+                                (index) => Container(
+                                  width: mediaQuery.size.width * 0.25,
+                                  child: _buildCalendarSection(index),
                                 ),
-                              );
-                            }).toList(),
-                          ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildSectionHeader("User Settings"),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                margin: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      child: Column(
-                        children: [
-                          Text("First Name"),
-                          Text("Last Name"),
-                        ],
                       ),
-                    ),
-                    Container(
-                      child: Column(
-                        children: [
-                          Text("Email"),
-                          Text("Password"),
-                        ],
+                      // Column(
+                      //   crossAxisAlignment: CrossAxisAlignment.stretch,
+                      //   children: [
+                      //     Container(
+                      //       padding: const EdgeInsets.symmetric(horizontal: 8),
+                      //       margin: const EdgeInsets.only(bottom: 10),
+                      //       child: Column(
+                      //         children: [
+                      //           Container(
+                      //             child: _buildCalendarSection(index),
+                      //           ),
+                      //         ],
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                      // Column(
+                      //   crossAxisAlignment: CrossAxisAlignment.stretch,
+                      //   children: [
+                      //     _buildSectionHeader("User Settings"),
+                      //     Container(
+                      //       padding: const EdgeInsets.symmetric(horizontal: 8),
+                      //       margin: const EdgeInsets.only(bottom: 10),
+                      //       child: Row(
+                      //         mainAxisAlignment: MainAxisAlignment.start,
+                      //         children: [
+                      //           Container(
+                      //             child: Column(
+                      //               children: [
+                      //                 Text("First Name"),
+                      //                 Text("Last Name"),
+                      //               ],
+                      //             ),
+                      //           ),
+                      //           Container(
+                      //             child: Column(
+                      //               children: [
+                      //                 Text("Email"),
+                      //                 Text("Password"),
+                      //               ],
+                      //             ),
+                      //           ),
+                      //         ],
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.secondary,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          onPressed: _navigateToAgenda,
+                          child: Text('Save',
+                              style: TextStyle(
+                                color:
+                                    Theme.of(context).colorScheme.onSecondary,
+                              )),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ]),
               ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.secondary,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              onPressed: _navigateToAgenda,
-              child: Text('Save',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondary,
-                  )),
             ),
-          ),
-        ]),
-      ),
     );
   }
 }
