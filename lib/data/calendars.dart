@@ -6,49 +6,49 @@ class CalendarsService {
   static Future<List<Calendar>> fetchUserCalendars(
       String userId, String authToken) async {
     print("Entering fetchUserCalendars in CalendarsService");
-    print("Email: $userId");
+    print("UserId: $userId");
     print("AuthToken: $authToken");
 
     // Define the GraphQL query string
     final String query = '''
-        query {user(id: "6796c7cae4edbe922aaded37")
+        query User(\$userId: String!) {
+        user(id: \$userId)
         {
           id
-          name
+          email
           googleAccounts: googleAccounts {
           email
-            selectedCalendars: selectedCalendars{
-              id
-              summary
-            }
+          selectedCalendars: selectedCalendars{
+            id
+            summary
+          }
         }
         } 
         }
     ''';
 
-    // Define the variables
+    //Define the variables
     // final Map<String, dynamic> variables = {
-    //   'email': email,
+    //   'userId': userId,
     // };
 
+    final String encodedQuery = Uri.encodeComponent(query);
     // Send the HTTP POST request
-    final response = await http.post(
+    final response = await http.get(
       Uri.parse(
-          'http://localhost:3000/graphql'), // Replace with your GraphQL endpoint
+          'http://localhost:3000/graphql?query=$encodedQuery&variables={"userId":"$userId"}'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
       },
-      body: jsonEncode({
-        'query': query,
-        'variables': userId,
-      }),
     );
 
     // Check the status code
     if (response.statusCode == 200) {
       // If the server returns a 200 OK response, parse the JSON
+      print('Raw response: ${response.body}');
       final data = jsonDecode(response.body);
+      print('Parsed data: ${data}');
 
       // Check for GraphQL errors
       if (data['errors'] != null && data['errors'].length > 0) {
@@ -62,10 +62,17 @@ class CalendarsService {
       final userData = data['data']['user'];
 
       // Parse the calendars into a List<Calendar>
-      final List<Calendar> calendars = (userData['calendars'] as List)
-          .map((calendar) => Calendar.fromJson(calendar))
-          .toList();
+      final List<Calendar> calendars = (userData['googleAccounts'] as List?)
+              ?.expand((googleAccount) =>
+                  (googleAccount['selectedCalendars'] as List?)
+                      ?.map((calendar) => Calendar.fromJson(calendar)) ??
+                  <Calendar>[])
+              ?.toList() ??
+          [];
 
+      if (calendars.isEmpty) {
+        print('No calendars found for user');
+      }
       return calendars;
     } else {
       // Handle non-200 status codes
