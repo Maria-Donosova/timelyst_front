@@ -1,10 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_sign_in_web/web_only.dart';
-import 'package:timelyst_flutter/services/googleIntegration/googleSignInOut.dart';
 
 import '../authService.dart';
 import '../../config/env_variables_config.dart';
