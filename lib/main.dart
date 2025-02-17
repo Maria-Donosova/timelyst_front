@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/screens/common/logIn.dart';
+import 'package:timelyst_flutter/services/googleIntegration/googleSignInOut.dart';
 
 import 'providers/authProvider.dart';
 
@@ -10,6 +11,7 @@ import 'themes.dart';
 
 Future main() async {
   await dotenv.load(fileName: 'lib/.env');
+  GoogleSignInOutService().initialize();
   runApp(const MyApp());
 }
 
