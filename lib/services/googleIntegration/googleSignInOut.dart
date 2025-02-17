@@ -140,7 +140,7 @@ class GoogleSignInOutService {
   }
 
   // google sign out method
-  Future<String> googleDisconnect(BuildContext context) async {
+  Future<String> googleDisconnect() async {
     try {
       await _googleSignIn.disconnect();
       //await _googleSignIn.signOut();
@@ -160,7 +160,7 @@ class GoogleSignInOutService {
   }
 
   // google sign out method
-  Future<void> googleSignOut(BuildContext context) async {
+  Future<void> googleSignOut() async {
     try {
       await _googleSignIn.signOut();
 
