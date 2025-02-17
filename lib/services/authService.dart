@@ -1,4 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decode/jwt_decode.dart';
 
 class AuthService {
   static const String _authTokenKey = 'authToken';
@@ -45,6 +46,23 @@ class AuthService {
     } catch (e) {
       print('Error checking login status: $e');
       return false;
+    }
+  }
+
+  Future<String?> getUserIdFromToken() async {
+    final token = await AuthService().getAuthToken();
+    if (token == null) return null;
+
+    try {
+      final payload = Jwt.parseJwt(token);
+      // Check common user ID field names
+      return payload['userId'] ??
+          payload['sub'] ??
+          payload['uid'] ??
+          payload['user_id'];
+    } catch (e) {
+      print('Error decoding token: $e');
+      return null;
     }
   }
 
