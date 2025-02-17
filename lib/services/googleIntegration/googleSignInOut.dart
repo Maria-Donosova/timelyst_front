@@ -9,24 +9,50 @@ import 'googleAuthService.dart';
 import '../connected_accounts.dart';
 
 class GoogleSignInOutService {
-  final GoogleSignIn _googleSignIn = (kIsWeb)
-      ? GoogleSignIn(
-          clientId: Config.clientId,
-          forceCodeForRefreshToken: true,
-          scopes: _scopes,
-        )
-      : GoogleSignIn(
-          forceCodeForRefreshToken: true,
-          scopes: _scopes,
-        );
+  static final GoogleSignInOutService _instance =
+      GoogleSignInOutService._internal();
+  factory GoogleSignInOutService() => _instance;
+  GoogleSignInOutService._internal();
 
-  static const List<String> _scopes = <String>[
+  late final GoogleSignIn _googleSignIn;
+
+  List<String> _scopes = <String>[
     'openid',
     'profile',
     'email',
-    'https://www.googleapis.com/auth/peopleapi.readonly',
     'https://www.googleapis.com/auth/calendar',
   ];
+
+  void initialize() {
+    _googleSignIn = kIsWeb
+        ? GoogleSignIn(
+            clientId: Config.clientId,
+            forceCodeForRefreshToken: true,
+            scopes: _scopes,
+          )
+        : GoogleSignIn(
+            forceCodeForRefreshToken: true,
+            scopes: _scopes,
+          );
+  }
+  // final GoogleSignIn _googleSignIn = (kIsWeb)
+  //     ? GoogleSignIn(
+  //         clientId: Config.clientId,
+  //         forceCodeForRefreshToken: true,
+  //         scopes: _scopes,
+  //       )
+  //     : GoogleSignIn(
+  //         forceCodeForRefreshToken: true,
+  //         scopes: _scopes,
+  //       );
+
+  // static const List<String> _scopes = <String>[
+  //   'openid',
+  //   'profile',
+  //   'email',
+  //   'https://www.googleapis.com/auth/peopleapi.readonly',
+  //   'https://www.googleapis.com/auth/calendar',
+  // ];
 
   GoogleAuthService _googleAuthService = GoogleAuthService();
   //ConnectedAccounts _connectedAccounts = ConnectedAccounts();
@@ -114,22 +140,38 @@ class GoogleSignInOutService {
   }
 
   // google sign out method
-  Future<String> googleSignOut(BuildContext context) async {
+  Future<String> googleDisconnect(BuildContext context) async {
     try {
       await _googleSignIn.disconnect();
-      await _googleSignIn.signOut();
-      //await _googleAuthService.clearTokensOnBackend();
-      //await storage.deleteAll();
+      //await _googleSignIn.signOut();
+      // await _googleAuthService.clearTokensOnBackend();
+      // await storage.deleteAll();
       if (_googleSignIn.currentUser == null) {
-        print("User is signed out");
-        return "User is signed out";
+        print("User is disconnected");
+        return "User is disconnected";
       } else {
-        print("Sign out failed");
-        return "Sign out failed";
+        print("Disconnect failed");
+        return "Disconnect failed";
       }
     } catch (e) {
       print(e);
       return "Error: $e";
+    }
+  }
+
+  // google sign out method
+  Future<void> googleSignOut(BuildContext context) async {
+    try {
+      await _googleSignIn.signOut();
+
+      if (_googleSignIn.currentUser == null) {
+        print("User is signed out");
+      } else {
+        print("Sign out failed");
+      }
+    } catch (e) {
+      print(e);
+      throw Exception('Google sign-out failed: $e');
     }
   }
 }
