@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:universal_html/html.dart' as html;
-
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../config/env_variables_config.dart';
