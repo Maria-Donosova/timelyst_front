@@ -166,12 +166,6 @@ class GoogleSignInOutService {
     try {
       //await _googleSignIn.disconnect();
       await _googleSignIn.signOut();
-
-      if (kIsWeb) {
-        // Redirect to Google's logout endpoint
-        html.window.location.href = 'https://accounts.google.com/Logout';
-      }
-
       print("User signed out and cookies cleared");
     } catch (e) {
       print(e);
