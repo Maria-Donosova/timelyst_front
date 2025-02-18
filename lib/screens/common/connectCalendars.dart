@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../widgets/shared/customAppbar.dart';
 import '../../services/googleIntegration/googleOrchestrator.dart';
-import '../../services/connected_accounts.dart';
 
 import 'agenda.dart';
 import 'calendarSettings.dart';
@@ -14,10 +12,8 @@ class ConnectCal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ConnectedAccounts(),
-      child: _ConnectCalBody(),
-    );
+    // Remove the ChangeNotifierProvider since it's no longer needed
+    return _ConnectCalBody();
   }
 }
 
@@ -55,7 +51,6 @@ class _ConnectCalBody extends StatelessWidget {
                     final result =
                         await GoogleOrchestrator().signInAndFetchCalendars(
                       context,
-                      Provider.of<ConnectedAccounts>(context, listen: false),
                     );
 
                     if (result['email'] != null) {

@@ -6,7 +6,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../../config/env_variables_config.dart';
 
 import 'googleAuthService.dart';
-import '../connected_accounts.dart';
 
 class GoogleSignInOutService {
   static final GoogleSignInOutService _instance =
@@ -57,8 +56,7 @@ class GoogleSignInOutService {
   GoogleAuthService _googleAuthService = GoogleAuthService();
   //ConnectedAccounts _connectedAccounts = ConnectedAccounts();
 
-  Future<Map<String, dynamic>> googleSignIn(
-      BuildContext context, ConnectedAccounts connectedAccounts) async {
+  Future<Map<String, dynamic>> googleSignIn(BuildContext context) async {
     print("entering googleSignIn");
     if (kIsWeb) {
       print("kIsWeb is true");
@@ -75,9 +73,6 @@ class GoogleSignInOutService {
             if (response['success']) {
               print('Success: ${response['message']}');
               print('User email: ${response['email']}');
-
-              // Add the email to the connected accounts
-              connectedAccounts.addAccount(response['email']);
 
               // Return the email and success message
               return {

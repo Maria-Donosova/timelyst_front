@@ -4,7 +4,7 @@ import 'googleSignInOut.dart';
 import 'googleCalendarService.dart';
 
 import '../../models/calendars.dart';
-import '../connected_accounts.dart';
+
 import '../../screens/common/calendarSettings.dart';
 
 class GoogleOrchestrator {
@@ -15,14 +15,12 @@ class GoogleOrchestrator {
   // Orchestrate the Google Sign-In and Calendar Fetching Process
   Future<Map<String, dynamic>> signInAndFetchCalendars(
     BuildContext context,
-    ConnectedAccounts connectedAccounts,
   ) async {
     print("Entering signInAndFetchCalendars");
     try {
       // Step 1: Sign in with Google
       final signInResult = await _googleSingInOutService.googleSignIn(
         context,
-        connectedAccounts,
       );
       print("Sign-in result: $signInResult");
 
