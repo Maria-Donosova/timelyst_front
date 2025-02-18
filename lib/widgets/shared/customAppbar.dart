@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timelyst_flutter/services/googleIntegration/googleSignInOut.dart';
 import '../../services/authService.dart';
 import '../../screens/common/connectCalendars.dart';
 import '../../screens/common/account.dart';
@@ -56,7 +57,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   List<Widget> _buildActions(BuildContext context, AuthProvider authProvider) {
-    final AuthService authService = AuthService();
+    final authService = AuthService();
+    final googleSignInService = GoogleSignInOutService();
 
     return [
       if (authProvider.isLoggedIn) ...[
@@ -96,12 +98,30 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             PopupMenuItem<_profileView>(
               value: _profileView.logout,
               child: Text('Logout'),
-              onTap: () {
-                authProvider.logout();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LogInScreen()),
-                );
+              onTap: () async {
+                try {
+                  // Await all async operations sequentially
+                  await googleSignInService.googleSignOut();
+                  await authProvider.logout();
+                  // Navigate AFTER operations complete
+
+                  if (context.mounted) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => LogInScreen()),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Logout failed: $e')),
+                    );
+                  }
+                  // Navigator.pushReplacement(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => LogInScreen()),
+                  // );
+                }
               },
             ),
           ],
