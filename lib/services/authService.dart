@@ -32,6 +32,7 @@ class AuthService {
     print("Entering clearAuthToken");
     try {
       await _storage.delete(key: _authTokenKey);
+      print("Cleared");
     } catch (e) {
       print('Error clearing auth token: $e');
       rethrow;
