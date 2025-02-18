@@ -70,10 +70,6 @@ class _ConnectCalBody extends StatelessWidget {
                           'email': result['email'],
                         },
                       );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(result['message'])),
-                      );
                     }
                   },
                 ),
