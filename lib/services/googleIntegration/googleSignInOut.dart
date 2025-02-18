@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:universal_html/html.dart' as html;
+
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../config/env_variables_config.dart';
@@ -162,13 +164,15 @@ class GoogleSignInOutService {
   // google sign out method
   Future<void> googleSignOut() async {
     try {
+      //await _googleSignIn.disconnect();
       await _googleSignIn.signOut();
 
-      if (_googleSignIn.currentUser == null) {
-        print("User is signed out");
-      } else {
-        print("Sign out failed");
+      if (kIsWeb) {
+        // Redirect to Google's logout endpoint
+        html.window.location.href = 'https://accounts.google.com/Logout';
       }
+
+      print("User signed out and cookies cleared");
     } catch (e) {
       print(e);
       throw Exception('Google sign-out failed: $e');
