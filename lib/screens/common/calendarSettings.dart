@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'agenda.dart';
+
+import '../../models/calendars.dart';
+import '../../services/googleIntegration/googleOrchestrator.dart';
 import '../../widgets/shared/customAppbar.dart';
 import '../../widgets/shared/categories.dart';
-import '../../models/calendars.dart';
+import 'agenda.dart';
 
 class CalendarSettings extends StatefulWidget {
   final List<Calendar> calendars;
@@ -213,30 +215,39 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     }).toList();
   }
 
-  void _navigateToAgenda() {
-    // final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
-    //   final index = entry.key;
-    //   return Calendar(
-    //     user: entry.value.user,
-    //     title: entry.value.title,
-    //     category: _selectedCategories[index],
-    //     // Add other necessary fields from import settings
-    //     // ...
-    //   );
-    // }).toList();
+  Future<void> _navigateToAgenda() async {
+// Prepare the selected calendars with the chosen import settings and categories
+    final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
+      final index = entry.key;
+      return Calendar(
+        user: entry.value.user,
+        title: entry.value.title,
+        category: _selectedCategories[index],
+        //importSettings: _importSettingsList[index],
+        // Add other necessary fields from the original calendar
+        // ...
+      );
+    }).toList();
 
-    //Consider change the above to the below
     // Save selected calendars using the orchestrator
-    // await GoogleOrchestrator().saveSelectedCalendars(
-    //     widget.userId, widget.email, _selectedCalendars);
-    // print("Widget User ID: ${widget.userId}");
-    // print("Widget email: ${widget.email}");
+    try {
+      await GoogleOrchestrator().saveSelectedCalendars(
+        widget.userId,
+        widget.email,
+        _selectedCalendars,
+      );
+      print("Selected calendars saved successfully.");
+    } catch (e) {
+      print("Failed to save selected calendars: $e");
+      // Handle the error as needed
+    }
 
+    // Navigate to the Agenda screen
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => Agenda(
-            // calendars: selectedCalendars,
+            //calendars: _selectedCalendars,
             // userId: widget.userId,
             // email: widget.email,
             ),
