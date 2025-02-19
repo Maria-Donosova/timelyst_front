@@ -90,7 +90,8 @@ class _CalendarSettingsState extends State<CalendarSettings> {
   }
 
   Widget _buildCalendarImportSettings(int index) {
-    final importSelection = _selectedMetadata[index];
+    final calendar = widget.calendars[index];
+    //final importSelection = _selectedMetadata[index];
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Column(
@@ -104,61 +105,59 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                 // 'All' Checkbox
                 _buildCheckbox(
                   'All',
-                  importSelection["subject"]! &&
-                      importSelection["description"]! &&
-                      importSelection["conferenceInfo"]! &&
-                      importSelection["organizer"]! &&
-                      importSelection["recipients"]!,
+                  calendar.importAll,
                   (value) {
                     bool newValue = value ?? false;
                     setState(() {
-                      importSelection["subject"] = newValue;
-                      importSelection["description"] = newValue;
-                      importSelection["conferenceInfo"] = newValue;
-                      importSelection["organizer"] = newValue;
-                      importSelection["recipients"] = newValue;
+                      calendar.importAll = newValue;
+                      calendar.importSubject = newValue;
+                      calendar.importBody = newValue;
+                      calendar.importConferenceInfo = newValue;
+                      calendar.importOrganizer = newValue;
+                      calendar.importRecipients = newValue;
                     });
                   },
                 ),
+
                 // Individual Checkboxes
                 _buildCheckbox(
                   'Subject',
-                  importSelection["subject"]!,
+                  calendar.importSubject,
                   (value) => setState(() {
-                    importSelection["subject"] = value ?? false;
-                    _updateAllCheckboxState(importSelection);
+                    calendar.importSubject = value ?? false;
+                    _updateAllCheckboxState(calendar);
                   }),
                 ),
                 _buildCheckbox(
                   'Description',
-                  importSelection["description"]!,
+                  calendar.importBody,
                   (value) => setState(() {
-                    importSelection["description"] = value ?? false;
-                    _updateAllCheckboxState(importSelection);
+                    calendar.importBody = value ?? false;
+                    _updateAllCheckboxState(calendar);
                   }),
                 ),
                 _buildCheckbox(
                   'Conference Info',
-                  importSelection["conferenceInfo"]!,
+                  calendar.importConferenceInfo,
                   (value) => setState(() {
-                    importSelection["conferenceInfo"] = value ?? false;
-                    _updateAllCheckboxState(importSelection);
+                    calendar.importConferenceInfo = value ?? false;
+                    _updateAllCheckboxState(calendar);
                   }),
                 ),
                 _buildCheckbox(
                   'Organizer',
-                  importSelection["organizer"]!,
+                  calendar.importOrganizer,
                   (value) => setState(() {
-                    importSelection["organizer"] = value ?? false;
-                    _updateAllCheckboxState(importSelection);
+                    calendar.importOrganizer = value ?? false;
+                    _updateAllCheckboxState(calendar);
                   }),
                 ),
                 _buildCheckbox(
                   'Recipients',
-                  importSelection["recipients"]!,
+                  calendar.importRecipients,
                   (value) => setState(() {
-                    importSelection["recipients"] = value ?? false;
-                    _updateAllCheckboxState(importSelection);
+                    calendar.importRecipients = value ?? false;
+                    _updateAllCheckboxState(calendar);
                   }),
                 ),
               ],
@@ -170,19 +169,14 @@ class _CalendarSettingsState extends State<CalendarSettings> {
   }
 
   // Helper method to update 'All' checkbox state
-  void _updateAllCheckboxState(Map<String, bool> importSelection) {
-    bool allChecked = importSelection["subject"]! &&
-        importSelection["description"]! &&
-        importSelection["conferenceInfo"]! &&
-        importSelection["organizer"]! &&
-        importSelection["recipients"]!;
-    if (allChecked) {
-      importSelection["subject"] = true;
-      importSelection["description"] = true;
-      importSelection["conferenceInfo"] = true;
-      importSelection["organizer"] = true;
-      importSelection["recipients"] = true;
-    }
+  // Helper method to update 'All' checkbox state
+  void _updateAllCheckboxState(Calendar calendar) {
+    bool allChecked = calendar.importSubject &&
+        calendar.importBody &&
+        calendar.importConferenceInfo &&
+        calendar.importOrganizer &&
+        calendar.importRecipients;
+    calendar.importAll = allChecked;
   }
 
   Widget _buildCheckbox(String label, bool value, Function(bool?) onChanged) {
@@ -244,40 +238,36 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
   Future<void> _navigateToAgenda() async {
     // Prepare the selected calendars with the chosen import settings and categories
-    final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
-      final index = entry.key;
-      final calendar = entry.value;
-      final selectedMetadata = _selectedMetadata[index];
-
+    final _selectedCalendars = widget.calendars.map((calendar) {
       return Calendar(
         user: calendar.user,
-        title: selectedMetadata["subject"]! ? calendar.title : '',
-        description:
-            selectedMetadata["description"]! ? calendar.description : '',
+        title: calendar.title,
+        category: _selectedCategories[widget.calendars.indexOf(calendar)],
+        // Copy other fields from the original calendar
+        kind: calendar.kind,
+        etag: calendar.etag,
+        id: calendar.id,
+        description: calendar.description,
         sourceCalendar: calendar.sourceCalendar,
         timeZone: calendar.timeZone,
-        category: _selectedCategories[index],
         catColor: calendar.catColor,
         defaultReminders: calendar.defaultReminders,
         notificationSettings: calendar.notificationSettings,
-        conferenceProperties: selectedMetadata["conferenceInfo"]!
-            ? calendar.conferenceProperties
-            : {},
-        organizer: selectedMetadata["organizer"]! ? calendar.organizer : null,
-        recipients:
-            selectedMetadata["recipients"]! ? calendar.recipients : null,
+        conferenceProperties: calendar.conferenceProperties,
+        organizer: calendar.organizer,
+        recipients: calendar.recipients,
+        // Copy import settings
+        importAll: calendar.importAll,
+        importSubject: calendar.importSubject,
+        importBody: calendar.importBody,
+        importConferenceInfo: calendar.importConferenceInfo,
+        importOrganizer: calendar.importOrganizer,
+        importRecipients: calendar.importRecipients,
       );
     }).toList();
 
     // Save selected calendars using the orchestrator
     try {
-      final userId = widget.userId;
-      final email = widget.email;
-
-      print("Widget userId: $userId");
-      print("Widget email: $email");
-      print("Selected calendars: $_selectedCalendars");
-
       await GoogleOrchestrator().saveSelectedCalendars(
         widget.userId,
         widget.email,
@@ -301,6 +291,66 @@ class _CalendarSettingsState extends State<CalendarSettings> {
       ),
     );
   }
+
+  // Future<void> _navigateToAgenda() async {
+  //   // Prepare the selected calendars with the chosen import settings and categories
+  //   final _selectedCalendars = widget.calendars.asMap().entries.map((entry) {
+  //     final index = entry.key;
+  //     final calendar = entry.value;
+  //     final selectedMetadata = _selectedMetadata[index];
+
+  //     return Calendar(
+  //       user: calendar.user,
+  //       title: selectedMetadata["subject"]! ? calendar.title : '',
+  //       description:
+  //           selectedMetadata["description"]! ? calendar.description : '',
+  //       sourceCalendar: calendar.sourceCalendar,
+  //       timeZone: calendar.timeZone,
+  //       category: _selectedCategories[index],
+  //       catColor: calendar.catColor,
+  //       defaultReminders: calendar.defaultReminders,
+  //       notificationSettings: calendar.notificationSettings,
+  //       conferenceProperties: selectedMetadata["conferenceInfo"]!
+  //           ? calendar.conferenceProperties
+  //           : {},
+  //       organizer: selectedMetadata["organizer"]! ? calendar.organizer : null,
+  //       recipients:
+  //           selectedMetadata["recipients"]! ? calendar.recipients : null,
+  //     );
+  //   }).toList();
+
+  //   // Save selected calendars using the orchestrator
+  //   try {
+  //     final userId = widget.userId;
+  //     final email = widget.email;
+
+  //     print("Widget userId: $userId");
+  //     print("Widget email: $email");
+  //     print("Selected calendars: $_selectedCalendars");
+
+  //     await GoogleOrchestrator().saveSelectedCalendars(
+  //       widget.userId,
+  //       widget.email,
+  //       _selectedCalendars,
+  //     );
+  //     print("Selected calendars saved successfully.");
+  //   } catch (e) {
+  //     print("Failed to save selected calendars: $e");
+  //     // Handle the error as needed
+  //   }
+
+  //   // Navigate to the Agenda screen
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => Agenda(
+  //           // calendars: _selectedCalendars,
+  //           // userId: widget.userId,
+  //           // email: widget.email,
+  //           ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
