@@ -18,6 +18,14 @@ class Calendar {
   final String? organizer;
   final List<String>? recipients;
 
+  // Add fields for import settings
+  bool importAll;
+  bool importSubject;
+  bool importBody;
+  bool importConferenceInfo;
+  bool importOrganizer;
+  bool importRecipients;
+
   Calendar({
     required this.user,
     this.kind,
@@ -35,6 +43,13 @@ class Calendar {
     this.conferenceProperties = const {},
     this.organizer,
     this.recipients,
+    // Initialize import settings
+    this.importAll = false,
+    this.importSubject = false,
+    this.importBody = false,
+    this.importConferenceInfo = false,
+    this.importOrganizer = false,
+    this.importRecipients = false,
   });
 
   // Convert JSON to Calendar object
@@ -55,9 +70,15 @@ class Calendar {
           (json['notificationSettings'] as Map<String, dynamic>?) ?? {},
       conferenceProperties:
           (json['conferenceProperties'] as Map<String, dynamic>?) ?? {},
-      // Add organizer and recipients fields
       organizer: json['organizer'],
       recipients: (json['recipients'] as List<dynamic>?)?.cast<String>(),
+      // Add import settings from JSON (if needed)
+      importAll: json['importAll'] ?? false,
+      importSubject: json['importSubject'] ?? false,
+      importBody: json['importBody'] ?? false,
+      importConferenceInfo: json['importConferenceInfo'] ?? false,
+      importOrganizer: json['importOrganizer'] ?? false,
+      importRecipients: json['importRecipients'] ?? false,
     );
   }
 
@@ -77,16 +98,17 @@ class Calendar {
       'defaultReminders': defaultReminders,
       'notificationSettings': notificationSettings,
       'conferenceProperties': conferenceProperties,
-      // Add organizer and recipients fields
+
       'organizer': organizer,
       'recipients': recipients,
       // Add ImportSettings fields to JSON
-      // 'subject': subject,
-      // 'body': body,
-      // 'attachments': attachments,
-      // 'conferenceInfo': conferenceInfo,
-      // 'importOrganizer': importOrganizer,
-      // 'importRecipients': importRecipients,
+// Add import settings to JSON
+      'importAll': importAll,
+      'importSubject': importSubject,
+      'importBody': importBody,
+      'importConferenceInfo': importConferenceInfo,
+      'importOrganizer': importOrganizer,
+      'importRecipients': importRecipients,
     };
   }
 
