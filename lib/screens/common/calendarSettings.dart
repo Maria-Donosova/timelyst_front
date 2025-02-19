@@ -271,6 +271,13 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
     // Save selected calendars using the orchestrator
     try {
+      final userId = widget.userId;
+      final email = widget.email;
+
+      print("Widget userId: $userId");
+      print("Widget email: $email");
+      print("Selected calendars: $_selectedCalendars");
+
       await GoogleOrchestrator().saveSelectedCalendars(
         widget.userId,
         widget.email,
