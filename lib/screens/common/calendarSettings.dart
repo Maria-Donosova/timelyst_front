@@ -282,60 +282,6 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     );
   }
 
-  // Future<void> _navigateToAgenda() async {
-  //   // Prepare the selected calendars with the chosen import settings and categories
-  //   final _selectedCalendars = widget.calendars.map((calendar) {
-  //     return Calendar(
-  //       user: calendar.user,
-  //       title: calendar.title,
-  //       category: _selectedCategories[widget.calendars.indexOf(calendar)],
-  //       kind: calendar.kind,
-  //       etag: calendar.etag,
-  //       id: calendar.id,
-  //       description: calendar.description,
-  //       sourceCalendar: calendar.sourceCalendar,
-  //       timeZone: calendar.timeZone,
-  //       catColor: calendar.catColor,
-  //       defaultReminders: calendar.defaultReminders,
-  //       notificationSettings: calendar.notificationSettings,
-  //       conferenceProperties: calendar.conferenceProperties,
-  //       organizer: calendar.organizer,
-  //       recipients: calendar.recipients,
-  //       importAll: calendar.importAll,
-  //       importSubject: calendar.importSubject,
-  //       importBody: calendar.importBody,
-  //       importConferenceInfo: calendar.importConferenceInfo,
-  //       importOrganizer: calendar.importOrganizer,
-  //       importRecipients: calendar.importRecipients,
-  //     );
-  //   }).toList();
-
-  //   // Save selected calendars using the orchestrator
-  //   try {
-  //     await GoogleOrchestrator().saveSelectedCalendars(
-  //       widget.userId,
-  //       widget.email,
-  //       _selectedCalendars,
-  //     );
-  //     print("Selected calendars saved successfully.");
-  //   } catch (e) {
-  //     print("Failed to save selected calendars: $e");
-  //     // Handle the error as needed
-  //   }
-
-  //   // Navigate to the Agenda screen
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => Agenda(
-  //           // calendars: _selectedCalendars,
-  //           // userId: widget.userId,
-  //           // email: widget.email,
-  //           ),
-  //     ),
-  //   );
-  //}
-
   @override
   Widget build(BuildContext context) {
     print("Building CalendarSettings with:");
