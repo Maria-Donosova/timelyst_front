@@ -27,11 +27,6 @@ class CalendarsService {
         }
     ''';
 
-    //Define the variables
-    // final Map<String, dynamic> variables = {
-    //   'userId': userId,
-    // };
-
     final String encodedQuery = Uri.encodeComponent(query);
     // Send the HTTP POST request
     final response = await http.get(
