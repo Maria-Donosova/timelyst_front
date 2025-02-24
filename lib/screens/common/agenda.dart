@@ -4,7 +4,12 @@ import '../../widgets/layout/left_panel.dart';
 import '../../widgets/layout/right_panel.dart';
 
 class Agenda extends StatelessWidget {
-  const Agenda({Key? key}) : super(key: key);
+  const Agenda({
+    Key? key,
+    calendars,
+    userId,
+    email,
+  }) : super(key: key);
   static const routeName = '/tasks-month-calendar';
 
   @override
