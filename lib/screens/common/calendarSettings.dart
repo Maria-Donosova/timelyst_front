@@ -273,10 +273,10 @@ class _CalendarSettingsState extends State<CalendarSettings> {
         context,
         MaterialPageRoute(
           builder: (context) => Agenda(
-              // calendars: _selectedCalendars,
-              // userId: widget.userId,
-              // email: widget.email,
-              ),
+            calendars: _selectedCalendars,
+            userId: widget.userId,
+            email: widget.email,
+          ),
         ),
       );
     } catch (e) {
