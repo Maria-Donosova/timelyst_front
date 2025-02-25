@@ -1,32 +1,103 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-// import 'package:timelyst_flutter/models/timeEvent.dart'; // Assuming you have a TimeEvent model
-// import 'package:timelyst_flutter/models/dayEvent.dart'; // Assuming you have a DayEvent model
+
+import '../../models/customApp.dart';
+import '../../models/dayEvent.dart';
+import '../../models/timeEvent.dart';
+import '../utils/eventsMapper.dart';
 
 class EventService {
   static const String _baseUrl = 'http://localhost:3000/graphql';
 
-  static Future<List<TimeEvent>> fetchTimeEvents(
+  // Fetch DayEvents and map them to CustomAppointment
+  static Future<List<CustomAppointment>> fetchDayEvents(
+      String userId, String authToken) async {
+    final String query = '''
+      query DayEvents(\$userId: String!) {
+        dayEvents(userId: \$userId) {
+          _id
+          userId
+          createdBy
+          user_calendars
+          calendarId
+          googleEventId
+          googleKind
+          googleEtag
+          creator
+          organizer
+          event_title
+          start
+          end
+          is_allDay
+          recurrence
+          recurrenceId
+          exceptionDates
+          day_eventInstance
+          category
+          event_body
+          event_location
+          event_conferencedetails
+          reminder
+          holiday
+          createdAt
+          updatedAt
+        }
+      }
+    ''';
+
+    final response = await http.post(
+      Uri.parse(_baseUrl),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $authToken',
+      },
+      body: jsonEncode({
+        'query': query,
+        'variables': {'userId': userId},
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['errors'] != null) {
+        throw Exception('Failed to fetch day events: ${data['errors']}');
+      }
+      final List<dynamic> dayEventsJson = data['data']['dayEvents'];
+      final List<DayEvent> dayEvents =
+          dayEventsJson.map((json) => DayEvent.fromJson(json)).toList();
+      return dayEvents
+          .map((event) => EventMapper.mapDayEventToCustomAppointment(event))
+          .toList();
+    } else {
+      throw Exception('Failed to fetch day events: ${response.statusCode}');
+    }
+  }
+
+  // Fetch TimeEvents and map them to CustomAppointment
+  static Future<List<CustomAppointment>> fetchTimeEvents(
       String userId, String authToken) async {
     final String query = '''
       query TimeEvents(\$userId: String!) {
         timeEvents(userId: \$userId) {
-          id
-          event_title
-          category
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
+          _id
+          userId
+          createdBy
           user_calendars
-          source_calendar
-          event_organizer
+          calendarId
+          googleEventId
+          googleKind
+          googleEtag
+          creator
+          organizer
+          event_title
+          start
+          end
           is_allDay
+          recurrence
           recurrenceId
-          recurrenceRule
           exceptionDates
           time_eventInstance
-          event_attendees
+          category
           event_body
           event_location
           event_conferenceDetails
@@ -56,88 +127,41 @@ class EventService {
         throw Exception('Failed to fetch time events: ${data['errors']}');
       }
       final List<dynamic> timeEventsJson = data['data']['timeEvents'];
-      return timeEventsJson.map((json) => TimeEvent.fromJson(json)).toList();
+      final List<TimeEvent> timeEvents =
+          timeEventsJson.map((json) => TimeEvent.fromJson(json)).toList();
+      return timeEvents
+          .map((event) => EventMapper.mapTimeEventToCustomAppointment(event))
+          .toList();
     } else {
       throw Exception('Failed to fetch time events: ${response.statusCode}');
     }
   }
 
-  static Future<List<DayEvent>> fetchDayEvents(
-      String userId, String authToken) async {
-    final String query = '''
-      query DayEvents(\$userId: String!) {
-        dayEvents(userId: \$userId) {
-          id
-          event_title
-          category
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
-          user_calendars
-          source_calendar
-          event_organizer
-          recurrenceId
-          recurrenceRule
-          exceptionDates
-          day_eventInstance
-          event_attendees
-          event_body
-          event_location
-          event_conferenceDetails
-          reminder
-          holiday
-          createdAt
-          updatedAt
-        }
-      }
-    ''';
-
-    final response = await http.post(
-      Uri.parse(_baseUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $authToken',
-      },
-      body: jsonEncode({
-        'query': query,
-        'variables': {'userId': userId},
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['errors'] != null) {
-        throw Exception('Failed to fetch day events: ${data['errors']}');
-      }
-      final List<dynamic> dayEventsJson = data['data']['dayEvents'];
-      return dayEventsJson.map((json) => DayEvent.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to fetch day events: ${response.statusCode}');
-    }
-  }
-
-  static Future<TimeEvent> createTimeEvent(
+  // Create a TimeEvent and map it to CustomAppointment
+  static Future<CustomAppointment> createTimeEvent(
       Map<String, dynamic> timeEventInput, String authToken) async {
     final String mutation = '''
       mutation CreateTimeEvent(\$timeEventInput: TimeEventInput!) {
         createTimeEvent(timeEventInput: \$timeEventInput) {
-          id
-          event_title
-          category
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
+          _id
+          userId
+          createdBy
           user_calendars
-          source_calendar
-          event_organizer
+          calendarId
+          googleEventId
+          googleKind
+          googleEtag
+          creator
+          organizer
+          event_title
+          start
+          end
           is_allDay
+          recurrence
           recurrenceId
-          recurrenceRule
           exceptionDates
           time_eventInstance
-          event_attendees
+          category
           event_body
           event_location
           event_conferenceDetails
@@ -166,35 +190,42 @@ class EventService {
       if (data['errors'] != null) {
         throw Exception('Failed to create time event: ${data['errors']}');
       }
-      return TimeEvent.fromJson(data['data']['createTimeEvent']);
+      final TimeEvent timeEvent =
+          TimeEvent.fromJson(data['data']['createTimeEvent']);
+      return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
     } else {
       throw Exception('Failed to create time event: ${response.statusCode}');
     }
   }
 
-  static Future<DayEvent> createDayEvent(
+  // Create a DayEvent and map it to CustomAppointment
+  static Future<CustomAppointment> createDayEvent(
       Map<String, dynamic> dayEventInput, String authToken) async {
     final String mutation = '''
       mutation CreateDayEvent(\$dayEventInput: DayEventInput!) {
         createDayEvent(dayEventInput: \$dayEventInput) {
-          id
-          event_title
-          category
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
+          _id
+          userId
+          createdBy
           user_calendars
-          source_calendar
-          event_organizer
+          calendarId
+          googleEventId
+          googleKind
+          googleEtag
+          creator
+          organizer
+          event_title
+          start
+          end
+          is_allDay
+          recurrence
           recurrenceId
-          recurrenceRule
           exceptionDates
           day_eventInstance
-          event_attendees
+          category
           event_body
           event_location
-          event_conferenceDetails
+          event_conferencedetails
           reminder
           holiday
           createdAt
@@ -220,33 +251,39 @@ class EventService {
       if (data['errors'] != null) {
         throw Exception('Failed to create day event: ${data['errors']}');
       }
-      return DayEvent.fromJson(data['data']['createDayEvent']);
+      final DayEvent dayEvent =
+          DayEvent.fromJson(data['data']['createDayEvent']);
+      return EventMapper.mapDayEventToCustomAppointment(dayEvent);
     } else {
       throw Exception('Failed to create day event: ${response.statusCode}');
     }
   }
 
-  static Future<TimeEvent> updateTimeEvent(
+  // Update a TimeEvent and map it to CustomAppointment
+  static Future<CustomAppointment> updateTimeEvent(
       String id, Map<String, dynamic> timeEventInput, String authToken) async {
     final String mutation = '''
       mutation UpdateTimeEvent(\$id: ID!, \$timeEventInput: TimeEventInput!) {
         updateTimeEvent(id: \$id, timeEventInput: \$timeEventInput) {
-          id
-          event_title
-          category
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
+          _id
+          userId
+          createdBy
           user_calendars
-          source_calendar
-          event_organizer
+          calendarId
+          googleEventId
+          googleKind
+          googleEtag
+          creator
+          organizer
+          event_title
+          start
+          end
           is_allDay
+          recurrence
           recurrenceId
-          recurrenceRule
           exceptionDates
           time_eventInstance
-          event_attendees
+          category
           event_body
           event_location
           event_conferenceDetails
@@ -275,35 +312,42 @@ class EventService {
       if (data['errors'] != null) {
         throw Exception('Failed to update time event: ${data['errors']}');
       }
-      return TimeEvent.fromJson(data['data']['updateTimeEvent']);
+      final TimeEvent timeEvent =
+          TimeEvent.fromJson(data['data']['updateTimeEvent']);
+      return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
     } else {
       throw Exception('Failed to update time event: ${response.statusCode}');
     }
   }
 
-  static Future<DayEvent> updateDayEvent(
+  // Update a DayEvent and map it to CustomAppointment
+  static Future<CustomAppointment> updateDayEvent(
       String id, Map<String, dynamic> dayEventInput, String authToken) async {
     final String mutation = '''
       mutation UpdateDayEvent(\$id: ID!, \$dayEventInput: DayEventInput!) {
         updateDayEvent(id: \$id, dayEventInput: \$dayEventInput) {
-          id
-          event_title
-          category
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
+          _id
+          userId
+          createdBy
           user_calendars
-          source_calendar
-          event_organizer
+          calendarId
+          googleEventId
+          googleKind
+          googleEtag
+          creator
+          organizer
+          event_title
+          start
+          end
+          is_allDay
+          recurrence
           recurrenceId
-          recurrenceRule
           exceptionDates
           day_eventInstance
-          event_attendees
+          category
           event_body
           event_location
-          event_conferenceDetails
+          event_conferencedetails
           reminder
           holiday
           createdAt
@@ -329,12 +373,15 @@ class EventService {
       if (data['errors'] != null) {
         throw Exception('Failed to update day event: ${data['errors']}');
       }
-      return DayEvent.fromJson(data['data']['updateDayEvent']);
+      final DayEvent dayEvent =
+          DayEvent.fromJson(data['data']['updateDayEvent']);
+      return EventMapper.mapDayEventToCustomAppointment(dayEvent);
     } else {
       throw Exception('Failed to update day event: ${response.statusCode}');
     }
   }
 
+  // Delete a TimeEvent
   static Future<bool> deleteTimeEvent(String id, String authToken) async {
     final String mutation = '''
       mutation DeleteTimeEvent(\$id: ID!) {
@@ -365,6 +412,7 @@ class EventService {
     }
   }
 
+  // Delete a DayEvent
   static Future<bool> deleteDayEvent(String id, String authToken) async {
     final String mutation = '''
       mutation DeleteDayEvent(\$id: ID!) {
