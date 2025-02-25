@@ -45,7 +45,7 @@ Widget appointmentBuilder(BuildContext context,
               Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Text(
-                  customAppointment.subject,
+                  customAppointment.title,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
@@ -87,7 +87,7 @@ Widget appointmentBuilder(BuildContext context,
         child: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Text(
-            customAppointment.subject,
+            customAppointment.title,
             style: TextStyle(
               color: Theme.of(context).colorScheme.primary,
             ),
