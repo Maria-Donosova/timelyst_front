@@ -1,55 +1,53 @@
 import 'package:flutter/material.dart';
-import '../models/calendars.dart';
 
 class CustomAppointment {
+  final String id;
+  final String organizer;
+  final String title;
+  final String description;
+  final DateTime startTime;
+  final String startTimeZone;
+  final DateTime endTime;
+  final String endTimeZone;
+  final String catTitle;
+  final Color catColor;
+  final String participants;
+  final bool isAllDay;
+  final String location;
+  final String? recurrenceRule;
+  final List<DateTime> exceptionDates;
+
   CustomAppointment({
-    this.id = '',
-    // this.creator = '',
-    // List<UserProfile> userProfiles = '',
-    this.userCalendars = const [],
-    // this.eventOrganizer = '',
-    this.subject = '',
+    required this.id,
+    this.organizer = '',
+    required this.title,
+    required this.description,
     required this.startTime,
-    required this.endTime,
-    // this.startTimeZone,
-    // this.endTimeZone,
-    this.isAllDay = false,
-    // this.recurrenceId,
-    this.recurrenceRule = '',
-    // this.recurrenceExceptionDates,
-    this.catTitle = '',
-    this.catColor = Colors.grey,
-    this.participants = '',
-    this.description = '',
-    this.location = '',
-    // this.resourceIds,
-    // required DateTime dateCreated,
-    // required DateTime dateChanged,
     this.startTimeZone = '',
+    required this.endTime,
     this.endTimeZone = '',
+    required this.catTitle,
+    this.catColor = Colors.white,
+    required this.participants,
+    required this.isAllDay,
+    required this.location,
+    required this.recurrenceRule,
+    this.exceptionDates = const [],
   });
-  String id;
-  // String? creator;
-  // List<UserProfile> userProfiles;
-  late List<Calendar> userCalendars;
-  // String? eventOrganizer;
-  String subject;
-  DateTime startTime;
-  DateTime endTime;
-  // String? startTimeZone;
-  // String? endTimeZone;
-  bool isAllDay;
-  // Object? recurrenceId;
-  String? recurrenceRule;
-  // List<DateTime>? recurrenceExceptionDates;
-  String catTitle;
-  Color catColor;
-  String participants;
-  String description;
-  String location;
-  // List<Object>? resourceIds;
-  // DateTime dateCreated;
-  // DateTime dateChanged;
-  String startTimeZone;
-  String endTimeZone;
+
+  // Convert CustomAppointment to JSON (if needed)
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'startTime': startTime.toIso8601String(),
+      'endTime': endTime.toIso8601String(),
+      'isAllDay': isAllDay,
+      'location': location,
+      'organizer': organizer,
+      'recurrenceRule': recurrenceRule,
+      'exceptionDates': exceptionDates.map((e) => e.toIso8601String()).toList(),
+    };
+  }
 }

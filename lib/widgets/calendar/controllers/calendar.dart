@@ -266,7 +266,7 @@ class _CalendarWState extends State<CalendarW> {
                 // userProfiles: [],
                 userCalendars: [],
                 // eventOrganizer: '',
-                subject: _customAppointment.subject,
+                subject: _customAppointment.title,
                 dateText: _dateText,
                 startTime: _startTimeText,
                 endTime: _endTimeText,
@@ -314,11 +314,12 @@ class _CalendarWState extends State<CalendarW> {
 //dummy events
 List<CustomAppointment> _appointments = [
   CustomAppointment(
-    subject: 'Meeting with Team',
+    id: '',
+    title: 'Meeting with Team',
     startTime: DateTime(2024, 09, 13, 0, 00, 0),
     endTime: DateTime(2024, 09, 16, 23, 59, 0),
     isAllDay: true,
-    // recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
+    recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
     catTitle: 'Work',
     catColor: Color.fromRGBO(8, 100, 237, 1),
     participants: 'tim@gmail.com, tom@gmail.com, cook@test.com',
@@ -326,7 +327,8 @@ List<CustomAppointment> _appointments = [
     location: 'Conference Room 1',
   ),
   CustomAppointment(
-    subject: 'Get Together',
+    id: '',
+    title: 'Get Together',
     // userCalendars: ['Gmail', 'Outlook'],
     startTime: DateTime.now().add(Duration(hours: 1)),
     endTime: DateTime.now().add(Duration(hours: 3)),
@@ -368,7 +370,7 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
 
   @override
   String getSubject(int index) {
-    return _appointments[index].subject;
+    return _appointments[index].title;
   }
 
   @override
@@ -411,8 +413,8 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
       CustomAppointment _customAppointment, Appointment appointment) {
     return CustomAppointment(
       id: appointment.id.toString(),
-      userCalendars: _customAppointment.userCalendars,
-      subject: appointment.subject,
+      //userCalendars: _customAppointment.userCalendars,
+      title: appointment.subject,
       startTime: appointment.startTime,
       endTime: appointment.endTime,
       catTitle: _customAppointment.catTitle,
