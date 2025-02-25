@@ -22,6 +22,7 @@ class DayEvent {
   final String eventBody;
   final String eventLocation;
   final String eventConferenceDetails;
+  final String participants;
   final bool reminder;
   final bool holiday;
   final DateTime createdAt;
@@ -50,6 +51,7 @@ class DayEvent {
     required this.eventBody,
     required this.eventLocation,
     required this.eventConferenceDetails,
+    required this.participants,
     required this.reminder,
     required this.holiday,
     required this.createdAt,
@@ -82,6 +84,7 @@ class DayEvent {
       eventBody: json['event_body'] ?? '',
       eventLocation: json['event_location'] ?? '',
       eventConferenceDetails: json['event_conferencedetails'] ?? '',
+      participants: '',
       reminder: json['reminder'] ?? false,
       holiday: json['holiday'] ?? false,
       createdAt:
