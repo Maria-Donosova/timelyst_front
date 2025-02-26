@@ -19,7 +19,3 @@ class Task {
     required this.creator,
   });
 }
-
-
-//Task type for models to be amended once lists and notes/photos implmemented
-//Consider amending category colory to allow dynamic assignment of color values (by user) 
