@@ -85,19 +85,29 @@ class _TaskListWState extends State<TaskListW> {
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }
-    final item = _dummyTasks.removeAt(oldIndex);
-    _dummyTasks.insert(newIndex, item);
+    final item = _tasks.removeAt(oldIndex);
+    _tasks.insert(newIndex, item);
     setState(() {});
   }
 
   void _onDismissed(index) {
-    _dummyTasks.removeAt(index);
+    _tasks.removeAt(index);
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     //final mediaQuery = MediaQuery.of(context);
+
+    // Loading
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage.isNotEmpty) {
+      return Center(child: Text('Error: $_errorMessage'));
+    }
+
     return LayoutBuilder(
       builder: (ctx, constraints) {
         return Column(children: [
@@ -106,9 +116,9 @@ class _TaskListWState extends State<TaskListW> {
             child: ReorderableListView.builder(
               buildDefaultDragHandles: false,
               scrollDirection: Axis.vertical,
-              itemCount: _dummyTasks.length,
+              itemCount: _tasks.length,
               itemBuilder: (ctx, index) {
-                final item = _dummyTasks[index];
+                final item = _tasks[index];
                 return ReorderableDragStartListener(
                   key: Key(item.id),
                   index: index,
@@ -116,9 +126,9 @@ class _TaskListWState extends State<TaskListW> {
                     key: Key(item.id),
                     direction: DismissDirection.horizontal,
                     child: TaskItem(
-                      _dummyTasks[index].id,
-                      _dummyTasks[index].title,
-                      _dummyTasks[index].category,
+                      _tasks[index].id,
+                      _tasks[index].title,
+                      _tasks[index].category,
 
                       //"${task["id"]}",
                       // "${task["task_description"]}",
