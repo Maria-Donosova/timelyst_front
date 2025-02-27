@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timelyst_flutter/models/task.dart';
 
 import '../../data/tasks.dart';
 import '../shared/categories.dart';
@@ -51,7 +52,9 @@ class _TaskItemState extends State<TaskItem> {
                     id: widget.id,
                     title: widget.title,
                     category: widget.category,
-                    // Add other necessary fields
+                    dateCreated: DateTime.now(),
+                    dateChanged: DateTime.now(),
+                    creator: '',
                   ),
                   onSave: (updatedTask) async {
                     try {
