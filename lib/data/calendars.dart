@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:timelyst_flutter/models/calendars.dart';
+import '../../models/calendars.dart';
 
 class CalendarsService {
   static Future<List<Calendar>> fetchUserCalendars(
