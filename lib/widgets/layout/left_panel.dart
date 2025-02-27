@@ -23,7 +23,11 @@ class LeftPanel extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Flexible(flex: 0, child: TitleW()),
-                    Flexible(flex: 0, child: NewTaskW()),
+                    Flexible(
+                        flex: 0,
+                        child: NewTaskW(
+                          onSave: (Task) {},
+                        )),
                   ],
                 ),
               ),
