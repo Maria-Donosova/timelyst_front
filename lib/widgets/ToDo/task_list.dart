@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../data/tasks.dart';
 import '../../models/task.dart';
 import 'task_item.dart';
 
@@ -11,48 +12,73 @@ class TaskListW extends StatefulWidget {
 
 class _TaskListWState extends State<TaskListW> {
   //Dummy tasks - remove once connected to database
-  List _dummyTasks = [
-    Task(
-      id: '1234',
-      title: 'Try Me',
-      category: 'Personal',
-      dateCreated: DateTime.now().subtract(Duration(days: 2)),
-      dateChanged: DateTime.now(),
-      creator: 'Maria Donosova',
-    ),
-    Task(
-      id: '21234',
-      title: 'Dare',
-      category: 'Work',
-      dateCreated: DateTime.now().subtract(Duration(days: 1)),
-      dateChanged: DateTime.now(),
-      creator: 'Maria Donosova',
-    ),
-    Task(
-      id: '35467',
-      title: 'Destiny',
-      category: 'Friends',
-      dateCreated: DateTime.now().subtract(Duration(days: 3)),
-      dateChanged: DateTime.now(),
-      creator: 'Maria Donosova',
-    ),
-    Task(
-      id: '4567',
-      title: 'Work it out',
-      category: 'Other',
-      dateCreated: DateTime.now().subtract(Duration(days: 10)),
-      dateChanged: DateTime.now(),
-      creator: 'Maria Donosova',
-    ),
-    Task(
-      id: '5124',
-      title: 'Just do it',
-      category: 'Family',
-      dateCreated: DateTime.now().subtract(Duration(days: 7)),
-      dateChanged: DateTime.now(),
-      creator: 'Maria Donosova',
-    ),
-  ];
+  // List _dummyTasks = [
+  //   Task(
+  //     id: '1234',
+  //     title: 'Try Me',
+  //     category: 'Personal',
+  //     dateCreated: DateTime.now().subtract(Duration(days: 2)),
+  //     dateChanged: DateTime.now(),
+  //     creator: 'Maria Donosova',
+  //   ),
+  //   Task(
+  //     id: '21234',
+  //     title: 'Dare',
+  //     category: 'Work',
+  //     dateCreated: DateTime.now().subtract(Duration(days: 1)),
+  //     dateChanged: DateTime.now(),
+  //     creator: 'Maria Donosova',
+  //   ),
+  //   Task(
+  //     id: '35467',
+  //     title: 'Destiny',
+  //     category: 'Friends',
+  //     dateCreated: DateTime.now().subtract(Duration(days: 3)),
+  //     dateChanged: DateTime.now(),
+  //     creator: 'Maria Donosova',
+  //   ),
+  //   Task(
+  //     id: '4567',
+  //     title: 'Work it out',
+  //     category: 'Other',
+  //     dateCreated: DateTime.now().subtract(Duration(days: 10)),
+  //     dateChanged: DateTime.now(),
+  //     creator: 'Maria Donosova',
+  //   ),
+  //   Task(
+  //     id: '5124',
+  //     title: 'Just do it',
+  //     category: 'Family',
+  //     dateCreated: DateTime.now().subtract(Duration(days: 7)),
+  //     dateChanged: DateTime.now(),
+  //     creator: 'Maria Donosova',
+  //   ),
+  // ];
+
+  List<Task> _tasks = [];
+  bool _isLoading = true;
+  String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTasks();
+  }
+
+  Future<void> _fetchTasks() async {
+    try {
+      final tasks = await TasksService.fetchUserTasks('userId', 'authToken');
+      setState(() {
+        _tasks = tasks;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
 
   //Reodering for reoderable list logic
   void _onReorder(int oldIndex, int newIndex) {
