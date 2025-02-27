@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import '/widgets/todo/edit_task.dart';
+
+import '../../data/tasks.dart';
 import '../shared/categories.dart';
+
+import '/widgets/todo/edit_task.dart';
 
 class TaskItem extends StatefulWidget {
   final String id;
@@ -43,7 +46,26 @@ class _TaskItemState extends State<TaskItem> {
               useSafeArea: false,
               context: context,
               builder: (_) {
-                return EditTaskW();
+                return EditTaskW(
+                  task: Task(
+                    id: widget.id,
+                    title: widget.title,
+                    category: widget.category,
+                    // Add other necessary fields
+                  ),
+                  onSave: (updatedTask) async {
+                    try {
+                      await TasksService.updateTask(
+                          updatedTask.id, 'authToken', updatedTask);
+                      // Refresh the task list
+                      _fetchTasks();
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to update task: $e')),
+                      );
+                    }
+                  },
+                );
               },
             ),
             child: Row(
