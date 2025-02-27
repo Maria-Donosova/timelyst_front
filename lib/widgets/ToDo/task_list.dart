@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-//import 'package:timelyst_flutter/widgets/shared/categories.dart';
-//import 'package:timelyst_flutter/widgets/shared/categories.dart';
-//import 'package:timelyst_flutter/widgets/todo/delete_task.dart';
-//import 'package:timelyst_flutter/widgets/todo/done_task.dart';
 import '../../models/task.dart';
 import 'task_item.dart';
 
