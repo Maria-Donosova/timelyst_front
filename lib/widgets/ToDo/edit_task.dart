@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+
 import '../shared/categories.dart';
-import '../../models/task.dart';
 import '../../data/tasks.dart';
+import '../../models/task.dart';
 
 class EditTaskW extends StatefulWidget {
   final Task task;
   final Function(Task) onSave;
 
-  EditTaskW({required this.task, required this.onSave, super.key});
+  EditTaskW({
+    required this.task,
+    required this.onSave,
+  });
 
   @override
   State<EditTaskW> createState() => _EditTaskWState();
