@@ -28,8 +28,7 @@ class _NewTaskWState extends State<NewTaskW> {
       );
 
       try {
-        // Call your backend to create the task
-        // For now, we assume the task is created successfully
+        // Call your backend to create the task For now, we assume the task is created successfully
         widget.onSave(newTask); // Notify parent widget
         Navigator.of(context).pop(); // Close the bottom sheet
       } catch (e) {
