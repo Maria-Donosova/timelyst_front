@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:timelyst_flutter/providers/taskProvider.dart';
 
 import '../../screens/common/logIn.dart';
 import '../../services/googleIntegration/googleSignInOut.dart';
-import '../../widgets/ToDo/task_list.dart';
 
 import 'providers/authProvider.dart';
 
