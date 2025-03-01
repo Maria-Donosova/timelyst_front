@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'package:provider/provider.dart';
-import 'package:timelyst_flutter/screens/common/logIn.dart';
-import 'package:timelyst_flutter/services/googleIntegration/googleSignInOut.dart';
+
+import '../../screens/common/logIn.dart';
+import '../../services/googleIntegration/googleSignInOut.dart';
+import '../../widgets/ToDo/task_list.dart';
 
 import 'providers/authProvider.dart';
 
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => TaskProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
