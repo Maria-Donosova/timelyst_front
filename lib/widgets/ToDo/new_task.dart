@@ -21,6 +21,7 @@ class _NewTaskWState extends State<NewTaskW> {
       final newTask = Task(
         id: '', // The backend should generate this
         title: _taskDescriptionController.text,
+        status: 'New',
         category: selectedCategory!,
         dateCreated: DateTime.now(),
         dateChanged: DateTime.now(),
