@@ -1,5 +1,6 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 import '../../models/task.dart';
 
 class TasksService {
@@ -14,6 +15,7 @@ class TasksService {
             tasks {
               id
               title
+              status
               task_type
               category
               dateCreated
@@ -66,6 +68,48 @@ class TasksService {
     }
   }
 
+  // Helper function to fetch a single task by ID (if needed)
+  static Future<Task> fetchTaskById(String taskId, String authToken) async {
+    // Define the GraphQL query to fetch a single task
+    const String query = '''
+    query FetchTask(\$taskId: String!) {
+      task(id: \$taskId) {
+        id
+        title
+        status
+        task_type
+        category
+        dateCreated
+        dateChanged
+        creator
+      }
+    }
+  ''';
+
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/graphql'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $authToken',
+      },
+      body: jsonEncode({
+        'query': query,
+        'variables': {'taskId': taskId},
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['errors'] != null && data['errors'].length > 0) {
+        throw Exception(
+            'GraphQL errors: ${data['errors'].map((e) => e['message']).join(", ")}');
+      }
+      return Task.fromJson(data['data']['task']);
+    } else {
+      throw Exception('Failed to fetch task: ${response.statusCode}');
+    }
+  }
+
   static Future<void> updateTask(
       String taskId, String authToken, Task updatedTask) async {
     print("Entering updateTask in TasksService");
@@ -76,6 +120,7 @@ class TasksService {
           updateTask(id: \$taskId, input: \$input) {
             id
             title
+            status
             task_type
             category
             dateCreated
@@ -114,6 +159,26 @@ class TasksService {
     } else {
       print('Failed to update task: ${response.statusCode}');
       throw Exception('Failed to update task: ${response.statusCode}');
+    }
+  }
+
+  static Future<void> markTaskAsComplete(
+      String taskId, String authToken) async {
+    try {
+      // Fetch the task to be updated (if needed)
+      // Note: If you already have the task locally, you can skip this step.
+      final task = await fetchTaskById(taskId, authToken);
+
+      // Update the task status
+      final updatedTask = task..status = 'completed';
+
+      // Call the updateTask function
+      await updateTask(taskId, authToken, updatedTask);
+
+      print('Task marked as complete successfully');
+    } catch (e) {
+      print('Failed to mark task as complete: $e');
+      throw Exception('Failed to mark task as complete: $e');
     }
   }
 
