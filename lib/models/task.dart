@@ -1,7 +1,7 @@
 class Task {
   final String id;
   final String title;
-  final String status;
+  String status;
   final String task_type;
   final String category;
   final DateTime dateCreated;
