@@ -8,12 +8,14 @@ class TaskItem extends StatefulWidget {
   final String id;
   final String title;
   final String category;
+  final String status;
   final Function(Task) onTaskUpdated; // Callback for task updates
 
   const TaskItem({
     required this.id,
     required this.title,
     required this.category,
+    required this.status,
     required this.onTaskUpdated,
   });
 

@@ -43,6 +43,24 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
+// Update to allow fo udpates of title and category
+  Future<void> updateTask(
+      String taskId, String authToken, String titile, String category) async {
+    try {
+      final task = _tasks.firstWhere((task) => task.id == taskId);
+
+      await TasksService.updateTask(taskId, authToken, task);
+
+      // Update the local task list
+      final index = _tasks.indexWhere((task) => task.id == taskId);
+      _tasks[index] = task;
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Failed to mark task as complete: $e';
+      notifyListeners();
+    }
+  }
+
   Future<void> deleteTask(String taskId, String authToken) async {
     try {
       await TasksService.deleteTask(taskId, authToken);
