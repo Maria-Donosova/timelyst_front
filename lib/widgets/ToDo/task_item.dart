@@ -45,6 +45,7 @@ class _TaskItemState extends State<TaskItem> {
                   task: Task(
                     id: widget.id,
                     title: widget.title,
+                    status: '',
                     category: widget.category,
                     dateCreated: DateTime.now(),
                     dateChanged: DateTime.now(),
