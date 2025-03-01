@@ -1,6 +1,7 @@
 class Task {
   final String id;
   final String title;
+  final String status;
   final String task_type;
   final String category;
   final DateTime dateCreated;
@@ -10,6 +11,7 @@ class Task {
   Task({
     required this.id,
     required this.title,
+    required this.status,
     this.task_type = "Task",
     this.category = 'Work',
     required this.dateCreated,
@@ -22,6 +24,7 @@ class Task {
     return Task(
       id: json['id'],
       title: json['title'],
+      status: json['status'],
       task_type: json['task_type'],
       category: json['category'],
       dateCreated: DateTime.parse(json['dateCreated']),
@@ -35,6 +38,7 @@ class Task {
     return {
       'id': id,
       'title': title,
+      'status': status,
       'task_type': task_type,
       'category': category,
       'dateCreated': dateCreated.toIso8601String(),
