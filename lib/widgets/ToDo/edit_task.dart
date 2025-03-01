@@ -34,6 +34,7 @@ class _EditTaskWState extends State<EditTaskW> {
       final updatedTask = Task(
         id: widget.task.id,
         title: _taskDescriptionController.text,
+        status: '',
         category: selectedCategory!,
         dateCreated: widget.task.dateCreated,
         dateChanged: DateTime.now(),
