@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
 import '../../widgets/ToDo/task_item.dart';
 
-class TaskListScreen extends StatelessWidget {
+class TaskListW extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final taskProvider = Provider.of<TaskProvider>(context);
