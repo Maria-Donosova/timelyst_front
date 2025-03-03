@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:timelyst_flutter/config/env_variables_config.dart';
 import 'dart:convert';
 
 import '../services/authService.dart';
@@ -31,7 +32,7 @@ Future<Map<String, dynamic>> registerUser(String email, String password,
 
     // Send the HTTP POST request
     final response = await http.post(
-      Uri.parse('http://localhost:3000/graphql'),
+      Uri.parse(Config.backendURL),
       headers: {
         'Content-Type': 'application/json',
       },
