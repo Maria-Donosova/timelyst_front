@@ -1,4 +1,6 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:timelyst_flutter/config/env_variables_config.dart';
 import 'dart:convert';
 
 import '../services/authService.dart';
@@ -27,7 +29,7 @@ Future<void> loginUser(String email, String password) async {
 
     // Send the HTTP POST request
     final response = await http.post(
-      Uri.parse('http://localhost:3000/graphql'),
+      Uri.parse(Config.backendURL),
       headers: {
         'Content-Type': 'application/json',
       },
