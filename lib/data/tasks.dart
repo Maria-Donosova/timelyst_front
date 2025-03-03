@@ -31,7 +31,7 @@ class TasksService {
     // Send the HTTP POST request
     final response = await http.get(
       Uri.parse(
-          '${Config.backendURL}?query=$encodedQuery&variables={"userId":"$userId"}'),
+          '${Config.backendGraphqlURL}?query=$encodedQuery&variables={"userId":"$userId"}'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -87,8 +87,10 @@ class TasksService {
     }
   ''';
 
+    final String encodedQuery = Uri.encodeComponent(query);
     final response = await http.post(
-      Uri.parse('http://localhost:3000/graphql'),
+      Uri.parse(
+          '${Config.backendGraphqlURL}?query=$encodedQuery&variables={"userId":"$taskId"}'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
