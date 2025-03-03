@@ -4,12 +4,25 @@ import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
 import '../../widgets/ToDo/task_item.dart';
 
-class TaskListW extends StatelessWidget {
+class TaskListW extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    final taskProvider = Provider.of<TaskProvider>(context);
+  _TaskListWState createState() => _TaskListWState();
+}
 
-    // Fetch tasks on initial load
+class _TaskListWState extends State<TaskListW> {
+  bool _isInitialLoad = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isInitialLoad) {
+      _isInitialLoad = false;
+      _fetchTasks();
+    }
+  }
+
+  void _fetchTasks() {
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     if (taskProvider.tasks.isEmpty && !taskProvider.isLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final storage = FlutterSecureStorage();
@@ -22,6 +35,11 @@ class TaskListW extends StatelessWidget {
         });
       });
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final taskProvider = Provider.of<TaskProvider>(context);
 
     // Loading state
     if (taskProvider.isLoading) {
@@ -61,7 +79,7 @@ class TaskListW extends StatelessWidget {
                           status: task.status,
                           onTaskUpdated: (updatedTask) {
                             taskProvider.updateTask("updatedTask", "", "", "");
-                          }, // Pass the status to TaskItem
+                          },
                         ),
                         onDismissed: (DismissDirection direction) async {
                           final storage = FlutterSecureStorage();
@@ -69,7 +87,6 @@ class TaskListW extends StatelessWidget {
                               await storage.read(key: 'authToken');
 
                           if (direction == DismissDirection.startToEnd) {
-                            // Mark task as complete
                             await taskProvider.markTaskAsComplete(
                                 task.id, authToken!);
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -83,7 +100,6 @@ class TaskListW extends StatelessWidget {
                               ),
                             );
                           } else {
-                            // Delete task
                             await taskProvider.deleteTask(task.id, authToken!);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -198,6 +214,207 @@ class TaskListW extends StatelessWidget {
     );
   }
 }
+
+// import 'package:flutter/material.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:provider/provider.dart';
+// import 'package:timelyst_flutter/providers/taskProvider.dart';
+// import '../../widgets/ToDo/task_item.dart';
+
+// class TaskListW extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     final taskProvider = Provider.of<TaskProvider>(context);
+
+//     // Fetch tasks on initial load
+//     if (taskProvider.tasks.isEmpty && !taskProvider.isLoading) {
+//       WidgetsBinding.instance.addPostFrameCallback((_) {
+//         final storage = FlutterSecureStorage();
+//         storage.read(key: 'authToken').then((authToken) {
+//           storage.read(key: 'userId').then((userId) {
+//             if (authToken != null && userId != null) {
+//               taskProvider.fetchTasks(userId, authToken);
+//             }
+//           });
+//         });
+//       });
+//     }
+
+//     // Loading state
+//     if (taskProvider.isLoading) {
+//       return Center(child: CircularProgressIndicator());
+//     }
+
+//     // Error state
+//     if (taskProvider.errorMessage.isNotEmpty) {
+//       return Center(child: Text('Error: ${taskProvider.errorMessage}'));
+//     }
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Task List'),
+//       ),
+//       body: LayoutBuilder(
+//         builder: (ctx, constraints) {
+//           return Column(
+//             children: [
+//               Expanded(
+//                 child: ReorderableListView.builder(
+//                   buildDefaultDragHandles: false,
+//                   scrollDirection: Axis.vertical,
+//                   itemCount: taskProvider.tasks.length,
+//                   itemBuilder: (ctx, index) {
+//                     final task = taskProvider.tasks[index];
+//                     return ReorderableDragStartListener(
+//                       key: Key(task.id),
+//                       index: index,
+//                       child: Dismissible(
+//                         key: Key(task.id),
+//                         direction: DismissDirection.horizontal,
+//                         child: TaskItem(
+//                           id: task.id,
+//                           title: task.title,
+//                           category: task.category,
+//                           status: task.status,
+//                           onTaskUpdated: (updatedTask) {
+//                             taskProvider.updateTask("updatedTask", "", "", "");
+//                           }, // Pass the status to TaskItem
+//                         ),
+//                         onDismissed: (DismissDirection direction) async {
+//                           final storage = FlutterSecureStorage();
+//                           final authToken =
+//                               await storage.read(key: 'authToken');
+
+//                           if (direction == DismissDirection.startToEnd) {
+//                             // Mark task as complete
+//                             await taskProvider.markTaskAsComplete(
+//                                 task.id, authToken!);
+//                             ScaffoldMessenger.of(context).showSnackBar(
+//                               SnackBar(
+//                                 backgroundColor:
+//                                     Theme.of(context).colorScheme.shadow,
+//                                 content: Text(
+//                                   'Well Done!',
+//                                   style: Theme.of(context).textTheme.bodyLarge,
+//                                 ),
+//                               ),
+//                             );
+//                           } else {
+//                             // Delete task
+//                             await taskProvider.deleteTask(task.id, authToken!);
+//                             ScaffoldMessenger.of(context).showSnackBar(
+//                               SnackBar(
+//                                 backgroundColor:
+//                                     Theme.of(context).colorScheme.shadow,
+//                                 content: Text(
+//                                   'Task deleted',
+//                                   style: Theme.of(context).textTheme.bodyLarge,
+//                                 ),
+//                               ),
+//                             );
+//                           }
+//                         },
+//                         confirmDismiss: (DismissDirection direction) async {
+//                           if (direction == DismissDirection.startToEnd) {
+//                             return true;
+//                           } else {
+//                             return await showDialog(
+//                               context: context,
+//                               builder: (BuildContext context) {
+//                                 return AlertDialog(
+//                                   title: Text(
+//                                     "Confirmation",
+//                                     style: Theme.of(context)
+//                                         .textTheme
+//                                         .displaySmall,
+//                                   ),
+//                                   content: Text(
+//                                     "Are you sure you want to delete this item?",
+//                                     style: Theme.of(context)
+//                                         .textTheme
+//                                         .displayMedium,
+//                                   ),
+//                                   actions: <Widget>[
+//                                     TextButton(
+//                                       style: TextButton.styleFrom(
+//                                         backgroundColor: Theme.of(context)
+//                                             .colorScheme
+//                                             .shadow,
+//                                       ),
+//                                       onPressed: () =>
+//                                           Navigator.of(context).pop(false),
+//                                       child: Text(
+//                                         "Cancel",
+//                                         style: Theme.of(context)
+//                                             .textTheme
+//                                             .bodyLarge,
+//                                       ),
+//                                     ),
+//                                     TextButton(
+//                                       style: TextButton.styleFrom(
+//                                         backgroundColor: Theme.of(context)
+//                                             .colorScheme
+//                                             .shadow,
+//                                       ),
+//                                       onPressed: () =>
+//                                           Navigator.of(context).pop(true),
+//                                       child: Text(
+//                                         "Delete",
+//                                         style: Theme.of(context)
+//                                             .textTheme
+//                                             .bodyLarge,
+//                                       ),
+//                                     ),
+//                                   ],
+//                                 );
+//                               },
+//                             );
+//                           }
+//                         },
+//                         background: Container(
+//                           color: Colors.greenAccent[100],
+//                           child: Padding(
+//                             padding: const EdgeInsets.all(5),
+//                             child: Row(
+//                               children: [
+//                                 Text(
+//                                   'Done',
+//                                   style: Theme.of(context).textTheme.bodyLarge,
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ),
+//                         secondaryBackground: Container(
+//                           color: Colors.orangeAccent[100],
+//                           child: Padding(
+//                             padding: const EdgeInsets.all(5),
+//                             child: Row(
+//                               mainAxisAlignment: MainAxisAlignment.end,
+//                               children: [
+//                                 Text(
+//                                   'Delete',
+//                                   style: Theme.of(context).textTheme.bodyLarge,
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ),
+//                       ),
+//                     );
+//                   },
+//                   onReorder: (oldIndex, newIndex) {
+//                     taskProvider.reorderTasks(oldIndex, newIndex);
+//                   },
+//                 ),
+//               ),
+//             ],
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
 
 // task_list.dart
 // import 'dart:io';
