@@ -31,4 +31,7 @@ class Config {
       dotenv.env['FRONTEND_URL'] ?? 'http://localhost:7357';
   static String get backendURL =>
       dotenv.env['BACKEND_URL'] ?? 'https://timelyst-back.fly.dev';
+  static String get backendGraphqlURL =>
+      dotenv.env['BACKEND_URL_GRAPHQL'] ??
+      'https://timelyst-back.fly.dev/graphql';
 }
