@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../config/env_variables_config.dart';
 
 import '../../models/task.dart';
 
@@ -30,7 +31,7 @@ class TasksService {
     // Send the HTTP POST request
     final response = await http.get(
       Uri.parse(
-          'http://localhost:3000/graphql?query=$encodedQuery&variables={"userId":"$userId"}'),
+          '${Config.backendURL}?query=$encodedQuery&variables={"userId":"$userId"}'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
