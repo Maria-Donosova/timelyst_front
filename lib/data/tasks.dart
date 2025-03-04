@@ -19,8 +19,8 @@ class TasksService {
               status
               task_type
               category
-              dateCreated
-              dateChanged
+              createdAt
+              updatedAt
               creator
             }
           }
@@ -80,8 +80,8 @@ class TasksService {
         status
         task_type
         category
-        dateCreated
-        dateChanged
+        createdAt
+        updatedAt
         creator
       }
     }
