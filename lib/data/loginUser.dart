@@ -28,7 +28,8 @@ Future<void> loginUser(String email, String password) async {
 
     // Send the HTTP POST request
     final response = await http.post(
-      Uri.parse(Config.backendURL),
+      //Uri.parse(Config.backendURL),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
       },
