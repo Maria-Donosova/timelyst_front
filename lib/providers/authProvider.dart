@@ -27,8 +27,8 @@ class AuthProvider with ChangeNotifier {
     _errorMessage = null;
     try {
       // Call the loginUser function
-      // Call the loginUser function
       final response = await loginUser(email, password);
+
       // Extract token and userId from the response
       final token = response['token'];
       final userId = response['userId'];
@@ -72,7 +72,9 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> logout() async {
     await _authService.clearAuthToken();
+    await _authService.clearUserId();
     _isLoggedIn = false;
+    _userId = null; // Reset userId in the provider
     notifyListeners();
   }
 }
