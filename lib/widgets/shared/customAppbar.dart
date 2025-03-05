@@ -103,8 +103,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   // Await all async operations sequentially
                   await googleSignInService.googleSignOut();
                   await authProvider.logout();
-                  // Navigate AFTER operations complete
 
+                  // Navigate AFTER operations complete
                   if (context.mounted) {
                     Navigator.pushReplacement(
                       context,
@@ -117,10 +117,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       SnackBar(content: Text('Logout failed: $e')),
                     );
                   }
-                  // Navigator.pushReplacement(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => LogInScreen()),
-                  // );
                 }
               },
             ),
