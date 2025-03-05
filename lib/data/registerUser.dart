@@ -75,8 +75,10 @@ Future<Map<String, dynamic>> registerUser(String email, String password,
       // Use AuthService to store the token securely
       final authService = AuthService();
       await authService.saveAuthToken(token);
+      await authService.saveUserId(userId);
 
       print('Token stored in jwt storage for registered user: $token');
+      print('UserId stored in secure storage: $userId');
 
       // Return the token and userId
       return {
