@@ -7,6 +7,7 @@ class AuthService {
   AuthService._internal();
 
   static const String _authTokenKey = 'authToken';
+  static const String _userIdKey = 'userId';
   //static const String _refreshTokenKey = 'refreshToken';
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
@@ -21,6 +22,18 @@ class AuthService {
       print("Token payload: $payload");
     } catch (e) {
       print('Error saving auth token: $e');
+      rethrow;
+    }
+  }
+
+  // Save userId
+  Future<void> saveUserId(String userId) async {
+    print("Entering saveUserId, userId: $userId");
+    try {
+      await _storage.write(key: _userIdKey, value: userId);
+      print("UserId saved successfully");
+    } catch (e) {
+      print('Error saving userId: $e');
       rethrow;
     }
   }
@@ -57,22 +70,33 @@ class AuthService {
     }
   }
 
-  Future<String?> getUserIdFromToken() async {
-    final token = await getAuthToken();
-    if (token == null) return null;
-
+  // Get userId
+  Future<String?> getUserId() async {
+    print("Entering getUserId, key: $_userIdKey");
     try {
-      final payload = Jwt.parseJwt(token);
-      // Check common user ID field names
-      return payload['userId'] ??
-          payload['sub'] ??
-          payload['uid'] ??
-          payload['user_id'];
+      return await _storage.read(key: _userIdKey);
     } catch (e) {
-      print('Error decoding token: $e');
+      print('Error reading userId: $e');
       return null;
     }
   }
+
+  // Future<String?> getUserIdFromToken() async {
+  //   final token = await getAuthToken();
+  //   if (token == null) return null;
+
+  //   try {
+  //     final payload = Jwt.parseJwt(token);
+  //     // Check common user ID field names
+  //     return payload['userId'] ??
+  //         payload['sub'] ??
+  //         payload['uid'] ??
+  //         payload['user_id'];
+  //   } catch (e) {
+  //     print('Error decoding token: $e');
+  //     return null;
+  //   }
+  // }
 
   // Methods for managing the refresh token
   // Future<void> saveRefreshToken(String refreshToken) async {

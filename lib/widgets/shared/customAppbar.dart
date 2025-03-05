@@ -71,7 +71,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               value: _profileView.profile,
               child: Text('Account Settings'),
               onTap: () async {
-                final userId = await authService.getUserIdFromToken();
+                final userId = await authService.getUserId();
                 if (userId != null) {
                   Navigator.push(
                     context,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
+import 'package:timelyst_flutter/services/authService.dart';
 import '../../widgets/ToDo/task_item.dart';
 
 class TaskListW extends StatefulWidget {
@@ -25,16 +26,23 @@ class _TaskListWState extends State<TaskListW> {
     print("Entered _fetchTasks in task_list");
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     if (taskProvider.tasks.isEmpty && !taskProvider.isLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final storage = FlutterSecureStorage();
-        storage.read(key: 'authToken').then((authToken) {
-          storage.read(key: 'userId').then((userId) {
-            print("User ID: $userId");
-            if (authToken != null && userId != null) {
-              taskProvider.fetchTasks(userId, authToken);
-            }
-          });
-        });
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final authService = AuthService();
+        final authToken = await authService.getAuthToken();
+        final userId = await authService.getUserId();
+        print("User ID: $userId");
+        if (authToken != null && userId != null) {
+          taskProvider.fetchTasks(userId, authToken);
+        }
+        // final storage = FlutterSecureStorage();
+        // storage.read(key: 'authToken').then((authToken) {
+        //   storage.read(key: 'userId').then((userId) {
+        //     print("User ID: $userId");
+        //     if (authToken != null && userId != null) {
+        //       taskProvider.fetchTasks(userId, authToken);
+        //     }
+        //   });
+        // });
       });
     }
   }
