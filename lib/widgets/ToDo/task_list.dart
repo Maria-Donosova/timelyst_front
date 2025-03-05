@@ -22,12 +22,14 @@ class _TaskListWState extends State<TaskListW> {
   }
 
   void _fetchTasks() {
+    print("Entered _fetchTasks in task_list");
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     if (taskProvider.tasks.isEmpty && !taskProvider.isLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final storage = FlutterSecureStorage();
         storage.read(key: 'authToken').then((authToken) {
           storage.read(key: 'userId').then((userId) {
+            print("User ID: $userId");
             if (authToken != null && userId != null) {
               taskProvider.fetchTasks(userId, authToken);
             }

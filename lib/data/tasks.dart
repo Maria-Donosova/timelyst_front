@@ -8,6 +8,7 @@ class TasksService {
   static Future<List<Task>> fetchUserTasks(
       String userId, String authToken) async {
     print("Entering fetchUserTasks in TasksService");
+    print("UserId: $userId");
 
     // Define the GraphQL query string
     final String query = '''
