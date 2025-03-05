@@ -2,9 +2,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 
 class AuthService {
+  static final AuthService _instance = AuthService._internal();
+  factory AuthService() => _instance;
+  AuthService._internal();
+
   static const String _authTokenKey = 'authToken';
   //static const String _refreshTokenKey = 'refreshToken';
-
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Methods for managing the authentication token
@@ -12,6 +15,10 @@ class AuthService {
     print("Entering saveAuthToken, token: $token");
     try {
       await _storage.write(key: _authTokenKey, value: token);
+      print("Token saved successfully");
+      // Decode and log the token content
+      final payload = Jwt.parseJwt(token);
+      print("Token payload: $payload");
     } catch (e) {
       print('Error saving auth token: $e');
       rethrow;
@@ -51,7 +58,7 @@ class AuthService {
   }
 
   Future<String?> getUserIdFromToken() async {
-    final token = await AuthService().getAuthToken();
+    final token = await getAuthToken();
     if (token == null) return null;
 
     try {
