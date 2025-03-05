@@ -48,6 +48,17 @@ class AuthService {
     }
   }
 
+  // Get userId
+  Future<String?> getUserId() async {
+    print("Entering getUserId, key: $_userIdKey");
+    try {
+      return await _storage.read(key: _userIdKey);
+    } catch (e) {
+      print('Error reading userId: $e');
+      return null;
+    }
+  }
+
   Future<void> clearAuthToken() async {
     print("Entering clearAuthToken");
     try {
@@ -55,6 +66,18 @@ class AuthService {
       print("Cleared");
     } catch (e) {
       print('Error clearing auth token: $e');
+      rethrow;
+    }
+  }
+
+  // Clear userId
+  Future<void> clearUserId() async {
+    print("Entering clearUserId");
+    try {
+      await _storage.delete(key: _userIdKey);
+      print("User ID cleared");
+    } catch (e) {
+      print('Error clearing userId: $e');
       rethrow;
     }
   }
@@ -67,17 +90,6 @@ class AuthService {
     } catch (e) {
       print('Error checking login status: $e');
       return false;
-    }
-  }
-
-  // Get userId
-  Future<String?> getUserId() async {
-    print("Entering getUserId, key: $_userIdKey");
-    try {
-      return await _storage.read(key: _userIdKey);
-    } catch (e) {
-      print('Error reading userId: $e');
-      return null;
     }
   }
 
