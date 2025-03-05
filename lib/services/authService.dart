@@ -93,23 +93,6 @@ class AuthService {
     }
   }
 
-  // Future<String?> getUserIdFromToken() async {
-  //   final token = await getAuthToken();
-  //   if (token == null) return null;
-
-  //   try {
-  //     final payload = Jwt.parseJwt(token);
-  //     // Check common user ID field names
-  //     return payload['userId'] ??
-  //         payload['sub'] ??
-  //         payload['uid'] ??
-  //         payload['user_id'];
-  //   } catch (e) {
-  //     print('Error decoding token: $e');
-  //     return null;
-  //   }
-  // }
-
   // Methods for managing the refresh token
   // Future<void> saveRefreshToken(String refreshToken) async {
   //   try {
