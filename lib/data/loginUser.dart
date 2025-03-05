@@ -4,7 +4,7 @@ import 'dart:convert';
 
 import '../services/authService.dart';
 
-Future<void> loginUser(String email, String password) async {
+Future<Map<String, dynamic>> loginUser(String email, String password) async {
   try {
     print("Entering loginUser in flutter");
     print('Logging in with email: $email and password: $password');
@@ -70,8 +70,17 @@ Future<void> loginUser(String email, String password) async {
       // Use AuthService to store the token securely
       final authService = AuthService();
       await authService.saveAuthToken(token);
-
       print('Token stored in jwt storage for logged in user: $token');
+
+      // Return the token and userId
+      return {
+        'token': token,
+        'userId': userId,
+        'role': role,
+      };
+    } else {
+      // If the server returns an error response, throw an exception
+      throw Exception('Failed to login: ${response.statusCode}');
     }
   } catch (e) {
     print('PrintError for E: $e');
