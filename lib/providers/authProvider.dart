@@ -12,21 +12,38 @@ class AuthProvider with ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
+  String? _userId;
+  String? get userId => _userId;
+
   Future<void> checkAuthState() async {
     _isLoggedIn = await _authService.isLoggedIn();
+    if (_isLoggedIn) {
+      _userId = await _authService.getUserId(); // Retrieve userId if logged in
+    }
     notifyListeners();
   }
 
   Future<void> login(String email, String password) async {
-    _errorMessage = null; // Clear any previous error message
+    _errorMessage = null;
     try {
       // Call the loginUser function
-      await loginUser(email, password);
+      // Call the loginUser function
+      final response = await loginUser(email, password);
+      // Extract token and userId from the response
+      final token = response['token'];
+      final userId = response['userId'];
 
-      // Assuming loginUser stores the token and sets _isLoggedIn to true
+      // Save the token and userId
+      await _authService.saveAuthToken(token);
+      await _authService.saveUserId(userId);
+
+      // Update the provider state
       _isLoggedIn = true;
+      _userId = userId;
       notifyListeners();
     } catch (e) {
+      _errorMessage = 'Failed to login: $e';
+      notifyListeners();
       throw Exception('Failed to login: $e');
     }
   }
