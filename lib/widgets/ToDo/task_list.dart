@@ -53,9 +53,6 @@ class _TaskListWState extends State<TaskListW> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Task List'),
-      ),
       body: LayoutBuilder(
         builder: (ctx, constraints) {
           return Column(
