@@ -16,21 +16,6 @@ class LeftPanel extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
-              // Padding(
-              //   padding: const EdgeInsets.only(bottom: 6.0),
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //     mainAxisSize: MainAxisSize.max,
-              //     children: [
-              //       //Flexible(flex: 0, child: TitleW()),
-              //       //   Flexible(
-              //       //       flex: 0,
-              //       //       child: NewTaskW(
-              //       //         onSave: (Task) {},
-              //       //       )),
-              //     ],
-              //   ),
-              // ),
               Flexible(child: TaskListW()),
             ],
           ),
