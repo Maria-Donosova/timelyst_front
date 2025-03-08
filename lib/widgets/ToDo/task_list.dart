@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:timelyst_flutter/models/task.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
 import 'package:timelyst_flutter/services/authService.dart';
 import 'package:timelyst_flutter/widgets/ToDo/new_task.dart';
+import 'package:timelyst_flutter/widgets/shared/categories.dart';
 import '../../widgets/ToDo/task_item.dart';
 
 class TaskListW extends StatefulWidget {
@@ -39,6 +41,42 @@ class _TaskListWState extends State<TaskListW> {
     }
   }
 
+  List<Task> tasks = [];
+
+  void _addNewTask(Task newTask) {
+    setState(() {
+      tasks.add(newTask);
+    });
+  }
+
+  final _form = GlobalKey<FormState>();
+  final _taskDescriptionController = TextEditingController();
+  String? selectedCategory;
+
+  void _saveTask() async {
+    if (_form.currentState!.validate()) {
+      final newTask = Task(
+        id: '', // The backend should generate this
+        title: _taskDescriptionController.text,
+        status: 'New',
+        category: selectedCategory!,
+        dateCreated: DateTime.now(),
+        dateChanged: DateTime.now(),
+        creator: '', // update later
+      );
+
+      try {
+        // Call your backend to create the task For now, we assume the task is created successfully
+        //widget.onSave(newTask); // Notify parent widget
+        Navigator.of(context).pop(); // Close the bottom sheet
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create task: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final taskProvider = Provider.of<TaskProvider>(context);
@@ -54,7 +92,7 @@ class _TaskListWState extends State<TaskListW> {
     }
 
     return DefaultTabController(
-      length: 3,
+      length: 1,
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -261,17 +299,101 @@ class _TaskListWState extends State<TaskListW> {
                 },
               ),
             ),
-            Container(),
-            Container(),
+            // Container(),
+            // Container(),
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            print("Floating button clicked");
+          onPressed: () => {
+            print("Floating button pressed"),
+            addNewTaskMethod(context),
+            // NewTaskW(
+            //   onSave: _addNewTask,
+            // ),
           },
           child: Icon(Icons.add),
         ),
       ),
+    );
+  }
+
+  Future<dynamic> addNewTaskMethod(BuildContext context) {
+    return showModalBottomSheet(
+      useSafeArea: false,
+      context: context,
+      builder: (_) {
+        return GestureDetector(
+          onTap: () {},
+          behavior: HitTestBehavior.opaque,
+          child: Column(
+            children: <Widget>[
+              Stack(
+                children: <Widget>[
+                  Card(
+                    elevation: 5,
+                    child: Container(
+                      padding: EdgeInsets.only(
+                        top: 10,
+                        left: 10,
+                        right: 10,
+                        bottom: MediaQuery.of(context).viewInsets.bottom + 50,
+                      ),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          left: BorderSide(
+                            color: Colors.grey,
+                            width: 3,
+                            style: BorderStyle.solid,
+                          ),
+                        ),
+                        shape: BoxShape.rectangle,
+                      ),
+                      child: Form(
+                        key: _form,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            TextFormField(
+                              controller: _taskDescriptionController,
+                              decoration:
+                                  InputDecoration(labelText: 'Task Title'),
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Please provide a value.';
+                                }
+                                return null;
+                              },
+                            ),
+                            DropdownButton<String>(
+                              hint: Text('Category'),
+                              value: selectedCategory,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedCategory = newValue;
+                                });
+                              },
+                              items: categories.map((category) {
+                                return DropdownMenuItem(
+                                  child: Text(category),
+                                  value: category,
+                                );
+                              }).toList(),
+                            ),
+                            ElevatedButton(
+                              onPressed: _saveTask,
+                              child: Text('Save'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
