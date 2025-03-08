@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/models/task.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
 import 'package:timelyst_flutter/services/authService.dart';
-import 'package:timelyst_flutter/widgets/ToDo/new_task.dart';
 import 'package:timelyst_flutter/widgets/shared/categories.dart';
 import '../../widgets/ToDo/task_item.dart';
 
@@ -321,6 +320,12 @@ class _TaskListWState extends State<TaskListW> {
     return showModalBottomSheet(
       useSafeArea: false,
       context: context,
+      constraints: BoxConstraints(
+        minWidth: MediaQuery.of(context).size.width * 0.5,
+        maxWidth: MediaQuery.of(context).size.width * 0.5,
+        minHeight: MediaQuery.of(context).size.width * 0.18,
+        maxHeight: MediaQuery.of(context).size.width * 0.18,
+      ),
       builder: (_) {
         return GestureDetector(
           onTap: () {},
@@ -330,23 +335,13 @@ class _TaskListWState extends State<TaskListW> {
               Stack(
                 children: <Widget>[
                   Card(
-                    elevation: 5,
+                    //elevation: 5,
                     child: Container(
                       padding: EdgeInsets.only(
                         top: 10,
                         left: 10,
                         right: 10,
                         bottom: MediaQuery.of(context).viewInsets.bottom + 50,
-                      ),
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: Colors.grey,
-                            width: 3,
-                            style: BorderStyle.solid,
-                          ),
-                        ),
-                        shape: BoxShape.rectangle,
                       ),
                       child: Form(
                         key: _form,
@@ -355,8 +350,7 @@ class _TaskListWState extends State<TaskListW> {
                           children: <Widget>[
                             TextFormField(
                               controller: _taskDescriptionController,
-                              decoration:
-                                  InputDecoration(labelText: 'Task Title'),
+                              decoration: InputDecoration(labelText: 'Task'),
                               validator: (value) {
                                 if (value!.isEmpty) {
                                   return 'Please provide a value.';
@@ -365,7 +359,18 @@ class _TaskListWState extends State<TaskListW> {
                               },
                             ),
                             DropdownButton<String>(
-                              hint: Text('Category'),
+                              padding: EdgeInsets.only(top: 15),
+                              hint: Text(
+                                'Category',
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onSecondary,
+                                  fontSize: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge!
+                                      .fontSize,
+                                ),
+                              ),
                               value: selectedCategory,
                               onChanged: (newValue) {
                                 setState(() {
@@ -379,10 +384,19 @@ class _TaskListWState extends State<TaskListW> {
                                 );
                               }).toList(),
                             ),
-                            ElevatedButton(
-                              onPressed: _saveTask,
-                              child: Text('Save'),
-                            ),
+                            // ElevatedButton(
+                            //   onPressed: _saveTask,
+                            //   child: Text('Save',
+                            //       style: TextStyle(
+                            //         color: Theme.of(context)
+                            //             .colorScheme
+                            //             .onSecondary,
+                            //       )),
+                            //   style: ElevatedButton.styleFrom(
+                            //     backgroundColor:
+                            //         Theme.of(context).colorScheme.secondary,
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
