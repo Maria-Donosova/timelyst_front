@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
 import 'package:timelyst_flutter/services/authService.dart';
+import 'package:timelyst_flutter/widgets/ToDo/new_task.dart';
 import '../../widgets/ToDo/task_item.dart';
 
 class TaskListW extends StatefulWidget {
@@ -56,6 +57,7 @@ class _TaskListWState extends State<TaskListW> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           toolbarHeight: 0,
           bottom: PreferredSize(
             preferredSize:
@@ -63,8 +65,8 @@ class _TaskListWState extends State<TaskListW> {
             child: TabBar(
               tabs: [
                 Tab(text: 'ToDo'),
-                Tab(text: 'Lists'),
-                Tab(text: 'Notes'),
+                // Tab(text: 'Lists'),
+                // Tab(text: 'Notes'),
               ],
               labelPadding: EdgeInsets.only(top: 5.3),
               labelStyle: Theme.of(context).textTheme.displayLarge,
@@ -262,6 +264,12 @@ class _TaskListWState extends State<TaskListW> {
             Container(),
             Container(),
           ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            print("Floating button clicked");
+          },
+          child: Icon(Icons.add),
         ),
       ),
     );
