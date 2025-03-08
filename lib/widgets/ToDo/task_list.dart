@@ -56,13 +56,26 @@ class _TaskListWState extends State<TaskListW> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          //title: Text('My App'),
-          bottom: TabBar(
-            tabs: [
-              Tab(text: 'ToDo'),
-              Tab(text: 'Lists'),
-              Tab(text: 'Notes'),
-            ],
+          toolbarHeight: 0,
+          bottom: PreferredSize(
+            preferredSize:
+                Size.fromHeight(54), // Set a fixed height for the TabBar
+            child: TabBar(
+              tabs: [
+                Tab(text: 'ToDo'),
+                Tab(text: 'Lists'),
+                Tab(text: 'Notes'),
+              ],
+              labelPadding: EdgeInsets.only(top: 5.3),
+              labelStyle: Theme.of(context).textTheme.displayLarge,
+              unselectedLabelStyle: Theme.of(context).textTheme.bodyLarge,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: Colors.white,
+              indicatorWeight: 0.001,
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
+              //indicator: BoxDecoration(),
+            ),
           ),
         ),
         body: TabBarView(
