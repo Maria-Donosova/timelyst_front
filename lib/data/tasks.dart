@@ -114,6 +114,65 @@ class TasksService {
     }
   }
 
+  static Future<Task> createTask(String authToken, Task newTask) async {
+    print("Entering createTask in TasksService");
+
+    // Define the GraphQL mutation string
+    final String mutation = '''
+    mutation CreateTask(\$input: TaskInput!) {
+      createTask(taskInput: \$input) {
+        id
+        title
+        status
+        task_type
+        category
+        createdAt
+        updatedAt
+        creator
+      }
+    }
+  ''';
+
+    // Prepare the variables for the mutation
+    final Map<String, dynamic> variables = {
+      'input': newTask.toJson(), // Convert the task to JSON
+    };
+
+    // Send the HTTP POST request
+    final response = await http.post(
+      Uri.parse(Config.backendGraphqlURL),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $authToken',
+      },
+      body: jsonEncode({
+        'query': mutation,
+        'variables': variables,
+      }),
+    );
+
+    // Check the status code
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      // Check for GraphQL errors
+      if (data['errors'] != null && data['errors'].length > 0) {
+        final errors = data['errors'];
+        print('Creating task failed with errors: $errors');
+        throw Exception(
+            'Creating task failed: ${errors.map((e) => e['message']).join(", ")}');
+      }
+
+      // Parse and return the created task
+      final createdTask = Task.fromJson(data['data']['createTask']);
+      print('Task created successfully: ${createdTask.id}');
+      return createdTask;
+    } else {
+      print('Failed to create task: ${response.statusCode}');
+      throw Exception('Failed to create task: ${response.statusCode}');
+    }
+  }
+
   static Future<void> updateTask(
       String taskId, String authToken, Task updatedTask) async {
     print("Entering updateTask in TasksService");
