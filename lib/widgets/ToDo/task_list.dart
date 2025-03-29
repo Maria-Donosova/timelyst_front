@@ -42,39 +42,39 @@ class _TaskListWState extends State<TaskListW> {
 
   List<Task> tasks = [];
 
-  void _addNewTask(Task newTask) {
-    setState(() {
-      tasks.add(newTask);
-    });
-  }
+  // void _addNewTask(Task newTask) {
+  //   setState(() {
+  //     tasks.add(newTask);
+  //   });
+  // }
 
   final _form = GlobalKey<FormState>();
   final _taskDescriptionController = TextEditingController();
   String? selectedCategory;
 
-  void _saveTask() async {
-    if (_form.currentState!.validate()) {
-      final newTask = Task(
-        id: '', // The backend should generate this
-        title: _taskDescriptionController.text,
-        status: 'New',
-        category: selectedCategory!,
-        dateCreated: DateTime.now(),
-        dateChanged: DateTime.now(),
-        creator: '', // update later
-      );
+  // void _saveTask() async {
+  //   if (_form.currentState!.validate()) {
+  //     final newTask = Task(
+  //       id: '', // The backend should generate this
+  //       title: _taskDescriptionController.text,
+  //       status: 'New',
+  //       category: selectedCategory!,
+  //       dateCreated: DateTime.now(),
+  //       dateChanged: DateTime.now(),
+  //       creator: '', // update later
+  //     );
 
-      try {
-        // Call your backend to create the task For now, we assume the task is created successfully
-        //widget.onSave(newTask); // Notify parent widget
-        Navigator.of(context).pop(); // Close the bottom sheet
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create task: $e')),
-        );
-      }
-    }
-  }
+  //     try {
+  //       // Call your backend to create the task For now, we assume the task is created successfully
+  //       //widget.onSave(newTask); // Notify parent widget
+  //       Navigator.of(context).pop(); // Close the bottom sheet
+  //     } catch (e) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Failed to create task: $e')),
+  //       );
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -306,9 +306,6 @@ class _TaskListWState extends State<TaskListW> {
           onPressed: () => {
             print("Floating button pressed"),
             addNewTaskMethod(context),
-            // NewTaskW(
-            //   onSave: _addNewTask,
-            // ),
           },
           child: Icon(Icons.add),
         ),
@@ -335,7 +332,6 @@ class _TaskListWState extends State<TaskListW> {
               Stack(
                 children: <Widget>[
                   Card(
-                    //elevation: 5,
                     child: Container(
                       padding: EdgeInsets.only(
                         top: 10,
@@ -360,17 +356,9 @@ class _TaskListWState extends State<TaskListW> {
                             ),
                             DropdownButton<String>(
                               padding: EdgeInsets.only(top: 15),
-                              hint: Text(
-                                'Category',
-                                style: TextStyle(
-                                  color:
-                                      Theme.of(context).colorScheme.onSecondary,
-                                  fontSize: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .fontSize,
-                                ),
-                              ),
+                              hint: selectedCategory == null
+                                  ? Text('Select Category')
+                                  : null, // Show hint when no category is selected
                               value: selectedCategory,
                               onChanged: (newValue) {
                                 setState(() {
@@ -378,32 +366,54 @@ class _TaskListWState extends State<TaskListW> {
                                 });
                               },
                               selectedItemBuilder: (BuildContext context) {
-                                // What displays in the button when an item is selected
-                                return categories.map((category) {
-                                  return Row(
-                                    children: [
-                                      if (selectedCategory !=
-                                          null) // Only show CircleAvatar if a category is selected
+                                // What shows in the button when selected
+                                return [
+                                  if (selectedCategory != null)
+                                    Row(
+                                      children: [
                                         CircleAvatar(
                                           backgroundColor:
                                               catColor(selectedCategory!),
                                           radius: 10,
                                         ),
-                                      if (selectedCategory != null)
                                         SizedBox(width: 8),
-                                      Text(selectedCategory ??
-                                          'Category'), // Fallback text if null
-                                    ],
-                                  );
-                                }).toList();
+                                        Text(selectedCategory!),
+                                      ],
+                                    )
+                                  else
+                                    Text(
+                                        'Category'), // Fallback when nothing selected
+                                ];
                               },
+                              // items: [
+                              //   DropdownMenuItem(
+                              //     value: null,
+                              //     child: Text(
+                              //         'Category'), // This is the actual hint
+                              //   ),
+                              //   ...categories.map((category) {
+                              //     return DropdownMenuItem(
+                              //       child: Row(
+                              //         children: [
+                              //           CircleAvatar(
+                              //             backgroundColor: catColor(category),
+                              //             radius: 5,
+                              //           ),
+                              //           SizedBox(width: 8),
+                              //           Text(category),
+                              //         ],
+                              //       ),
+                              //       value: category,
+                              //     );
+                              //   }).toList(),
+                              // ]
                               items: categories.map((category) {
                                 return DropdownMenuItem(
                                   child: Row(
                                     children: [
                                       CircleAvatar(
                                         backgroundColor: catColor(category),
-                                        radius: 7,
+                                        radius: 5,
                                       ),
                                       SizedBox(
                                           width:
