@@ -314,128 +314,312 @@ class _TaskListWState extends State<TaskListW> {
   }
 
   Future<dynamic> addNewTaskMethod(BuildContext context) {
+    // Create local TextEditingController and category state just for the modal
+    final modalTaskController = TextEditingController();
+    String? modalSelectedCategory = selectedCategory;
+
     return showModalBottomSheet(
       useSafeArea: false,
       context: context,
+      isScrollControlled: true,
       constraints: BoxConstraints(
         minWidth: MediaQuery.of(context).size.width * 0.5,
         maxWidth: MediaQuery.of(context).size.width * 0.5,
         minHeight: MediaQuery.of(context).size.width * 0.18,
         maxHeight: MediaQuery.of(context).size.width * 0.18,
       ),
-      builder: (_) {
-        return GestureDetector(
-          onTap: () {},
-          behavior: HitTestBehavior.opaque,
-          child: Column(
-            children: <Widget>[
-              Stack(
-                children: <Widget>[
-                  Card(
-                    child: Container(
-                      padding: EdgeInsets.only(
-                        top: 10,
-                        left: 10,
-                        right: 10,
-                        bottom: MediaQuery.of(context).viewInsets.bottom + 50,
-                      ),
-                      child: Form(
-                        key: _form,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            TextFormField(
-                              controller: _taskDescriptionController,
-                              decoration: InputDecoration(labelText: 'Task'),
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Please provide a value.';
-                                }
-                                return null;
-                              },
-                            ),
-                            DropdownButton<String>(
-                              padding: EdgeInsets.only(top: 15),
-                              hint: selectedCategory == null
-                                  ? Text('Select Category')
-                                  : null, // Show hint when no category is selected
-                              value: selectedCategory,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  selectedCategory = newValue;
-                                });
-                              },
-                              selectedItemBuilder: (BuildContext context) {
-                                // What shows in the button when selected
-                                return [
-                                  if (selectedCategory != null)
-                                    Row(
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Card(
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        child: Form(
+                          key: _form,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextFormField(
+                                controller: modalTaskController,
+                                decoration: InputDecoration(labelText: 'Task'),
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'Please provide a value.';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 15),
+                              DropdownButtonFormField<String>(
+                                hint: Text('Select Category'),
+                                value: modalSelectedCategory,
+                                onChanged: (newValue) {
+                                  setModalState(() {
+                                    modalSelectedCategory = newValue;
+                                  });
+                                  // Also update parent state if needed
+                                  setState(() {
+                                    selectedCategory = newValue;
+                                  });
+                                },
+                                selectedItemBuilder: (BuildContext context) {
+                                  return categories.map((category) {
+                                    return Row(
                                       children: [
                                         CircleAvatar(
-                                          backgroundColor:
-                                              catColor(selectedCategory!),
-                                          radius: 10,
+                                          backgroundColor: catColor(category),
+                                          radius: 5,
                                         ),
                                         SizedBox(width: 8),
-                                        Text(selectedCategory!),
+                                        Text(category),
                                       ],
-                                    )
-                                  else
-                                    Text(
-                                        'Category'), // Fallback when nothing selected
-                                ];
-                              },
-                              // items: [
-                              //   DropdownMenuItem(
-                              //     value: null,
-                              //     child: Text(
-                              //         'Category'), // This is the actual hint
-                              //   ),
-                              //   ...categories.map((category) {
-                              //     return DropdownMenuItem(
-                              //       child: Row(
-                              //         children: [
-                              //           CircleAvatar(
-                              //             backgroundColor: catColor(category),
-                              //             radius: 5,
-                              //           ),
-                              //           SizedBox(width: 8),
-                              //           Text(category),
-                              //         ],
-                              //       ),
-                              //       value: category,
-                              //     );
-                              //   }).toList(),
-                              // ]
-                              items: categories.map((category) {
-                                return DropdownMenuItem(
-                                  child: Row(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundColor: catColor(category),
-                                        radius: 5,
-                                      ),
-                                      SizedBox(
-                                          width:
-                                              8), // Spacing between CircleAvatar and text
-                                      Text(category),
-                                    ],
-                                  ),
-                                  value: category,
-                                );
-                              }).toList(),
-                            ),
-                          ],
+                                    );
+                                  }).toList();
+                                },
+                                items: categories.map((category) {
+                                  return DropdownMenuItem<String>(
+                                    value: category,
+                                    child: Row(
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: catColor(category),
+                                          radius: 5,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(category),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
+
+  // Future<dynamic> addNewTaskMethod(BuildContext context) {
+  //   return showModalBottomSheet(
+  //     useSafeArea: false,
+  //     context: context,
+  //     constraints: BoxConstraints(
+  //       minWidth: MediaQuery.of(context).size.width * 0.5,
+  //       maxWidth: MediaQuery.of(context).size.width * 0.5,
+  //       minHeight: MediaQuery.of(context).size.width * 0.18,
+  //       maxHeight: MediaQuery.of(context).size.width * 0.18,
+  //     ),
+  //     builder: (_) {
+  //       String? modalSelectedCategory = selectedCategory; // Local copy
+
+  //       return StatefulBuilder(
+  //         builder: (BuildContext context, StateSetter setModalState) {
+  //           return GestureDetector(
+  //             onTap: () {},
+  //             behavior: HitTestBehavior.opaque,
+  //             child: Column(
+  //               children: <Widget>[
+  //                 Stack(
+  //                   children: <Widget>[
+  //                     Card(
+  //                       child: Container(
+  //                         padding: EdgeInsets.only(
+  //                           top: 10,
+  //                           left: 10,
+  //                           right: 10,
+  //                           bottom:
+  //                               MediaQuery.of(context).viewInsets.bottom + 50,
+  //                         ),
+  //                         child: Form(
+  //                           key: _form,
+  //                           child: Column(
+  //                             crossAxisAlignment: CrossAxisAlignment.start,
+  //                             children: <Widget>[
+  //                               TextFormField(
+  //                                 controller: _taskDescriptionController,
+  //                                 decoration:
+  //                                     InputDecoration(labelText: 'Task'),
+  //                                 validator: (value) {
+  //                                   if (value!.isEmpty) {
+  //                                     return 'Please provide a value.';
+  //                                   }
+  //                                   return null;
+  //                                 },
+  //                               ),
+  //                               DropdownButton<String>(
+  //                                 padding: EdgeInsets.only(top: 15),
+  //                                 hint: Text('Select Category'),
+  //                                 value: modalSelectedCategory,
+  //                                 onChanged: (newValue) {
+  //                                   setModalState(() {
+  //                                     modalSelectedCategory = newValue;
+  //                                   });
+  //                                   // Also update the parent's state
+  //                                   setState(() {
+  //                                     selectedCategory = newValue;
+  //                                   });
+  //                                 },
+  //                                 selectedItemBuilder: (BuildContext context) {
+  //                                   if (modalSelectedCategory == null) {
+  //                                     return [Text('Select Category')];
+  //                                   }
+  //                                   return [
+  //                                     Row(
+  //                                       children: [
+  //                                         CircleAvatar(
+  //                                           backgroundColor: catColor(
+  //                                               modalSelectedCategory!),
+  //                                           radius: 5,
+  //                                         ),
+  //                                         SizedBox(width: 8),
+  //                                         Text(modalSelectedCategory!),
+  //                                       ],
+  //                                     )
+  //                                   ];
+  //                                 },
+  //                                 items: categories.map((category) {
+  //                                   return DropdownMenuItem(
+  //                                     child: Row(
+  //                                       children: [
+  //                                         CircleAvatar(
+  //                                           backgroundColor: catColor(category),
+  //                                           radius: 5,
+  //                                         ),
+  //                                         SizedBox(width: 8),
+  //                                         Text(category),
+  //                                       ],
+  //                                     ),
+  //                                     value: category,
+  //                                   );
+  //                                 }).toList(),
+  //                               ),
+  //                             ],
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ],
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
+  // Future<dynamic> addNewTaskMethod(BuildContext context) {
+  //   return showModalBottomSheet(
+  //     useSafeArea: false,
+  //     context: context,
+  //     constraints: BoxConstraints(
+  //       minWidth: MediaQuery.of(context).size.width * 0.5,
+  //       maxWidth: MediaQuery.of(context).size.width * 0.5,
+  //       minHeight: MediaQuery.of(context).size.width * 0.18,
+  //       maxHeight: MediaQuery.of(context).size.width * 0.18,
+  //     ),
+  //     builder: (_) {
+  //       return GestureDetector(
+  //         onTap: () {},
+  //         behavior: HitTestBehavior.opaque,
+  //         child: Column(
+  //           children: <Widget>[
+  //             Stack(
+  //               children: <Widget>[
+  //                 Card(
+  //                   child: Container(
+  //                     padding: EdgeInsets.only(
+  //                       top: 10,
+  //                       left: 10,
+  //                       right: 10,
+  //                       bottom: MediaQuery.of(context).viewInsets.bottom + 50,
+  //                     ),
+  //                     child: Form(
+  //                       key: _form,
+  //                       child: Column(
+  //                         crossAxisAlignment: CrossAxisAlignment.start,
+  //                         children: <Widget>[
+  //                           TextFormField(
+  //                             controller: _taskDescriptionController,
+  //                             decoration: InputDecoration(labelText: 'Task'),
+  //                             validator: (value) {
+  //                               if (value!.isEmpty) {
+  //                                 return 'Please provide a value.';
+  //                               }
+  //                               return null;
+  //                             },
+  //                           ),
+  //                           DropdownButton<String>(
+  //                             padding: EdgeInsets.only(top: 15),
+  //                             hint: Text(
+  //                                 'Select Category'), // Always show hint when no category is selected
+  //                             value: selectedCategory,
+  //                             onChanged: (newValue) {
+  //                               setState(() {
+  //                                 selectedCategory = newValue;
+  //                               });
+  //                             },
+  //                             selectedItemBuilder: (BuildContext context) {
+  //                               // This builds what is shown in the button when an item is selected
+  //                               return categories.map((category) {
+  //                                 return Row(
+  //                                   children: [
+  //                                     CircleAvatar(
+  //                                       backgroundColor: catColor(category),
+  //                                       radius: 5,
+  //                                     ),
+  //                                     SizedBox(width: 8),
+  //                                     Text(category),
+  //                                   ],
+  //                                 );
+  //                               }).toList();
+  //                             },
+  //                             items: categories.map((category) {
+  //                               return DropdownMenuItem(
+  //                                 child: Row(
+  //                                   children: [
+  //                                     CircleAvatar(
+  //                                       backgroundColor: catColor(category),
+  //                                       radius: 5,
+  //                                     ),
+  //                                     SizedBox(width: 8),
+  //                                     Text(category),
+  //                                   ],
+  //                                 ),
+  //                                 value: category,
+  //                               );
+  //                             }).toList(),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 }
