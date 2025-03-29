@@ -377,13 +377,33 @@ class _TaskListWState extends State<TaskListW> {
                                   selectedCategory = newValue;
                                 });
                               },
+                              selectedItemBuilder: (BuildContext context) {
+                                // What displays in the button when an item is selected
+                                return categories.map((category) {
+                                  return Row(
+                                    children: [
+                                      if (selectedCategory !=
+                                          null) // Only show CircleAvatar if a category is selected
+                                        CircleAvatar(
+                                          backgroundColor:
+                                              catColor(selectedCategory!),
+                                          radius: 10,
+                                        ),
+                                      if (selectedCategory != null)
+                                        SizedBox(width: 8),
+                                      Text(selectedCategory ??
+                                          'Category'), // Fallback text if null
+                                    ],
+                                  );
+                                }).toList();
+                              },
                               items: categories.map((category) {
                                 return DropdownMenuItem(
                                   child: Row(
                                     children: [
                                       CircleAvatar(
                                         backgroundColor: catColor(category),
-                                        radius: 7, // Adjust size as needed
+                                        radius: 7,
                                       ),
                                       SizedBox(
                                           width:
