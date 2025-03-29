@@ -379,24 +379,22 @@ class _TaskListWState extends State<TaskListW> {
                               },
                               items: categories.map((category) {
                                 return DropdownMenuItem(
-                                  child: Text(category),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundColor: catColor(category),
+                                        radius: 7, // Adjust size as needed
+                                      ),
+                                      SizedBox(
+                                          width:
+                                              8), // Spacing between CircleAvatar and text
+                                      Text(category),
+                                    ],
+                                  ),
                                   value: category,
                                 );
                               }).toList(),
                             ),
-                            // ElevatedButton(
-                            //   onPressed: _saveTask,
-                            //   child: Text('Save',
-                            //       style: TextStyle(
-                            //         color: Theme.of(context)
-                            //             .colorScheme
-                            //             .onSecondary,
-                            //       )),
-                            //   style: ElevatedButton.styleFrom(
-                            //     backgroundColor:
-                            //         Theme.of(context).colorScheme.secondary,
-                            //   ),
-                            // ),
                           ],
                         ),
                       ),
