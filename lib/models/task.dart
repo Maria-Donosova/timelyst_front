@@ -35,12 +35,16 @@ class Task {
 
   // Convert Task object to JSON
   Map<String, dynamic> toJson() {
+    // Remove id from the JSON when sending to backend for mutations
+    // as the backend will handle the ID
     return {
-      'id': id,
+      // 'id': id, // Exclude ID for create/update operations
       'title': title,
       'status': status,
       'task_type': task_type,
       'category': category,
+      // Use the field names expected by the backend
+      // Only include dates if they're not null
       'createdAt': dateCreated.toIso8601String(),
       'updatedAt': dateChanged.toIso8601String(),
       'creator': creator,
