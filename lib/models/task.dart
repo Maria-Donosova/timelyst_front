@@ -47,7 +47,8 @@ class Task {
       // Only include dates if they're not null
       'createdAt': dateCreated.toIso8601String(),
       'updatedAt': dateChanged.toIso8601String(),
-      'creator': creator,
+
+      'user_id': creator, // Map creator to user_id as required by backend
     };
   }
 }
