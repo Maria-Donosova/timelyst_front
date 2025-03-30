@@ -88,10 +88,8 @@ class TasksService {
     }
   ''';
 
-    final String encodedQuery = Uri.encodeComponent(query);
     final response = await http.post(
-      Uri.parse(
-          '${Config.backendGraphqlURL}?query=$encodedQuery&variables={"userId":"$taskId"}'),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -135,7 +133,7 @@ class TasksService {
 
     // Prepare the variables for the mutation
     final Map<String, dynamic> variables = {
-      'input': newTask.toJson(), // Convert the task to JSON
+      'taskInput': newTask.toJson(), // Convert the task to JSON
     };
 
     // Send the HTTP POST request
@@ -199,7 +197,7 @@ class TasksService {
     };
 
     final response = await http.post(
-      Uri.parse('http://localhost:3000/graphql'),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -256,7 +254,7 @@ class TasksService {
     ''';
 
     final response = await http.post(
-      Uri.parse('http://localhost:3000/graphql'),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
