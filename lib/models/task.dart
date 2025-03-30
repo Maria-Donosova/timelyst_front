@@ -27,8 +27,8 @@ class Task {
       status: json['status'],
       task_type: json['task_type'],
       category: json['category'],
-      dateCreated: DateTime.parse(json['dateCreated']),
-      dateChanged: DateTime.parse(json['dateChanged']),
+      dateCreated: DateTime.parse(json['createdAt'] ?? json['dateCreated']),
+      dateChanged: DateTime.parse(json['updatedAt'] ?? json['dateChanged']),
       creator: json['creator'],
     );
   }
@@ -41,8 +41,8 @@ class Task {
       'status': status,
       'task_type': task_type,
       'category': category,
-      'dateCreated': dateCreated.toIso8601String(),
-      'dateChanged': dateChanged.toIso8601String(),
+      'createdAt': dateCreated.toIso8601String(),
+      'updatedAt': dateChanged.toIso8601String(),
       'creator': creator,
     };
   }
