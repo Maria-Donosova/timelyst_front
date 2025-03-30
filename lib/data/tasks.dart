@@ -117,8 +117,8 @@ class TasksService {
 
     // Define the GraphQL mutation string
     final String mutation = '''
-    mutation CreateTask(\$input: TaskInputData!) {
-      createTask(taskInput: \$input) {
+    mutation CreateTask(\$taskInput: TaskInputData!) {
+      createTask(taskInput: \$taskInput) {
         id
         title
         status
