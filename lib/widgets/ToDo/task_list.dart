@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:timelyst_flutter/data/tasks.dart';
 import 'package:timelyst_flutter/models/task.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
 import 'package:timelyst_flutter/services/authService.dart';
@@ -401,6 +402,100 @@ class _TaskListWState extends State<TaskListW> {
                                     ),
                                   );
                                 }).toList(),
+                              ),
+                              const SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.shadow,
+                                    ),
+                                    onPressed: () async {
+                                      if (_form.currentState!.validate() &&
+                                          modalSelectedCategory != null) {
+                                        // Get the task provider
+                                        final taskProvider =
+                                            Provider.of<TaskProvider>(context,
+                                                listen: false);
+
+                                        // Get auth token and user ID
+                                        final authService = AuthService();
+                                        final authToken =
+                                            await authService.getAuthToken();
+                                        final userId =
+                                            await authService.getUserId();
+
+                                        if (authToken != null &&
+                                            userId != null) {
+                                          try {
+                                            // Create a new task
+                                            final newTask = Task(
+                                              id: '', // The backend will generate this
+                                              title: modalTaskController.text,
+                                              status: 'New',
+                                              category: modalSelectedCategory!,
+                                              dateCreated: DateTime.now(),
+                                              dateChanged: DateTime.now(),
+                                              creator: userId,
+                                            );
+
+                                            // Call the service to create the task
+                                            await TasksService.createTask(
+                                                authToken, newTask);
+
+                                            // Refresh the task list
+                                            await taskProvider.fetchTasks(
+                                                userId, authToken);
+
+                                            // Close the modal
+                                            Navigator.of(context).pop();
+
+                                            // Show success message
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                backgroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .shadow,
+                                                content: Text(
+                                                  'Task created successfully',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge,
+                                                ),
+                                              ),
+                                            );
+                                          } catch (e) {
+                                            // Show error message
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                backgroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .shadow,
+                                                content: Text(
+                                                  'Failed to create task: $e',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      }
+                                    },
+                                    child: Text(
+                                      'Save',
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
