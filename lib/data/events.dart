@@ -1,14 +1,13 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../config/env_variables_config.dart';
 import '../../models/customApp.dart';
 import '../../models/dayEvent.dart';
 import '../../models/timeEvent.dart';
 import '../utils/eventsMapper.dart';
 
 class EventService {
-  static const String _baseUrl = 'http://localhost:3000/graphql';
-
   // Fetch DayEvents and map them to CustomAppointment
   static Future<List<CustomAppointment>> fetchDayEvents(
       String userId, String authToken) async {
@@ -46,7 +45,7 @@ class EventService {
     ''';
 
     final response = await http.post(
-      Uri.parse(_baseUrl),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -110,7 +109,7 @@ class EventService {
     ''';
 
     final response = await http.post(
-      Uri.parse(_baseUrl),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -174,7 +173,7 @@ class EventService {
     ''';
 
     final response = await http.post(
-      Uri.parse(_baseUrl),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -235,7 +234,7 @@ class EventService {
     ''';
 
     final response = await http.post(
-      Uri.parse(_baseUrl),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -296,7 +295,7 @@ class EventService {
     ''';
 
     final response = await http.post(
-      Uri.parse(_baseUrl),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -357,7 +356,7 @@ class EventService {
     ''';
 
     final response = await http.post(
-      Uri.parse(_baseUrl),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -390,7 +389,7 @@ class EventService {
     ''';
 
     final response = await http.post(
-      Uri.parse(_baseUrl),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -421,7 +420,7 @@ class EventService {
     ''';
 
     final response = await http.post(
-      Uri.parse(_baseUrl),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
