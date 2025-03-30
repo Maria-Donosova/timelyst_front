@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../models/calendars.dart';
+import '../../config/env_variables_config.dart';
 
 class CalendarsService {
   static Future<List<Calendar>> fetchUserCalendars(
@@ -28,7 +29,7 @@ class CalendarsService {
     // Send the HTTP POST request
     final response = await http.get(
       Uri.parse(
-          'http://localhost:3000/graphql?query=$encodedQuery&variables={"userId":"$userId"}'),
+          '${Config.backendGraphqlURL}?query=$encodedQuery&variables={"userId":"$userId"}'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -106,7 +107,7 @@ class CalendarsService {
     };
 
     final response = await http.post(
-      Uri.parse('http://localhost:3000/graphql'),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -144,7 +145,7 @@ class CalendarsService {
     ''';
 
     final response = await http.post(
-      Uri.parse('http://localhost:3000/graphql'),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -185,7 +186,7 @@ class CalendarsService {
     ''';
 
     final response = await http.post(
-      Uri.parse('http://localhost:3000/graphql'),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
@@ -226,7 +227,7 @@ class CalendarsService {
     ''';
 
     final response = await http.post(
-      Uri.parse('http://localhost:3000/graphql'),
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
