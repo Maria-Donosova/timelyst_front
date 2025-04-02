@@ -35,8 +35,7 @@ class Task {
 
   // Convert Task object to JSON
   Map<String, dynamic> toJson() {
-    // Remove id from the JSON when sending to backend for mutations
-    // as the backend will handle the ID
+    // Remove id from the JSON when sending to backend for mutations as the backend will handle the ID
     return {
       // 'id': id, // Exclude ID for create/update operations
       'title': title,
@@ -47,30 +46,7 @@ class Task {
       // Only include dates if they're not null
       'createdAt': dateCreated.toIso8601String(),
       'updatedAt': dateChanged.toIso8601String(),
-
       'user_id': creator, // Map creator to user_id as required by backend
     };
   }
 }
-
-// class Task {
-//   final String id;
-//   final String title;
-//   final String task_type;
-//   final String category;
-//   //final Color category;
-//   final DateTime dateCreated;
-//   final DateTime dateChanged;
-//   final String creator;
-
-//   Task({
-//     required this.id,
-//     required this.title,
-//     this.task_type = "Task",
-//     this.category = 'Work',
-//     //this.category = Colors.grey,
-//     required this.dateCreated,
-//     required this.dateChanged,
-//     required this.creator,
-//   });
-// }
