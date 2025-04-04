@@ -43,12 +43,6 @@ class _TaskListWState extends State<TaskListW> {
 
   List<Task> tasks = [];
 
-  // void _addNewTask(Task newTask) {
-  //   setState(() {
-  //     tasks.add(newTask);
-  //   });
-  // }
-
   final _form = GlobalKey<FormState>();
   final _taskDescriptionController = TextEditingController();
   String? selectedCategory;
@@ -438,7 +432,7 @@ class _TaskListWState extends State<TaskListW> {
                                               category: modalSelectedCategory!,
                                               dateCreated: DateTime.now(),
                                               dateChanged: DateTime.now(),
-                                              creator: userId,
+                                              //creator: userId,
                                             );
 
                                             // Call the service to create the task

@@ -38,7 +38,7 @@ class _EditTaskWState extends State<EditTaskW> {
         category: selectedCategory!,
         dateCreated: widget.task.dateCreated,
         dateChanged: DateTime.now(),
-        creator: widget.task.creator,
+        //creator: widget.task.creator,
       );
 
       try {
