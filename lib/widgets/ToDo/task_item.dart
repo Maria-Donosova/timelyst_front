@@ -51,7 +51,7 @@ class _TaskItemState extends State<TaskItem> {
                     category: widget.category,
                     dateCreated: DateTime.now(),
                     dateChanged: DateTime.now(),
-                    creator: '', // Update with the user ID
+                    //creator: '', // Update with the user ID
                   ),
                   onSave: (updatedTask) async {
                     try {

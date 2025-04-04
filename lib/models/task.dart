@@ -6,7 +6,7 @@ class Task {
   final String category;
   final DateTime dateCreated;
   final DateTime dateChanged;
-  final String creator;
+  //final String creator;
 
   Task({
     required this.id,
@@ -16,7 +16,7 @@ class Task {
     this.category = 'Work',
     required this.dateCreated,
     required this.dateChanged,
-    required this.creator,
+    //required this.creator,
   });
 
   // Convert JSON to Task object
@@ -29,7 +29,7 @@ class Task {
       category: json['category'],
       dateCreated: DateTime.parse(json['createdAt'] ?? json['dateCreated']),
       dateChanged: DateTime.parse(json['updatedAt'] ?? json['dateChanged']),
-      creator: json['creator'],
+      //creator: json['creator'],
     );
   }
 
@@ -42,7 +42,7 @@ class Task {
       'category': category,
       'createdAt': dateCreated.toIso8601String(),
       'updatedAt': dateChanged.toIso8601String(),
-      'user_id': creator,
+      //'user_id': creator,
     };
   }
 }

@@ -22,7 +22,6 @@ class TasksService {
               category
               createdAt
               updatedAt
-              creator
             }
           }
         }
@@ -83,7 +82,6 @@ class TasksService {
         category
         createdAt
         updatedAt
-        creator
       }
     }
   ''';
@@ -126,7 +124,6 @@ class TasksService {
         category
         createdAt
         updatedAt
-        creator
       }
     }
   ''';
@@ -186,7 +183,6 @@ class TasksService {
             category
             createdAt
             updatedAt
-            creator
           }
         }
     ''';
