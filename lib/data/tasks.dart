@@ -112,6 +112,8 @@ class TasksService {
 
   static Future<Task> createTask(String authToken, Task newTask) async {
     print("Entering createTask in TasksService");
+    print("NewTask: $newTask");
+    print("AuthToken: $authToken");
 
     // Define the GraphQL mutation string
     final String mutation = '''
@@ -128,11 +130,24 @@ class TasksService {
     }
   ''';
 
-    // Prepare the variables for the mutation
+    //Prepare the variables for the mutation
     final Map<String, dynamic> variables = {
-      'taskInput': newTask.toJson(), // Convert the task to JSON
+      'taskInput': {
+        'title': newTask.title,
+        'status': newTask.status,
+        'task_type': newTask.task_type,
+        'category': newTask.category,
+      },
     };
 
+    // final Map<String, dynamic> variables = {
+    //   'taskInput': {
+    //     'title': newTask.title,
+    //     'status': newTask.status,
+    //     'task_type': newTask.taskType,
+    //     'category': newTask.category,
+    //   },
+    // };
     // Send the HTTP POST request
     final response = await http.post(
       Uri.parse(Config.backendGraphqlURL),
