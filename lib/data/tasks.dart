@@ -113,7 +113,7 @@ class TasksService {
   static Future<Task> createTask(String authToken, Task newTask) async {
     print("Entering createTask in TasksService");
     print("NewTask: $newTask");
-    print("AuthToken: $authToken");
+    print("AuthToken in Task Service: $authToken");
 
     // Define the GraphQL mutation string
     final String mutation = '''
