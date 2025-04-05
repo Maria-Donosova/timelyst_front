@@ -6,7 +6,7 @@ class Task {
   final String category;
 
   Task({
-    required this.id,
+    this.id = '',
     required this.title,
     required this.status,
     this.task_type = "Task",

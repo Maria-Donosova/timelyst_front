@@ -47,30 +47,6 @@ class _TaskListWState extends State<TaskListW> {
   final _taskDescriptionController = TextEditingController();
   String? selectedCategory;
 
-  // void _saveTask() async {
-  //   if (_form.currentState!.validate()) {
-  //     final newTask = Task(
-  //       id: '', // The backend should generate this
-  //       title: _taskDescriptionController.text,
-  //       status: 'New',
-  //       category: selectedCategory!,
-  //       dateCreated: DateTime.now(),
-  //       dateChanged: DateTime.now(),
-  //       creator: '', // update later
-  //     );
-
-  //     try {
-  //       // Call your backend to create the task For now, we assume the task is created successfully
-  //       //widget.onSave(newTask); // Notify parent widget
-  //       Navigator.of(context).pop(); // Close the bottom sheet
-  //     } catch (e) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Failed to create task: $e')),
-  //       );
-  //     }
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     final taskProvider = Provider.of<TaskProvider>(context);
@@ -424,15 +400,12 @@ class _TaskListWState extends State<TaskListW> {
                                         if (authToken != null &&
                                             userId != null) {
                                           try {
-                                            // Create a new task
+                                            // Create a new task with non-null values
                                             final newTask = Task(
-                                              id: '', // The backend will generate this
                                               title: modalTaskController.text,
                                               status: 'New',
                                               category: modalSelectedCategory!,
-                                              // dateCreated: DateTime.now(),
-                                              // dateChanged: DateTime.now(),
-                                              //creator: userId,
+                                              task_type: 'Task',
                                             );
 
                                             // Call the service to create the task
@@ -463,6 +436,7 @@ class _TaskListWState extends State<TaskListW> {
                                               ),
                                             );
                                           } catch (e) {
+                                            print('Error creating task: $e');
                                             // Show error message
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
@@ -505,210 +479,4 @@ class _TaskListWState extends State<TaskListW> {
       },
     );
   }
-
-  // Future<dynamic> addNewTaskMethod(BuildContext context) {
-  //   return showModalBottomSheet(
-  //     useSafeArea: false,
-  //     context: context,
-  //     constraints: BoxConstraints(
-  //       minWidth: MediaQuery.of(context).size.width * 0.5,
-  //       maxWidth: MediaQuery.of(context).size.width * 0.5,
-  //       minHeight: MediaQuery.of(context).size.width * 0.18,
-  //       maxHeight: MediaQuery.of(context).size.width * 0.18,
-  //     ),
-  //     builder: (_) {
-  //       String? modalSelectedCategory = selectedCategory; // Local copy
-
-  //       return StatefulBuilder(
-  //         builder: (BuildContext context, StateSetter setModalState) {
-  //           return GestureDetector(
-  //             onTap: () {},
-  //             behavior: HitTestBehavior.opaque,
-  //             child: Column(
-  //               children: <Widget>[
-  //                 Stack(
-  //                   children: <Widget>[
-  //                     Card(
-  //                       child: Container(
-  //                         padding: EdgeInsets.only(
-  //                           top: 10,
-  //                           left: 10,
-  //                           right: 10,
-  //                           bottom:
-  //                               MediaQuery.of(context).viewInsets.bottom + 50,
-  //                         ),
-  //                         child: Form(
-  //                           key: _form,
-  //                           child: Column(
-  //                             crossAxisAlignment: CrossAxisAlignment.start,
-  //                             children: <Widget>[
-  //                               TextFormField(
-  //                                 controller: _taskDescriptionController,
-  //                                 decoration:
-  //                                     InputDecoration(labelText: 'Task'),
-  //                                 validator: (value) {
-  //                                   if (value!.isEmpty) {
-  //                                     return 'Please provide a value.';
-  //                                   }
-  //                                   return null;
-  //                                 },
-  //                               ),
-  //                               DropdownButton<String>(
-  //                                 padding: EdgeInsets.only(top: 15),
-  //                                 hint: Text('Select Category'),
-  //                                 value: modalSelectedCategory,
-  //                                 onChanged: (newValue) {
-  //                                   setModalState(() {
-  //                                     modalSelectedCategory = newValue;
-  //                                   });
-  //                                   // Also update the parent's state
-  //                                   setState(() {
-  //                                     selectedCategory = newValue;
-  //                                   });
-  //                                 },
-  //                                 selectedItemBuilder: (BuildContext context) {
-  //                                   if (modalSelectedCategory == null) {
-  //                                     return [Text('Select Category')];
-  //                                   }
-  //                                   return [
-  //                                     Row(
-  //                                       children: [
-  //                                         CircleAvatar(
-  //                                           backgroundColor: catColor(
-  //                                               modalSelectedCategory!),
-  //                                           radius: 5,
-  //                                         ),
-  //                                         SizedBox(width: 8),
-  //                                         Text(modalSelectedCategory!),
-  //                                       ],
-  //                                     )
-  //                                   ];
-  //                                 },
-  //                                 items: categories.map((category) {
-  //                                   return DropdownMenuItem(
-  //                                     child: Row(
-  //                                       children: [
-  //                                         CircleAvatar(
-  //                                           backgroundColor: catColor(category),
-  //                                           radius: 5,
-  //                                         ),
-  //                                         SizedBox(width: 8),
-  //                                         Text(category),
-  //                                       ],
-  //                                     ),
-  //                                     value: category,
-  //                                   );
-  //                                 }).toList(),
-  //                               ),
-  //                             ],
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ],
-  //             ),
-  //           );
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
-
-  // Future<dynamic> addNewTaskMethod(BuildContext context) {
-  //   return showModalBottomSheet(
-  //     useSafeArea: false,
-  //     context: context,
-  //     constraints: BoxConstraints(
-  //       minWidth: MediaQuery.of(context).size.width * 0.5,
-  //       maxWidth: MediaQuery.of(context).size.width * 0.5,
-  //       minHeight: MediaQuery.of(context).size.width * 0.18,
-  //       maxHeight: MediaQuery.of(context).size.width * 0.18,
-  //     ),
-  //     builder: (_) {
-  //       return GestureDetector(
-  //         onTap: () {},
-  //         behavior: HitTestBehavior.opaque,
-  //         child: Column(
-  //           children: <Widget>[
-  //             Stack(
-  //               children: <Widget>[
-  //                 Card(
-  //                   child: Container(
-  //                     padding: EdgeInsets.only(
-  //                       top: 10,
-  //                       left: 10,
-  //                       right: 10,
-  //                       bottom: MediaQuery.of(context).viewInsets.bottom + 50,
-  //                     ),
-  //                     child: Form(
-  //                       key: _form,
-  //                       child: Column(
-  //                         crossAxisAlignment: CrossAxisAlignment.start,
-  //                         children: <Widget>[
-  //                           TextFormField(
-  //                             controller: _taskDescriptionController,
-  //                             decoration: InputDecoration(labelText: 'Task'),
-  //                             validator: (value) {
-  //                               if (value!.isEmpty) {
-  //                                 return 'Please provide a value.';
-  //                               }
-  //                               return null;
-  //                             },
-  //                           ),
-  //                           DropdownButton<String>(
-  //                             padding: EdgeInsets.only(top: 15),
-  //                             hint: Text(
-  //                                 'Select Category'), // Always show hint when no category is selected
-  //                             value: selectedCategory,
-  //                             onChanged: (newValue) {
-  //                               setState(() {
-  //                                 selectedCategory = newValue;
-  //                               });
-  //                             },
-  //                             selectedItemBuilder: (BuildContext context) {
-  //                               // This builds what is shown in the button when an item is selected
-  //                               return categories.map((category) {
-  //                                 return Row(
-  //                                   children: [
-  //                                     CircleAvatar(
-  //                                       backgroundColor: catColor(category),
-  //                                       radius: 5,
-  //                                     ),
-  //                                     SizedBox(width: 8),
-  //                                     Text(category),
-  //                                   ],
-  //                                 );
-  //                               }).toList();
-  //                             },
-  //                             items: categories.map((category) {
-  //                               return DropdownMenuItem(
-  //                                 child: Row(
-  //                                   children: [
-  //                                     CircleAvatar(
-  //                                       backgroundColor: catColor(category),
-  //                                       radius: 5,
-  //                                     ),
-  //                                     SizedBox(width: 8),
-  //                                     Text(category),
-  //                                   ],
-  //                                 ),
-  //                                 value: category,
-  //                               );
-  //                             }).toList(),
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 }
