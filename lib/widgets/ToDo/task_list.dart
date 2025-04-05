@@ -416,43 +416,70 @@ class _TaskListWState extends State<TaskListW> {
                                             await taskProvider.fetchTasks(
                                                 userId, authToken);
 
-                                            // Close the modal
+                                            // Capture the scaffold context before popping
+                                            final scaffoldContext =
+                                                ScaffoldMessenger.of(context);
+                                            final themeData = Theme.of(context);
+
+                                            // Close the modal first
                                             Navigator.of(context).pop();
 
-                                            // Show success message
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                backgroundColor:
-                                                    Theme.of(context)
-                                                        .colorScheme
-                                                        .shadow,
-                                                content: Text(
-                                                  'Task created successfully',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyLarge,
+                                            // Wait for the modal to close completely before showing the SnackBar
+                                            Future.delayed(
+                                                Duration(milliseconds: 500),
+                                                () {
+                                              // Show success message using the captured context
+                                              scaffoldContext.showSnackBar(
+                                                SnackBar(
+                                                  backgroundColor: themeData
+                                                      .colorScheme.shadow,
+                                                  content: Text(
+                                                    'Task created successfully',
+                                                    style: themeData
+                                                        .textTheme.bodyLarge,
+                                                  ),
+                                                  duration:
+                                                      Duration(seconds: 2),
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  margin: EdgeInsets.all(10),
+                                                  elevation: 6,
                                                 ),
-                                              ),
-                                            );
+                                              );
+                                            });
                                           } catch (e) {
                                             print('Error creating task: $e');
-                                            // Show error message
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                backgroundColor:
-                                                    Theme.of(context)
-                                                        .colorScheme
-                                                        .shadow,
-                                                content: Text(
-                                                  'Failed to create task: $e',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyLarge,
+                                            // Capture the scaffold context before popping
+                                            final scaffoldContext =
+                                                ScaffoldMessenger.of(context);
+                                            final themeData = Theme.of(context);
+
+                                            // Close the modal first
+                                            Navigator.of(context).pop();
+
+                                            // Wait for the modal to close completely before showing the error SnackBar
+                                            Future.delayed(
+                                                Duration(milliseconds: 500),
+                                                () {
+                                              // Show error message using the captured context
+                                              scaffoldContext.showSnackBar(
+                                                SnackBar(
+                                                  backgroundColor: themeData
+                                                      .colorScheme.shadow,
+                                                  content: Text(
+                                                    'Failed to create task: $e',
+                                                    style: themeData
+                                                        .textTheme.bodyLarge,
+                                                  ),
+                                                  duration:
+                                                      Duration(seconds: 2),
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  margin: EdgeInsets.all(10),
+                                                  elevation: 6,
                                                 ),
-                                              ),
-                                            );
+                                              );
+                                            });
                                           }
                                         }
                                       }
