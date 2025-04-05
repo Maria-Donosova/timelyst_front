@@ -119,13 +119,10 @@ class TasksService {
     final String mutation = '''
     mutation CreateTask(\$taskInput: TaskInputData!) {
       createTask(taskInput: \$taskInput) {
-        id
         title
         status
         task_type
         category
-        createdAt
-        updatedAt
       }
     }
   ''';
@@ -140,14 +137,6 @@ class TasksService {
       },
     };
 
-    // final Map<String, dynamic> variables = {
-    //   'taskInput': {
-    //     'title': newTask.title,
-    //     'status': newTask.status,
-    //     'task_type': newTask.taskType,
-    //     'category': newTask.category,
-    //   },
-    // };
     // Send the HTTP POST request
     final response = await http.post(
       Uri.parse(Config.backendGraphqlURL),
@@ -191,13 +180,10 @@ class TasksService {
     final String mutation = '''
         mutation UpdateTask(\$taskId: String!, \$input: TaskInputData!) {
           updateTask(id: \$taskId, input: \$input) {
-            id
             title
             status
             task_type
             category
-            createdAt
-            updatedAt
           }
         }
     ''';
