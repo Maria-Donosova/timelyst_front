@@ -430,8 +430,8 @@ class _TaskListWState extends State<TaskListW> {
                                               title: modalTaskController.text,
                                               status: 'New',
                                               category: modalSelectedCategory!,
-                                              dateCreated: DateTime.now(),
-                                              dateChanged: DateTime.now(),
+                                              // dateCreated: DateTime.now(),
+                                              // dateChanged: DateTime.now(),
                                               //creator: userId,
                                             );
 
