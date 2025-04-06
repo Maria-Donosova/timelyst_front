@@ -13,29 +13,29 @@ class TasksService {
     // Define the GraphQL query string
     final String query = '''
         query UserTasks(\$userId: String!) {
-          user(id: \$userId) {
-            tasks {
-              id
-              title
-              status
-              task_type
-              category
-              createdAt
-              updatedAt
-            }
+          tasks(userId: \$userId) {
+            id
+            title
+            status
+            task_type
+            category
+            createdAt
+            updatedAt
           }
         }
     ''';
 
-    final String encodedQuery = Uri.encodeComponent(query);
     // Send the HTTP POST request
-    final response = await http.get(
-      Uri.parse(
-          '${Config.backendGraphqlURL}?query=$encodedQuery&variables={"userId":"$userId"}'),
+    final response = await http.post(
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
       },
+      body: jsonEncode({
+        'query': query,
+        'variables': {'userId': userId},
+      }),
     );
 
     // Check the status code
@@ -52,7 +52,7 @@ class TasksService {
       }
 
       // Extract the tasks from the response
-      final List<dynamic> tasksData = data['data']['user']['tasks'];
+      final List<dynamic> tasksData = data['data']['tasks'];
 
       // Parse the tasks into a List<Task>
       final List<Task> tasks =
@@ -70,11 +70,12 @@ class TasksService {
   }
 
   // Helper function to fetch a single task by ID (if needed)
-  static Future<Task> fetchTaskById(String taskId, String authToken) async {
+  static Future<Task> fetchTaskById(
+      String taskId, String authToken, String userId) async {
     // Define the GraphQL query to fetch a single task
     const String query = '''
-    query FetchTask(\$taskId: String!) {
-      task(id: \$taskId) {
+    query FetchTask(\$taskId: String!, \$userId: String!) {
+      task(id: \$taskId, user_id: \$userId) {
         id
         title
         status
@@ -94,7 +95,7 @@ class TasksService {
       },
       body: jsonEncode({
         'query': query,
-        'variables': {'taskId': taskId},
+        'variables': {'taskId': taskId, 'userId': userId},
       }),
     );
 
@@ -238,7 +239,8 @@ class TasksService {
     try {
       // Fetch the task to be updated (if needed)
       // Note: If you already have the task locally, you can skip this step.
-      final task = await fetchTaskById(taskId, authToken);
+      final task = await fetchTaskById(
+          taskId, authToken, ''); // Passing empty string as userId
 
       // Update the task status
       final updatedTask = task..status = 'completed';
