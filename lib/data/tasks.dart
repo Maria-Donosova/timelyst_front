@@ -119,6 +119,7 @@ class TasksService {
     final String mutation = '''
     mutation CreateTask(\$taskInput: TaskInputData!) {
       createTask(taskInput: \$taskInput) {
+        id
         title
         status
         task_type
@@ -162,8 +163,19 @@ class TasksService {
             'Creating task failed: ${errors.map((e) => e['message']).join(", ")}');
       }
 
+      // Add debug logging to see the response structure
+      print('Response data: ${data['data']}');
+      print('CreateTask response: ${data['data']['createTask']}');
+
+      // Check if id is null and provide a default
+      final taskData = data['data']['createTask'];
+      if (taskData['id'] == null) {
+        print('Warning: Task ID is null in the response');
+        taskData['id'] = ''; // Provide a default empty string instead of null
+      }
+
       // Parse and return the created task
-      final createdTask = Task.fromJson(data['data']['createTask']);
+      final createdTask = Task.fromJson(taskData);
       print('Task created successfully: ${createdTask.id}');
       return createdTask;
     } else {
@@ -180,6 +192,7 @@ class TasksService {
     final String mutation = '''
         mutation UpdateTask(\$taskId: String!, \$input: TaskInputData!) {
           updateTask(id: \$taskId, input: \$input) {
+            id
             title
             status
             task_type
