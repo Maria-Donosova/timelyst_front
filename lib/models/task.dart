@@ -27,7 +27,6 @@ class Task {
   // Convert Task object to JSON
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'title': title,
       'status': status,
       'task_type': task_type,
