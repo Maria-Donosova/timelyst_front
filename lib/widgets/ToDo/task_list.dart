@@ -34,8 +34,8 @@ class _TaskListWState extends State<TaskListW> {
         final authToken = await authService.getAuthToken();
         final userId = await authService.getUserId();
         print("User ID: $userId");
-        if (authToken != null && userId != null) {
-          taskProvider.fetchTasks(userId, authToken);
+        if (authToken != null) {
+          taskProvider.fetchTasks(authToken);
         }
       });
     }
@@ -413,8 +413,8 @@ class _TaskListWState extends State<TaskListW> {
                                                 authToken, newTask);
 
                                             // Refresh the task list
-                                            await taskProvider.fetchTasks(
-                                                userId, authToken);
+                                            await taskProvider
+                                                .fetchTasks(authToken);
 
                                             // Capture the scaffold context before popping
                                             final scaffoldContext =

@@ -5,15 +5,13 @@ import '../../config/env_variables_config.dart';
 import '../../models/task.dart';
 
 class TasksService {
-  static Future<List<Task>> fetchUserTasks(
-      String userId, String authToken) async {
+  static Future<List<Task>> fetchUserTasks(String authToken) async {
     print("Entering fetchUserTasks in TasksService");
-    print("UserId: $userId");
 
     // Define the GraphQL query string
     final String query = '''
-        query UserTasks(\$userId: String!) {
-          tasks(userId: \$userId) {
+        query UserTasks {
+          tasks {
             id
             title
             status
@@ -34,7 +32,6 @@ class TasksService {
       },
       body: jsonEncode({
         'query': query,
-        'variables': {'userId': userId},
       }),
     );
 
@@ -132,6 +129,7 @@ class TasksService {
     //Prepare the variables for the mutation
     final Map<String, dynamic> variables = {
       'taskInput': {
+        'id': newTask.id,
         'title': newTask.title,
         'status': newTask.status,
         'task_type': newTask.task_type,

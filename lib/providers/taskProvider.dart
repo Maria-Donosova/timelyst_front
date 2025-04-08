@@ -11,12 +11,12 @@ class TaskProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  Future<void> fetchTasks(String userId, String authToken) async {
+  Future<void> fetchTasks(String authToken) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      _tasks = await TasksService.fetchUserTasks(userId, authToken);
+      _tasks = await TasksService.fetchUserTasks(authToken);
       _errorMessage = '';
     } catch (e) {
       _errorMessage = 'Failed to fetch tasks: $e';
@@ -43,9 +43,9 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-// Update to allow fo udpates of title and category
+  // Update to allow for updates of title and category
   Future<void> updateTask(
-      String taskId, String authToken, String titile, String category) async {
+      String taskId, String authToken, String title, String category) async {
     try {
       final task = _tasks.firstWhere((task) => task.id == taskId);
 
@@ -56,7 +56,7 @@ class TaskProvider with ChangeNotifier {
       _tasks[index] = task;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Failed to mark task as complete: $e';
+      _errorMessage = 'Failed to update task: $e';
       notifyListeners();
     }
   }
