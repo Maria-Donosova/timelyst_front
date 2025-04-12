@@ -129,7 +129,6 @@ class TasksService {
     //Prepare the variables for the mutation
     final Map<String, dynamic> variables = {
       'taskInput': {
-        'id': newTask.id,
         'title': newTask.title,
         'status': newTask.status,
         'task_type': newTask.task_type,
