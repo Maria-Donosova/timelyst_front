@@ -114,9 +114,19 @@ class _TaskListWState extends State<TaskListW> {
                                   title: task.title,
                                   category: task.category,
                                   status: task.status,
-                                  onTaskUpdated: (updatedTask) {
-                                    taskProvider.updateTask(
-                                        "updatedTask", "", "", "");
+                                  onTaskUpdated: (updatedTask) async {
+                                    final authService = AuthService();
+                                    final authToken =
+                                        await authService.getAuthToken();
+                                    if (authToken != null) {
+                                      await taskProvider.updateTask(
+                                          updatedTask.id,
+                                          authToken,
+                                          updatedTask.title,
+                                          updatedTask.category);
+                                      // Refresh the task list after update
+                                      await taskProvider.fetchTasks(authToken);
+                                    }
                                   },
                                 ),
                                 onDismissed:
