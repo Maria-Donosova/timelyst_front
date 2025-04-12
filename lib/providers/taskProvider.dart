@@ -47,13 +47,24 @@ class TaskProvider with ChangeNotifier {
   Future<void> updateTask(
       String taskId, String authToken, String title, String category) async {
     try {
+      // Find the task to update
       final task = _tasks.firstWhere((task) => task.id == taskId);
 
-      await TasksService.updateTask(taskId, authToken, task);
+      // Create an updated task with the new values
+      final updatedTask = Task(
+        id: taskId,
+        title: title,
+        status: task.status,
+        category: category,
+        task_type: task.task_type,
+      );
+
+      // Send the update to the server
+      await TasksService.updateTask(taskId, authToken, updatedTask);
 
       // Update the local task list
       final index = _tasks.indexWhere((task) => task.id == taskId);
-      _tasks[index] = task;
+      _tasks[index] = updatedTask;
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Failed to update task: $e';

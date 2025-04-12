@@ -185,11 +185,12 @@ class TasksService {
   static Future<void> updateTask(
       String taskId, String authToken, Task updatedTask) async {
     print("Entering updateTask in TasksService");
+    print("AuthToken in updateTask: $authToken");
 
     // Define the GraphQL mutation string
     final String mutation = '''
-        mutation UpdateTask(\$taskId: String!, \$input: TaskInputData!) {
-          updateTask(id: \$taskId, input: \$input) {
+        mutation UpdateTask(\$taskId: String!, \$taskInput: TaskInputData!) {
+          updateTask(id: \$taskId, taskInput: \$taskInput) {
             id
             title
             status
@@ -199,10 +200,18 @@ class TasksService {
         }
     ''';
 
+    // Only include the fields that match the TaskInputData type
     final Map<String, dynamic> variables = {
       'taskId': taskId,
-      'input': updatedTask.toJson(),
+      'taskInput': {
+        'title': updatedTask.title,
+        'status': updatedTask.status,
+        'task_type': updatedTask.task_type,
+        'category': updatedTask.category,
+      },
     };
+
+    print("Update task variables: $variables");
 
     final response = await http.post(
       Uri.parse(Config.backendGraphqlURL),
