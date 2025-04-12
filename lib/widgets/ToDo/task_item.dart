@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/task.dart';
 import '../../data/tasks.dart';
+import '../../services/authService.dart';
 import '../shared/categories.dart';
 import '/widgets/todo/edit_task.dart';
 
@@ -52,12 +53,21 @@ class _TaskItemState extends State<TaskItem> {
                   ),
                   onSave: (updatedTask) async {
                     try {
-                      await TasksService.updateTask(
-                        updatedTask.id,
-                        'authToken', // Replace with actual auth token
-                        updatedTask,
-                      );
-                      widget.onTaskUpdated(updatedTask); // Notify parent widget
+                      // Get the auth token from secure storage
+                      final authService = AuthService();
+                      final authToken = await authService.getAuthToken();
+
+                      if (authToken != null) {
+                        await TasksService.updateTask(
+                          updatedTask.id,
+                          authToken,
+                          updatedTask,
+                        );
+                        widget
+                            .onTaskUpdated(updatedTask); // Notify parent widget
+                      } else {
+                        throw Exception('Authentication token not found');
+                      }
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Failed to update task: $e')),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/data/tasks.dart';
+import 'package:timelyst_flutter/services/authService.dart';
 import '../../models/task.dart';
 
 class DoneTaskW extends StatefulWidget {
@@ -22,11 +23,20 @@ class _DoneTaskWState extends State<DoneTaskW> {
     try {
       final task = tasks.firstWhere((task) => task.id == taskId);
       final updatedTask = task..task_type = 'completed'; // Update task status
-      await TasksService.updateTask(taskId, 'authToken', updatedTask);
-      // Remove the task from the local list
-      setState(() {
-        tasks.removeWhere((task) => task.id == taskId);
-      });
+
+      // Get the auth token from secure storage
+      final authService = AuthService();
+      final authToken = await authService.getAuthToken();
+
+      if (authToken != null) {
+        await TasksService.updateTask(taskId, authToken, updatedTask);
+        // Remove the task from the local list
+        setState(() {
+          tasks.removeWhere((task) => task.id == taskId);
+        });
+      } else {
+        throw Exception('Authentication token not found');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to mark task as done: $e')),
