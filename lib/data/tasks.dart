@@ -185,7 +185,7 @@ class TasksService {
       String taskId, String authToken, Task updatedTask) async {
     print("Entering updateTask in TasksService");
     print("AuthToken in updateTask: $authToken");
-    print("Task Od: $taskId");
+    print("Task Id: $taskId");
 
     // Define the GraphQL mutation string
     final String mutation = '''
