@@ -46,7 +46,7 @@ class _TaskItemState extends State<TaskItem> {
               builder: (_) {
                 return EditTaskW(
                   task: Task(
-                    id: widget.id,
+                    taskId: widget.id,
                     title: widget.title,
                     status: '',
                     category: widget.category,
@@ -59,7 +59,7 @@ class _TaskItemState extends State<TaskItem> {
 
                       if (authToken != null) {
                         await TasksService.updateTask(
-                          updatedTask.id,
+                          updatedTask.taskId,
                           authToken,
                           updatedTask,
                         );

@@ -73,7 +73,7 @@ class TasksService {
     const String query = '''
     query FetchTask(\$taskId: String!, \$userId: String!) {
       task(id: \$taskId, user_id: \$userId) {
-        id
+        taskId
         title
         status
         task_type
@@ -117,7 +117,6 @@ class TasksService {
     final String mutation = '''
     mutation CreateTask(\$taskInput: TaskInputData!) {
       createTask(taskInput: \$taskInput) {
-        id
         title
         status
         task_type
@@ -174,7 +173,7 @@ class TasksService {
 
       // Parse and return the created task
       final createdTask = Task.fromJson(taskData);
-      print('Task created successfully: ${createdTask.id}');
+      print('Task created successfully: ${createdTask.taskId}');
       return createdTask;
     } else {
       print('Failed to create task: ${response.statusCode}');
@@ -186,12 +185,12 @@ class TasksService {
       String taskId, String authToken, Task updatedTask) async {
     print("Entering updateTask in TasksService");
     print("AuthToken in updateTask: $authToken");
+    print("Task Od: $taskId");
 
     // Define the GraphQL mutation string
     final String mutation = '''
         mutation UpdateTask(\$taskId: String!, \$taskInput: TaskInputData!) {
           updateTask(id: \$taskId, taskInput: \$taskInput) {
-            id
             title
             status
             task_type
