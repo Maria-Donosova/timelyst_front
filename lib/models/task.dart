@@ -1,12 +1,12 @@
 class Task {
-  final String id;
+  final String taskId;
   final String title;
   String status;
   final String task_type;
   final String category;
 
   Task({
-    this.id = '',
+    this.taskId = '',
     required this.title,
     required this.status,
     this.task_type = "Task",
@@ -16,7 +16,7 @@ class Task {
   // Convert JSON to Task object
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
-      id: json['id'],
+      taskId: json['id'],
       title: json['title'],
       status: json['status'],
       task_type: json['task_type'],

@@ -33,7 +33,7 @@ class _EditTaskWState extends State<EditTaskW> {
   void _saveTask() async {
     if (_form.currentState!.validate()) {
       final updatedTask = Task(
-        id: widget.task.id,
+        taskId: widget.task.taskId,
         title: _taskDescriptionController.text,
         status: '',
         category: selectedCategory!,
@@ -49,7 +49,7 @@ class _EditTaskWState extends State<EditTaskW> {
 
         if (authToken != null) {
           await TasksService.updateTask(
-            updatedTask.id,
+            updatedTask.taskId,
             authToken,
             updatedTask,
           );

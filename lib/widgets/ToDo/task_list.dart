@@ -104,13 +104,13 @@ class _TaskListWState extends State<TaskListW> {
                           itemBuilder: (ctx, index) {
                             final task = taskProvider.tasks[index];
                             return ReorderableDragStartListener(
-                              key: Key(task.id),
+                              key: Key(task.taskId),
                               index: index,
                               child: Dismissible(
-                                key: Key(task.id),
+                                key: Key(task.taskId),
                                 direction: DismissDirection.horizontal,
                                 child: TaskItem(
-                                  id: task.id,
+                                  id: task.taskId,
                                   title: task.title,
                                   category: task.category,
                                   status: task.status,
@@ -120,7 +120,7 @@ class _TaskListWState extends State<TaskListW> {
                                         await authService.getAuthToken();
                                     if (authToken != null) {
                                       await taskProvider.updateTask(
-                                          updatedTask.id,
+                                          updatedTask.taskId,
                                           authToken,
                                           updatedTask.title,
                                           updatedTask.category);
@@ -138,7 +138,7 @@ class _TaskListWState extends State<TaskListW> {
                                   if (direction ==
                                       DismissDirection.startToEnd) {
                                     await taskProvider.markTaskAsComplete(
-                                        task.id, authToken!);
+                                        task.taskId, authToken!);
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         backgroundColor: Theme.of(context)
@@ -154,7 +154,7 @@ class _TaskListWState extends State<TaskListW> {
                                     );
                                   } else {
                                     await taskProvider.deleteTask(
-                                        task.id, authToken!);
+                                        task.taskId, authToken!);
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         backgroundColor: Theme.of(context)

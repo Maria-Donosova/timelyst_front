@@ -28,13 +28,13 @@ class TaskProvider with ChangeNotifier {
 
   Future<void> markTaskAsComplete(String taskId, String authToken) async {
     try {
-      final task = _tasks.firstWhere((task) => task.id == taskId);
+      final task = _tasks.firstWhere((task) => task.taskId == taskId);
       final updatedTask = task..status = 'completed';
 
       await TasksService.updateTask(taskId, authToken, updatedTask);
 
       // Update the local task list
-      final index = _tasks.indexWhere((task) => task.id == taskId);
+      final index = _tasks.indexWhere((task) => task.taskId == taskId);
       _tasks[index] = updatedTask;
       notifyListeners();
     } catch (e) {
@@ -48,11 +48,11 @@ class TaskProvider with ChangeNotifier {
       String taskId, String authToken, String title, String category) async {
     try {
       // Find the task to update
-      final task = _tasks.firstWhere((task) => task.id == taskId);
+      final task = _tasks.firstWhere((task) => task.taskId == taskId);
 
       // Create an updated task with the new values
       final updatedTask = Task(
-        id: taskId,
+        taskId: taskId,
         title: title,
         status: task.status,
         category: category,
@@ -63,7 +63,7 @@ class TaskProvider with ChangeNotifier {
       await TasksService.updateTask(taskId, authToken, updatedTask);
 
       // Update the local task list
-      final index = _tasks.indexWhere((task) => task.id == taskId);
+      final index = _tasks.indexWhere((task) => task.taskId == taskId);
       _tasks[index] = updatedTask;
       notifyListeners();
     } catch (e) {
@@ -77,7 +77,7 @@ class TaskProvider with ChangeNotifier {
       await TasksService.deleteTask(taskId, authToken);
 
       // Remove the task from the local list
-      _tasks.removeWhere((task) => task.id == taskId);
+      _tasks.removeWhere((task) => task.taskId == taskId);
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Failed to delete task: $e';
