@@ -125,9 +125,11 @@ class _EditTaskWState extends State<EditTaskW> {
                           }).toList(),
                         ),
                         ElevatedButton(
-                          onPressed: _saveTask,
-                          child: Text('Save'),
-                        ),
+                            onPressed: _saveTask,
+                            child: Text(
+                              'Save',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            )),
                       ],
                     ),
                   ),
