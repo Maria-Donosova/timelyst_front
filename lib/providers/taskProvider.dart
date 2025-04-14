@@ -28,14 +28,12 @@ class TaskProvider with ChangeNotifier {
 
   Future<void> markTaskAsComplete(String taskId, String authToken) async {
     try {
-      final task = _tasks.firstWhere((task) => task.taskId == taskId);
-      final updatedTask = task..status = 'completed';
+      // Use the dedicated markTaskAsDone method from TasksService
+      await TasksService.markTaskAsDone(taskId, authToken);
 
-      await TasksService.updateTask(taskId, authToken, updatedTask);
-
-      // Update the local task list
-      final index = _tasks.indexWhere((task) => task.taskId == taskId);
-      _tasks[index] = updatedTask;
+      // Remove the task from the local list since it's now done
+      // This matches the behavior in fetchUserTasks which filters out 'done' tasks
+      _tasks.removeWhere((task) => task.taskId == taskId);
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Failed to mark task as complete: $e';
