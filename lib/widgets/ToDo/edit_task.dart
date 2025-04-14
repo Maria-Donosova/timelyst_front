@@ -69,75 +69,96 @@ class _EditTaskWState extends State<EditTaskW> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => FocusScope.of(context).unfocus(),
       behavior: HitTestBehavior.opaque,
-      child: Column(
-        children: <Widget>[
-          Stack(
-            children: <Widget>[
-              Card(
-                elevation: 5,
-                child: Container(
-                  padding: EdgeInsets.only(
-                    top: 10,
-                    left: 10,
-                    right: 10,
-                    bottom: MediaQuery.of(context).viewInsets.bottom + 50,
-                  ),
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      left: BorderSide(
-                        color: Colors.grey,
-                        width: 3,
-                        style: BorderStyle.solid,
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Card(
+              child: Container(
+                padding: EdgeInsets.all(10),
+                child: Form(
+                  key: _form,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _taskDescriptionController,
+                        decoration: InputDecoration(labelText: 'Task Title'),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please provide a value.';
+                          }
+                          return null;
+                        },
                       ),
-                    ),
-                    shape: BoxShape.rectangle,
-                  ),
-                  child: Form(
-                    key: _form,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        TextFormField(
-                          controller: _taskDescriptionController,
-                          decoration: InputDecoration(labelText: 'Task Title'),
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please provide a value.';
-                            }
-                            return null;
-                          },
-                        ),
-                        DropdownButton<String>(
-                          hint: Text('Category'),
-                          value: selectedCategory,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedCategory = newValue;
-                            });
-                          },
-                          items: categories.map((category) {
-                            return DropdownMenuItem(
-                              child: Text(category),
-                              value: category,
+                      const SizedBox(height: 15),
+                      DropdownButtonFormField<String>(
+                        hint: Text('Select Category'),
+                        value: selectedCategory,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedCategory = newValue;
+                          });
+                        },
+                        selectedItemBuilder: (BuildContext context) {
+                          return categories.map((category) {
+                            return Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: catColor(category),
+                                  radius: 5,
+                                ),
+                                SizedBox(width: 8),
+                                Text(category),
+                              ],
                             );
-                          }).toList(),
-                        ),
-                        ElevatedButton(
+                          }).toList();
+                        },
+                        items: categories.map((category) {
+                          return DropdownMenuItem<String>(
+                            value: category,
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: catColor(category),
+                                  radius: 5,
+                                ),
+                                SizedBox(width: 8),
+                                Text(category),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.shadow,
+                            ),
                             onPressed: _saveTask,
                             child: Text(
                               'Save',
                               style: Theme.of(context).textTheme.bodyLarge,
-                            )),
-                      ],
-                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
