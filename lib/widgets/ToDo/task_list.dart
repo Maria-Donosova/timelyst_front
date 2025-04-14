@@ -139,6 +139,8 @@ class _TaskListWState extends State<TaskListW> {
                                       DismissDirection.startToEnd) {
                                     await taskProvider.markTaskAsComplete(
                                         task.taskId, authToken!);
+                                    // The task is now removed from the list by the provider
+                                    // No need to refresh the list as notifyListeners is called
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         backgroundColor: Theme.of(context)
@@ -152,6 +154,7 @@ class _TaskListWState extends State<TaskListW> {
                                         ),
                                       ),
                                     );
+                                    // No need to call setState as the provider will notify listeners
                                   } else {
                                     await taskProvider.deleteTask(
                                         task.taskId, authToken!);
