@@ -55,10 +55,14 @@ class TasksService {
       final List<Task> tasks =
           tasksData.map((task) => Task.fromJson(task)).toList();
 
-      if (tasks.isEmpty) {
-        print('No tasks found for user');
+      // Filter out tasks with 'done' status
+      final List<Task> activeTasks =
+          tasks.where((task) => task.status != 'done').toList();
+
+      if (activeTasks.isEmpty) {
+        print('No active tasks found for user');
       }
-      return tasks;
+      return activeTasks;
     } else {
       // Handle non-200 status codes
       print('Failed to fetch tasks: ${response.statusCode}');
@@ -191,6 +195,7 @@ class TasksService {
     final String mutation = '''
         mutation UpdateTask(\$taskId: String!, \$taskInput: TaskInputData!) {
           updateTask(id: \$taskId, taskInput: \$taskInput) {
+            id
             title
             status
             task_type
@@ -239,21 +244,55 @@ class TasksService {
     }
   }
 
-  static Future<void> markTaskAsComplete(
-      String taskId, String authToken) async {
+  static Future<void> markTaskAsDone(String taskId, String authToken) async {
+    print("Entering markTaskAsDone in TasksService");
+
+    // Define the GraphQL mutation string that directly calls the markTaskAsDone resolver
+    final String mutation = '''
+        mutation MarkTaskAsDone($taskId: String!) {
+          markTaskAsDone(id: $taskId) {
+            id
+            title
+            status
+            task_type
+            category
+            updatedAt
+          }
+        }
+    ''';
+
     try {
-      // Fetch the task to be updated (if needed)
-      // Note: If you already have the task locally, you can skip this step.
-      final task = await fetchTaskById(
-          taskId, authToken, ''); // Passing empty string as userId
+      // Send the HTTP POST request
+      final response = await http.post(
+        Uri.parse(Config.backendGraphqlURL),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+        body: jsonEncode({
+          'query': mutation,
+          'variables': {'taskId': taskId},
+        }),
+      );
 
-      // Update the task status
-      final updatedTask = task..status = 'completed';
+      // Check the status code
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
 
-      // Call the updateTask function
-      await updateTask(taskId, authToken, updatedTask);
+        // Check for GraphQL errors
+        if (data['errors'] != null && data['errors'].length > 0) {
+          final errors = data['errors'];
+          print('Marking task as complete failed with errors: $errors');
+          throw Exception(
+              'Marking task as complete failed: ${errors.map((e) => e['message']).join(", ")}');
+        }
 
-      print('Task marked as complete successfully');
+        print('Task marked as complete successfully');
+      } else {
+        print('Failed to mark task as complete: ${response.statusCode}');
+        throw Exception(
+            'Failed to mark task as complete: ${response.statusCode}');
+      }
     } catch (e) {
       print('Failed to mark task as complete: $e');
       throw Exception('Failed to mark task as complete: $e');
