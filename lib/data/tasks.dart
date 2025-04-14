@@ -249,8 +249,8 @@ class TasksService {
 
     // Define the GraphQL mutation string that directly calls the markTaskAsDone resolver
     final String mutation = '''
-        mutation MarkTaskAsDone($taskId: String!) {
-          markTaskAsDone(id: $taskId) {
+        mutation MarkTaskAsDone(\$taskId: String!) {
+          markTaskAsDone(id: \$taskId) {
             id
             title
             status
