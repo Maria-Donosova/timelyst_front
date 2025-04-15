@@ -55,12 +55,29 @@ class _EditTaskWState extends State<EditTaskW> {
           );
           widget.onSave(updatedTask); // Notify parent widget
           Navigator.of(context).pop(); // Close the bottom sheet
+
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Theme.of(context).colorScheme.shadow,
+              content: Text(
+                'Task updated successfully',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+          );
         } else {
           throw Exception('Authentication token not found');
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update task: $e')),
+          SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.shadow,
+            content: Text(
+              'Failed to update task: $e',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
         );
       }
     }
