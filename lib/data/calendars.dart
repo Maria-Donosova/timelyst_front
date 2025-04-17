@@ -25,15 +25,17 @@ class CalendarsService {
         }
     ''';
 
-    final String encodedQuery = Uri.encodeComponent(query);
     // Send the HTTP POST request
-    final response = await http.get(
-      Uri.parse(
-          '${Config.backendGraphqlURL}?query=$encodedQuery&variables={"userId":"$userId"}'),
+    final response = await http.post(
+      Uri.parse(Config.backendGraphqlURL),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
       },
+      body: jsonEncode({
+        'query': query,
+        'variables': {'userId': userId},
+      }),
     );
 
     // Check the status code
