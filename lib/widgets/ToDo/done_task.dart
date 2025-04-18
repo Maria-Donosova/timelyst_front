@@ -1,39 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/data/tasks.dart';
+// import 'package:timelyst_flutter/data/tasks.dart';
+import 'package:timelyst_flutter/models/task.dart';
+import 'package:timelyst_flutter/providers/taskProvider.dart';
 import 'package:timelyst_flutter/services/authService.dart';
-import '../../models/task.dart';
+import 'package:provider/provider.dart';
 
-class DoneTaskW extends StatefulWidget {
+class DoneTaskW extends StatelessWidget {
   final Task task;
 
-  DoneTaskW({required this.task, super.key});
+  DoneTaskW({required this.task});
 
   @override
-  State<DoneTaskW> createState() => _DoneTaskWState();
-}
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.greenAccent[100],
+      child: Padding(
+        padding: const EdgeInsets.all(5),
+        child: Row(
+          children: [
+            Text(
+              'Done',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-class _DoneTaskWState extends State<DoneTaskW> {
-  final List tasks = [
-    'task',
-    'task1',
-    'task2'
-  ]; //replace with the list that gets fetched from the backend
-
-  void doneTask(String taskId) async {
+  // Method to handle marking a task as complete
+  static Future<void> markTaskAsComplete(
+      BuildContext context, String taskId) async {
     try {
-      final task = tasks.firstWhere((task) => task.id == taskId);
-      final updatedTask = task..task_type = 'completed'; // Update task status
-
-      // Get the auth token from secure storage
+      final taskProvider = Provider.of<TaskProvider>(context, listen: false);
       final authService = AuthService();
       final authToken = await authService.getAuthToken();
 
       if (authToken != null) {
-        await TasksService.updateTask(taskId, authToken, updatedTask);
-        // Remove the task from the local list
-        setState(() {
-          tasks.removeWhere((task) => task.id == taskId);
-        });
+        await taskProvider.markTaskAsComplete(taskId, authToken);
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.shadow,
+            content: Text(
+              'Well Done!',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+        );
       } else {
         throw Exception('Authentication token not found');
       }
@@ -42,11 +57,5 @@ class _DoneTaskWState extends State<DoneTaskW> {
         SnackBar(content: Text('Failed to mark task as done: $e')),
       );
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
   }
 }
