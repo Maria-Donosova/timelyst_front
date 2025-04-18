@@ -11,6 +11,8 @@ class EventService {
   // Fetch DayEvents and map them to CustomAppointment
   static Future<List<CustomAppointment>> fetchDayEvents(
       String userId, String authToken) async {
+    print("Entering fetchDayEvents in EventService");
+
     final String query = '''
       query DayEvents(\$userId: String!) {
         dayEvents(userId: \$userId) {
@@ -44,6 +46,7 @@ class EventService {
       }
     ''';
 
+    // Send the HTTP POST request
     final response = await http.post(
       Uri.parse(Config.backendGraphqlURL),
       headers: {
@@ -56,18 +59,33 @@ class EventService {
       }),
     );
 
+    // Check the status code
     if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON
       final data = jsonDecode(response.body);
-      if (data['errors'] != null) {
-        throw Exception('Failed to fetch day events: ${data['errors']}');
+
+      // Check for GraphQL errors
+      if (data['errors'] != null && data['errors'].length > 0) {
+        final errors = data['errors'];
+        print('Fetching day events failed with errors: $errors');
+        throw Exception(
+            'Fetching day events failed: ${errors.map((e) => e['message']).join(", ")}');
       }
+
+      // Extract the day events from the response
       final List<dynamic> dayEventsJson = data['data']['dayEvents'];
+
+      // Parse the day events into a List<DayEvent>
       final List<DayEvent> dayEvents =
           dayEventsJson.map((json) => DayEvent.fromJson(json)).toList();
+
+      // Map to CustomAppointment and return
       return dayEvents
           .map((event) => EventMapper.mapDayEventToCustomAppointment(event))
           .toList();
     } else {
+      // Handle non-200 status codes
+      print('Failed to fetch day events: ${response.statusCode}');
       throw Exception('Failed to fetch day events: ${response.statusCode}');
     }
   }
@@ -75,6 +93,8 @@ class EventService {
   // Fetch TimeEvents and map them to CustomAppointment
   static Future<List<CustomAppointment>> fetchTimeEvents(
       String userId, String authToken) async {
+    print("Entering fetchTimeEvents in EventService");
+
     final String query = '''
       query TimeEvents(\$userId: String!) {
         timeEvents(userId: \$userId) {
@@ -108,6 +128,7 @@ class EventService {
       }
     ''';
 
+    // Send the HTTP POST request
     final response = await http.post(
       Uri.parse(Config.backendGraphqlURL),
       headers: {
@@ -120,18 +141,33 @@ class EventService {
       }),
     );
 
+    // Check the status code
     if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON
       final data = jsonDecode(response.body);
-      if (data['errors'] != null) {
-        throw Exception('Failed to fetch time events: ${data['errors']}');
+
+      // Check for GraphQL errors
+      if (data['errors'] != null && data['errors'].length > 0) {
+        final errors = data['errors'];
+        print('Fetching time events failed with errors: $errors');
+        throw Exception(
+            'Fetching time events failed: ${errors.map((e) => e['message']).join(", ")}');
       }
+
+      // Extract the time events from the response
       final List<dynamic> timeEventsJson = data['data']['timeEvents'];
+
+      // Parse the time events into a List<TimeEvent>
       final List<TimeEvent> timeEvents =
           timeEventsJson.map((json) => TimeEvent.fromJson(json)).toList();
+
+      // Map to CustomAppointment and return
       return timeEvents
           .map((event) => EventMapper.mapTimeEventToCustomAppointment(event))
           .toList();
     } else {
+      // Handle non-200 status codes
+      print('Failed to fetch time events: ${response.statusCode}');
       throw Exception('Failed to fetch time events: ${response.statusCode}');
     }
   }
@@ -139,6 +175,10 @@ class EventService {
   // Create a TimeEvent and map it to CustomAppointment
   static Future<CustomAppointment> createTimeEvent(
       Map<String, dynamic> timeEventInput, String authToken) async {
+    print("Entering createTimeEvent in EventService");
+    print("TimeEventInput: $timeEventInput");
+    print("AuthToken in Event Service: $authToken");
+
     final String mutation = '''
       mutation CreateTimeEvent(\$timeEventInput: TimeEventInput!) {
         createTimeEvent(timeEventInput: \$timeEventInput) {
@@ -172,34 +212,58 @@ class EventService {
       }
     ''';
 
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $authToken',
-      },
-      body: jsonEncode({
-        'query': mutation,
-        'variables': {'timeEventInput': timeEventInput},
-      }),
-    );
+    try {
+      // Send the HTTP POST request
+      final response = await http.post(
+        Uri.parse(Config.backendGraphqlURL),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+        body: jsonEncode({
+          'query': mutation,
+          'variables': {'timeEventInput': timeEventInput},
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['errors'] != null) {
-        throw Exception('Failed to create time event: ${data['errors']}');
+      // Check the status code
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Check for GraphQL errors
+        if (data['errors'] != null && data['errors'].length > 0) {
+          final errors = data['errors'];
+          print('Creating time event failed with errors: $errors');
+          throw Exception(
+              'Creating time event failed: ${errors.map((e) => e['message']).join(", ")}');
+        }
+
+        // Add debug logging to see the response structure
+        print('Response data: ${data['data']}');
+        print('CreateTimeEvent response: ${data['data']['createTimeEvent']}');
+
+        // Parse and return the created time event
+        final TimeEvent timeEvent =
+            TimeEvent.fromJson(data['data']['createTimeEvent']);
+        print('Time event created successfully: ${timeEvent.id}');
+        return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+      } else {
+        print('Failed to create time event: ${response.statusCode}');
+        throw Exception('Failed to create time event: ${response.statusCode}');
       }
-      final TimeEvent timeEvent =
-          TimeEvent.fromJson(data['data']['createTimeEvent']);
-      return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
-    } else {
-      throw Exception('Failed to create time event: ${response.statusCode}');
+    } catch (e) {
+      print('Failed to create time event: $e');
+      throw Exception('Failed to create time event: $e');
     }
   }
 
   // Create a DayEvent and map it to CustomAppointment
   static Future<CustomAppointment> createDayEvent(
       Map<String, dynamic> dayEventInput, String authToken) async {
+    print("Entering createDayEvent in EventService");
+    print("DayEventInput: $dayEventInput");
+    print("AuthToken in Event Service: $authToken");
+
     final String mutation = '''
       mutation CreateDayEvent(\$dayEventInput: DayEventInput!) {
         createDayEvent(dayEventInput: \$dayEventInput) {
@@ -233,34 +297,59 @@ class EventService {
       }
     ''';
 
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $authToken',
-      },
-      body: jsonEncode({
-        'query': mutation,
-        'variables': {'dayEventInput': dayEventInput},
-      }),
-    );
+    try {
+      // Send the HTTP POST request
+      final response = await http.post(
+        Uri.parse(Config.backendGraphqlURL),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+        body: jsonEncode({
+          'query': mutation,
+          'variables': {'dayEventInput': dayEventInput},
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['errors'] != null) {
-        throw Exception('Failed to create day event: ${data['errors']}');
+      // Check the status code
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Check for GraphQL errors
+        if (data['errors'] != null && data['errors'].length > 0) {
+          final errors = data['errors'];
+          print('Creating day event failed with errors: $errors');
+          throw Exception(
+              'Creating day event failed: ${errors.map((e) => e['message']).join(", ")}');
+        }
+
+        // Add debug logging to see the response structure
+        print('Response data: ${data['data']}');
+        print('CreateDayEvent response: ${data['data']['createDayEvent']}');
+
+        // Parse and return the created day event
+        final DayEvent dayEvent =
+            DayEvent.fromJson(data['data']['createDayEvent']);
+        print('Day event created successfully: ${dayEvent.id}');
+        return EventMapper.mapDayEventToCustomAppointment(dayEvent);
+      } else {
+        print('Failed to create day event: ${response.statusCode}');
+        throw Exception('Failed to create day event: ${response.statusCode}');
       }
-      final DayEvent dayEvent =
-          DayEvent.fromJson(data['data']['createDayEvent']);
-      return EventMapper.mapDayEventToCustomAppointment(dayEvent);
-    } else {
-      throw Exception('Failed to create day event: ${response.statusCode}');
+    } catch (e) {
+      print('Failed to create day event: $e');
+      throw Exception('Failed to create day event: $e');
     }
   }
 
   // Update a TimeEvent and map it to CustomAppointment
   static Future<CustomAppointment> updateTimeEvent(
       String id, Map<String, dynamic> timeEventInput, String authToken) async {
+    print("Entering updateTimeEvent in EventService");
+    print("TimeEventInput: $timeEventInput");
+    print("AuthToken in Event Service: $authToken");
+    print("Event Id: $id");
+
     final String mutation = '''
       mutation UpdateTimeEvent(\$id: ID!, \$timeEventInput: TimeEventInput!) {
         updateTimeEvent(id: \$id, timeEventInput: \$timeEventInput) {
@@ -294,34 +383,56 @@ class EventService {
       }
     ''';
 
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $authToken',
-      },
-      body: jsonEncode({
-        'query': mutation,
-        'variables': {'id': id, 'timeEventInput': timeEventInput},
-      }),
-    );
+    try {
+      // Send the HTTP POST request
+      final response = await http.post(
+        Uri.parse(Config.backendGraphqlURL),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+        body: jsonEncode({
+          'query': mutation,
+          'variables': {'id': id, 'timeEventInput': timeEventInput},
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['errors'] != null) {
-        throw Exception('Failed to update time event: ${data['errors']}');
+      // Check the status code
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Check for GraphQL errors
+        if (data['errors'] != null && data['errors'].length > 0) {
+          final errors = data['errors'];
+          print('Updating time event failed with errors: $errors');
+          throw Exception(
+              'Updating time event failed: ${errors.map((e) => e['message']).join(", ")}');
+        }
+
+        print('Time event updated successfully');
+
+        // Parse and return the updated time event
+        final TimeEvent timeEvent =
+            TimeEvent.fromJson(data['data']['updateTimeEvent']);
+        return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+      } else {
+        print('Failed to update time event: ${response.statusCode}');
+        throw Exception('Failed to update time event: ${response.statusCode}');
       }
-      final TimeEvent timeEvent =
-          TimeEvent.fromJson(data['data']['updateTimeEvent']);
-      return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
-    } else {
-      throw Exception('Failed to update time event: ${response.statusCode}');
+    } catch (e) {
+      print('Failed to update time event: $e');
+      throw Exception('Failed to update time event: $e');
     }
   }
 
   // Update a DayEvent and map it to CustomAppointment
   static Future<CustomAppointment> updateDayEvent(
       String id, Map<String, dynamic> dayEventInput, String authToken) async {
+    print("Entering updateDayEvent in EventService");
+    print("DayEventInput: $dayEventInput");
+    print("AuthToken in Event Service: $authToken");
+    print("Event Id: $id");
+
     final String mutation = '''
       mutation UpdateDayEvent(\$id: ID!, \$dayEventInput: DayEventInput!) {
         updateDayEvent(id: \$id, dayEventInput: \$dayEventInput) {
@@ -355,90 +466,143 @@ class EventService {
       }
     ''';
 
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $authToken',
-      },
-      body: jsonEncode({
-        'query': mutation,
-        'variables': {'id': id, 'dayEventInput': dayEventInput},
-      }),
-    );
+    try {
+      // Send the HTTP POST request
+      final response = await http.post(
+        Uri.parse(Config.backendGraphqlURL),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+        body: jsonEncode({
+          'query': mutation,
+          'variables': {'id': id, 'dayEventInput': dayEventInput},
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['errors'] != null) {
-        throw Exception('Failed to update day event: ${data['errors']}');
+      // Check the status code
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Check for GraphQL errors
+        if (data['errors'] != null && data['errors'].length > 0) {
+          final errors = data['errors'];
+          print('Updating day event failed with errors: $errors');
+          throw Exception(
+              'Updating day event failed: ${errors.map((e) => e['message']).join(", ")}');
+        }
+
+        print('Day event updated successfully');
+
+        // Parse and return the updated day event
+        final DayEvent dayEvent =
+            DayEvent.fromJson(data['data']['updateDayEvent']);
+        return EventMapper.mapDayEventToCustomAppointment(dayEvent);
+      } else {
+        print('Failed to update day event: ${response.statusCode}');
+        throw Exception('Failed to update day event: ${response.statusCode}');
       }
-      final DayEvent dayEvent =
-          DayEvent.fromJson(data['data']['updateDayEvent']);
-      return EventMapper.mapDayEventToCustomAppointment(dayEvent);
-    } else {
-      throw Exception('Failed to update day event: ${response.statusCode}');
+    } catch (e) {
+      print('Failed to update day event: $e');
+      throw Exception('Failed to update day event: $e');
     }
   }
 
   // Delete a TimeEvent
   static Future<bool> deleteTimeEvent(String id, String authToken) async {
+    print("Entering deleteTimeEvent in EventService");
+    print("Event Id: $id");
+
     final String mutation = '''
       mutation DeleteTimeEvent(\$id: ID!) {
         deleteTimeEvent(id: \$id)
       }
     ''';
 
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $authToken',
-      },
-      body: jsonEncode({
-        'query': mutation,
-        'variables': {'id': id},
-      }),
-    );
+    try {
+      // Send the HTTP POST request
+      final response = await http.post(
+        Uri.parse(Config.backendGraphqlURL),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+        body: jsonEncode({
+          'query': mutation,
+          'variables': {'id': id},
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['errors'] != null) {
-        throw Exception('Failed to delete time event: ${data['errors']}');
+      // Check the status code
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Check for GraphQL errors
+        if (data['errors'] != null && data['errors'].length > 0) {
+          final errors = data['errors'];
+          print('Deleting time event failed with errors: $errors');
+          throw Exception(
+              'Deleting time event failed: ${errors.map((e) => e['message']).join(", ")}');
+        }
+
+        print('Time event deleted successfully');
+        return data['data']['deleteTimeEvent'];
+      } else {
+        print('Failed to delete time event: ${response.statusCode}');
+        throw Exception('Failed to delete time event: ${response.statusCode}');
       }
-      return data['data']['deleteTimeEvent'];
-    } else {
-      throw Exception('Failed to delete time event: ${response.statusCode}');
+    } catch (e) {
+      print('Failed to delete time event: $e');
+      throw Exception('Failed to delete time event: $e');
     }
   }
 
   // Delete a DayEvent
   static Future<bool> deleteDayEvent(String id, String authToken) async {
+    print("Entering deleteDayEvent in EventService");
+    print("Event Id: $id");
+
     final String mutation = '''
       mutation DeleteDayEvent(\$id: ID!) {
         deleteDayEvent(id: \$id)
       }
     ''';
 
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $authToken',
-      },
-      body: jsonEncode({
-        'query': mutation,
-        'variables': {'id': id},
-      }),
-    );
+    try {
+      // Send the HTTP POST request
+      final response = await http.post(
+        Uri.parse(Config.backendGraphqlURL),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+        body: jsonEncode({
+          'query': mutation,
+          'variables': {'id': id},
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['errors'] != null) {
-        throw Exception('Failed to delete day event: ${data['errors']}');
+      // Check the status code
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Check for GraphQL errors
+        if (data['errors'] != null && data['errors'].length > 0) {
+          final errors = data['errors'];
+          print('Deleting day event failed with errors: $errors');
+          throw Exception(
+              'Deleting day event failed: ${errors.map((e) => e['message']).join(", ")}');
+        }
+
+        print('Day event deleted successfully');
+        return data['data']['deleteDayEvent'];
+      } else {
+        print('Failed to delete day event: ${response.statusCode}');
+        throw Exception('Failed to delete day event: ${response.statusCode}');
       }
-      return data['data']['deleteDayEvent'];
-    } else {
-      throw Exception('Failed to delete day event: ${response.statusCode}');
+    } catch (e) {
+      print('Failed to delete day event: $e');
+      throw Exception('Failed to delete day event: $e');
     }
   }
 }
