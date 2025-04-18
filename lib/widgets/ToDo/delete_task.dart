@@ -1,35 +1,83 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/data/tasks.dart';
+// import 'package:timelyst_flutter/data/tasks.dart';
+import 'package:timelyst_flutter/models/task.dart';
+import 'package:timelyst_flutter/providers/taskProvider.dart';
 import 'package:timelyst_flutter/services/authService.dart';
-import '../../models/task.dart';
+import 'package:provider/provider.dart';
 
-class DeleteTaskW extends StatefulWidget {
+class DeleteTaskW extends StatelessWidget {
   final Task task;
 
-  DeleteTaskW({required this.task, super.key});
+  DeleteTaskW({required this.task});
+
+  // Method to show the delete confirmation dialog
+  static Future<bool> showDeleteConfirmation(
+      BuildContext context, Task task) async {
+    return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return DeleteTaskW(task: task);
+          },
+        ) ??
+        false; // Return false if dialog is dismissed without a choice
+  }
 
   @override
-  State<DeleteTaskW> createState() => _DeleteTaskWState();
-}
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        "Confirmation",
+        style: Theme.of(context).textTheme.displaySmall,
+      ),
+      content: Text(
+        "Are you sure you want to delete this item?",
+        style: Theme.of(context).textTheme.displayMedium,
+      ),
+      actions: <Widget>[
+        TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.shadow,
+          ),
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(
+            "Cancel",
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.shadow,
+          ),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(
+            "Delete",
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+      ],
+    );
+  }
 
-class _DeleteTaskWState extends State<DeleteTaskW> {
-  final List tasks = [
-    'task',
-    'task1',
-    'task2'
-  ]; //replace with the list that gets fetched from the backend
-  void deleteTask(String taskId) async {
+  // Method to handle the actual task deletion
+  static Future<void> deleteTask(BuildContext context, String taskId) async {
     try {
-      // Get the auth token from secure storage
+      final taskProvider = Provider.of<TaskProvider>(context, listen: false);
       final authService = AuthService();
       final authToken = await authService.getAuthToken();
 
       if (authToken != null) {
-        await TasksService.deleteTask(taskId, authToken);
-        // Remove the task from the local list
-        setState(() {
-          tasks.removeWhere((task) => task.id == taskId);
-        });
+        await taskProvider.deleteTask(taskId, authToken);
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Theme.of(context).colorScheme.shadow,
+            content: Text(
+              'Task deleted',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+        );
       } else {
         throw Exception('Authentication token not found');
       }
@@ -38,11 +86,5 @@ class _DeleteTaskWState extends State<DeleteTaskW> {
         SnackBar(content: Text('Failed to delete task: $e')),
       );
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
   }
 }
