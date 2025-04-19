@@ -7,6 +7,17 @@ import 'package:timelyst_flutter/services/authService.dart';
 import 'package:timelyst_flutter/widgets/shared/categories.dart';
 
 class NewTaskW extends StatefulWidget {
+  static Future<void> show(BuildContext context) {
+    return showModalBottomSheet(
+      useSafeArea: true,
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return NewTaskW();
+      },
+    );
+  }
+
   @override
   _NewTaskWState createState() => _NewTaskWState();
 }
@@ -200,24 +211,6 @@ class _NewTaskWState extends State<NewTaskW> {
             ),
           ),
         );
-      },
-    );
-  }
-
-  // Method to show the new task modal
-  static Future<void> show(BuildContext context) {
-    return showModalBottomSheet(
-      useSafeArea: false,
-      context: context,
-      isScrollControlled: true,
-      constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.5,
-        maxWidth: MediaQuery.of(context).size.width * 0.5,
-        minHeight: MediaQuery.of(context).size.width * 0.18,
-        maxHeight: MediaQuery.of(context).size.width * 0.18,
-      ),
-      builder: (BuildContext context) {
-        return NewTaskW();
       },
     );
   }
