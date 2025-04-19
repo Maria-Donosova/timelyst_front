@@ -561,7 +561,7 @@ class EventDetailsScreentate extends State<EventDetails> {
                           if (value!.isEmpty) {
                             return 'Please provide a value.';
                           }
-                          return 'Error';
+                          return null;
                         },
                       ),
                     ),
