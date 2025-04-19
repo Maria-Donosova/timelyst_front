@@ -32,12 +32,12 @@ class EventService {
             recurrenceId
             recurrenceRule
             exceptionDates
-            day_Event_Instance
+            day_EventInstance
             category
             event_attendees
             event_body
             event_location
-            event_conferencedetails
+            event_ConferenceDetails
             reminder
             holiday
             createdAt
@@ -91,6 +91,84 @@ class EventService {
     }
   }
 
+  // Fetch a single TimeEvent by ID and map it to CustomAppointment
+  static Future<CustomAppointment> fetchTimeEvent(
+      String id, String authToken) async {
+    print("Entering fetchTimeEvent in EventService");
+
+    final String query = '''
+      query TimeEvent($id: String) {
+        timeEvent(id: $id) {
+          id
+          user_id
+          createdBy
+          user_calendars
+          source_calendar
+          event_organizer
+          event_title
+          event_startDate
+          event_endDate
+          start_timeZone
+          end_timeZone
+          is_AllDay
+          recurrenceId
+          recurrenceRule
+          exceptionDates
+          time_EventInstance
+          category
+          event_attendees
+          event_body
+          event_location
+          event_ConferenceDetails
+          reminder
+          holiday
+          createdAt
+          updatedAt
+        }
+      }
+    ''';
+
+    // Send the HTTP POST request
+    final response = await http.post(
+      Uri.parse(Config.backendGraphqlURL),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $authToken',
+      },
+      body: jsonEncode({
+        'query': query,
+        'variables': {'id': id},
+      }),
+    );
+
+    // Check the status code
+    if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON
+      final data = jsonDecode(response.body);
+
+      // Check for GraphQL errors
+      if (data['errors'] != null && data['errors'].length > 0) {
+        final errors = data['errors'];
+        print('Fetching time event failed with errors: $errors');
+        throw Exception(
+            'Fetching time event failed: ${errors.map((e) => e['message']).join(", ")}');
+      }
+
+      // Extract the time event from the response
+      final timeEventJson = data['data']['timeEvent'];
+
+      // Parse the time event into a TimeEvent
+      final TimeEvent timeEvent = TimeEvent.fromJson(timeEventJson);
+
+      // Map to CustomAppointment and return
+      return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+    } else {
+      // Handle non-200 status codes
+      print('Failed to fetch time event: ${response.statusCode}');
+      throw Exception('Failed to fetch time event: ${response.statusCode}');
+    }
+  }
+
   // Fetch TimeEvents and map them to CustomAppointment
   static Future<List<CustomAppointment>> fetchTimeEvents(
       String userId, String authToken) async {
@@ -115,12 +193,12 @@ class EventService {
             recurrenceId
             recurrenceRule
             exceptionDates
-            time_eventInstance
+            time_EventInstance
             category
             event_attendees
             event_body
             event_location
-            event_conferenceDetails
+            event_ConferenceDetails
             reminder
             holiday
             createdAt
@@ -139,7 +217,6 @@ class EventService {
       },
       body: jsonEncode({
         'query': query,
-        'variables': {'userId': userId},
       }),
     );
 
@@ -185,7 +262,6 @@ class EventService {
     final String mutation = '''
       mutation CreateTimeEvent(\$timeEventInput: TimeEventInputData!) {
         createTimeEvent(timeEventInput: \$timeEventInput) {
-          id
           user_id
           createdBy
           user_calendars
@@ -200,12 +276,12 @@ class EventService {
           recurrenceId
           recurrenceRule
           exceptionDates
-          time_eventInstance
+          time_EventInstance
           category
           event_attendees
           event_body
           event_location
-          event_conferenceDetails
+          event_ConferenceDetails
           reminder
           holiday
           createdAt
@@ -269,7 +345,6 @@ class EventService {
     final String mutation = '''
       mutation CreateDayEvent(\$dayEventInput: DayEventInputData!) {
         createDayEvent(dayEventInput: \$dayEventInput) {
-          id
           user_id
           createdBy
           user_calendars
@@ -284,12 +359,12 @@ class EventService {
           recurrenceId
           recurrenceRule
           exceptionDates
-          day_Event_Instance
+          day_EventInstance
           category
           event_attendees
           event_body
           event_location
-          event_conferencedetails
+          event_ConferenceDetails
           reminder
           holiday
           createdAt
@@ -369,12 +444,12 @@ class EventService {
           recurrenceId
           recurrenceRule
           exceptionDates
-          time_eventInstance
+          time_EventInstance
           category
           event_attendees
           event_body
           event_location
-          event_conferenceDetails
+          event_ConferenceDetails
           reminder
           holiday
           createdAt
@@ -451,12 +526,12 @@ class EventService {
           recurrenceId
           recurrenceRule
           exceptionDates
-          day_Event_Instance
+          day_EventInstance
           category
           event_attendees
           event_body
           event_location
-          event_conferencedetails
+          event_ConferenceDetails
           reminder
           holiday
           createdAt
