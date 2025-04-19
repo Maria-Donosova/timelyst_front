@@ -17,24 +17,23 @@ class EventService {
       query DayEvents {
         dayEvents {
           id
-          userId
+          user_id
           createdBy
           user_calendars
-          calendarId
-          googleEventId
-          googleKind
-          googleEtag
-          creator
-          organizer
+          source_calendar
+          event_organizer
           event_title
-          start
-          end
-          is_allDay
-          recurrence
+          event_startDate
+          event_endDate
+          start_timeZone
+          end_timeZone
+          is_AllDay
           recurrenceId
+          recurrenceRule
           exceptionDates
-          day_eventInstance
+          day_Event_Instance
           category
+          event_attendees
           event_body
           event_location
           event_conferencedetails
@@ -98,24 +97,23 @@ class EventService {
       query TimeEvents {
         timeEvents {
           id
-          userId
+          user_id
           createdBy
           user_calendars
-          calendarId
-          googleEventId
-          googleKind
-          googleEtag
-          creator
-          organizer
+          source_calendar
+          event_organizer
           event_title
-          start
-          end
+          event_startDate
+          event_endDate
+          start_timeZone
+          end_timeZone
           is_allDay
-          recurrence
           recurrenceId
+          recurrenceRule
           exceptionDates
           time_eventInstance
           category
+          event_attendees
           event_body
           event_location
           event_conferenceDetails
@@ -179,26 +177,26 @@ class EventService {
     print("AuthToken in Event Service: $authToken");
 
     final String mutation = '''
-      mutation CreateTimeEvent(\$timeEventInput: TimeEventInput!) {
+      mutation CreateTimeEvent(\$timeEventInput: TimeEventInputData!) {
         createTimeEvent(timeEventInput: \$timeEventInput) {
+          id
           user_id
           createdBy
           user_calendars
-          calendarId
-          googleEventId
-          googleKind
-          googleEtag
-          creator
-          organizer
+          source_calendar
+          event_organizer
           event_title
-          start
-          end
+          event_startDate
+          event_endDate
+          start_timeZone
+          end_timeZone
           is_allDay
-          recurrence
           recurrenceId
+          recurrenceRule
           exceptionDates
           time_eventInstance
           category
+          event_attendees
           event_body
           event_location
           event_conferenceDetails
@@ -263,26 +261,26 @@ class EventService {
     print("AuthToken in Event Service: $authToken");
 
     final String mutation = '''
-      mutation CreateDayEvent(\$dayEventInput: DayEventInput!) {
+      mutation CreateDayEvent(\$dayEventInput: DayEventInputData!) {
         createDayEvent(dayEventInput: \$dayEventInput) {
+          id
           user_id
           createdBy
           user_calendars
-          calendarId
-          googleEventId
-          googleKind
-          googleEtag
-          creator
-          organizer
+          source_calendar
+          event_organizer
           event_title
-          start
-          end
-          is_allDay
-          recurrence
+          event_startDate
+          event_endDate
+          start_timeZone
+          end_timeZone
+          is_AllDay
           recurrenceId
+          recurrenceRule
           exceptionDates
-          day_eventInstance
+          day_Event_Instance
           category
+          event_attendees
           event_body
           event_location
           event_conferencedetails
@@ -348,27 +346,26 @@ class EventService {
     print("Event Id: $id");
 
     final String mutation = '''
-      mutation UpdateTimeEvent(\$id: String, \$timeEventInput: TimeEventInput!) {
+      mutation UpdateTimeEvent(\$id: String, \$timeEventInput: TimeEventInputData!) {
         updateTimeEvent(id: \$id, timeEventInput: \$timeEventInput) {
           id
           user_id
           createdBy
           user_calendars
-          calendarId
-          googleEventId
-          googleKind
-          googleEtag
-          creator
-          organizer
+          source_calendar
+          event_organizer
           event_title
-          start
-          end
+          event_startDate
+          event_endDate
+          start_timeZone
+          end_timeZone
           is_allDay
-          recurrence
           recurrenceId
+          recurrenceRule
           exceptionDates
           time_eventInstance
           category
+          event_attendees
           event_body
           event_location
           event_conferenceDetails
@@ -431,27 +428,26 @@ class EventService {
     print("Event Id: $id");
 
     final String mutation = '''
-      mutation UpdateDayEvent(\$id: String, \$dayEventInput: DayEventInput!) {
+      mutation UpdateDayEvent(\$id: String, \$dayEventInput: DayEventInputData!) {
         updateDayEvent(id: \$id, dayEventInput: \$dayEventInput) {
           id
           user_id
           createdBy
           user_calendars
-          calendarId
-          googleEventId
-          googleKind
-          googleEtag
-          creator
-          organizer
+          source_calendar
+          event_organizer
           event_title
-          start
-          end
-          is_allDay
-          recurrence
+          event_startDate
+          event_endDate
+          start_timeZone
+          end_timeZone
+          is_AllDay
           recurrenceId
+          recurrenceRule
           exceptionDates
-          day_eventInstance
+          day_Event_Instance
           category
+          event_attendees
           event_body
           event_location
           event_conferencedetails
