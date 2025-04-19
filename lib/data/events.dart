@@ -16,31 +16,33 @@ class EventService {
     final String query = '''
       query DayEvents {
         dayEvents {
-          id
-          user_id
-          createdBy
-          user_calendars
-          source_calendar
-          event_organizer
-          event_title
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
-          is_AllDay
-          recurrenceId
-          recurrenceRule
-          exceptionDates
-          day_Event_Instance
-          category
-          event_attendees
-          event_body
-          event_location
-          event_conferencedetails
-          reminder
-          holiday
-          createdAt
-          updatedAt
+          dayEvents {
+            id
+            user_id
+            createdBy
+            user_calendars
+            source_calendar
+            event_organizer
+            event_title
+            event_startDate
+            event_endDate
+            start_timeZone
+            end_timeZone
+            is_AllDay
+            recurrenceId
+            recurrenceRule
+            exceptionDates
+            day_Event_Instance
+            category
+            event_attendees
+            event_body
+            event_location
+            event_conferencedetails
+            reminder
+            holiday
+            createdAt
+            updatedAt
+          }
         }
       }
     ''';
@@ -71,7 +73,8 @@ class EventService {
       }
 
       // Extract the day events from the response
-      final List<dynamic> dayEventsJson = data['data']['dayEvents'];
+      final List<dynamic> dayEventsJson =
+          data['data']['dayEvents']['dayEvents'];
 
       // Parse the day events into a List<DayEvent>
       final List<DayEvent> dayEvents =
@@ -96,31 +99,33 @@ class EventService {
     final String query = '''
       query TimeEvents {
         timeEvents {
-          id
-          user_id
-          createdBy
-          user_calendars
-          source_calendar
-          event_organizer
-          event_title
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
-          is_allDay
-          recurrenceId
-          recurrenceRule
-          exceptionDates
-          time_eventInstance
-          category
-          event_attendees
-          event_body
-          event_location
-          event_conferenceDetails
-          reminder
-          holiday
-          createdAt
-          updatedAt
+          timeEvents {
+            id
+            user_id
+            createdBy
+            user_calendars
+            source_calendar
+            event_organizer
+            event_title
+            event_startDate
+            event_endDate
+            start_timeZone
+            end_timeZone
+            is_AllDay
+            recurrenceId
+            recurrenceRule
+            exceptionDates
+            time_eventInstance
+            category
+            event_attendees
+            event_body
+            event_location
+            event_conferenceDetails
+            reminder
+            holiday
+            createdAt
+            updatedAt
+          }
         }
       }
     ''';
@@ -152,7 +157,8 @@ class EventService {
       }
 
       // Extract the time events from the response
-      final List<dynamic> timeEventsJson = data['data']['timeEvents'];
+      final List<dynamic> timeEventsJson =
+          data['data']['timeEvents']['timeEvents'];
 
       // Parse the time events into a List<TimeEvent>
       final List<TimeEvent> timeEvents =
@@ -190,7 +196,7 @@ class EventService {
           event_endDate
           start_timeZone
           end_timeZone
-          is_allDay
+          is_AllDay
           recurrenceId
           recurrenceRule
           exceptionDates
@@ -359,7 +365,7 @@ class EventService {
           event_endDate
           start_timeZone
           end_timeZone
-          is_allDay
+          is_AllDay
           recurrenceId
           recurrenceRule
           exceptionDates
