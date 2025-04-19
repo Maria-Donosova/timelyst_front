@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+//import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
-import 'package:timelyst_flutter/data/tasks.dart';
+//import 'package:timelyst_flutter/data/tasks.dart';
 import 'package:timelyst_flutter/models/task.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
 import 'package:timelyst_flutter/services/authService.dart';
-import 'package:timelyst_flutter/widgets/shared/categories.dart';
+//import 'package:timelyst_flutter/widgets/shared/categories.dart';
 import '../../widgets/ToDo/task_item.dart';
+import '../../widgets/ToDo/new_task.dart';
+import '../../widgets/ToDo/delete_task.dart';
+import '../../widgets/ToDo/done_task.dart';
 
 class TaskListW extends StatefulWidget {
   @override
@@ -44,7 +47,6 @@ class _TaskListWState extends State<TaskListW> {
   List<Task> tasks = [];
 
   final _form = GlobalKey<FormState>();
-  final _taskDescriptionController = TextEditingController();
   String? selectedCategory;
 
   @override
@@ -131,46 +133,15 @@ class _TaskListWState extends State<TaskListW> {
                                 ),
                                 onDismissed:
                                     (DismissDirection direction) async {
-                                  final storage = FlutterSecureStorage();
-                                  final authToken =
-                                      await storage.read(key: 'authToken');
-
                                   if (direction ==
                                       DismissDirection.startToEnd) {
-                                    await taskProvider.markTaskAsComplete(
-                                        task.taskId, authToken!);
-                                    // The task is now removed from the list by the provider
-                                    // No need to refresh the list as notifyListeners is called
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        backgroundColor: Theme.of(context)
-                                            .colorScheme
-                                            .shadow,
-                                        content: Text(
-                                          'Well Done!',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge,
-                                        ),
-                                      ),
-                                    );
-                                    // No need to call setState as the provider will notify listeners
+                                    // Use the extracted DoneTaskW component
+                                    await DoneTaskW.markTaskAsComplete(
+                                        context, task.taskId);
                                   } else {
-                                    await taskProvider.deleteTask(
-                                        task.taskId, authToken!);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        backgroundColor: Theme.of(context)
-                                            .colorScheme
-                                            .shadow,
-                                        content: Text(
-                                          'Task deleted',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge,
-                                        ),
-                                      ),
-                                    );
+                                    // Use the extracted DeleteTaskW component
+                                    await DeleteTaskW.deleteTask(
+                                        context, task.taskId);
                                   }
                                 },
                                 confirmDismiss:
@@ -179,79 +150,12 @@ class _TaskListWState extends State<TaskListW> {
                                       DismissDirection.startToEnd) {
                                     return true;
                                   } else {
-                                    return await showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: Text(
-                                            "Confirmation",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .displaySmall,
-                                          ),
-                                          content: Text(
-                                            "Are you sure you want to delete this item?",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .displayMedium,
-                                          ),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              style: TextButton.styleFrom(
-                                                backgroundColor:
-                                                    Theme.of(context)
-                                                        .colorScheme
-                                                        .shadow,
-                                              ),
-                                              onPressed: () =>
-                                                  Navigator.of(context)
-                                                      .pop(false),
-                                              child: Text(
-                                                "Cancel",
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyLarge,
-                                              ),
-                                            ),
-                                            TextButton(
-                                              style: TextButton.styleFrom(
-                                                backgroundColor:
-                                                    Theme.of(context)
-                                                        .colorScheme
-                                                        .shadow,
-                                              ),
-                                              onPressed: () =>
-                                                  Navigator.of(context)
-                                                      .pop(true),
-                                              child: Text(
-                                                "Delete",
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyLarge,
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
+                                    // Use the extracted DeleteTaskW component for confirmation
+                                    return await DeleteTaskW
+                                        .showDeleteConfirmation(context, task);
                                   }
                                 },
-                                background: Container(
-                                  color: Colors.greenAccent[100],
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(5),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          'Done',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                background: DoneTaskW(task: task),
                                 secondaryBackground: Container(
                                   color: Colors.orangeAccent[100],
                                   child: Padding(
@@ -287,9 +191,9 @@ class _TaskListWState extends State<TaskListW> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () => {
-            print("Floating button pressed"),
-            addNewTaskMethod(context),
+          onPressed: () {
+            print("Floating button pressed");
+            NewTaskW.show(context);
           },
           child: Icon(Icons.add),
         ),
@@ -297,226 +201,5 @@ class _TaskListWState extends State<TaskListW> {
     );
   }
 
-  Future<dynamic> addNewTaskMethod(BuildContext context) {
-    // Create local TextEditingController and category state just for the modal
-    final modalTaskController = TextEditingController();
-    String? modalSelectedCategory = selectedCategory;
-
-    return showModalBottomSheet(
-      useSafeArea: false,
-      context: context,
-      isScrollControlled: true,
-      constraints: BoxConstraints(
-        minWidth: MediaQuery.of(context).size.width * 0.5,
-        maxWidth: MediaQuery.of(context).size.width * 0.5,
-        minHeight: MediaQuery.of(context).size.width * 0.18,
-        maxHeight: MediaQuery.of(context).size.width * 0.18,
-      ),
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState) {
-            return GestureDetector(
-              onTap: () => FocusScope.of(context).unfocus(),
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Card(
-                      child: Container(
-                        padding: EdgeInsets.all(10),
-                        child: Form(
-                          key: _form,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              TextFormField(
-                                controller: modalTaskController,
-                                decoration: InputDecoration(labelText: 'Task'),
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'Please provide a value.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 15),
-                              DropdownButtonFormField<String>(
-                                hint: Text('Select Category'),
-                                value: modalSelectedCategory,
-                                onChanged: (newValue) {
-                                  setModalState(() {
-                                    modalSelectedCategory = newValue;
-                                  });
-                                  // Also update parent state if needed
-                                  setState(() {
-                                    selectedCategory = newValue;
-                                  });
-                                },
-                                selectedItemBuilder: (BuildContext context) {
-                                  return categories.map((category) {
-                                    return Row(
-                                      children: [
-                                        CircleAvatar(
-                                          backgroundColor: catColor(category),
-                                          radius: 5,
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(category),
-                                      ],
-                                    );
-                                  }).toList();
-                                },
-                                items: categories.map((category) {
-                                  return DropdownMenuItem<String>(
-                                    value: category,
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          backgroundColor: catColor(category),
-                                          radius: 5,
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(category),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                              const SizedBox(height: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton(
-                                    style: TextButton.styleFrom(
-                                      backgroundColor:
-                                          Theme.of(context).colorScheme.shadow,
-                                    ),
-                                    onPressed: () async {
-                                      if (_form.currentState!.validate() &&
-                                          modalSelectedCategory != null) {
-                                        // Get the task provider
-                                        final taskProvider =
-                                            Provider.of<TaskProvider>(context,
-                                                listen: false);
-
-                                        // Get auth token and user ID
-                                        final authService = AuthService();
-                                        final authToken =
-                                            await authService.getAuthToken();
-                                        final userId =
-                                            await authService.getUserId();
-
-                                        if (authToken != null &&
-                                            userId != null) {
-                                          try {
-                                            // Create a new task with non-null values
-                                            final newTask = Task(
-                                              title: modalTaskController.text,
-                                              status: 'New',
-                                              category: modalSelectedCategory!,
-                                              task_type: 'Task',
-                                            );
-
-                                            // Call the service to create the task
-                                            await TasksService.createTask(
-                                                authToken, newTask);
-
-                                            // Refresh the task list
-                                            await taskProvider
-                                                .fetchTasks(authToken);
-
-                                            // Capture the scaffold context before popping
-                                            final scaffoldContext =
-                                                ScaffoldMessenger.of(context);
-                                            final themeData = Theme.of(context);
-
-                                            // Close the modal first
-                                            Navigator.of(context).pop();
-
-                                            // Wait for the modal to close completely before showing the SnackBar
-                                            Future.delayed(
-                                                Duration(milliseconds: 500),
-                                                () {
-                                              // Show success message using the captured context
-                                              scaffoldContext.showSnackBar(
-                                                SnackBar(
-                                                  backgroundColor: themeData
-                                                      .colorScheme.shadow,
-                                                  content: Text(
-                                                    'Task created successfully',
-                                                    style: themeData
-                                                        .textTheme.bodyLarge,
-                                                  ),
-                                                  duration:
-                                                      Duration(seconds: 2),
-                                                  behavior:
-                                                      SnackBarBehavior.floating,
-                                                  margin: EdgeInsets.all(10),
-                                                  elevation: 6,
-                                                ),
-                                              );
-                                            });
-                                          } catch (e) {
-                                            print('Error creating task: $e');
-                                            // Capture the scaffold context before popping
-                                            final scaffoldContext =
-                                                ScaffoldMessenger.of(context);
-                                            final themeData = Theme.of(context);
-
-                                            // Close the modal first
-                                            Navigator.of(context).pop();
-
-                                            // Wait for the modal to close completely before showing the error SnackBar
-                                            Future.delayed(
-                                                Duration(milliseconds: 500),
-                                                () {
-                                              // Show error message using the captured context
-                                              scaffoldContext.showSnackBar(
-                                                SnackBar(
-                                                  backgroundColor: themeData
-                                                      .colorScheme.shadow,
-                                                  content: Text(
-                                                    'Failed to create task: $e',
-                                                    style: themeData
-                                                        .textTheme.bodyLarge,
-                                                  ),
-                                                  duration:
-                                                      Duration(seconds: 2),
-                                                  behavior:
-                                                      SnackBarBehavior.floating,
-                                                  margin: EdgeInsets.all(10),
-                                                  elevation: 6,
-                                                ),
-                                              );
-                                            });
-                                          }
-                                        }
-                                      }
-                                    },
-                                    child: Text(
-                                      'Save',
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
+  // The addNewTaskMethod has been moved to the NewTaskW widget
 }
