@@ -14,9 +14,9 @@ class EventService {
     print("Entering fetchDayEvents in EventService");
 
     final String query = '''
-      query DayEvents(\$userId: String!) {
-        dayEvents(userId: \$userId) {
-          _id
+      query DayEvents {
+        dayEvents {
+          id
           userId
           createdBy
           user_calendars
@@ -55,7 +55,6 @@ class EventService {
       },
       body: jsonEncode({
         'query': query,
-        'variables': {'userId': userId},
       }),
     );
 
@@ -96,9 +95,9 @@ class EventService {
     print("Entering fetchTimeEvents in EventService");
 
     final String query = '''
-      query TimeEvents(\$userId: String!) {
-        timeEvents(userId: \$userId) {
-          _id
+      query TimeEvents {
+        timeEvents {
+          id
           userId
           createdBy
           user_calendars
@@ -182,8 +181,7 @@ class EventService {
     final String mutation = '''
       mutation CreateTimeEvent(\$timeEventInput: TimeEventInput!) {
         createTimeEvent(timeEventInput: \$timeEventInput) {
-          _id
-          userId
+          user_id
           createdBy
           user_calendars
           calendarId
@@ -267,8 +265,7 @@ class EventService {
     final String mutation = '''
       mutation CreateDayEvent(\$dayEventInput: DayEventInput!) {
         createDayEvent(dayEventInput: \$dayEventInput) {
-          _id
-          userId
+          user_id
           createdBy
           user_calendars
           calendarId
@@ -351,10 +348,10 @@ class EventService {
     print("Event Id: $id");
 
     final String mutation = '''
-      mutation UpdateTimeEvent(\$id: ID!, \$timeEventInput: TimeEventInput!) {
+      mutation UpdateTimeEvent(\$id: String, \$timeEventInput: TimeEventInput!) {
         updateTimeEvent(id: \$id, timeEventInput: \$timeEventInput) {
-          _id
-          userId
+          id
+          user_id
           createdBy
           user_calendars
           calendarId
@@ -434,10 +431,10 @@ class EventService {
     print("Event Id: $id");
 
     final String mutation = '''
-      mutation UpdateDayEvent(\$id: ID!, \$dayEventInput: DayEventInput!) {
+      mutation UpdateDayEvent(\$id: String, \$dayEventInput: DayEventInput!) {
         updateDayEvent(id: \$id, dayEventInput: \$dayEventInput) {
-          _id
-          userId
+          id
+          user_id
           createdBy
           user_calendars
           calendarId
@@ -514,7 +511,7 @@ class EventService {
     print("Event Id: $id");
 
     final String mutation = '''
-      mutation DeleteTimeEvent(\$id: ID!) {
+      mutation DeleteTimeEvent(\$id: String) {
         deleteTimeEvent(id: \$id)
       }
     ''';
@@ -563,7 +560,7 @@ class EventService {
     print("Event Id: $id");
 
     final String mutation = '''
-      mutation DeleteDayEvent(\$id: ID!) {
+      mutation DeleteDayEvent(\$id: String) {
         deleteDayEvent(id: \$id)
       }
     ''';
