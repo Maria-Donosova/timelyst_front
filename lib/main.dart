@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
-import 'package:timelyst_flutter/providers/taskProvider.dart';
+
+import 'themes.dart';
+
+import 'providers/authProvider.dart';
+import 'providers/calendarProvider.dart';
+import 'providers/eventProvider.dart';
+import 'providers/taskProvider.dart';
 
 import '../../screens/common/logIn.dart';
 import '../../services/googleIntegration/googleSignInOut.dart';
-
-import 'providers/authProvider.dart';
-
-import 'themes.dart';
 
 Future main() async {
   await dotenv.load(fileName: 'lib/.env');
@@ -26,6 +28,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => TaskProvider()),
+        ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProvider(create: (_) => CalendarProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
