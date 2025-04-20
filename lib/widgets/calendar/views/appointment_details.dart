@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../models/calendars.dart';
+import '../../../models/customApp.dart';
+import '../../../providers/eventProvider.dart';
+import '../../../providers/authProvider.dart';
+import '../../../services/authService.dart';
 
 import '../../shared/categories.dart'; // Imports the categories and their colors
 
@@ -513,7 +518,199 @@ class EventDetailsScreentate extends State<EventDetails> {
     _eventDateController.dispose();
     _eventStartTimeController.dispose();
     _eventEndTimeController.dispose();
+    _eventTitleController.dispose();
+    _eventDescriptionController.dispose();
+    _eventLocation.dispose();
+    _eventParticipants.dispose();
+    _eventCalendar.dispose();
     super.dispose();
+  }
+
+  // Save or update event based on form data
+  Future<bool> _saveEvent(BuildContext context) async {
+    try {
+      // Get the auth provider for user ID and token
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userId = authProvider.userId ?? '';
+      final isLoggedIn = authProvider.isLoggedIn;
+
+      if (userId.isEmpty || isLoggedIn != 'true') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Authentication error. Please log in again.')),
+        );
+        return false;
+      }
+
+      // Parse date and time strings to DateTime objects
+      final dateStr = _eventDateController.text;
+      final startTimeStr = _eventStartTimeController.text;
+      final endTimeStr = _eventEndTimeController.text;
+
+      // Parse date using DateFormat
+      DateTime? eventDate;
+      try {
+        eventDate = DateFormat('MMMM d').parse(dateStr);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid date format')),
+        );
+        return false;
+      }
+
+      // Create DateTime objects for start and end times
+      final startTimeParts = startTimeStr.split(':');
+      final endTimeParts = endTimeStr.split(':');
+
+      if (startTimeParts.length != 2 || endTimeParts.length != 2) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid time format')),
+        );
+        return false;
+      }
+
+      final startHour = int.tryParse(startTimeParts[0]);
+      final startMinute = int.tryParse(startTimeParts[1]);
+      final endHour = int.tryParse(endTimeParts[0]);
+      final endMinute = int.tryParse(endTimeParts[1]);
+
+      if (startHour == null ||
+          startMinute == null ||
+          endHour == null ||
+          endMinute == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid time format')),
+        );
+        return false;
+      }
+
+      final startDateTime = DateTime(
+        eventDate.year,
+        eventDate.month,
+        eventDate.day,
+        startHour,
+        startMinute,
+      );
+
+      final endDateTime = DateTime(
+        eventDate.year,
+        eventDate.month,
+        eventDate.day,
+        endHour,
+        endMinute,
+      );
+
+      // Prepare event data
+      final Map<String, dynamic> eventInput = {
+        'user_id': userId,
+        'createdBy': userId,
+        'user_calendars':
+            widget._userCalendars != null && widget._userCalendars!.isNotEmpty
+                ? widget._userCalendars!.map((cal) => cal.id ?? '').toList()
+                : [],
+        'source_calendar':
+            widget._userCalendars != null && widget._userCalendars!.isNotEmpty
+                ? widget._userCalendars![0].sourceCalendar ?? ''
+                : '',
+        'event_organizer': userId,
+        'event_title': _eventTitleController.text,
+        'event_startDate': startDateTime.toIso8601String(),
+        'event_endDate': endDateTime.toIso8601String(),
+        'is_AllDay': _allDay,
+        'recurrenceRule': _recurrence != 'None' ? _buildRecurrenceRule() : '',
+        'category': _selectedCategory,
+        'event_attendees': _eventParticipants.text,
+        'event_body': _eventDescriptionController.text,
+        'event_location': _eventLocation.text,
+      };
+
+      // Get the event provider
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+
+      // Get the auth token from AuthService
+      final authService = AuthService();
+      final authToken = await authService.getAuthToken() ?? '';
+
+      // Determine if this is a create or update operation
+      final isUpdate = widget._id != null && widget._id!.isNotEmpty;
+
+      // Call the appropriate method based on all-day status and create/update
+      CustomAppointment? result;
+
+      if (isUpdate) {
+        // Update existing event
+        if (_allDay) {
+          result = await eventProvider.updateDayEvent(
+              widget._id!, eventInput, authToken);
+        } else {
+          result = await eventProvider.updateTimeEvent(
+              widget._id!, eventInput, authToken);
+        }
+      } else {
+        // Create new event
+        if (_allDay) {
+          result = await eventProvider.createDayEvent(eventInput, authToken);
+        } else {
+          result = await eventProvider.createTimeEvent(eventInput, authToken);
+        }
+      }
+
+      return result != null;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving event: ${e.toString()}')),
+      );
+      return false;
+    }
+  }
+
+  // Build recurrence rule string based on selected recurrence pattern
+  String _buildRecurrenceRule() {
+    String rule = '';
+
+    switch (_recurrence) {
+      case 'Daily':
+        rule = 'FREQ=DAILY';
+        break;
+      case 'Weekly':
+        if (_selectedDays.isNotEmpty) {
+          // Convert day names to BYDAY format (MO,TU,WE,TH,FR,SA,SU)
+          final byDays = _selectedDays
+              .map((day) {
+                switch (day) {
+                  case 'Monday':
+                    return 'MO';
+                  case 'Tuesday':
+                    return 'TU';
+                  case 'Wednesday':
+                    return 'WE';
+                  case 'Thursday':
+                    return 'TH';
+                  case 'Friday':
+                    return 'FR';
+                  case 'Saturday':
+                    return 'SA';
+                  case 'Sunday':
+                    return 'SU';
+                  default:
+                    return '';
+                }
+              })
+              .where((day) => day.isNotEmpty)
+              .join(',');
+
+          rule = 'FREQ=WEEKLY;BYDAY=$byDays';
+        } else {
+          rule = 'FREQ=WEEKLY';
+        }
+        break;
+      case 'Yearly':
+        rule = 'FREQ=YEARLY';
+        break;
+      default:
+        rule = '';
+    }
+
+    return rule;
   }
 
   @override
@@ -867,26 +1064,23 @@ class EventDetailsScreentate extends State<EventDetails> {
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onPrimary,
                           )),
-                      onPressed: () {
+                      onPressed: () async {
                         if (_appFormKey.currentState!.validate()) {
-                          print('saved');
+                          final success = await _saveEvent(context);
+                          if (success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text('Event saved successfully')),
+                            );
+                            Navigator.of(context).pop();
+                          }
                         } else {
-                          Text('Fix the items');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('Please fix the errors in the form')),
+                          );
                         }
-
-                        setState(() {
-                          print("event saved");
-                          // runMutation({
-                          //                       //   "task_description":
-                          //                       //       _taskDescriptionController.text
-                          //                       //           .trim(),
-                          //                       //   // "task_type":
-                          //                       //   //  _taskTypeController.text.trim(),
-                          //                       //   "category": _selectedCategory,
-                          //                       //   'userId': currUserId,
-                          //                       // });;
-                        });
-                        Navigator.of(context).pop();
                       }),
                 ],
               ),
