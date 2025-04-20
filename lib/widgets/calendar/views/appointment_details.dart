@@ -528,13 +528,18 @@ class EventDetailsScreentate extends State<EventDetails> {
 
   // Save or update event based on form data
   Future<bool> _saveEvent(BuildContext context) async {
-    try {
-      // Get the auth provider for user ID and token
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final userId = authProvider.userId ?? '';
-      final isLoggedIn = authProvider.isLoggedIn;
+    print("Entering saveEvent in appointment builder");
 
-      if (userId.isEmpty || isLoggedIn != 'true') {
+    try {
+      // Get the auth service for user ID and token
+      final authService = AuthService();
+      final authToken = await authService.getAuthToken();
+      final userId = await authService.getUserId();
+
+      print("User ID: $userId");
+      print("Auth Token: $authToken");
+
+      if (authToken == null || userId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Authentication error. Please log in again.')),
         );
@@ -625,10 +630,6 @@ class EventDetailsScreentate extends State<EventDetails> {
 
       // Get the event provider
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
-
-      // Get the auth token from AuthService
-      final authService = AuthService();
-      final authToken = await authService.getAuthToken() ?? '';
 
       // Determine if this is a create or update operation
       final isUpdate = widget._id != null && widget._id!.isNotEmpty;
