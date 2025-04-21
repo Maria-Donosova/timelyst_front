@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../models/calendars.dart';
 import '../../../models/customApp.dart';
 import '../../../providers/eventProvider.dart';
-import '../../../providers/authProvider.dart';
+//import '../../../providers/authProvider.dart';
 import '../../../services/authService.dart';
 
 import '../../shared/categories.dart'; // Imports the categories and their colors
@@ -555,6 +555,11 @@ class EventDetailsScreentate extends State<EventDetails> {
       DateTime? eventDate;
       try {
         eventDate = DateFormat('MMMM d').parse(dateStr);
+        // Set current year if the parsed date has a different year
+        if (eventDate.year != DateTime.now().year) {
+          eventDate =
+              DateTime(DateTime.now().year, eventDate.month, eventDate.day);
+        }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Invalid date format')),
@@ -563,20 +568,106 @@ class EventDetailsScreentate extends State<EventDetails> {
       }
 
       // Create DateTime objects for start and end times
-      final startTimeParts = startTimeStr.split(':');
-      final endTimeParts = endTimeStr.split(':');
+      int? startHour, startMinute, endHour, endMinute;
 
-      if (startTimeParts.length != 2 || endTimeParts.length != 2) {
+      // Handle different time formats (12-hour with AM/PM or 24-hour)
+      try {
+        // Try different time formats
+        DateTime? startTime;
+
+        // Try standard formats first
+        if (startTimeStr.toLowerCase().contains('am') ||
+            startTimeStr.toLowerCase().contains('pm')) {
+          // Try various 12-hour formats with AM/PM
+          final formats = ['h:mm a', 'h a', 'h:mm a', 'hh:mm a'];
+
+          for (final format in formats) {
+            try {
+              startTime = DateFormat(format).parse(startTimeStr);
+              break; // Exit loop if parsing succeeds
+            } catch (e) {
+              // Continue to next format
+            }
+          }
+
+          if (startTime == null) {
+            throw FormatException('Could not parse time: $startTimeStr');
+          }
+        } else {
+          // 24-hour format
+          final startTimeParts = startTimeStr.split(':');
+          if (startTimeParts.length != 2) {
+            throw FormatException('Invalid time format');
+          }
+          startHour = int.tryParse(startTimeParts[0]);
+          startMinute = int.tryParse(startTimeParts[1]);
+
+          if (startHour == null || startMinute == null) {
+            throw FormatException('Invalid time values');
+          }
+
+          // Continue with the method execution
+        }
+
+        startHour = startTime?.hour;
+        startMinute = startTime?.minute;
+      } catch (e) {
+        print('Error parsing start time: $e');
+        print('Start time string: "$startTimeStr"');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid time format')),
+          SnackBar(content: Text('Invalid start time format: $startTimeStr')),
         );
         return false;
       }
 
-      final startHour = int.tryParse(startTimeParts[0]);
-      final startMinute = int.tryParse(startTimeParts[1]);
-      final endHour = int.tryParse(endTimeParts[0]);
-      final endMinute = int.tryParse(endTimeParts[1]);
+      try {
+        // Try different time formats
+        DateTime? endTime;
+
+        // Try standard formats first
+        if (endTimeStr.toLowerCase().contains('am') ||
+            endTimeStr.toLowerCase().contains('pm')) {
+          // Try various 12-hour formats with AM/PM
+          final formats = ['h:mm a', 'h a', 'h:mm a', 'hh:mm a'];
+
+          for (final format in formats) {
+            try {
+              endTime = DateFormat(format).parse(endTimeStr);
+              break; // Exit loop if parsing succeeds
+            } catch (e) {
+              // Continue to next format
+            }
+          }
+
+          if (endTime == null) {
+            throw FormatException('Could not parse time: $endTimeStr');
+          }
+        } else {
+          // 24-hour format
+          final endTimeParts = endTimeStr.split(':');
+          if (endTimeParts.length != 2) {
+            throw FormatException('Invalid time format');
+          }
+          endHour = int.tryParse(endTimeParts[0]);
+          endMinute = int.tryParse(endTimeParts[1]);
+
+          if (endHour == null || endMinute == null) {
+            throw FormatException('Invalid time values');
+          }
+
+          // Continue with the method execution
+        }
+
+        endHour = endTime?.hour;
+        endMinute = endTime?.minute;
+      } catch (e) {
+        print('Error parsing end time: $e');
+        print('End time string: "$endTimeStr"');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid end time format: $endTimeStr')),
+        );
+        return false;
+      }
 
       if (startHour == null ||
           startMinute == null ||
@@ -604,7 +695,7 @@ class EventDetailsScreentate extends State<EventDetails> {
         endMinute,
       );
 
-      // Prepare event data
+      // Prepare event data with proper date format for models
       final Map<String, dynamic> eventInput = {
         'user_id': userId,
         'createdBy': userId,
@@ -618,15 +709,24 @@ class EventDetailsScreentate extends State<EventDetails> {
                 : '',
         'event_organizer': userId,
         'event_title': _eventTitleController.text,
-        'event_startDate': startDateTime.toIso8601String(),
-        'event_endDate': endDateTime.toIso8601String(),
+        // Format dates according to the model requirements
+        'start': _allDay
+            ? {'date': startDateTime.toIso8601String().split('T')[0]}
+            : {'dateTime': startDateTime.toIso8601String()},
+        'end': _allDay
+            ? {'date': endDateTime.toIso8601String().split('T')[0]}
+            : {'dateTime': endDateTime.toIso8601String()},
         'is_AllDay': _allDay,
-        'recurrenceRule': _recurrence != 'None' ? _buildRecurrenceRule() : '',
+        'recurrence': _recurrence != 'None' ? [_buildRecurrenceRule()] : [],
         'category': _selectedCategory,
         'event_attendees': _eventParticipants.text,
         'event_body': _eventDescriptionController.text,
         'event_location': _eventLocation.text,
       };
+
+      // Keep these fields for backward compatibility with API
+      eventInput['event_startDate'] = startDateTime.toIso8601String();
+      eventInput['event_endDate'] = endDateTime.toIso8601String();
 
       // Get the event provider
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
