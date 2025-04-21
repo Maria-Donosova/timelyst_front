@@ -716,7 +716,7 @@ class EventDetailsScreentate extends State<EventDetails> {
         'end': _allDay
             ? {'date': endDateTime.toIso8601String().split('T')[0]}
             : {'dateTime': endDateTime.toIso8601String()},
-        'is_AllDay': _allDay,
+        'is_AllDay': _allDay, // Fixed casing to match backend exactly
         'recurrence': _recurrence != 'None' ? [_buildRecurrenceRule()] : [],
         'category': _selectedCategory,
         'event_attendees': _eventParticipants.text,
