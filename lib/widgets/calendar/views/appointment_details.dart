@@ -140,27 +140,74 @@ class EventDetailsScreentate extends State<EventDetails> {
     }
   }
 
-//function to select start time based on user input via time picker and update end time by 30 minutes
-  Future<void> _selectStartTime(BuildContext context, bool isStartTime) async {
-    TimeOfDay initialStartTime;
+  TimeOfDay _parseTimeString(String timeString) {
+    print("Entering parseTimeString");
+    print("Parsing time: $timeString");
     try {
-      initialStartTime =
-          TimeOfDay.fromDateTime(DateTime.parse(widget._startTimeText!));
+      // Step 1: Normalize the string (replace non-breaking space with a regular space)
+      final normalizedTime = timeString.replaceAll(' ', ' ').trim();
+      print("Normalized Time: $normalizedTime");
+
+      // Step 2: Use RegExp to extract hour, minute, and period
+      final regExp =
+          RegExp(r'^(\d{1,2}):?(\d{2})?\s*([AP]M)?$', caseSensitive: false);
+      final match = regExp.firstMatch(normalizedTime);
+      print("Match: $match");
+
+      if (match == null) {
+        throw FormatException('Invalid time format: $timeString');
+      }
+
+      // Step 3: Extract components
+      int hour = int.parse(match.group(1)!);
+      int minute = match.group(2) != null ? int.parse(match.group(2)!) : 0;
+      final period = match.group(3)?.toUpperCase();
+
+      // Step 4: Convert 12-hour to 24-hour format
+      if (period == 'PM' && hour != 12) {
+        hour += 12;
+      } else if (period == 'AM' && hour == 12) {
+        hour = 0;
+      }
+
+      return TimeOfDay(hour: hour, minute: minute);
     } catch (e) {
-      initialStartTime =
-          TimeOfDay.now(); // Fallback to current date if parsing fails
+      print('Error parsing time: $e');
+      print('Time string: "$timeString"');
+      return TimeOfDay.now(); // Fallback
     }
+  }
+
+  Future<void> _selectStartTime(BuildContext context, bool isStartTime) async {
+    print("Entering _selectStartTime");
+    print("isStartTime: $isStartTime");
+    print("widget._startTimeText: ${widget._startTimeText}");
+    TimeOfDay initialStartTime = TimeOfDay.now(); // Default fallback
+
+    if (widget._startTimeText != null && widget._startTimeText!.isNotEmpty) {
+      initialStartTime = _parseTimeString(widget._startTimeText!);
+    }
+
     final selectedStartTime = await showTimePicker(
       context: context,
       initialTime: initialStartTime,
       initialEntryMode: TimePickerEntryMode.inputOnly,
     );
+
+    print("Selected Start Time: $selectedStartTime");
+
     if (selectedStartTime != null) {
-      final newEndTime = selectedStartTime.replacing(
-        hour: (selectedStartTime.hour + (selectedStartTime.minute + 30) ~/ 60) %
-            24,
-        minute: (selectedStartTime.minute + 30) % 60,
+      final now = DateTime.now();
+      final startDateTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        selectedStartTime.hour,
+        selectedStartTime.minute,
       );
+      final endDateTime = startDateTime.add(const Duration(minutes: 30));
+      final newEndTime = TimeOfDay.fromDateTime(endDateTime);
+
       setState(() {
         _eventStartTimeController.text = selectedStartTime.format(context);
         _eventEndTimeController.text = newEndTime.format(context);
@@ -527,6 +574,243 @@ class EventDetailsScreentate extends State<EventDetails> {
   }
 
   // Save or update event based on form data
+  // Future<bool> _saveEvent(BuildContext context) async {
+  //   print("Entering saveEvent in appointment builder");
+
+  //   try {
+  //     // Get the auth service for user ID and token
+  //     final authService = AuthService();
+  //     final authToken = await authService.getAuthToken();
+  //     final userId = await authService.getUserId();
+
+  //     print("User ID: $userId");
+  //     print("Auth Token: $authToken");
+
+  //     if (authToken == null || userId == null) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Authentication error. Please log in again.')),
+  //       );
+  //       return false;
+  //     }
+
+  //     // Parse date and time strings to DateTime objects
+  //     final dateStr = _eventDateController.text;
+  //     final startTimeStr = _eventStartTimeController.text;
+  //     final endTimeStr = _eventEndTimeController.text;
+
+  //     // Parse date using DateFormat
+  //     DateTime? eventDate;
+  //     try {
+  //       eventDate = DateFormat('MMMM d').parse(dateStr);
+  //       // Set current year if the parsed date has a different year
+  //       if (eventDate.year != DateTime.now().year) {
+  //         eventDate =
+  //             DateTime(DateTime.now().year, eventDate.month, eventDate.day);
+  //       }
+  //     } catch (e) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Invalid date format')),
+  //       );
+  //       return false;
+  //     }
+
+  //     // Create DateTime objects for start and end times
+  //     int? startHour, startMinute, endHour, endMinute;
+
+  //     // Handle different time formats (12-hour with AM/PM or 24-hour)
+  //     try {
+  //       // Try different time formats
+  //       DateTime? startTime;
+
+  //       // Try standard formats first
+  //       if (startTimeStr.toLowerCase().contains('am') ||
+  //           startTimeStr.toLowerCase().contains('pm')) {
+  //         // Try various 12-hour formats with AM/PM
+  //         final formats = ['h:mm a', 'h a', 'h:mm a', 'hh:mm a'];
+
+  //         for (final format in formats) {
+  //           try {
+  //             startTime = DateFormat(format).parse(startTimeStr);
+  //             break; // Exit loop if parsing succeeds
+  //           } catch (e) {
+  //             // Continue to next format
+  //           }
+  //         }
+
+  //         if (startTime == null) {
+  //           throw FormatException('Could not parse time: $startTimeStr');
+  //         }
+  //       } else {
+  //         // 24-hour format
+  //         final startTimeParts = startTimeStr.split(':');
+  //         if (startTimeParts.length != 2) {
+  //           throw FormatException('Invalid time format');
+  //         }
+  //         startHour = int.tryParse(startTimeParts[0]);
+  //         startMinute = int.tryParse(startTimeParts[1]);
+
+  //         if (startHour == null || startMinute == null) {
+  //           throw FormatException('Invalid time values');
+  //         }
+
+  //         // Continue with the method execution
+  //       }
+
+  //       startHour = startTime?.hour;
+  //       startMinute = startTime?.minute;
+  //     } catch (e) {
+  //       print('Error parsing start time: $e');
+  //       print('Start time string: "$startTimeStr"');
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Invalid start time format: $startTimeStr')),
+  //       );
+  //       return false;
+  //     }
+
+  //     try {
+  //       // Try different time formats
+  //       DateTime? endTime;
+
+  //       // Try standard formats first
+  //       if (endTimeStr.toLowerCase().contains('am') ||
+  //           endTimeStr.toLowerCase().contains('pm')) {
+  //         // Try various 12-hour formats with AM/PM
+  //         final formats = ['h:mm a', 'h a', 'h:mm a', 'hh:mm a'];
+
+  //         for (final format in formats) {
+  //           try {
+  //             endTime = DateFormat(format).parse(endTimeStr);
+  //             break; // Exit loop if parsing succeeds
+  //           } catch (e) {
+  //             // Continue to next format
+  //           }
+  //         }
+
+  //         if (endTime == null) {
+  //           throw FormatException('Could not parse time: $endTimeStr');
+  //         }
+  //       } else {
+  //         // 24-hour format
+  //         final endTimeParts = endTimeStr.split(':');
+  //         if (endTimeParts.length != 2) {
+  //           throw FormatException('Invalid time format');
+  //         }
+  //         endHour = int.tryParse(endTimeParts[0]);
+  //         endMinute = int.tryParse(endTimeParts[1]);
+
+  //         if (endHour == null || endMinute == null) {
+  //           throw FormatException('Invalid time values');
+  //         }
+
+  //         // Continue with the method execution
+  //       }
+
+  //       endHour = endTime?.hour;
+  //       endMinute = endTime?.minute;
+  //     } catch (e) {
+  //       print('Error parsing end time: $e');
+  //       print('End time string: "$endTimeStr"');
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Invalid end time format: $endTimeStr')),
+  //       );
+  //       return false;
+  //     }
+
+  //     if (startHour == null ||
+  //         startMinute == null ||
+  //         endHour == null ||
+  //         endMinute == null) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Invalid time format')),
+  //       );
+  //       return false;
+  //     }
+
+  //     final startDateTime = DateTime(
+  //       eventDate.year,
+  //       eventDate.month,
+  //       eventDate.day,
+  //       startHour,
+  //       startMinute,
+  //     );
+
+  //     final endDateTime = DateTime(
+  //       eventDate.year,
+  //       eventDate.month,
+  //       eventDate.day,
+  //       endHour,
+  //       endMinute,
+  //     );
+
+  //     // Prepare event data with proper date format for models
+  //     final Map<String, dynamic> eventInput = {
+  //       'user_id': userId,
+  //       'createdBy': userId,
+  //       'user_calendars':
+  //           widget._userCalendars != null && widget._userCalendars!.isNotEmpty
+  //               ? widget._userCalendars!.map((cal) => cal.id ?? '').toList()
+  //               : [],
+  //       'source_calendar':
+  //           widget._userCalendars != null && widget._userCalendars!.isNotEmpty
+  //               ? widget._userCalendars![0].sourceCalendar ?? ''
+  //               : '',
+  //       'event_organizer': userId,
+  //       'event_title': _eventTitleController.text,
+  //       // Format dates according to the model requirements
+  //       'start': _allDay
+  //           ? {'date': startDateTime.toIso8601String().split('T')[0]}
+  //           : {'dateTime': startDateTime.toIso8601String()},
+  //       'end': _allDay
+  //           ? {'date': endDateTime.toIso8601String().split('T')[0]}
+  //           : {'dateTime': endDateTime.toIso8601String()},
+  //       'is_AllDay': _allDay, // Fixed casing to match backend exactly
+  //       'recurrence': _recurrence != 'None' ? [_buildRecurrenceRule()] : [],
+  //       'category': _selectedCategory,
+  //       'event_attendees': _eventParticipants.text,
+  //       'event_body': _eventDescriptionController.text,
+  //       'event_location': _eventLocation.text,
+  //     };
+
+  //     // Keep these fields for backward compatibility with API
+  //     eventInput['event_startDate'] = startDateTime.toIso8601String();
+  //     eventInput['event_endDate'] = endDateTime.toIso8601String();
+
+  //     // Get the event provider
+  //     final eventProvider = Provider.of<EventProvider>(context, listen: false);
+
+  //     // Determine if this is a create or update operation
+  //     final isUpdate = widget._id != null && widget._id!.isNotEmpty;
+
+  //     // Call the appropriate method based on all-day status and create/update
+  //     CustomAppointment? result;
+
+  //     if (isUpdate) {
+  //       // Update existing event
+  //       if (_allDay) {
+  //         result = await eventProvider.updateDayEvent(
+  //             widget._id!, eventInput, authToken);
+  //       } else {
+  //         result = await eventProvider.updateTimeEvent(
+  //             widget._id!, eventInput, authToken);
+  //       }
+  //     } else {
+  //       // Create new event
+  //       if (_allDay) {
+  //         result = await eventProvider.createDayEvent(eventInput, authToken);
+  //       } else {
+  //         result = await eventProvider.createTimeEvent(eventInput, authToken);
+  //       }
+  //     }
+
+  //     return result != null;
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error saving event: ${e.toString()}')),
+  //     );
+  //     return false;
+  //   }
+  // }
+
   Future<bool> _saveEvent(BuildContext context) async {
     print("Entering saveEvent in appointment builder");
 
@@ -536,9 +820,6 @@ class EventDetailsScreentate extends State<EventDetails> {
       final authToken = await authService.getAuthToken();
       final userId = await authService.getUserId();
 
-      print("User ID: $userId");
-      print("Auth Token: $authToken");
-
       if (authToken == null || userId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Authentication error. Please log in again.')),
@@ -546,16 +827,11 @@ class EventDetailsScreentate extends State<EventDetails> {
         return false;
       }
 
-      // Parse date and time strings to DateTime objects
+      // Parse date
       final dateStr = _eventDateController.text;
-      final startTimeStr = _eventStartTimeController.text;
-      final endTimeStr = _eventEndTimeController.text;
-
-      // Parse date using DateFormat
       DateTime? eventDate;
       try {
         eventDate = DateFormat('MMMM d').parse(dateStr);
-        // Set current year if the parsed date has a different year
         if (eventDate.year != DateTime.now().year) {
           eventDate =
               DateTime(DateTime.now().year, eventDate.month, eventDate.day);
@@ -567,192 +843,76 @@ class EventDetailsScreentate extends State<EventDetails> {
         return false;
       }
 
-      // Create DateTime objects for start and end times
-      int? startHour, startMinute, endHour, endMinute;
-
-      // Handle different time formats (12-hour with AM/PM or 24-hour)
+      // Parse times using _parseTimeString
+      TimeOfDay startTime, endTime;
       try {
-        // Try different time formats
-        DateTime? startTime;
-
-        // Try standard formats first
-        if (startTimeStr.toLowerCase().contains('am') ||
-            startTimeStr.toLowerCase().contains('pm')) {
-          // Try various 12-hour formats with AM/PM
-          final formats = ['h:mm a', 'h a', 'h:mm a', 'hh:mm a'];
-
-          for (final format in formats) {
-            try {
-              startTime = DateFormat(format).parse(startTimeStr);
-              break; // Exit loop if parsing succeeds
-            } catch (e) {
-              // Continue to next format
-            }
-          }
-
-          if (startTime == null) {
-            throw FormatException('Could not parse time: $startTimeStr');
-          }
-        } else {
-          // 24-hour format
-          final startTimeParts = startTimeStr.split(':');
-          if (startTimeParts.length != 2) {
-            throw FormatException('Invalid time format');
-          }
-          startHour = int.tryParse(startTimeParts[0]);
-          startMinute = int.tryParse(startTimeParts[1]);
-
-          if (startHour == null || startMinute == null) {
-            throw FormatException('Invalid time values');
-          }
-
-          // Continue with the method execution
-        }
-
-        startHour = startTime?.hour;
-        startMinute = startTime?.minute;
+        startTime = _parseTimeString(_eventStartTimeController.text);
+        endTime = _parseTimeString(_eventEndTimeController.text);
       } catch (e) {
-        print('Error parsing start time: $e');
-        print('Start time string: "$startTimeStr"');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid start time format: $startTimeStr')),
-        );
-        return false;
-      }
-
-      try {
-        // Try different time formats
-        DateTime? endTime;
-
-        // Try standard formats first
-        if (endTimeStr.toLowerCase().contains('am') ||
-            endTimeStr.toLowerCase().contains('pm')) {
-          // Try various 12-hour formats with AM/PM
-          final formats = ['h:mm a', 'h a', 'h:mm a', 'hh:mm a'];
-
-          for (final format in formats) {
-            try {
-              endTime = DateFormat(format).parse(endTimeStr);
-              break; // Exit loop if parsing succeeds
-            } catch (e) {
-              // Continue to next format
-            }
-          }
-
-          if (endTime == null) {
-            throw FormatException('Could not parse time: $endTimeStr');
-          }
-        } else {
-          // 24-hour format
-          final endTimeParts = endTimeStr.split(':');
-          if (endTimeParts.length != 2) {
-            throw FormatException('Invalid time format');
-          }
-          endHour = int.tryParse(endTimeParts[0]);
-          endMinute = int.tryParse(endTimeParts[1]);
-
-          if (endHour == null || endMinute == null) {
-            throw FormatException('Invalid time values');
-          }
-
-          // Continue with the method execution
-        }
-
-        endHour = endTime?.hour;
-        endMinute = endTime?.minute;
-      } catch (e) {
-        print('Error parsing end time: $e');
-        print('End time string: "$endTimeStr"');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid end time format: $endTimeStr')),
-        );
-        return false;
-      }
-
-      if (startHour == null ||
-          startMinute == null ||
-          endHour == null ||
-          endMinute == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Invalid time format')),
         );
         return false;
       }
 
+      // Create DateTime objects
       final startDateTime = DateTime(
         eventDate.year,
         eventDate.month,
         eventDate.day,
-        startHour,
-        startMinute,
+        startTime.hour,
+        startTime.minute,
       );
 
       final endDateTime = DateTime(
         eventDate.year,
         eventDate.month,
         eventDate.day,
-        endHour,
-        endMinute,
+        endTime.hour,
+        endTime.minute,
       );
 
-      // Prepare event data with proper date format for models
+      // Prepare event data
       final Map<String, dynamic> eventInput = {
         'user_id': userId,
         'createdBy': userId,
         'user_calendars':
-            widget._userCalendars != null && widget._userCalendars!.isNotEmpty
-                ? widget._userCalendars!.map((cal) => cal.id ?? '').toList()
-                : [],
+            widget._userCalendars?.map((cal) => cal.id ?? '').toList() ?? [],
         'source_calendar':
-            widget._userCalendars != null && widget._userCalendars!.isNotEmpty
-                ? widget._userCalendars![0].sourceCalendar ?? ''
-                : '',
+            widget._userCalendars?.firstOrNull?.sourceCalendar ?? '',
         'event_organizer': userId,
         'event_title': _eventTitleController.text,
-        // Format dates according to the model requirements
         'start': _allDay
             ? {'date': startDateTime.toIso8601String().split('T')[0]}
             : {'dateTime': startDateTime.toIso8601String()},
         'end': _allDay
             ? {'date': endDateTime.toIso8601String().split('T')[0]}
             : {'dateTime': endDateTime.toIso8601String()},
-        'is_AllDay': _allDay, // Fixed casing to match backend exactly
+        'is_AllDay': _allDay,
         'recurrence': _recurrence != 'None' ? [_buildRecurrenceRule()] : [],
         'category': _selectedCategory,
         'event_attendees': _eventParticipants.text,
         'event_body': _eventDescriptionController.text,
         'event_location': _eventLocation.text,
+        'event_startDate': startDateTime.toIso8601String(),
+        'event_endDate': endDateTime.toIso8601String(),
       };
 
-      // Keep these fields for backward compatibility with API
-      eventInput['event_startDate'] = startDateTime.toIso8601String();
-      eventInput['event_endDate'] = endDateTime.toIso8601String();
-
-      // Get the event provider
+      // Save/update event
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
-
-      // Determine if this is a create or update operation
       final isUpdate = widget._id != null && widget._id!.isNotEmpty;
 
-      // Call the appropriate method based on all-day status and create/update
       CustomAppointment? result;
-
       if (isUpdate) {
-        // Update existing event
-        if (_allDay) {
-          result = await eventProvider.updateDayEvent(
-              widget._id!, eventInput, authToken);
-        } else {
-          result = await eventProvider.updateTimeEvent(
-              widget._id!, eventInput, authToken);
-        }
+        result = _allDay
+            ? await eventProvider.updateDayEvent(
+                widget._id!, eventInput, authToken)
+            : await eventProvider.updateTimeEvent(
+                widget._id!, eventInput, authToken);
       } else {
-        // Create new event
-        if (_allDay) {
-          result = await eventProvider.createDayEvent(eventInput, authToken);
-        } else {
-          result = await eventProvider.createTimeEvent(eventInput, authToken);
-        }
+        result = _allDay
+            ? await eventProvider.createDayEvent(eventInput, authToken)
+            : await eventProvider.createTimeEvent(eventInput, authToken);
       }
 
       return result != null;
