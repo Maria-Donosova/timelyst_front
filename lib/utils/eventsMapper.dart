@@ -13,7 +13,7 @@ class EventMapper {
       startTime:
           DateTime.parse(dayEvent.start['dateTime'] ?? dayEvent.start['date']),
       endTime: DateTime.parse(dayEvent.end['dateTime'] ?? dayEvent.end['date']),
-      isAllDay: dayEvent.isAllDay,
+      isAllDay: dayEvent.is_AllDay,
       location: dayEvent.eventLocation,
       organizer:
           dayEvent.organizer['displayName'] ?? dayEvent.organizer['email'],
@@ -37,7 +37,7 @@ class EventMapper {
           timeEvent.start['dateTime'] ?? timeEvent.start['date']),
       endTime:
           DateTime.parse(timeEvent.end['dateTime'] ?? timeEvent.end['date']),
-      isAllDay: timeEvent.isAllDay,
+      isAllDay: timeEvent.is_AllDay,
       location: timeEvent.eventLocation,
       organizer:
           timeEvent.organizer['displayName'] ?? timeEvent.organizer['email'],
