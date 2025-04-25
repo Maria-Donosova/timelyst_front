@@ -262,6 +262,7 @@ class EventService {
     final String mutation = '''
       mutation CreateTimeEvent(\$timeEventInput: TimeEventInputData!) {
         createTimeEvent(timeEventInput: \$timeEventInput) {
+          id
           user_id
           createdBy
           user_calendars
@@ -345,6 +346,7 @@ class EventService {
     final String mutation = '''
       mutation CreateDayEvent(\$dayEventInput: DayEventInputData!) {
         createDayEvent(dayEventInput: \$dayEventInput) {
+          id
           user_id
           createdBy
           user_calendars
