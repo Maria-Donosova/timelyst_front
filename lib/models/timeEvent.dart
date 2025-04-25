@@ -13,7 +13,7 @@ class TimeEvent {
   final String eventTitle;
   final Map<String, dynamic> start;
   final Map<String, dynamic> end;
-  final bool isAllDay;
+  final bool is_AllDay;
   final List<String> recurrence;
   final String recurrenceId;
   final List<String> exceptionDates;
@@ -42,7 +42,7 @@ class TimeEvent {
     required this.eventTitle,
     required this.start,
     required this.end,
-    required this.isAllDay,
+    required this.is_AllDay,
     required this.recurrence,
     required this.recurrenceId,
     required this.exceptionDates,
@@ -74,7 +74,7 @@ class TimeEvent {
       eventTitle: json['event_title'] ?? '',
       start: (json['start'] as Map<String, dynamic>?) ?? {},
       end: (json['end'] as Map<String, dynamic>?) ?? {},
-      isAllDay: json['is_allDay'] ?? false,
+      is_AllDay: json['is_AllDay'] ?? false,
       recurrence: (json['recurrence'] as List<dynamic>?)?.cast<String>() ?? [],
       recurrenceId: json['recurrenceId'] ?? '',
       exceptionDates:
