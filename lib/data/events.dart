@@ -292,29 +292,103 @@ class EventService {
     ''';
 
     try {
+      // Validate input data before sending
+      if (timeEventInput == null || timeEventInput.isEmpty) {
+        print('Error: TimeEventInput is null or empty');
+        throw Exception('Cannot create time event with empty data');
+      }
+
+      // Check for required fields
+      final requiredFields = [
+        'event_title',
+        'event_startDate',
+        'event_endDate'
+      ];
+      for (final field in requiredFields) {
+        if (timeEventInput[field] == null ||
+            timeEventInput[field].toString().isEmpty) {
+          print('Error: Required field $field is missing or empty');
+          throw Exception('Required field $field is missing or empty');
+        }
+      }
+
+      // Validate auth token
+      if (authToken == null || authToken.isEmpty) {
+        print('Error: Authentication token is missing');
+        throw Exception(
+            'Authentication token is required to create a time event');
+      }
+
       // Send the HTTP POST request
-      final response = await http.post(
-        Uri.parse(Config.backendGraphqlURL),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $authToken',
-        },
-        body: jsonEncode({
-          'query': mutation,
-          'variables': {'timeEventInput': timeEventInput},
-        }),
-      );
+      http.Response response;
+      try {
+        response = await http
+            .post(
+          Uri.parse(Config.backendGraphqlURL),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          body: jsonEncode({
+            'query': mutation,
+            'variables': {'timeEventInput': timeEventInput},
+          }),
+        )
+            .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            print('Error: Request timed out');
+            throw Exception(
+                'Network request timed out. Please check your connection and try again.');
+          },
+        );
+      } on http.ClientException catch (e) {
+        print('HTTP client error: $e');
+        throw Exception(
+            'Network error: Unable to connect to the server. Please check your connection.');
+      }
+
+      // Log the response for debugging
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       // Check the status code
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        // Try to parse the response body
+        Map<String, dynamic> data;
+        try {
+          data = jsonDecode(response.body);
+        } catch (e) {
+          print('Error parsing response JSON: $e');
+          throw Exception('Server returned invalid JSON response');
+        }
 
         // Check for GraphQL errors
         if (data['errors'] != null && data['errors'].length > 0) {
           final errors = data['errors'];
-          print('Creating time event failed with errors: $errors');
+          print('Creating time event failed with GraphQL errors: $errors');
+
+          // Extract error messages and categorize them
+          final errorMessages = errors.map((e) => e['message']).join(", ");
+
+          // Check for specific error types
+          if (errorMessages.contains('validation')) {
+            throw Exception('Validation error: $errorMessages');
+          } else if (errorMessages.contains('authentication') ||
+              errorMessages.contains('unauthorized')) {
+            throw Exception('Authentication error: $errorMessages');
+          } else if (errorMessages.contains('not found')) {
+            throw Exception('Resource not found: $errorMessages');
+          } else {
+            throw Exception('Creating time event failed: $errorMessages');
+          }
+        }
+
+        // Check if data and createTimeEvent exist
+        if (data['data'] == null || data['data']['createTimeEvent'] == null) {
+          print('Error: Response missing expected data structure');
           throw Exception(
-              'Creating time event failed: ${errors.map((e) => e['message']).join(", ")}');
+              'Server returned success but with invalid data structure');
         }
 
         // Add debug logging to see the response structure
@@ -322,17 +396,47 @@ class EventService {
         print('CreateTimeEvent response: ${data['data']['createTimeEvent']}');
 
         // Parse and return the created time event
-        final TimeEvent timeEvent =
-            TimeEvent.fromJson(data['data']['createTimeEvent']);
-        print('Time event created successfully: ${timeEvent.id}');
-        return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+        try {
+          final TimeEvent timeEvent =
+              TimeEvent.fromJson(data['data']['createTimeEvent']);
+          print('Time event created successfully: ${timeEvent.id}');
+          return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+        } catch (e) {
+          print('Error mapping time event: $e');
+          throw Exception('Error processing server response: $e');
+        }
+      } else if (response.statusCode == 400) {
+        print('Bad request error (400): ${response.body}');
+        throw Exception(
+            'Invalid request data. Please check your event details and try again.');
+      } else if (response.statusCode == 401) {
+        print('Authentication error (401): ${response.body}');
+        throw Exception('Authentication failed. Please log in again.');
+      } else if (response.statusCode == 403) {
+        print('Authorization error (403): ${response.body}');
+        throw Exception('You do not have permission to create this event.');
+      } else if (response.statusCode == 404) {
+        print('Not found error (404): ${response.body}');
+        throw Exception('The requested resource was not found.');
+      } else if (response.statusCode >= 500) {
+        print('Server error (${response.statusCode}): ${response.body}');
+        throw Exception('Server error occurred. Please try again later.');
       } else {
-        print('Failed to create time event: ${response.statusCode}');
-        throw Exception('Failed to create time event: ${response.statusCode}');
+        print(
+            'Unexpected status code: ${response.statusCode}, body: ${response.body}');
+        throw Exception(
+            'Failed to create time event: Unexpected error (${response.statusCode})');
       }
     } catch (e) {
+      // Handle any uncaught exceptions
       print('Failed to create time event: $e');
-      throw Exception('Failed to create time event: $e');
+      if (e is Exception) {
+        // Rethrow exceptions that we've already formatted
+        rethrow;
+      } else {
+        // Wrap other errors
+        throw Exception('Failed to create time event: $e');
+      }
     }
   }
 
@@ -376,29 +480,103 @@ class EventService {
     ''';
 
     try {
+      // Validate input data before sending
+      if (dayEventInput == null || dayEventInput.isEmpty) {
+        print('Error: DayEventInput is null or empty');
+        throw Exception('Cannot create day event with empty data');
+      }
+
+      // Check for required fields
+      final requiredFields = [
+        'event_title',
+        'event_startDate',
+        'event_endDate'
+      ];
+      for (final field in requiredFields) {
+        if (dayEventInput[field] == null ||
+            dayEventInput[field].toString().isEmpty) {
+          print('Error: Required field $field is missing or empty');
+          throw Exception('Required field $field is missing or empty');
+        }
+      }
+
+      // Validate auth token
+      if (authToken == null || authToken.isEmpty) {
+        print('Error: Authentication token is missing');
+        throw Exception(
+            'Authentication token is required to create a day event');
+      }
+
       // Send the HTTP POST request
-      final response = await http.post(
-        Uri.parse(Config.backendGraphqlURL),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $authToken',
-        },
-        body: jsonEncode({
-          'query': mutation,
-          'variables': {'dayEventInput': dayEventInput},
-        }),
-      );
+      http.Response response;
+      try {
+        response = await http
+            .post(
+          Uri.parse(Config.backendGraphqlURL),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          body: jsonEncode({
+            'query': mutation,
+            'variables': {'dayEventInput': dayEventInput},
+          }),
+        )
+            .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            print('Error: Request timed out');
+            throw Exception(
+                'Network request timed out. Please check your connection and try again.');
+          },
+        );
+      } on http.ClientException catch (e) {
+        print('HTTP client error: $e');
+        throw Exception(
+            'Network error: Unable to connect to the server. Please check your connection.');
+      }
+
+      // Log the response for debugging
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       // Check the status code
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        // Try to parse the response body
+        Map<String, dynamic> data;
+        try {
+          data = jsonDecode(response.body);
+        } catch (e) {
+          print('Error parsing response JSON: $e');
+          throw Exception('Server returned invalid JSON response');
+        }
 
         // Check for GraphQL errors
         if (data['errors'] != null && data['errors'].length > 0) {
           final errors = data['errors'];
-          print('Creating day event failed with errors: $errors');
+          print('Creating day event failed with GraphQL errors: $errors');
+
+          // Extract error messages and categorize them
+          final errorMessages = errors.map((e) => e['message']).join(", ");
+
+          // Check for specific error types
+          if (errorMessages.contains('validation')) {
+            throw Exception('Validation error: $errorMessages');
+          } else if (errorMessages.contains('authentication') ||
+              errorMessages.contains('unauthorized')) {
+            throw Exception('Authentication error: $errorMessages');
+          } else if (errorMessages.contains('not found')) {
+            throw Exception('Resource not found: $errorMessages');
+          } else {
+            throw Exception('Creating day event failed: $errorMessages');
+          }
+        }
+
+        // Check if data and createDayEvent exist
+        if (data['data'] == null || data['data']['createDayEvent'] == null) {
+          print('Error: Response missing expected data structure');
           throw Exception(
-              'Creating day event failed: ${errors.map((e) => e['message']).join(", ")}');
+              'Server returned success but with invalid data structure');
         }
 
         // Add debug logging to see the response structure
@@ -406,17 +584,47 @@ class EventService {
         print('CreateDayEvent response: ${data['data']['createDayEvent']}');
 
         // Parse and return the created day event
-        final DayEvent dayEvent =
-            DayEvent.fromJson(data['data']['createDayEvent']);
-        print('Day event created successfully: ${dayEvent.id}');
-        return EventMapper.mapDayEventToCustomAppointment(dayEvent);
+        try {
+          final DayEvent dayEvent =
+              DayEvent.fromJson(data['data']['createDayEvent']);
+          print('Day event created successfully: ${dayEvent.id}');
+          return EventMapper.mapDayEventToCustomAppointment(dayEvent);
+        } catch (e) {
+          print('Error mapping day event: $e');
+          throw Exception('Error processing server response: $e');
+        }
+      } else if (response.statusCode == 400) {
+        print('Bad request error (400): ${response.body}');
+        throw Exception(
+            'Invalid request data. Please check your event details and try again.');
+      } else if (response.statusCode == 401) {
+        print('Authentication error (401): ${response.body}');
+        throw Exception('Authentication failed. Please log in again.');
+      } else if (response.statusCode == 403) {
+        print('Authorization error (403): ${response.body}');
+        throw Exception('You do not have permission to create this event.');
+      } else if (response.statusCode == 404) {
+        print('Not found error (404): ${response.body}');
+        throw Exception('The requested resource was not found.');
+      } else if (response.statusCode >= 500) {
+        print('Server error (${response.statusCode}): ${response.body}');
+        throw Exception('Server error occurred. Please try again later.');
       } else {
-        print('Failed to create day event: ${response.statusCode}');
-        throw Exception('Failed to create day event: ${response.statusCode}');
+        print(
+            'Unexpected status code: ${response.statusCode}, body: ${response.body}');
+        throw Exception(
+            'Failed to create day event: Unexpected error (${response.statusCode})');
       }
     } catch (e) {
+      // Handle any uncaught exceptions
       print('Failed to create day event: $e');
-      throw Exception('Failed to create day event: $e');
+      if (e is Exception) {
+        // Rethrow exceptions that we've already formatted
+        rethrow;
+      } else {
+        // Wrap other errors
+        throw Exception('Failed to create day event: $e');
+      }
     }
   }
 
