@@ -17,12 +17,17 @@ class EventMapper {
       location: dayEvent.eventLocation,
       organizer:
           dayEvent.organizer['displayName'] ?? dayEvent.organizer['email'],
-      recurrenceRule: dayEvent.recurrence.join(';'),
+      recurrenceRule:
+          dayEvent.recurrence.isEmpty ? null : dayEvent.recurrence.join(';'),
       catTitle: dayEvent.category,
       participants: dayEvent.participants,
-      exceptionDates: dayEvent.exceptionDates.isNotEmpty
-          ? dayEvent.exceptionDates.join(';')
-          : null,
+      exceptionDates: dayEvent.exceptionDates.isEmpty
+          ? null
+          : dayEvent.exceptionDates.join(';'),
+      userCalendars:
+          dayEvent.userCalendars.isEmpty ? [] : dayEvent.userCalendars,
+      timeEventInstance:
+          dayEvent.dayEventInstance.isEmpty ? null : dayEvent.dayEventInstance,
       catColor:
           _getColorFromCategory(dayEvent.category), // Map category to color
     );
@@ -42,12 +47,19 @@ class EventMapper {
       location: timeEvent.eventLocation,
       organizer:
           timeEvent.organizer['displayName'] ?? timeEvent.organizer['email'],
-      recurrenceRule: timeEvent.recurrence.join(';'),
-      exceptionDates: timeEvent.exceptionDates.isNotEmpty
-          ? timeEvent.exceptionDates.join(';')
-          : null,
+      recurrenceRule:
+          timeEvent.recurrence.isEmpty ? null : timeEvent.recurrence.join(';'),
+      exceptionDates: timeEvent.exceptionDates.isEmpty
+          ? null
+          : timeEvent.exceptionDates.join(';'),
       catTitle: timeEvent.category,
       participants: timeEvent.participants,
+      userCalendars:
+          timeEvent.userCalendars.isEmpty ? [] : timeEvent.userCalendars,
+      timeEventInstance: timeEvent.timeEventInstances.isEmpty ||
+              timeEvent.timeEventInstances[0].isEmpty
+          ? null
+          : timeEvent.timeEventInstances[0],
       catColor:
           _getColorFromCategory(timeEvent.category), // Map category to color
     );
