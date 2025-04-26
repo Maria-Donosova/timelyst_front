@@ -15,11 +15,11 @@ class CustomAppointment {
   final bool isAllDay;
   final String location;
   final String? recurrenceRule;
-  final String? exceptionDates; // Changed from List<DateTime> to String?
-  final List<String> userCalendars; // Added user_calendars as string array
+  final String? exceptionDates;
+  final List<String> userCalendars;
   final String? timeEventInstance;
   final String? createdAt;
-  final String? updatedAt; // Added time_EventInstance field
+  final String? updatedAt;
 
   CustomAppointment({
     required this.id,
@@ -39,9 +39,27 @@ class CustomAppointment {
     this.exceptionDates,
     this.userCalendars = const [],
     this.timeEventInstance,
-    this.createdAt,
-    this.updatedAt,
-  });
+    String? createdAt,
+    String? updatedAt,
+  })  : createdAt = _parseDate(createdAt),
+        updatedAt = _parseDate(updatedAt);
+
+  static String? _parseDate(String? dateString) {
+    if (dateString == null) return null;
+
+    try {
+      // Try parsing as Unix timestamp first
+      if (dateString.length == 13 && int.tryParse(dateString) != null) {
+        return DateTime.fromMillisecondsSinceEpoch(int.parse(dateString))
+            .toIso8601String();
+      }
+      // Try parsing as ISO string
+      return DateTime.parse(dateString).toIso8601String();
+    } catch (e) {
+      print('Error parsing date: $e');
+      return null;
+    }
+  }
 
   // Convert CustomAppointment to JSON (if needed)
   Map<String, dynamic> toJson() {
