@@ -876,20 +876,13 @@ class EventDetailsScreentate extends State<EventDetails> {
       final Map<String, dynamic> eventInput = {
         'user_id': userId,
         'createdBy': userId,
-        'user_calendars':
-            widget._userCalendars?.map((cal) => cal.id ?? '').toList() ?? [],
+        'user_calendars': widget._userCalendars?.firstOrNull?.id ?? '',
         'source_calendar':
             widget._userCalendars?.firstOrNull?.sourceCalendar ?? '',
         'event_organizer': userId,
         'event_title': _eventTitleController.text,
-        'start': _allDay
-            ? {'date': startDateTime.toIso8601String().split('T')[0]}
-            : {'dateTime': startDateTime.toIso8601String()},
-        'end': _allDay
-            ? {'date': endDateTime.toIso8601String().split('T')[0]}
-            : {'dateTime': endDateTime.toIso8601String()},
         'is_AllDay': _allDay,
-        'recurrence': _recurrence != 'None' ? [_buildRecurrenceRule()] : [],
+        'recurrenceRule': _recurrence != 'None' ? _buildRecurrenceRule() : '',
         'category': _selectedCategory,
         'event_attendees': _eventParticipants.text,
         'event_body': _eventDescriptionController.text,
