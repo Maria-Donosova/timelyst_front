@@ -993,28 +993,8 @@ class EventDetailsScreentate extends State<EventDetails> {
             Padding(
               padding: const EdgeInsets.only(top: 120),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                      ),
-                      child: Text('Delete',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          )),
-                      onPressed: () {
-                        setState(
-                          () {
-                            print("Delete");
-                          },
-                        );
-                      },
-                    ),
-                  ),
                   Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: TextButton(
@@ -1034,35 +1014,60 @@ class EventDetailsScreentate extends State<EventDetails> {
                           )),
                     ),
                   ),
-                  TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.secondary,
+                          ),
+                          child: Text('Delete',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              )),
+                          onPressed: () {
+                            setState(
+                              () {
+                                print("Delete");
+                              },
+                            );
+                          },
+                        ),
                       ),
-                      child: Text('Save',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          )),
-                      onPressed: () async {
-                        if (_appFormKey.currentState!.validate()) {
-                          final success = await _saveEvent(context);
-                          // Close the modal first
-                          Navigator.of(context).pop();
-                          if (success) {
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                        ),
+                        child: Text('Save',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            )),
+                        onPressed: () async {
+                          if (_appFormKey.currentState!.validate()) {
+                            final success = await _saveEvent(context);
+                            // Close the modal first
+                            Navigator.of(context).pop();
+                            if (success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text('Event saved successfully')),
+                              );
+                              Navigator.of(context).pop();
+                            }
+                          } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content: Text('Event saved successfully')),
+                                  content: Text(
+                                      'Please fix the errors in the form')),
                             );
-                            Navigator.of(context).pop();
                           }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content:
-                                    Text('Please fix the errors in the form')),
-                          );
-                        }
-                      }),
+                        },
+                      ),
+                    ],
+                  ),
                 ],
               ),
             )
