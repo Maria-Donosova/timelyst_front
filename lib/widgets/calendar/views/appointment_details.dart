@@ -14,7 +14,7 @@ class EventDetails extends StatefulWidget {
     required String? id,
     //required String creator,
     // List<UserProfile> userProfiles,
-    List<Calendar>? userCalendars,
+    //List<Calendar>? userCalendars,
     // String eventOrganizer,
     String? subject,
     String? dateText,
@@ -37,7 +37,7 @@ class EventDetails extends StatefulWidget {
   })  : _id = id,
         // _creator = creator,
         // _userProfiles = userProfiles,
-        _userCalendars = userCalendars,
+        //_userCalendars = userCalendars,
         // _eventOrganizer = eventOrganizer,
         _subject = subject,
         _dateText = dateText,
@@ -58,7 +58,7 @@ class EventDetails extends StatefulWidget {
   // final String _creator;
   // final String _eventOrganizer;
   // final List<UserProfile> _userProfiles;
-  final List<Calendar>? _userCalendars;
+  //final List<Calendar>? _userCalendars;
   final String? _subject;
   final String? _dateText;
   final String? _startTimeText;
@@ -118,10 +118,10 @@ class EventDetailsScreentate extends State<EventDetails> {
     _eventParticipants = TextEditingController(text: widget._participants);
     _allDay = widget._allDay!;
     //_eventRecurrenceRule = TextEditingController(text: widget._recurrenceRule);
-    _eventCalendar = TextEditingController(
-        text: widget._userCalendars != null && widget._userCalendars!.isNotEmpty
-            ? widget._userCalendars![0].title
-            : '');
+    // _eventCalendar = TextEditingController(
+    //     text: widget._userCalendars != null && widget._userCalendars!.isNotEmpty
+    //         ? widget._userCalendars![0].title
+    //         : '');
   }
 
 //function to select date
@@ -461,8 +461,8 @@ class EventDetailsScreentate extends State<EventDetails> {
                   []; // Initialize with an empty list
             }
             categoryCalendarsMap[category]!.add(calendar);
-            checkedCalendars[calendar.title] =
-                calendars.contains(widget._userCalendars);
+            // checkedCalendars[calendar.title] =
+            //     calendars.contains(widget._userCalendars);
           }
 
           return StatefulBuilder(
@@ -876,9 +876,9 @@ class EventDetailsScreentate extends State<EventDetails> {
       final Map<String, dynamic> eventInput = {
         'user_id': userId,
         'createdBy': userId,
-        'user_calendars': widget._userCalendars?.firstOrNull?.id ?? '',
-        'source_calendar':
-            widget._userCalendars?.firstOrNull?.sourceCalendar ?? '',
+        // 'user_calendars': widget._userCalendars?.firstOrNull?.id ?? '',
+        // 'source_calendar':
+        //     widget._userCalendars?.firstOrNull?.sourceCalendar ?? '',
         'event_organizer': userId,
         'event_title': _eventTitleController.text,
         'is_AllDay': _allDay,
@@ -1321,6 +1321,8 @@ class EventDetailsScreentate extends State<EventDetails> {
                       onPressed: () async {
                         if (_appFormKey.currentState!.validate()) {
                           final success = await _saveEvent(context);
+                          // Close the modal first
+                          Navigator.of(context).pop();
                           if (success) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
