@@ -259,6 +259,19 @@ class EventService {
     print("TimeEventInput: $timeEventInput");
     print("AuthToken in Event Service: $authToken");
 
+    // Ensure start and end dates are properly formatted as strings, not nested objects
+    if (timeEventInput['start'] != null) {
+      timeEventInput['event_startDate'] = timeEventInput['start']['dateTime'] ??
+          timeEventInput['start']['date'];
+      timeEventInput.remove('start');
+    }
+
+    if (timeEventInput['end'] != null) {
+      timeEventInput['event_endDate'] =
+          timeEventInput['end']['dateTime'] ?? timeEventInput['end']['date'];
+      timeEventInput.remove('end');
+    }
+
     final String mutation = '''
       mutation CreateTimeEvent(\$timeEventInput: TimeEventInputData!) {
         createTimeEvent(timeEventInput: \$timeEventInput) {
@@ -446,6 +459,19 @@ class EventService {
     print("Entering createDayEvent in EventService");
     print("DayEventInput: $dayEventInput");
     print("AuthToken in Event Service: $authToken");
+
+    // Ensure start and end dates are properly formatted as strings, not nested objects
+    if (dayEventInput['start'] != null) {
+      dayEventInput['event_startDate'] =
+          dayEventInput['start']['dateTime'] ?? dayEventInput['start']['date'];
+      dayEventInput.remove('start');
+    }
+
+    if (dayEventInput['end'] != null) {
+      dayEventInput['event_endDate'] =
+          dayEventInput['end']['dateTime'] ?? dayEventInput['end']['date'];
+      dayEventInput.remove('end');
+    }
 
     final String mutation = '''
       mutation CreateDayEvent(\$dayEventInput: DayEventInputData!) {

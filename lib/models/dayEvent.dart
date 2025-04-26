@@ -58,33 +58,78 @@ class DayEvent {
     required this.updatedAt,
   });
 
+  // Convert DayEvent to a Map for sending to backend
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'id': id,
+      'user_id': userId,
+      'createdBy': createdBy,
+      'user_calendars': userCalendars,
+      'source_calendar': calendarId,
+      'googleEventId': googleEventId,
+      'googleKind': googleKind,
+      'googleEtag': googleEtag,
+      'creator': creator,
+      'event_organizer': organizer['displayName'] ?? '',
+      'event_title': eventTitle,
+      // Flatten the start and end date objects to match backend expectations
+      'event_startDate': start['dateTime'] ?? start['date'] ?? '',
+      'event_endDate': end['dateTime'] ?? end['date'] ?? '',
+      'is_AllDay': is_AllDay,
+      'recurrenceRule': recurrence.isNotEmpty ? recurrence.first : '',
+      'recurrenceId': recurrenceId,
+      'exceptionDates': exceptionDates,
+      'day_EventInstance': dayEventInstance,
+      'category': category,
+      'event_body': eventBody,
+      'event_location': eventLocation,
+      'event_ConferenceDetails': eventConferenceDetails,
+      'event_attendees': participants,
+      'reminder': reminder,
+      'holiday': holiday,
+    };
+    return data;
+  }
+
   factory DayEvent.fromJson(Map<String, dynamic> json) {
     return DayEvent(
-      id: json['_id'] ?? '',
-      userId: json['userId'] ?? '',
+      id: json['id'] ?? json['_id'] ?? '',
+      userId: json['user_id'] ?? json['userId'] ?? '',
       createdBy: json['createdBy'] ?? '',
-      userCalendars:
-          (json['user_calendars'] as List<dynamic>?)?.cast<String>() ?? [],
-      calendarId: json['calendarId'] ?? '',
+      userCalendars: (json['user_calendars'] is String)
+          ? [json['user_calendars']]
+          : (json['user_calendars'] as List<dynamic>?)?.cast<String>() ?? [],
+      calendarId: json['source_calendar'] ?? json['calendarId'] ?? '',
       googleEventId: json['googleEventId'] ?? '',
       googleKind: json['googleKind'] ?? '',
       googleEtag: json['googleEtag'] ?? '',
       creator: (json['creator'] as Map<String, dynamic>?) ?? {},
-      organizer: (json['organizer'] as Map<String, dynamic>?) ?? {},
+      organizer: json['event_organizer'] != null
+          ? {'displayName': json['event_organizer']}
+          : (json['organizer'] as Map<String, dynamic>?) ?? {},
       eventTitle: json['event_title'] ?? '',
-      start: (json['start'] as Map<String, dynamic>?) ?? {},
-      end: (json['end'] as Map<String, dynamic>?) ?? {},
+      start: json['event_startDate'] != null
+          ? {'dateTime': json['event_startDate']}
+          : (json['start'] as Map<String, dynamic>?) ?? {},
+      end: json['event_endDate'] != null
+          ? {'dateTime': json['event_endDate']}
+          : (json['end'] as Map<String, dynamic>?) ?? {},
       is_AllDay: json['is_AllDay'] ?? false,
-      recurrence: (json['recurrence'] as List<dynamic>?)?.cast<String>() ?? [],
+      recurrence: json['recurrenceRule'] != null
+          ? [json['recurrenceRule']]
+          : (json['recurrence'] as List<dynamic>?)?.cast<String>() ?? [],
       recurrenceId: json['recurrenceId'] ?? '',
       exceptionDates:
           (json['exceptionDates'] as List<dynamic>?)?.cast<String>() ?? [],
-      dayEventInstance: json['day_eventInstance'] ?? '',
+      dayEventInstance:
+          json['day_EventInstance'] ?? json['day_eventInstance'] ?? '',
       category: json['category'] ?? '',
       eventBody: json['event_body'] ?? '',
       eventLocation: json['event_location'] ?? '',
-      eventConferenceDetails: json['event_conferencedetails'] ?? '',
-      participants: '',
+      eventConferenceDetails: json['event_ConferenceDetails'] ??
+          json['event_conferencedetails'] ??
+          '',
+      participants: json['event_attendees'] ?? '',
       reminder: json['reminder'] ?? false,
       holiday: json['holiday'] ?? false,
       createdAt:
