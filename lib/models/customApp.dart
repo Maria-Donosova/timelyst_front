@@ -15,7 +15,9 @@ class CustomAppointment {
   final bool isAllDay;
   final String location;
   final String? recurrenceRule;
-  final List<DateTime> exceptionDates;
+  final String? exceptionDates; // Changed from List<DateTime> to String?
+  final List<String> userCalendars; // Added user_calendars as string array
+  final String? timeEventInstance; // Added time_EventInstance field
 
   CustomAppointment({
     required this.id,
@@ -32,7 +34,9 @@ class CustomAppointment {
     required this.isAllDay,
     required this.location,
     required this.recurrenceRule,
-    this.exceptionDates = const [],
+    this.exceptionDates,
+    this.userCalendars = const [],
+    this.timeEventInstance,
   });
 
   // Convert CustomAppointment to JSON (if needed)
@@ -47,7 +51,9 @@ class CustomAppointment {
       'location': location,
       'organizer': organizer,
       'recurrenceRule': recurrenceRule,
-      'exceptionDates': exceptionDates.map((e) => e.toIso8601String()).toList(),
+      'exceptionDates': exceptionDates,
+      'userCalendars': userCalendars,
+      'timeEventInstance': timeEventInstance,
     };
   }
 }
