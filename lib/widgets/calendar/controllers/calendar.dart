@@ -412,20 +412,19 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   CustomAppointment convertAppointmentToObject(
       CustomAppointment _customAppointment, Appointment appointment) {
     return CustomAppointment(
-      id: appointment.id.toString(),
-      //userCalendars: _customAppointment.userCalendars,
-      title: appointment.subject,
-      startTime: appointment.startTime,
-      endTime: appointment.endTime,
-      catTitle: _customAppointment.catTitle,
-      isAllDay: appointment.isAllDay,
-      description: _customAppointment.description,
-      location: _customAppointment.location,
-      participants: _customAppointment.participants,
-      recurrenceRule: appointment.recurrenceRule,
-//    recurrenceId: appointment.recurrenceId,
-//    recurrenceExceptionDates: appointment.recurrenceExceptionDates);
-//   }
-    );
+        id: appointment.id.toString(),
+        userCalendars: _customAppointment.userCalendars,
+        title: appointment.subject,
+        startTime: appointment.startTime,
+        endTime: appointment.endTime,
+        catTitle: _customAppointment.catTitle,
+        catColor: _customAppointment.catColor,
+        isAllDay: appointment.isAllDay,
+        description: _customAppointment.description,
+        location: _customAppointment.location,
+        participants: _customAppointment.participants,
+        recurrenceRule: appointment.recurrenceRule,
+        exceptionDates: null, // Properly handle exceptionDates
+        timeEventInstance: _customAppointment.timeEventInstance);
   }
 }

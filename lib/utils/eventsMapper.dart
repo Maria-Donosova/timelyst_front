@@ -20,8 +20,9 @@ class EventMapper {
       recurrenceRule: dayEvent.recurrence.join(';'),
       catTitle: dayEvent.category,
       participants: dayEvent.participants,
-      exceptionDates:
-          dayEvent.exceptionDates.map((e) => DateTime.parse(e)).toList(),
+      exceptionDates: dayEvent.exceptionDates.isNotEmpty
+          ? dayEvent.exceptionDates.join(';')
+          : null,
       catColor:
           _getColorFromCategory(dayEvent.category), // Map category to color
     );
@@ -42,8 +43,9 @@ class EventMapper {
       organizer:
           timeEvent.organizer['displayName'] ?? timeEvent.organizer['email'],
       recurrenceRule: timeEvent.recurrence.join(';'),
-      exceptionDates:
-          timeEvent.exceptionDates.map((e) => DateTime.parse(e)).toList(),
+      exceptionDates: timeEvent.exceptionDates.isNotEmpty
+          ? timeEvent.exceptionDates.join(';')
+          : null,
       catTitle: timeEvent.category,
       participants: timeEvent.participants,
       catColor:
