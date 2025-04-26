@@ -513,6 +513,122 @@ class EventDetailsScreentate extends State<EventDetails> {
         });
   }
 
+  // Future<bool> _saveEvent(BuildContext context) async {
+  //   try {
+  //     final authService = AuthService();
+  //     final authToken = await authService.getAuthToken();
+  //     final userId = await authService.getUserId();
+
+  //     if (authToken == null || userId == null) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Authentication error. Please log in again.')),
+  //       );
+  //       return false;
+  //     }
+
+  //     // Parse date
+  //     final dateStr = _eventDateController.text;
+  //     DateTime? eventDate;
+  //     try {
+  //       eventDate = DateFormat('MMMM d').parse(dateStr);
+  //       if (eventDate.year != DateTime.now().year) {
+  //         eventDate =
+  //             DateTime(DateTime.now().year, eventDate.month, eventDate.day);
+  //       }
+  //     } catch (e) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Invalid date format')),
+  //       );
+  //       return false;
+  //     }
+
+  //     // Parse times
+  //     TimeOfDay startTime, endTime;
+  //     try {
+  //       startTime = _parseTimeString(_eventStartTimeController.text);
+  //       endTime = _parseTimeString(_eventEndTimeController.text);
+  //     } catch (e) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Invalid time format')),
+  //       );
+  //       return false;
+  //     }
+
+  //     // Create DateTime objects
+  //     final startDateTime = DateTime(
+  //       eventDate.year,
+  //       eventDate.month,
+  //       eventDate.day,
+  //       startTime.hour,
+  //       startTime.minute,
+  //     );
+
+  //     final endDateTime = DateTime(
+  //       eventDate.year,
+  //       eventDate.month,
+  //       eventDate.day,
+  //       endTime.hour,
+  //       endTime.minute,
+  //     );
+
+  //     // Prepare event data with proper date handling
+  //     final Map<String, dynamic> eventInput = {
+  //       'user_id': userId,
+  //       'createdBy': userId,
+  //       'event_organizer': userId,
+  //       'event_title': _eventTitleController.text,
+  //       'is_AllDay': _allDay,
+  //       'recurrenceRule': _recurrence != 'None' ? _buildRecurrenceRule() : '',
+  //       'category': _selectedCategory,
+  //       'event_attendees': _eventParticipants.text,
+  //       'event_body': _eventDescriptionController.text,
+  //       'event_location': _eventLocation.text,
+  //       'event_startDate': startDateTime.toIso8601String(),
+  //       'event_endDate': endDateTime.toIso8601String(),
+  //     };
+
+  //     // Handle server response with proper date parsing
+  //     final eventProvider = Provider.of<EventProvider>(context, listen: false);
+  //     final isUpdate = widget._id != null && widget._id!.isNotEmpty;
+
+  //     CustomAppointment? result;
+  //     if (isUpdate) {
+  //       result = _allDay
+  //           ? await eventProvider.updateDayEvent(
+  //               widget._id!, eventInput, authToken)
+  //           : await eventProvider.updateTimeEvent(
+  //               widget._id!, eventInput, authToken);
+  //     } else {
+  //       result = _allDay
+  //           ? await eventProvider.createDayEvent(eventInput, authToken)
+  //           : await eventProvider.createTimeEvent(eventInput, authToken);
+  //     }
+
+  //     // Handle server response dates properly
+  //     if (result != null) {
+  //       // Ensure dates are properly parsed from server response
+  //       // if (result.createdAt != null) {
+  //       //   try {
+  //       //     // Handle both ISO string and timestamp formats
+  //       //     final createdAt = result.createdAt is String
+  //       //         ? DateTime.parse(result.createdAt as String)
+  //       //         : DateTime.fromMillisecondsSinceEpoch(result.createdAt as int);
+  //       //     // Use the parsed date as needed
+  //       //   } catch (e) {
+  //       //     print('Error parsing server date: $e');
+  //       //   }
+  //       // }
+  //       return true;
+  //     }
+  //     return false;
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error saving event: ${e.toString()}')),
+  //     );
+  //     return false;
+  //   }
+  // }
+
   Future<bool> _saveEvent(BuildContext context) async {
     try {
       final authService = AuthService();
@@ -520,9 +636,8 @@ class EventDetailsScreentate extends State<EventDetails> {
       final userId = await authService.getUserId();
 
       if (authToken == null || userId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Authentication error. Please log in again.')),
-        );
+        _showErrorMessage(
+            context, 'Authentication error. Please log in again.');
         return false;
       }
 
@@ -536,9 +651,8 @@ class EventDetailsScreentate extends State<EventDetails> {
               DateTime(DateTime.now().year, eventDate.month, eventDate.day);
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid date format')),
-        );
+        _showErrorMessage(
+            context, 'Invalid date format. Please use format like "April 26"');
         return false;
       }
 
@@ -548,9 +662,16 @@ class EventDetailsScreentate extends State<EventDetails> {
         startTime = _parseTimeString(_eventStartTimeController.text);
         endTime = _parseTimeString(_eventEndTimeController.text);
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid time format')),
-        );
+        _showErrorMessage(
+            context, 'Invalid time format. Please use format like "2:30 PM"');
+        return false;
+      }
+
+      // Validate end time is after start time
+      if (endTime.hour < startTime.hour ||
+          (endTime.hour == startTime.hour &&
+              endTime.minute <= startTime.minute)) {
+        _showErrorMessage(context, 'End time must be after start time');
         return false;
       }
 
@@ -571,7 +692,7 @@ class EventDetailsScreentate extends State<EventDetails> {
         endTime.minute,
       );
 
-      // Prepare event data with proper date handling
+      // Prepare event data
       final Map<String, dynamic> eventInput = {
         'user_id': userId,
         'createdBy': userId,
@@ -587,46 +708,64 @@ class EventDetailsScreentate extends State<EventDetails> {
         'event_endDate': endDateTime.toIso8601String(),
       };
 
-      // Handle server response with proper date parsing
+      // Save to server
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
       final isUpdate = widget._id != null && widget._id!.isNotEmpty;
 
-      CustomAppointment? result;
-      if (isUpdate) {
-        result = _allDay
-            ? await eventProvider.updateDayEvent(
-                widget._id!, eventInput, authToken)
-            : await eventProvider.updateTimeEvent(
-                widget._id!, eventInput, authToken);
-      } else {
-        result = _allDay
-            ? await eventProvider.createDayEvent(eventInput, authToken)
-            : await eventProvider.createTimeEvent(eventInput, authToken);
-      }
+      try {
+        CustomAppointment? result;
+        if (isUpdate) {
+          result = _allDay
+              ? await eventProvider.updateDayEvent(
+                  widget._id!, eventInput, authToken)
+              : await eventProvider.updateTimeEvent(
+                  widget._id!, eventInput, authToken);
+        } else {
+          result = _allDay
+              ? await eventProvider.createDayEvent(eventInput, authToken)
+              : await eventProvider.createTimeEvent(eventInput, authToken);
+        }
 
-      // Handle server response dates properly
-      if (result != null) {
-        // Ensure dates are properly parsed from server response
-        // if (result.createdAt != null) {
-        //   try {
-        //     // Handle both ISO string and timestamp formats
-        //     final createdAt = result.createdAt is String
-        //         ? DateTime.parse(result.createdAt as String)
-        //         : DateTime.fromMillisecondsSinceEpoch(result.createdAt as int);
-        //     // Use the parsed date as needed
-        //   } catch (e) {
-        //     print('Error parsing server date: $e');
-        //   }
-        // }
-        return true;
+        if (result != null) {
+          _showSuccessMessage(
+              context,
+              isUpdate
+                  ? 'Event updated successfully!'
+                  : 'Event created successfully!');
+          return true;
+        } else {
+          _showErrorMessage(context, 'Failed to save event. Please try again.');
+          return false;
+        }
+      } catch (e) {
+        _showErrorMessage(context, 'Error saving event: ${e.toString()}');
+        return false;
       }
-      return false;
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving event: ${e.toString()}')),
-      );
+      _showErrorMessage(context, 'Unexpected error: ${e.toString()}');
       return false;
     }
+  }
+
+// Helper methods for showing messages
+  void _showSuccessMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showErrorMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   // Build recurrence rule string based on selected recurrence pattern
