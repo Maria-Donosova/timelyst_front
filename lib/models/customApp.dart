@@ -17,7 +17,9 @@ class CustomAppointment {
   final String? recurrenceRule;
   final String? exceptionDates; // Changed from List<DateTime> to String?
   final List<String> userCalendars; // Added user_calendars as string array
-  final String? timeEventInstance; // Added time_EventInstance field
+  final String? timeEventInstance;
+  final String? createdAt;
+  final String? updatedAt; // Added time_EventInstance field
 
   CustomAppointment({
     required this.id,
@@ -37,6 +39,8 @@ class CustomAppointment {
     this.exceptionDates,
     this.userCalendars = const [],
     this.timeEventInstance,
+    this.createdAt,
+    this.updatedAt,
   });
 
   // Convert CustomAppointment to JSON (if needed)
