@@ -11,8 +11,11 @@ class EventMapper {
       title: dayEvent.eventTitle,
       description: dayEvent.eventBody,
       startTime:
-          DateTime.parse(dayEvent.start['dateTime'] ?? dayEvent.start['date']),
-      endTime: DateTime.parse(dayEvent.end['dateTime'] ?? dayEvent.end['date']),
+          DateTime.parse(dayEvent.start), // Directly parse the ISO string
+      endTime: DateTime.parse(dayEvent.end),
+      // startTime:
+      //     DateTime.parse(dayEvent.start['dateTime'] ?? dayEvent.start['date']),
+      // endTime: DateTime.parse(dayEvent.end['dateTime'] ?? dayEvent.end['date']),
       isAllDay: dayEvent.is_AllDay,
       location: dayEvent.eventLocation,
       organizer:
@@ -39,10 +42,13 @@ class EventMapper {
       id: timeEvent.id,
       title: timeEvent.eventTitle,
       description: timeEvent.eventBody,
-      startTime: DateTime.parse(
-          timeEvent.start['dateTime'] ?? timeEvent.start['date']),
-      endTime:
-          DateTime.parse(timeEvent.end['dateTime'] ?? timeEvent.end['date']),
+      startTime:
+          DateTime.parse(timeEvent.start), // Directly parse the ISO string
+      endTime: DateTime.parse(timeEvent.end),
+      // startTime: DateTime.parse(
+      //     timeEvent.start['dateTime'] ?? timeEvent.start['date']),
+      // endTime:
+      //     DateTime.parse(timeEvent.end['dateTime'] ?? timeEvent.end['date']),
       isAllDay: timeEvent.is_AllDay,
       location: timeEvent.eventLocation,
       organizer:
