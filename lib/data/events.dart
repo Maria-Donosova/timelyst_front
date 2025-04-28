@@ -24,10 +24,9 @@ class EventService {
             source_calendar
             event_organizer
             event_title
-            event_startDate
-            event_endDate
-            start_timeZone
-            end_timeZone
+            start
+            end
+            timeZone
             is_AllDay
             recurrenceId
             recurrenceRule
@@ -106,10 +105,9 @@ class EventService {
           source_calendar
           event_organizer
           event_title
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
+          start
+          end
+          timeZone
           is_AllDay
           recurrenceId
           recurrenceRule
@@ -185,10 +183,9 @@ class EventService {
             source_calendar
             event_organizer
             event_title
-            event_startDate
-            event_endDate
-            start_timeZone
-            end_timeZone
+            start
+            end
+            timeZone
             is_AllDay
             recurrenceId
             recurrenceRule
@@ -260,17 +257,17 @@ class EventService {
     print("AuthToken in Event Service: $authToken");
 
     // Ensure start and end dates are properly formatted as strings, not nested objects
-    if (timeEventInput['start'] != null) {
-      timeEventInput['event_startDate'] = timeEventInput['start']['dateTime'] ??
-          timeEventInput['start']['date'];
-      timeEventInput.remove('start');
-    }
+    // if (timeEventInput['start'] != null) {
+    //   timeEventInput['event_startDate'] = timeEventInput['start']['dateTime'] ??
+    //       timeEventInput['start']['date'];
+    //   timeEventInput.remove('start');
+    // }
 
-    if (timeEventInput['end'] != null) {
-      timeEventInput['event_endDate'] =
-          timeEventInput['end']['dateTime'] ?? timeEventInput['end']['date'];
-      timeEventInput.remove('end');
-    }
+    // if (timeEventInput['end'] != null) {
+    //   timeEventInput['event_endDate'] =
+    //       timeEventInput['end']['dateTime'] ?? timeEventInput['end']['date'];
+    //   timeEventInput.remove('end');
+    // }
 
     final String mutation = '''
       mutation CreateTimeEvent(\$timeEventInput: TimeEventInputData!) {
@@ -282,10 +279,9 @@ class EventService {
           source_calendar
           event_organizer
           event_title
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
+          start
+          end
+          timeZone
           is_AllDay
           recurrenceId
           recurrenceRule
@@ -312,11 +308,7 @@ class EventService {
       }
 
       // Check for required fields
-      final requiredFields = [
-        'event_title',
-        'event_startDate',
-        'event_endDate'
-      ];
+      final requiredFields = ['event_title', 'start', 'end'];
       for (final field in requiredFields) {
         if (timeEventInput[field] == null ||
             timeEventInput[field].toString().isEmpty) {
@@ -462,7 +454,7 @@ class EventService {
 
     // Ensure start and end dates are properly formatted as strings, not nested objects
     if (dayEventInput['start'] != null) {
-      dayEventInput['event_startDate'] =
+      dayEventInput['start'] =
           dayEventInput['start']['dateTime'] ?? dayEventInput['start']['date'];
       dayEventInput.remove('start');
     }
@@ -483,10 +475,8 @@ class EventService {
           source_calendar
           event_organizer
           event_title
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
+          start
+          end
           is_AllDay
           recurrenceId
           recurrenceRule
@@ -513,11 +503,7 @@ class EventService {
       }
 
       // Check for required fields
-      final requiredFields = [
-        'event_title',
-        'event_startDate',
-        'event_endDate'
-      ];
+      final requiredFields = ['event_title', 'start', 'end'];
       for (final field in requiredFields) {
         if (dayEventInput[field] == null ||
             dayEventInput[field].toString().isEmpty) {
@@ -672,10 +658,9 @@ class EventService {
           source_calendar
           event_organizer
           event_title
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
+          start
+          end
+          imeZone
           is_AllDay
           recurrenceId
           recurrenceRule
@@ -754,10 +739,9 @@ class EventService {
           source_calendar
           event_organizer
           event_title
-          event_startDate
-          event_endDate
-          start_timeZone
-          end_timeZone
+          start
+          end
+          timeZone
           is_AllDay
           recurrenceId
           recurrenceRule

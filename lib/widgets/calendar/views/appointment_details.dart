@@ -12,8 +12,8 @@ class EventDetails extends StatefulWidget {
     required String? id,
     String? subject,
     String? dateText,
-    String? startTime,
-    String? endTime,
+    String? start,
+    String? end,
     bool? isAllDay,
     String? recurrenceRule,
     String? catTitle,
@@ -24,8 +24,8 @@ class EventDetails extends StatefulWidget {
   })  : _id = id,
         _subject = subject,
         _dateText = dateText,
-        _startTimeText = startTime,
-        _endTimeText = endTime,
+        _start = start,
+        _end = end,
         _allDay = isAllDay,
         _recurrenceRule = recurrenceRule,
         _catTitle = catTitle,
@@ -36,8 +36,8 @@ class EventDetails extends StatefulWidget {
   final String? _id;
   final String? _subject;
   final String? _dateText;
-  final String? _startTimeText;
-  final String? _endTimeText;
+  final String? _start;
+  final String? _end;
   final bool? _allDay;
   final String? _recurrenceRule;
   final String? _catTitle;
@@ -73,9 +73,8 @@ class EventDetailsScreentate extends State<EventDetails> {
     super.initState();
     _eventTitleController = TextEditingController(text: widget._subject);
     _eventDateController = TextEditingController(text: widget._dateText);
-    _eventStartTimeController =
-        TextEditingController(text: widget._startTimeText);
-    _eventEndTimeController = TextEditingController(text: widget._endTimeText);
+    _eventStartTimeController = TextEditingController(text: widget._start);
+    _eventEndTimeController = TextEditingController(text: widget._end);
     _eventLocation = TextEditingController(text: widget._eventLocation);
     _eventDescriptionController =
         TextEditingController(text: widget._eventBody);
@@ -140,49 +139,49 @@ class EventDetailsScreentate extends State<EventDetails> {
     }
   }
 
-  Future<void> _selectStartTime(BuildContext context, bool isStartTime) async {
-    TimeOfDay initialStartTime = TimeOfDay.now();
+  Future<void> _selectStart(BuildContext context, bool isStart) async {
+    TimeOfDay initialStart = TimeOfDay.now();
 
-    if (widget._startTimeText != null && widget._startTimeText!.isNotEmpty) {
-      initialStartTime = _parseTimeString(widget._startTimeText!);
+    if (widget._start != null && widget._start!.isNotEmpty) {
+      initialStart = _parseTimeString(widget._start!);
     }
 
-    final selectedStartTime = await showTimePicker(
+    final selectedStart = await showTimePicker(
       context: context,
-      initialTime: initialStartTime,
+      initialTime: initialStart,
       initialEntryMode: TimePickerEntryMode.inputOnly,
     );
 
-    if (selectedStartTime != null) {
+    if (selectedStart != null) {
       final now = DateTime.now();
-      final startDateTime = DateTime(
+      final start = DateTime(
         now.year,
         now.month,
         now.day,
-        selectedStartTime.hour,
-        selectedStartTime.minute,
+        selectedStart.hour,
+        selectedStart.minute,
       );
-      final endDateTime = startDateTime.add(const Duration(minutes: 30));
-      final newEndTime = TimeOfDay.fromDateTime(endDateTime);
+      final endDate = start.add(const Duration(minutes: 30));
+      final newEnd = TimeOfDay.fromDateTime(endDate);
 
       setState(() {
-        _eventStartTimeController.text = selectedStartTime.format(context);
-        _eventEndTimeController.text = newEndTime.format(context);
+        _eventStartTimeController.text = selectedStart.format(context);
+        _eventEndTimeController.text = newEnd.format(context);
       });
     }
   }
 
-  Future<void> _selectEndTime(BuildContext context, bool isStartTime) async {
-    final selectedEndTime = await showTimePicker(
+  Future<void> _selectEndTime(BuildContext context, bool isStart) async {
+    final selectedEnd = await showTimePicker(
       context: context,
       initialTime:
           TimeOfDay.fromDateTime(DateTime.now().add(Duration(minutes: 30))),
       initialEntryMode: TimePickerEntryMode.inputOnly,
     );
 
-    if (selectedEndTime != null) {
+    if (selectedEnd != null) {
       setState(() {
-        _eventEndTimeController.text = selectedEndTime.format(context);
+        _eventEndTimeController.text = selectedEnd.format(context);
       });
     }
   }
@@ -676,7 +675,7 @@ class EventDetailsScreentate extends State<EventDetails> {
       }
 
       // Create DateTime objects
-      final startDateTime = DateTime(
+      final start = DateTime(
         eventDate.year,
         eventDate.month,
         eventDate.day,
@@ -684,7 +683,7 @@ class EventDetailsScreentate extends State<EventDetails> {
         startTime.minute,
       );
 
-      final endDateTime = DateTime(
+      final end = DateTime(
         eventDate.year,
         eventDate.month,
         eventDate.day,
@@ -704,8 +703,8 @@ class EventDetailsScreentate extends State<EventDetails> {
         'event_attendees': _eventParticipants.text,
         'event_body': _eventDescriptionController.text,
         'event_location': _eventLocation.text,
-        'event_startDate': startDateTime.toIso8601String(),
-        'event_endDate': endDateTime.toIso8601String(),
+        'start': start.toIso8601String(),
+        'end': end.toIso8601String(),
       };
 
       // Save to server
@@ -918,7 +917,7 @@ class EventDetailsScreentate extends State<EventDetails> {
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.datetime,
                     onTap: () async {
-                      await _selectStartTime(context, true);
+                      await _selectStart(context, true);
                     },
                     validator: (value) {
                       if (value!.isEmpty) {
