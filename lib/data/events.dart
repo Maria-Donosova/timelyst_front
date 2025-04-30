@@ -26,7 +26,6 @@ class EventService {
             event_title
             start
             end
-            timeZone
             is_AllDay
             recurrenceId
             recurrenceRule
