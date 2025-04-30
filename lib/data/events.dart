@@ -456,13 +456,11 @@ class EventService {
     if (dayEventInput['start'] != null) {
       dayEventInput['start'] =
           dayEventInput['start']['dateTime'] ?? dayEventInput['start']['date'];
-      dayEventInput.remove('start');
     }
 
     if (dayEventInput['end'] != null) {
-      dayEventInput['event_endDate'] =
+      dayEventInput['end'] =
           dayEventInput['end']['dateTime'] ?? dayEventInput['end']['date'];
-      dayEventInput.remove('end');
     }
 
     final String mutation = '''
