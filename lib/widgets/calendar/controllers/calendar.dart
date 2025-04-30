@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import 'package:timelyst_flutter/models/customApp.dart';
+import 'package:timelyst_flutter/providers/eventProvider.dart';
 
 import '../views/week_days.dart';
 import '../views/appointment_cell_builder.dart';
@@ -23,6 +24,8 @@ class CalendarW extends StatefulWidget {
 
 class _CalendarWState extends State<CalendarW> {
   final CalendarController _controller = CalendarController();
+  late EventProvider _eventProvider;
+  bool _isInitialized = false;
 
   String? _headerText,
       _weekStart,
@@ -51,12 +54,40 @@ class _CalendarWState extends State<CalendarW> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _eventProvider = Provider.of<EventProvider>(context);
+      // Fetch events when the widget is first initialized
+      _fetchEvents();
+      _isInitialized = true;
+    }
+  }
+
+  Future<void> _fetchEvents() async {
+    // You'll need to get userId and authToken from your auth provider
+    // This is a placeholder - replace with actual implementation
+    final String userId = 'current-user-id'; // Get from auth provider
+    final String authToken = 'auth-token'; // Get from auth provider
+
+    try {
+      await _eventProvider.fetchAllEvents(userId, authToken);
+    } catch (e) {
+      print('Error fetching events: $e');
+      // Handle error - maybe show a snackbar
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final width = MediaQuery.of(context).size.width;
     final cellWidth = width / 14;
     final isMonth = _controller.view == CalendarView.month;
     final isWeek = _controller.view == CalendarView.week;
+
+    // Get events from provider
+    final List<CustomAppointment> appointments = _eventProvider.events;
 
     return Card(
       child: Column(
@@ -133,7 +164,7 @@ class _CalendarWState extends State<CalendarW> {
                 allowDragAndDrop: true,
                 dragAndDropSettings:
                     DragAndDropSettings(showTimeIndicator: true),
-                dataSource: _EventDataSource(_appointments),
+                dataSource: _EventDataSource(appointments),
                 onTap: _calendarTapped,
                 onViewChanged: (ViewChangedDetails viewChangedDetails) {
                   if (_controller.view == CalendarView.month) {
@@ -311,36 +342,7 @@ class _CalendarWState extends State<CalendarW> {
   }
 }
 
-//dummy events
-List<CustomAppointment> _appointments = [
-  CustomAppointment(
-    id: '',
-    title: 'Meeting with Team',
-    startTime: DateTime(2024, 09, 13, 0, 00, 0),
-    endTime: DateTime(2024, 09, 16, 23, 59, 0),
-    isAllDay: true,
-    recurrenceRule: 'FREQ=MONTHLY;BYMONTHDAY=-1;INTERVAL=1;COUNT=10',
-    catTitle: 'Work',
-    catColor: Color.fromRGBO(8, 100, 237, 1),
-    participants: 'tim@gmail.com, tom@gmail.com, cook@test.com',
-    description: 'Discuss project updates',
-    location: 'Conference Room 1',
-  ),
-  CustomAppointment(
-    id: '',
-    title: 'Get Together',
-    // userCalendars: ['Gmail', 'Outlook'],
-    startTime: DateTime.now().add(Duration(hours: 1)),
-    endTime: DateTime.now().add(Duration(hours: 3)),
-    isAllDay: false,
-    recurrenceRule: 'FREQ=DAILY;INTERVAL=2;COUNT=10',
-    catTitle: 'Friends',
-    catColor: Color.fromRGBO(255, 239, 91, 1),
-    participants: 'john@test.com, jane@test.com, jim@test.com',
-    description: 'Have a lot of fun',
-    location: 'Cafe',
-  )
-];
+// Remove the dummy events list as we'll use the provider's events
 
 //datasource connector: override syncfusion appointment properties with custom appointment properties
 class _EventDataSource extends CalendarDataSource<CustomAppointment> {
@@ -350,52 +352,52 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
 
   @override
   DateTime getStartTime(int index) {
-    return _appointments[index].startTime;
+    return appointments![index].startTime;
   }
 
   @override
   DateTime getEndTime(int index) {
-    return _appointments[index].endTime;
+    return appointments![index].endTime;
   }
 
   @override
   String getStartTimeZone(int index) {
-    return _appointments[index].startTimeZone;
+    return appointments![index].startTimeZone;
   }
 
   @override
   String getEndTimeZone(int index) {
-    return _appointments[index].endTimeZone;
+    return appointments![index].endTimeZone;
   }
 
   @override
   String getSubject(int index) {
-    return _appointments[index].title;
+    return appointments![index].title;
   }
 
   @override
   Color getColor(int index) {
-    return _appointments[index].catColor;
+    return appointments![index].catColor;
   }
 
   @override
   bool isAllDay(int index) {
-    return _appointments[index].isAllDay;
+    return appointments![index].isAllDay;
   }
 
   @override
   String? getRecurrenceRule(int index) {
-    return _appointments[index].recurrenceRule;
+    return appointments![index].recurrenceRule;
   }
 
   @override
   String getNotes(int index) {
-    return _appointments[index].description;
+    return appointments![index].description;
   }
 
   @override
   String getLocation(int index) {
-    return _appointments[index].location;
+    return appointments![index].location;
   }
 
   // @override
