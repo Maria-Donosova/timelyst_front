@@ -726,15 +726,9 @@ class EventDetailsScreentate extends State<EventDetails> {
         }
 
         if (result != null) {
-          // Find the nearest CalendarW widget and call its refresh method
-          final calendarState = context.findAncestorStateOfType<_CalendarWState>();
-          if (calendarState != null) {
-            calendarState.addEventAndRefresh(result);
-          }
-          
-          // Close the dialog
-          Navigator.of(context).pop();
-          
+          // Return success to the caller
+          Navigator.of(context).pop(true);
+
           _showSuccessMessage(
               context,
               isUpdate
