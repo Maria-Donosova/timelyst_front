@@ -182,11 +182,18 @@ class _CalendarWState extends State<CalendarW> {
                         .toString();
                   }
                   if (_controller.view == CalendarView.week) {
+                    // Add a safety check to ensure we don't access out-of-bounds indices
+                    final visibleDatesLength =
+                        viewChangedDetails.visibleDates.length;
                     _weekStart = DateFormat('d')
                         .format(viewChangedDetails.visibleDates[0])
                         .toString();
+                    // Make sure we don't access an index that doesn't exist
                     _weekEnd = DateFormat('d')
-                        .format(viewChangedDetails.visibleDates[6])
+                        .format(viewChangedDetails.visibleDates[
+                            visibleDatesLength > 6
+                                ? 6
+                                : visibleDatesLength - 1])
                         .toString();
                     _month = DateFormat('MMMM')
                         .format(viewChangedDetails.visibleDates[0])
@@ -284,43 +291,48 @@ class _CalendarWState extends State<CalendarW> {
           .toString();
     }
     if (details.targetElement == CalendarElement.appointment) {
-      final CustomAppointment _customAppointment = details.appointments![0];
+      // Add safety check to ensure appointments list is not null or empty
+      if (details.appointments != null && details.appointments!.isNotEmpty) {
+        final CustomAppointment _customAppointment = details.appointments![0];
 
-      _dateText =
-          DateFormat('MMM dd').format(_customAppointment.startTime).toString();
+        _dateText = DateFormat('MMM dd')
+            .format(_customAppointment.startTime)
+            .toString();
 
-      _startTimeText =
-          DateFormat('hh:mm a').format(_customAppointment.startTime).toString();
+        _startTimeText = DateFormat('hh:mm a')
+            .format(_customAppointment.startTime)
+            .toString();
 
-      _endTimeText =
-          DateFormat('hh:mm a').format(_customAppointment.endTime).toString();
+        _endTimeText =
+            DateFormat('hh:mm a').format(_customAppointment.endTime).toString();
 
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              content: EventDetails(
-                id: _customAppointment.id,
-                // creator: '',
-                // userProfiles: [],
-                //userCalendars: [],
-                // eventOrganizer: '',
-                subject: _customAppointment.title,
-                dateText: _dateText,
-                start: _startTimeText,
-                end: _endTimeText,
-                catTitle: _customAppointment.catTitle,
-                catColor: _customAppointment.catColor,
-                participants: _customAppointment.participants,
-                body: _customAppointment.description,
-                location: _customAppointment.location,
-                isAllDay: _customAppointment.isAllDay,
-                // recurrenceId: '',
-                recurrenceRule: _customAppointment.recurrenceRule,
-                // recurrenceExceptionDates: [],
-              ),
-            );
-          });
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: EventDetails(
+                  id: _customAppointment.id,
+                  // creator: '',
+                  // userProfiles: [],
+                  //userCalendars: [],
+                  // eventOrganizer: '',
+                  subject: _customAppointment.title,
+                  dateText: _dateText,
+                  start: _startTimeText,
+                  end: _endTimeText,
+                  catTitle: _customAppointment.catTitle,
+                  catColor: _customAppointment.catColor,
+                  participants: _customAppointment.participants,
+                  body: _customAppointment.description,
+                  location: _customAppointment.location,
+                  isAllDay: _customAppointment.isAllDay,
+                  // recurrenceId: '',
+                  recurrenceRule: _customAppointment.recurrenceRule,
+                  // recurrenceExceptionDates: [],
+                ),
+              );
+            });
+      }
     } else
       showDialog(
           context: context,
