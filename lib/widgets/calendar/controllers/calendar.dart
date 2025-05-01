@@ -360,6 +360,16 @@ class _CalendarWState extends State<CalendarW> {
             );
           });
   }
+
+  // Add this method to refresh the calendar with a new event
+  void addEventAndRefresh(CustomAppointment event) {
+    if (mounted) {
+      setState(() {
+        // Add the event to the provider
+        _eventProvider.addEvent(event);
+      });
+    }
+  }
 }
 
 // Remove the dummy events list as we'll use the provider's events
