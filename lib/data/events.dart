@@ -174,7 +174,6 @@ class EventService {
     final String query = '''
       query TimeEvents {
         timeEvents {
-          timeEvents {
             id
             user_id
             createdBy
@@ -199,7 +198,6 @@ class EventService {
             holiday
             createdAt
             updatedAt
-          }
         }
       }
     ''';
@@ -738,7 +736,6 @@ class EventService {
           event_title
           start
           end
-          timeZone
           is_AllDay
           recurrenceId
           recurrenceRule
