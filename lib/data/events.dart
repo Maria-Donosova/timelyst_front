@@ -232,8 +232,14 @@ class EventService {
       ;
 
       // Parse the time events into a List<TimeEvent>
-      final List<TimeEvent> timeEvents =
-          timeEventsJson.map((json) => TimeEvent.fromJson(json)).toList();
+      // In the parsing section, add a check to handle if user_id is an object
+      final List<TimeEvent> timeEvents = timeEventsJson.map((json) {
+        // If user_id is an object, extract just the _id field
+        if (json['user_id'] is Map) {
+          json['user_id'] = json['user_id']['_id'];
+        }
+        return TimeEvent.fromJson(json);
+      }).toList();
 
       // Map to CustomAppointment and return
       return timeEvents
@@ -400,9 +406,11 @@ class EventService {
         // Parse and return the created time event
         try {
           // In the createTimeEvent method, after successful creation
-          final TimeEvent timeEvent = TimeEvent.fromJson(data['data']['createTimeEvent']);
+          final TimeEvent timeEvent =
+              TimeEvent.fromJson(data['data']['createTimeEvent']);
           print('Time event created successfully: ${timeEvent.id}');
-          final customAppointment = EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+          final customAppointment =
+              EventMapper.mapTimeEventToCustomAppointment(timeEvent);
           // Remove the Provider line that's causing the error
           return customAppointment;
         } catch (e) {
