@@ -399,10 +399,12 @@ class EventService {
 
         // Parse and return the created time event
         try {
-          final TimeEvent timeEvent =
-              TimeEvent.fromJson(data['data']['createTimeEvent']);
+          // In the createTimeEvent method, after successful creation
+          final TimeEvent timeEvent = TimeEvent.fromJson(data['data']['createTimeEvent']);
           print('Time event created successfully: ${timeEvent.id}');
-          return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+          final customAppointment = EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+          // Remove the Provider line that's causing the error
+          return customAppointment;
         } catch (e) {
           print('Error mapping time event: $e');
           throw Exception('Error processing server response: $e');

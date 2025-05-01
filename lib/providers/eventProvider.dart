@@ -249,4 +249,10 @@ class EventProvider with ChangeNotifier {
       _events.add(updatedEvent);
     }
   }
+
+  // Add a single event to the list
+  void addEvent(CustomAppointment event) {
+    _events.add(event);
+    notifyListeners();
+  }
 }
