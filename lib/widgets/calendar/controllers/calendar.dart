@@ -5,13 +5,14 @@ import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-import 'package:timelyst_flutter/models/customApp.dart';
-import 'package:timelyst_flutter/providers/eventProvider.dart';
-
 import '../views/week_days.dart';
 import '../views/appointment_cell_builder.dart';
 import '../views/monthly_appointment_cell_builder.dart';
 import '../views/appointment_details.dart';
+import '../../../models/customApp.dart';
+import '../../../providers/authProvider.dart';
+import '../../../providers/eventProvider.dart';
+import '../../../services/authService.dart';
 
 enum _calView { day, week, month }
 
@@ -65,13 +66,20 @@ class _CalendarWState extends State<CalendarW> {
   }
 
   Future<void> _fetchEvents() async {
-    // You'll need to get userId and authToken from your auth provider
-    // This is a placeholder - replace with actual implementation
-    final String userId = 'current-user-id'; // Get from auth provider
-    final String authToken = 'auth-token'; // Get from auth provider
+    // Get authProvider to access user credentials
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     try {
-      await _eventProvider.fetchAllEvents(userId, authToken);
+      // Get the userId and authToken from authProvider
+      final userId = authProvider.userId;
+      final authToken = await AuthService().getAuthToken();
+
+      if (userId != null && authToken != null) {
+        await _eventProvider.fetchAllEvents(userId, authToken);
+      } else {
+        print('Error: userId or authToken is null');
+        // Handle the case when user is not authenticated
+      }
     } catch (e) {
       print('Error fetching events: $e');
       // Handle error - maybe show a snackbar
