@@ -368,15 +368,15 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
     return appointments![index].endTime;
   }
 
-  @override
-  String getStartTimeZone(int index) {
-    return appointments![index].startTimeZone;
-  }
+  // @override
+  // String getStartTimeZone(int index) {
+  //   return appointments![index].startTimeZone;
+  // }
 
-  @override
-  String getEndTimeZone(int index) {
-    return appointments![index].endTimeZone;
-  }
+  // @override
+  // String getEndTimeZone(int index) {
+  //   return appointments![index].endTimeZone;
+  // }
 
   @override
   String getSubject(int index) {
