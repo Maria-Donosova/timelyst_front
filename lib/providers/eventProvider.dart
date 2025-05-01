@@ -100,6 +100,12 @@ class EventProvider with ChangeNotifier {
     }
   }
 
+  // Add a method to add a CustomAppointment directly
+  void addSingleEvent(CustomAppointment event) {
+    _updateSingleEvent(event);
+    notifyListeners();
+  }
+
   // Create a new day event
   Future<CustomAppointment?> createDayEvent(
       Map<String, dynamic> dayEventInput, String authToken) async {
