@@ -172,7 +172,7 @@ class EventService {
     print("Entering fetchTimeEvents in EventService");
 
     final String query = '''
-      query TimeEvents {
+      query GetTimeEvents {
         timeEvents {
             id
             user_id
@@ -228,8 +228,8 @@ class EventService {
       }
 
       // Extract the time events from the response
-      final List<dynamic> timeEventsJson =
-          data['data']['timeEvents']['timeEvents'];
+      final List<dynamic> timeEventsJson = data['data']['timeEvents'];
+      ;
 
       // Parse the time events into a List<TimeEvent>
       final List<TimeEvent> timeEvents =
