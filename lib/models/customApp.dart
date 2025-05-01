@@ -25,17 +25,17 @@ class CustomAppointment {
     required this.id,
     this.organizer = '',
     required this.title,
-    required this.description,
+    this.description = '', // Make description optional with default value
     required this.startTime,
     this.startTimeZone = '',
     required this.endTime,
     this.endTimeZone = '',
-    required this.catTitle,
+    this.catTitle = '', // Make catTitle optional with default value
     this.catColor = Colors.white,
-    required this.participants,
+    this.participants = '', // Make participants optional with default value
     required this.isAllDay,
-    required this.location,
-    required this.recurrenceRule,
+    this.location = '', // Make location optional with default value
+    this.recurrenceRule,
     this.exceptionDates,
     this.userCalendars = const [],
     this.timeEventInstance,
