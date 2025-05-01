@@ -75,8 +75,13 @@ class EventService {
           data['data']['dayEvents']['dayEvents'];
 
       // Parse the day events into a List<DayEvent>
-      final List<DayEvent> dayEvents =
-          dayEventsJson.map((json) => DayEvent.fromJson(json)).toList();
+      final List<DayEvent> dayEvents = dayEventsJson.map((json) {
+        // If user_id is an object, extract just the _id field
+        if (json['user_id'] is Map) {
+          json['user_id'] = json['user_id']['_id'];
+        }
+        return DayEvent.fromJson(json);
+      }).toList();
 
       // Map to CustomAppointment and return
       return dayEvents
@@ -153,6 +158,11 @@ class EventService {
 
       // Extract the time event from the response
       final timeEventJson = data['data']['timeEvent'];
+      
+      // If user_id is an object, extract just the _id field
+      if (timeEventJson['user_id'] is Map) {
+        timeEventJson['user_id'] = timeEventJson['user_id']['_id'];
+      }
 
       // Parse the time event into a TimeEvent
       final TimeEvent timeEvent = TimeEvent.fromJson(timeEventJson);
@@ -406,8 +416,14 @@ class EventService {
         // Parse and return the created time event
         try {
           // In the createTimeEvent method, after successful creation
-          final TimeEvent timeEvent =
-              TimeEvent.fromJson(data['data']['createTimeEvent']);
+          final createTimeEventData = data['data']['createTimeEvent'];
+          
+          // If user_id is an object, extract just the _id field
+          if (createTimeEventData['user_id'] is Map) {
+            createTimeEventData['user_id'] = createTimeEventData['user_id']['_id'];
+          }
+          
+          final TimeEvent timeEvent = TimeEvent.fromJson(createTimeEventData);
           print('Time event created successfully: ${timeEvent.id}');
           final customAppointment =
               EventMapper.mapTimeEventToCustomAppointment(timeEvent);
@@ -713,8 +729,14 @@ class EventService {
         print('Time event updated successfully');
 
         // Parse and return the updated time event
-        final TimeEvent timeEvent =
-            TimeEvent.fromJson(data['data']['updateTimeEvent']);
+        final updateTimeEventData = data['data']['updateTimeEvent'];
+        
+        // If user_id is an object, extract just the _id field
+        if (updateTimeEventData['user_id'] is Map) {
+          updateTimeEventData['user_id'] = updateTimeEventData['user_id']['_id'];
+        }
+        
+        final TimeEvent timeEvent = TimeEvent.fromJson(updateTimeEventData);
         return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
       } else {
         print('Failed to update time event: ${response.statusCode}');
@@ -793,8 +815,14 @@ class EventService {
         print('Day event updated successfully');
 
         // Parse and return the updated day event
-        final DayEvent dayEvent =
-            DayEvent.fromJson(data['data']['updateDayEvent']);
+        final updateDayEventData = data['data']['updateDayEvent'];
+        
+        // If user_id is an object, extract just the _id field
+        if (updateDayEventData['user_id'] is Map) {
+          updateDayEventData['user_id'] = updateDayEventData['user_id']['_id'];
+        }
+        
+        final DayEvent dayEvent = DayEvent.fromJson(updateDayEventData);
         return EventMapper.mapDayEventToCustomAppointment(dayEvent);
       } else {
         print('Failed to update day event: ${response.statusCode}');
