@@ -59,10 +59,26 @@ class _CalendarWState extends State<CalendarW> {
     super.didChangeDependencies();
     if (!_isInitialized) {
       _eventProvider = Provider.of<EventProvider>(context);
+      // Add listener to update when events change
+      _eventProvider.addListener(_onEventsChanged);
       // Fetch events when the widget is first initialized
       _fetchEvents();
       _isInitialized = true;
     }
+  }
+
+  void _onEventsChanged() {
+    // When events in the provider change, update the UI
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    // Remove listener when widget is disposed
+    _eventProvider.removeListener(_onEventsChanged);
+    super.dispose();
   }
 
   Future<void> _fetchEvents() async {
@@ -75,7 +91,16 @@ class _CalendarWState extends State<CalendarW> {
       final authToken = await AuthService().getAuthToken();
 
       if (userId != null && authToken != null) {
+        // Fetch both day and time events
         await _eventProvider.fetchAllEvents(userId, authToken);
+        
+        // Debug: Print the number of events loaded
+        print('Loaded ${_eventProvider.events.length} events');
+        
+        // Force a rebuild after fetching events
+        if (mounted) {
+          setState(() {});
+        }
       } else {
         print('Error: userId or authToken is null');
         // Handle the case when user is not authenticated
@@ -96,6 +121,12 @@ class _CalendarWState extends State<CalendarW> {
 
     // Get events from provider
     final List<CustomAppointment> appointments = _eventProvider.events;
+    
+    // Debug: Print the events being displayed
+    print('Building calendar with ${appointments.length} events');
+    for (var app in appointments) {
+      print('Event: ${app.title}, Start: ${app.startTime}, End: ${app.endTime}');
+    }
 
     return Card(
       child: Column(
