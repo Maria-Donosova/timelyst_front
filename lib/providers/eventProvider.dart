@@ -145,11 +145,9 @@ class EventProvider with ChangeNotifier {
           await EventService.createTimeEvent(timeEventInput, authToken);
       _events.add(newEvent);
       _errorMessage = '';
-      notifyListeners();
       return newEvent;
     } catch (e) {
       _errorMessage = 'Failed to create time event: $e';
-      notifyListeners();
       return null;
     } finally {
       _isLoading = false;
