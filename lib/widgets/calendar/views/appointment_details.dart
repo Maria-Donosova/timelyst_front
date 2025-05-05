@@ -726,14 +726,22 @@ class EventDetailsScreentate extends State<EventDetails> {
         }
 
         if (result != null) {
-          // Return success to the caller
-          Navigator.of(context).pop(true);
-
+          // Show success message before navigation
           _showSuccessMessage(
               context,
               isUpdate
                   ? 'Event updated successfully!'
                   : 'Event created successfully!');
+
+          // Safe navigation - check if we can pop before attempting to
+          if (Navigator.of(context).canPop()) {
+            try {
+              Navigator.of(context).pop(true);
+            } catch (e) {
+              print('Navigation error in _saveEvent: $e');
+              // Don't attempt additional navigation here
+            }
+          }
           return true;
         } else {
           _showErrorMessage(context, 'Failed to save event. Please try again.');
@@ -1189,14 +1197,20 @@ class EventDetailsScreentate extends State<EventDetails> {
                         onPressed: () async {
                           if (_appFormKey.currentState!.validate()) {
                             final success = await _saveEvent(context);
-                            // Close the modal first
-                            Navigator.of(context).pop();
-                            if (success) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text('Event saved successfully')),
-                              );
-                              Navigator.of(context).pop();
+                            // Only try to pop if we can
+                            if (success && Navigator.of(context).canPop()) {
+                              // We already showed success message in _saveEvent
+                              // Only pop once - the _saveEvent already popped once if possible
+                              try {
+                                Navigator.of(context).pop();
+                              } catch (e) {
+                                print('Navigation error: $e');
+                                // Handle the error gracefully
+                                if (Navigator.of(context).canPop()) {
+                                  Navigator.of(context)
+                                      .pushReplacementNamed('/agenda');
+                                }
+                              }
                             }
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
