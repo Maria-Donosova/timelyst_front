@@ -93,10 +93,10 @@ class _CalendarWState extends State<CalendarW> {
       if (userId != null && authToken != null) {
         // Fetch both day and time events
         await _eventProvider.fetchAllEvents(userId, authToken);
-        
+
         // Debug: Print the number of events loaded
         print('Loaded ${_eventProvider.events.length} events');
-        
+
         // Force a rebuild after fetching events
         if (mounted) {
           setState(() {});
@@ -111,6 +111,7 @@ class _CalendarWState extends State<CalendarW> {
     }
   }
 
+  // Modify the build method to ensure the data source is updated
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -121,12 +122,12 @@ class _CalendarWState extends State<CalendarW> {
 
     // Get events from provider
     final List<CustomAppointment> appointments = _eventProvider.events;
-    
+
     // Debug: Print the events being displayed
     print('Building calendar with ${appointments.length} events');
-    for (var app in appointments) {
-      print('Event: ${app.title}, Start: ${app.startTime}, End: ${app.endTime}');
-    }
+
+    // Create a new data source with the updated appointments
+    final _dataSource = _EventDataSource(appointments);
 
     return Card(
       child: Column(
@@ -421,16 +422,6 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
     return appointments![index].endTime;
   }
 
-  // @override
-  // String getStartTimeZone(int index) {
-  //   return appointments![index].startTimeZone;
-  // }
-
-  // @override
-  // String getEndTimeZone(int index) {
-  //   return appointments![index].endTimeZone;
-  // }
-
   @override
   String getSubject(int index) {
     return appointments![index].title;
@@ -446,6 +437,7 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
     return appointments![index].isAllDay;
   }
 
+  // Make sure all other required properties are properly mapped
   @override
   String? getRecurrenceRule(int index) {
     return appointments![index].recurrenceRule;
