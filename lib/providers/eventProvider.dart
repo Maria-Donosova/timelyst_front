@@ -65,7 +65,7 @@ class EventProvider with ChangeNotifier {
 
       // Debug print to verify events are loaded
       print(
-          'Fetched ${_events.length} total events (${dayEvents.length} day events, ${timeEvents.length} time events)');
+          'Fetched ${_events.length} total events (${dayEvents.length} day events, ${timeEvents.length} time events in eventProvider)');
 
       _errorMessage = '';
     } catch (e) {
