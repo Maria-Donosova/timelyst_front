@@ -396,9 +396,11 @@ class _CalendarWState extends State<CalendarW> {
   // Add this method to refresh the calendar with a new event
   void addEventAndRefresh(CustomAppointment event) {
     if (mounted) {
-      setState(() {
+      // Use addPostFrameCallback to ensure we're not in the middle of a build cycle
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         // Add the event to the provider
-        _eventProvider.addEvent(event);
+        _eventProvider.addSingleEvent(event);
+        setState(() {});
       });
     }
   }
