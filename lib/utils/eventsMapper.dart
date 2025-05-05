@@ -38,17 +38,49 @@ class EventMapper {
 
   static CustomAppointment mapTimeEventToCustomAppointment(
       TimeEvent timeEvent) {
+    // Parse start time with error handling
+    DateTime startTime;
+    try {
+      // Try parsing as ISO string first
+      startTime = DateTime.parse(timeEvent.start);
+    } catch (e) {
+      // If that fails, try parsing as Unix timestamp (milliseconds)
+      try {
+        startTime =
+            DateTime.fromMillisecondsSinceEpoch(int.parse(timeEvent.start));
+      } catch (e) {
+        print('Error parsing start time: $e');
+        startTime = DateTime.now(); // Fallback
+      }
+    }
+
+    // Parse end time with error handling
+    DateTime endTime;
+    try {
+      // Try parsing as ISO string first
+      endTime = DateTime.parse(timeEvent.end);
+    } catch (e) {
+      // If that fails, try parsing as Unix timestamp (milliseconds)
+      try {
+        endTime = DateTime.fromMillisecondsSinceEpoch(int.parse(timeEvent.end));
+      } catch (e) {
+        print('Error parsing end time: $e');
+        endTime = DateTime.now(); // Fallback
+      }
+    }
+
     return CustomAppointment(
       id: timeEvent.id,
       title: timeEvent.eventTitle,
       description: timeEvent.eventBody ?? '',
-      startTime:
-          DateTime.parse(timeEvent.start), // Directly parse the ISO string
-      endTime: DateTime.parse(timeEvent.end),
+      startTime: startTime,
+      endTime: endTime,
       isAllDay: timeEvent.is_AllDay,
       location: timeEvent.eventLocation ?? '',
       organizer: timeEvent.organizer != null
-          ? (timeEvent.organizer['displayName'] ?? timeEvent.organizer['email'] ?? '')
+          ? (timeEvent.organizer['displayName'] ??
+              timeEvent.organizer['email'] ??
+              '')
           : '',
       recurrenceRule:
           timeEvent.recurrence.isEmpty ? null : timeEvent.recurrence.join(';'),
@@ -63,8 +95,8 @@ class EventMapper {
               timeEvent.timeEventInstances[0].isEmpty
           ? null
           : timeEvent.timeEventInstances[0],
-      catColor:
-          _getColorFromCategory(timeEvent.category ?? ''), // Map category to color
+      catColor: _getColorFromCategory(
+          timeEvent.category ?? ''), // Map category to color
     );
   }
 
