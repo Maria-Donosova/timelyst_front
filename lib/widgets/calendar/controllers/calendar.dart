@@ -95,7 +95,7 @@ class _CalendarWState extends State<CalendarW> {
         await _eventProvider.fetchAllEvents(userId, authToken);
 
         // Debug: Print the number of events loaded
-        print('Loaded ${_eventProvider.events.length} events');
+        print('Loaded ${_eventProvider.events.length} events in calendar.dart');
 
         // Force a rebuild after fetching events
         if (mounted) {

@@ -239,7 +239,8 @@ class EventService {
 
       // Extract the time events from the response
       final List<dynamic> timeEventsJson = data['data']['timeEvents'];
-      print('Received ${timeEventsJson.length} time events from API');
+      print(
+          'Received ${timeEventsJson.length} time events from API in eventsService');
 
       // Add some debug logging for the first event if available
       if (timeEventsJson.isNotEmpty) {
@@ -247,19 +248,37 @@ class EventService {
       }
 
       // Parse the time events into a List<TimeEvent>
-      // In the parsing section, add a check to handle if user_id is an object
       final List<TimeEvent> timeEvents = timeEventsJson.map((json) {
         // If user_id is an object, extract just the _id field
         if (json['user_id'] is Map) {
           json['user_id'] = json['user_id']['_id'];
         }
+        
+        // Add debug logging to see the structure of each event before mapping
+        print('Processing time event: ${json['id']} with title: ${json['event_title']}');
+        
         return TimeEvent.fromJson(json);
       }).toList();
-
+      
+      // Add debug logging after mapping to see if any events are being filtered out
+      print('Mapped ${timeEvents.length} time events to TimeEvent objects');
+      
       // Map to CustomAppointment and return
-      return timeEvents
-          .map((event) => EventMapper.mapTimeEventToCustomAppointment(event))
+      final mappedEvents = timeEvents
+          .map((event) {
+            try {
+              return EventMapper.mapTimeEventToCustomAppointment(event);
+            } catch (e) {
+              print('Error mapping time event ${event.id}: $e');
+              return null;
+            }
+          })
+          .where((event) => event != null)
+          .cast<CustomAppointment>()
           .toList();
+      
+      print('Successfully mapped ${mappedEvents.length} time events to CustomAppointment objects');
+      return mappedEvents;
     } else {
       // Handle non-200 status codes
       print('Failed to fetch time events: ${response.statusCode}');
