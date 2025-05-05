@@ -158,7 +158,7 @@ class EventService {
 
       // Extract the time event from the response
       final timeEventJson = data['data']['timeEvent'];
-      
+
       // If user_id is an object, extract just the _id field
       if (timeEventJson['user_id'] is Map) {
         timeEventJson['user_id'] = timeEventJson['user_id']['_id'];
@@ -239,7 +239,12 @@ class EventService {
 
       // Extract the time events from the response
       final List<dynamic> timeEventsJson = data['data']['timeEvents'];
-      ;
+      print('Received ${timeEventsJson.length} time events from API');
+
+      // Add some debug logging for the first event if available
+      if (timeEventsJson.isNotEmpty) {
+        print('First time event data: ${timeEventsJson.first}');
+      }
 
       // Parse the time events into a List<TimeEvent>
       // In the parsing section, add a check to handle if user_id is an object
@@ -417,12 +422,13 @@ class EventService {
         try {
           // In the createTimeEvent method, after successful creation
           final createTimeEventData = data['data']['createTimeEvent'];
-          
+
           // If user_id is an object, extract just the _id field
           if (createTimeEventData['user_id'] is Map) {
-            createTimeEventData['user_id'] = createTimeEventData['user_id']['_id'];
+            createTimeEventData['user_id'] =
+                createTimeEventData['user_id']['_id'];
           }
-          
+
           final TimeEvent timeEvent = TimeEvent.fromJson(createTimeEventData);
           print('Time event created successfully: ${timeEvent.id}');
           final customAppointment =
@@ -730,12 +736,13 @@ class EventService {
 
         // Parse and return the updated time event
         final updateTimeEventData = data['data']['updateTimeEvent'];
-        
+
         // If user_id is an object, extract just the _id field
         if (updateTimeEventData['user_id'] is Map) {
-          updateTimeEventData['user_id'] = updateTimeEventData['user_id']['_id'];
+          updateTimeEventData['user_id'] =
+              updateTimeEventData['user_id']['_id'];
         }
-        
+
         final TimeEvent timeEvent = TimeEvent.fromJson(updateTimeEventData);
         return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
       } else {
@@ -816,12 +823,12 @@ class EventService {
 
         // Parse and return the updated day event
         final updateDayEventData = data['data']['updateDayEvent'];
-        
+
         // If user_id is an object, extract just the _id field
         if (updateDayEventData['user_id'] is Map) {
           updateDayEventData['user_id'] = updateDayEventData['user_id']['_id'];
         }
-        
+
         final DayEvent dayEvent = DayEvent.fromJson(updateDayEventData);
         return EventMapper.mapDayEventToCustomAppointment(dayEvent);
       } else {
