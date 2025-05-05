@@ -62,6 +62,11 @@ class EventProvider with ChangeNotifier {
 
       // Combine all events
       _events = [...dayEvents, ...timeEvents];
+
+      // Debug print to verify events are loaded
+      print(
+          'Fetched ${_events.length} total events (${dayEvents.length} day events, ${timeEvents.length} time events)');
+
       _errorMessage = '';
     } catch (e) {
       _errorMessage = 'Failed to fetch events: $e';
