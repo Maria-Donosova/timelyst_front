@@ -1,8 +1,8 @@
-// event_mapper.dart
 import 'package:flutter/material.dart';
 import '../models/customApp.dart';
 import '../models/timeEvent.dart';
 import '../models/dayEvent.dart';
+import '../../utils/date_utils.dart';
 
 class EventMapper {
   static CustomAppointment mapDayEventToCustomAppointment(DayEvent dayEvent) {
@@ -39,35 +39,8 @@ class EventMapper {
   static CustomAppointment mapTimeEventToCustomAppointment(
       TimeEvent timeEvent) {
     // Parse start time with improved error handling
-    DateTime startTime;
-    try {
-      // First check if it's a numeric timestamp (milliseconds since epoch)
-      if (timeEvent.start.contains(RegExp(r'^\d+$'))) {
-        startTime =
-            DateTime.fromMillisecondsSinceEpoch(int.parse(timeEvent.start));
-      } else {
-        // Otherwise try parsing as ISO string
-        startTime = DateTime.parse(timeEvent.start);
-      }
-    } catch (e) {
-      print('Error parsing start time: $e');
-      startTime = DateTime.now(); // Fallback
-    }
-
-    // Parse end time with improved error handling
-    DateTime endTime;
-    try {
-      // First check if it's a numeric timestamp (milliseconds since epoch)
-      if (timeEvent.end.contains(RegExp(r'^\d+$'))) {
-        endTime = DateTime.fromMillisecondsSinceEpoch(int.parse(timeEvent.end));
-      } else {
-        // Otherwise try parsing as ISO string
-        endTime = DateTime.parse(timeEvent.end);
-      }
-    } catch (e) {
-      print('Error parsing end time: $e');
-      endTime = DateTime.now().add(Duration(hours: 1)); // Fallback
-    }
+    DateTime startTime = DateTimeUtils.parseAnyFormat(timeEvent.start);
+    DateTime endTime = DateTimeUtils.parseAnyFormat(timeEvent.end);
 
     return CustomAppointment(
       id: timeEvent.id,
