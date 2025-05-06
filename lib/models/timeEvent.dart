@@ -31,7 +31,7 @@ class TimeEvent {
   final DateTime updatedAt;
 
   TimeEvent({
-    required this.id,
+    this.id = '',
     required this.userId,
     required this.createdBy,
     required this.userCalendars,
