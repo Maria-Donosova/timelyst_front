@@ -253,16 +253,17 @@ class EventService {
         if (json['user_id'] is Map) {
           json['user_id'] = json['user_id']['_id'];
         }
-        
+
         // Add debug logging to see the structure of each event before mapping
-        print('Processing time event: ${json['id']} with title: ${json['event_title']}');
-        
+        print(
+            'Processing time event: ${json['id']} with title: ${json['event_title']}');
+
         return TimeEvent.fromJson(json);
       }).toList();
-      
+
       // Add debug logging after mapping to see if any events are being filtered out
       print('Mapped ${timeEvents.length} time events to TimeEvent objects');
-      
+
       // Map to CustomAppointment and return
       final mappedEvents = timeEvents
           .map((event) {
@@ -276,8 +277,9 @@ class EventService {
           .where((event) => event != null)
           .cast<CustomAppointment>()
           .toList();
-      
-      print('Successfully mapped ${mappedEvents.length} time events to CustomAppointment objects');
+
+      print(
+          'Successfully mapped ${mappedEvents.length} time events to CustomAppointment objects');
       return mappedEvents;
     } else {
       // Handle non-200 status codes
@@ -706,7 +708,7 @@ class EventService {
           event_title
           start
           end
-          imeZone
+          timeZone
           is_AllDay
           recurrenceId
           recurrenceRule
