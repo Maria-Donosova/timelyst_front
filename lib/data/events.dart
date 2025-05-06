@@ -689,61 +689,106 @@ class EventService {
   }
 
   // Update a TimeEvent and map it to CustomAppointment
+  // Add this updateTimeEventMutation to your EventService class
+  static String updateTimeEventMutation = '''
+  mutation UpdateTimeEvent(\$id: String!, \$timeEventInput: TimeEventInputData!) {
+    updateTimeEvent(id: \$id, timeEventInput: \$timeEventInput) {
+      id
+      user_id
+      createdBy
+      user_calendars
+      source_calendar
+      event_organizer
+      event_title
+      start
+      end
+      timeZone
+      is_AllDay
+      recurrenceId
+      recurrenceRule
+      exceptionDates
+      time_EventInstance
+      category
+      event_attendees
+      event_body
+      event_location
+      event_ConferenceDetails
+      reminder
+      holiday
+      createdAt
+      updatedAt
+    }
+  }
+  ''';
+  // And implement the updateTimeEvent method
   static Future<CustomAppointment> updateTimeEvent(
       String id, Map<String, dynamic> timeEventInput, String authToken) async {
     print("Entering updateTimeEvent in EventService");
     print("TimeEventInput: $timeEventInput");
-    print("AuthToken in Event Service: $authToken");
-    print("Event Id: $id");
-
-    final String mutation = '''
-      mutation UpdateTimeEvent(\$id: String, \$timeEventInput: TimeEventInputData!) {
-        updateTimeEvent(id: \$id, timeEventInput: \$timeEventInput) {
-          id
-          user_id
-          createdBy
-          user_calendars
-          source_calendar
-          event_organizer
-          event_title
-          start
-          end
-          timeZone
-          is_AllDay
-          recurrenceId
-          recurrenceRule
-          exceptionDates
-          time_EventInstance
-          category
-          event_attendees
-          event_body
-          event_location
-          event_ConferenceDetails
-          reminder
-          holiday
-          createdAt
-          updatedAt
-        }
-      }
-    ''';
-
+    print("Event ID: $id");
     try {
+      // Validate input data before sending
+      if (timeEventInput == null || timeEventInput.isEmpty) {
+        print('Error: TimeEventInput is null or empty');
+        throw Exception('Cannot update time event with empty data');
+      }
+
+      // Validate ID
+      if (id == null || id.isEmpty) {
+        print('Error: Event ID is null or empty');
+        throw Exception('Cannot update time event without a valid ID');
+      }
+
+      // Validate auth token
+      if (authToken == null || authToken.isEmpty) {
+        print('Error: Authentication token is missing');
+        throw Exception(
+            'Authentication token is required to update a time event');
+      }
+
       // Send the HTTP POST request
-      final response = await http.post(
-        Uri.parse(Config.backendGraphqlURL),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $authToken',
-        },
-        body: jsonEncode({
-          'query': mutation,
-          'variables': {'id': id, 'timeEventInput': timeEventInput},
-        }),
-      );
+      http.Response response;
+      try {
+        response = await http
+            .post(
+          Uri.parse(Config.backendGraphqlURL),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          body: jsonEncode({
+            'query': updateTimeEventMutation,
+            'variables': {'id': id, 'timeEventInput': timeEventInput},
+          }),
+        )
+            .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            print('Error: Request timed out');
+            throw Exception(
+                'Network request timed out. Please check your connection and try again.');
+          },
+        );
+      } on http.ClientException catch (e) {
+        print('HTTP client error: $e');
+        throw Exception(
+            'Network error: Unable to connect to the server. Please check your connection.');
+      }
+
+      // Log the response for debugging
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       // Check the status code
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        // Try to parse the response body
+        Map<String, dynamic> data;
+        try {
+          data = jsonDecode(response.body);
+        } catch (e) {
+          print('Error parsing response JSON: $e');
+          throw Exception('Server returned invalid JSON response');
+        }
 
         // Check for GraphQL errors
         if (data['errors'] != null && data['errors'].length > 0) {
@@ -753,26 +798,45 @@ class EventService {
               'Updating time event failed: ${errors.map((e) => e['message']).join(", ")}');
         }
 
-        print('Time event updated successfully');
-
-        // Parse and return the updated time event
-        final updateTimeEventData = data['data']['updateTimeEvent'];
-
-        // If user_id is an object, extract just the _id field
-        if (updateTimeEventData['user_id'] is Map) {
-          updateTimeEventData['user_id'] =
-              updateTimeEventData['user_id']['_id'];
+        // Check if data and updateTimeEvent exist
+        if (data['data'] == null || data['data']['updateTimeEvent'] == null) {
+          print('Error: Response missing expected data structure');
+          throw Exception(
+              'Server returned success but with invalid data structure');
         }
 
-        final TimeEvent timeEvent = TimeEvent.fromJson(updateTimeEventData);
-        return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+        // Parse and return the updated time event
+        try {
+          final updateTimeEventData = data['data']['updateTimeEvent'];
+
+          // If user_id is an object, extract just the _id field
+          if (updateTimeEventData['user_id'] is Map) {
+            updateTimeEventData['user_id'] =
+                updateTimeEventData['user_id']['_id'];
+          }
+
+          final TimeEvent timeEvent = TimeEvent.fromJson(updateTimeEventData);
+          print('Time event updated successfully: ${timeEvent.id}');
+          return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+        } catch (e) {
+          print('Error mapping time event: $e');
+          throw Exception('Error processing server response: $e');
+        }
       } else {
+        // Handle non-200 status codes
         print('Failed to update time event: ${response.statusCode}');
         throw Exception('Failed to update time event: ${response.statusCode}');
       }
     } catch (e) {
+      // Handle any uncaught exceptions
       print('Failed to update time event: $e');
-      throw Exception('Failed to update time event: $e');
+      if (e is Exception) {
+        // Rethrow exceptions that we've already formatted
+        rethrow;
+      } else {
+        // Wrap other errors
+        throw Exception('Failed to update time event: $e');
+      }
     }
   }
 
