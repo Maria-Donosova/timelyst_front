@@ -179,6 +179,12 @@ class EventProvider with ChangeNotifier {
   // Update a time event
   Future<CustomAppointment?> updateTimeEvent(
       String id, Map<String, dynamic> timeEventInput, String authToken) async {
+    if (id.isEmpty) {
+      _errorMessage = 'Event ID cannot be empty';
+      notifyListeners();
+      return null;
+    }
+
     _isLoading = true;
     notifyListeners();
 
