@@ -61,6 +61,8 @@ class EventDetailsScreentate extends State<EventDetails> {
 
   final _appFormKey = GlobalKey<FormState>();
   bool isChecked = false;
+  bool _isEditing = false;
+  bool _isLoading = false;
 
   bool _allDay = false;
   bool _isRecurring = false;
@@ -81,6 +83,9 @@ class EventDetailsScreentate extends State<EventDetails> {
     _selectedCategory = widget._catTitle ?? 'Misc'; // Added default value
     _eventParticipants = TextEditingController(text: widget._participants);
     _allDay = widget._allDay ?? false; // Added null check
+    
+    // If we have an ID, we're editing an existing event
+    _isEditing = widget._id != null && widget._id!.isNotEmpty;
   }
 
   @override
@@ -629,14 +634,26 @@ class EventDetailsScreentate extends State<EventDetails> {
   // }
 
   Future<bool> _saveEvent(BuildContext context) async {
+    if (!_appFormKey.currentState!.validate()) {
+      return false;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final authService = AuthService();
       final authToken = await authService.getAuthToken();
       final userId = await authService.getUserId();
 
       if (authToken == null || userId == null) {
-        _showErrorMessage(
-            context, 'Authentication error. Please log in again.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Authentication error. Please log in again.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         return false;
       }
 
@@ -650,8 +667,12 @@ class EventDetailsScreentate extends State<EventDetails> {
               DateTime(DateTime.now().year, eventDate.month, eventDate.day);
         }
       } catch (e) {
-        _showErrorMessage(
-            context, 'Invalid date format. Please use format like "April 26"');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Invalid date format. Please use format like "April 26"'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         return false;
       }
 
@@ -661,8 +682,12 @@ class EventDetailsScreentate extends State<EventDetails> {
         startTime = _parseTimeString(_eventStartTimeController.text);
         endTime = _parseTimeString(_eventEndTimeController.text);
       } catch (e) {
-        _showErrorMessage(
-            context, 'Invalid time format. Please use format like "2:30 PM"');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Invalid time format. Please use format like "2:30 PM"'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         return false;
       }
 
@@ -670,7 +695,12 @@ class EventDetailsScreentate extends State<EventDetails> {
       if (endTime.hour < startTime.hour ||
           (endTime.hour == startTime.hour &&
               endTime.minute <= startTime.minute)) {
-        _showErrorMessage(context, 'End time must be after start time');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('End time must be after start time'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         return false;
       }
 
@@ -727,11 +757,15 @@ class EventDetailsScreentate extends State<EventDetails> {
 
         if (result != null) {
           // Show success message before navigation
-          _showSuccessMessage(
-              context,
-              isUpdate
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(isUpdate
                   ? 'Event updated successfully!'
-                  : 'Event created successfully!');
+                  : 'Event created successfully!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
 
           // Safe navigation - check if we can pop before attempting to
           if (Navigator.of(context).canPop()) {
@@ -744,38 +778,39 @@ class EventDetailsScreentate extends State<EventDetails> {
           }
           return true;
         } else {
-          _showErrorMessage(context, 'Failed to save event. Please try again.');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save event. Please try again.'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
           return false;
         }
       } catch (e) {
-        _showErrorMessage(context, 'Error saving event: ${e.toString()}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving event: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         return false;
       }
     } catch (e) {
-      _showErrorMessage(context, 'Unexpected error: ${e.toString()}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Unexpected error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       return false;
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-  }
-
-// Helper methods for showing messages
-  void _showSuccessMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _showErrorMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   // Build recurrence rule string based on selected recurrence pattern
@@ -828,6 +863,70 @@ class EventDetailsScreentate extends State<EventDetails> {
     return rule;
   }
 
+  // Method to delete an event
+  Future<void> _deleteEvent() async {
+    if (widget._id == null || widget._id!.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Get auth token
+      final authService = AuthService();
+      final authToken = await authService.getAuthToken();
+
+      if (authToken == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Authentication error. Please log in again.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+      bool success = false;
+
+      if (_allDay) {
+        success = await eventProvider.deleteDayEvent(widget._id!, authToken);
+      } else {
+        success = await eventProvider.deleteTimeEvent(widget._id!, authToken);
+      }
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Event deleted successfully'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.of(context).pop(true); // Return true to indicate deletion
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete event'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     //bool _isSelected = false;
@@ -836,7 +935,9 @@ class EventDetailsScreentate extends State<EventDetails> {
     var isAllDay = widget._allDay;
     final width = MediaQuery.of(context).size.width;
 
-    return Form(
+    return _isLoading
+        ? Center(child: CircularProgressIndicator())
+        : Form(
       autovalidateMode: AutovalidateMode.onUserInteraction,
       key: _appFormKey,
       child: SizedBox(
@@ -1176,13 +1277,15 @@ class EventDetailsScreentate extends State<EventDetails> {
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onPrimary,
                               )),
-                          onPressed: () {
-                            setState(
-                              () {
-                                print("Delete");
-                              },
-                            );
-                          },
+                          onPressed: _isLoading
+                              ? null
+                              : () {
+                                  if (_isEditing) {
+                                    _deleteEvent();
+                                  } else {
+                                    Navigator.of(context).pop();
+                                  }
+                                },
                         ),
                       ),
                       TextButton(
@@ -1194,32 +1297,34 @@ class EventDetailsScreentate extends State<EventDetails> {
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                             )),
-                        onPressed: () async {
-                          if (_appFormKey.currentState!.validate()) {
-                            final success = await _saveEvent(context);
-                            // Only try to pop if we can
-                            if (success && Navigator.of(context).canPop()) {
-                              // We already showed success message in _saveEvent
-                              // Only pop once - the _saveEvent already popped once if possible
-                              try {
-                                Navigator.of(context).pop();
-                              } catch (e) {
-                                print('Navigation error: $e');
-                                // Handle the error gracefully
-                                if (Navigator.of(context).canPop()) {
-                                  Navigator.of(context)
-                                      .pushReplacementNamed('/agenda');
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                if (_appFormKey.currentState!.validate()) {
+                                  final success = await _saveEvent(context);
+                                  // Only try to pop if we can
+                                  if (success && Navigator.of(context).canPop()) {
+                                    // We already showed success message in _saveEvent
+                                    // Only pop once - the _saveEvent already popped once if possible
+                                    try {
+                                      Navigator.of(context).pop();
+                                    } catch (e) {
+                                      print('Navigation error: $e');
+                                      // Handle the error gracefully
+                                      if (Navigator.of(context).canPop()) {
+                                        Navigator.of(context)
+                                            .pushReplacementNamed('/agenda');
+                                      }
+                                    }
+                                  }
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Please fix the errors in the form')),
+                                  );
                                 }
-                              }
-                            }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text(
-                                      'Please fix the errors in the form')),
-                            );
-                          }
-                        },
+                              },
                       ),
                     ],
                   ),
