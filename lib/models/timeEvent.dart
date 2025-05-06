@@ -1,4 +1,5 @@
-// models/time_event.dart
+import '../../utils/date_utils.dart';
+
 class TimeEvent {
   final String id;
   final String userId;
@@ -93,6 +94,7 @@ class TimeEvent {
     return data;
   }
 
+  // In TimeEvent class
   factory TimeEvent.fromJson(Map<String, dynamic> json) {
     return TimeEvent(
       id: json['id'] ?? json['_id'] ?? '',
@@ -138,112 +140,17 @@ class TimeEvent {
       participants: json['event_attendees'] ?? '',
       reminder: json['reminder'] ?? false,
       holiday: json['holiday'] ?? false,
-      createdAt:
-          DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt:
-          DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTimeUtils.parseAnyFormat(json['createdAt']),
+      updatedAt: DateTimeUtils.parseAnyFormat(json['updatedAt']),
     );
   }
 
   // Add these methods to parse date times
   DateTime getStartDateTime() {
-    try {
-      return DateTime.parse(start);
-    } catch (e) {
-      return DateTime.now(); // Fallback
-    }
+    return DateTimeUtils.parseAnyFormat(start);
   }
 
   DateTime getEndDateTime() {
-    try {
-      return DateTime.parse(end);
-    } catch (e) {
-      return DateTime.now(); // Fallback
-    }
+    return DateTimeUtils.parseAnyFormat(end);
   }
-  // DateTime getStartDateTime() {
-  //   try {
-  //     if (start == null) return DateTime.now();
-
-  //     // Check if start is a Map with dateTime or date
-  //     if (start is Map<String, dynamic>) {
-  //       String? dateTimeStr = start['dateTime'] ?? start['date'];
-  //       if (dateTimeStr == null) return DateTime.now();
-
-  //       // Try parsing as ISO date first
-  //       try {
-  //         return DateTime.parse(dateTimeStr);
-  //       } catch (e) {
-  //         // Try parsing as Unix timestamp (milliseconds)
-  //         if (dateTimeStr.length > 8 && int.tryParse(dateTimeStr) != null) {
-  //           return DateTime.fromMillisecondsSinceEpoch(int.parse(dateTimeStr));
-  //         }
-  //         // If all parsing fails, return current time
-  //         return DateTime.now();
-  //       }
-  //     } else if (start is String) {
-  //       // Try parsing as ISO date first
-  //       try {
-  //         return DateTime.parse(start as String);
-  //       } catch (e) {
-  //         // Try parsing as Unix timestamp (milliseconds)
-  //         if ((start as String).length > 8 &&
-  //             int.tryParse(start as String) != null) {
-  //           return DateTime.fromMillisecondsSinceEpoch(
-  //               int.parse(start as String));
-  //         }
-  //         // If all parsing fails, return current time
-  //         return DateTime.now();
-  //       }
-  //     }
-
-  //     return DateTime.now(); // Default fallback
-  //   } catch (e) {
-  //     print('Error parsing start date: $e');
-  //     return DateTime.now(); // Fallback value
-  //   }
-  // }
-
-  // DateTime getEndDateTime() {
-  //   try {
-  //     if (end == null) return DateTime.now();
-
-  //     // Check if end is a Map with dateTime or date
-  //     if (end is Map<String, dynamic>) {
-  //       String? dateTimeStr = end['dateTime'] ?? end['date'];
-  //       if (dateTimeStr == null) return DateTime.now();
-
-  //       // Try parsing as ISO date first
-  //       try {
-  //         return DateTime.parse(dateTimeStr);
-  //       } catch (e) {
-  //         // Try parsing as Unix timestamp (milliseconds)
-  //         if (dateTimeStr.length > 8 && int.tryParse(dateTimeStr) != null) {
-  //           return DateTime.fromMillisecondsSinceEpoch(int.parse(dateTimeStr));
-  //         }
-  //         // If all parsing fails, return current time
-  //         return DateTime.now();
-  //       }
-  //     } else if (end is String) {
-  //       // Try parsing as ISO date first
-  //       try {
-  //         return DateTime.parse(end as String);
-  //       } catch (e) {
-  //         // Try parsing as Unix timestamp (milliseconds)
-  //         if ((end as String).length > 8 &&
-  //             int.tryParse(end as String) != null) {
-  //           return DateTime.fromMillisecondsSinceEpoch(
-  //               int.parse(end as String));
-  //         }
-  //         // If all parsing fails, return current time
-  //         return DateTime.now();
-  //       }
-  //     }
-
-  //     return DateTime.now(); // Default fallback
-  //   } catch (e) {
-  //     print('Error parsing end date: $e');
-  //     return DateTime.now(); // Fallback value
-  //   }
-  // }
 }
