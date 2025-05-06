@@ -38,35 +38,35 @@ class EventMapper {
 
   static CustomAppointment mapTimeEventToCustomAppointment(
       TimeEvent timeEvent) {
-    // Parse start time with error handling
+    // Parse start time with improved error handling
     DateTime startTime;
     try {
-      // Try parsing as ISO string first
-      startTime = DateTime.parse(timeEvent.start);
-    } catch (e) {
-      // If that fails, try parsing as Unix timestamp (milliseconds)
-      try {
+      // First check if it's a numeric timestamp (milliseconds since epoch)
+      if (timeEvent.start.contains(RegExp(r'^\d+$'))) {
         startTime =
             DateTime.fromMillisecondsSinceEpoch(int.parse(timeEvent.start));
-      } catch (e) {
-        print('Error parsing start time: $e');
-        startTime = DateTime.now(); // Fallback
+      } else {
+        // Otherwise try parsing as ISO string
+        startTime = DateTime.parse(timeEvent.start);
       }
+    } catch (e) {
+      print('Error parsing start time: $e');
+      startTime = DateTime.now(); // Fallback
     }
 
-    // Parse end time with error handling
+    // Parse end time with improved error handling
     DateTime endTime;
     try {
-      // Try parsing as ISO string first
-      endTime = DateTime.parse(timeEvent.end);
-    } catch (e) {
-      // If that fails, try parsing as Unix timestamp (milliseconds)
-      try {
+      // First check if it's a numeric timestamp (milliseconds since epoch)
+      if (timeEvent.end.contains(RegExp(r'^\d+$'))) {
         endTime = DateTime.fromMillisecondsSinceEpoch(int.parse(timeEvent.end));
-      } catch (e) {
-        print('Error parsing end time: $e');
-        endTime = DateTime.now(); // Fallback
+      } else {
+        // Otherwise try parsing as ISO string
+        endTime = DateTime.parse(timeEvent.end);
       }
+    } catch (e) {
+      print('Error parsing end time: $e');
+      endTime = DateTime.now().add(Duration(hours: 1)); // Fallback
     }
 
     return CustomAppointment(
