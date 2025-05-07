@@ -45,11 +45,12 @@ class EventMapper {
     return CustomAppointment(
       id: timeEvent.id,
       title: timeEvent.eventTitle,
-      description: timeEvent.eventBody ?? '',
+      description: timeEvent.eventBody,
       startTime: startTime,
       endTime: endTime,
       isAllDay: timeEvent.is_AllDay,
-      location: timeEvent.eventLocation ?? '',
+      location: timeEvent.eventLocation,
+      // ignore: unnecessary_null_comparison
       organizer: timeEvent.organizer != null
           ? (timeEvent.organizer['displayName'] ??
               timeEvent.organizer['email'] ??
@@ -60,16 +61,16 @@ class EventMapper {
       exceptionDates: timeEvent.exceptionDates.isEmpty
           ? null
           : timeEvent.exceptionDates.join(';'),
-      catTitle: timeEvent.category ?? '',
-      participants: timeEvent.participants ?? '',
+      catTitle: timeEvent.category,
+      participants: timeEvent.participants,
       userCalendars:
           timeEvent.userCalendars.isEmpty ? [] : timeEvent.userCalendars,
       timeEventInstance: timeEvent.timeEventInstances.isEmpty ||
               timeEvent.timeEventInstances[0].isEmpty
           ? null
           : timeEvent.timeEventInstances[0],
-      catColor: _getColorFromCategory(
-          timeEvent.category ?? ''), // Map category to color
+      catColor:
+          _getColorFromCategory(timeEvent.category), // Map category to color
     );
   }
 

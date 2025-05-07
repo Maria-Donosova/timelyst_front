@@ -127,7 +127,7 @@ class _CalendarWState extends State<CalendarW> {
     print('Building calendar with ${appointments.length} events');
 
     // Create a new data source with the updated appointments
-    final _dataSource = _EventDataSource(appointments);
+    //final _dataSource = _EventDataSource(appointments);
 
     return Card(
       child: Column(
