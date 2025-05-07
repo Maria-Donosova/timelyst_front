@@ -6,6 +6,7 @@ import '../../../models/customApp.dart';
 import '../../../providers/eventProvider.dart';
 import '../../../services/authService.dart';
 import '../../shared/categories.dart';
+import '../controllers/event_deletion_controller.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
@@ -63,6 +64,8 @@ class EventDetailsScreenState extends State<EventDetails> {
   bool isChecked = false;
   bool _isEditing = false;
   bool _isLoading = false;
+
+  List<Calendar> calendars = [];
 
   bool _allDay = false;
   bool _isRecurring = false;
@@ -517,122 +520,6 @@ class EventDetailsScreenState extends State<EventDetails> {
         });
   }
 
-  // Future<bool> _saveEvent(BuildContext context) async {
-  //   try {
-  //     final authService = AuthService();
-  //     final authToken = await authService.getAuthToken();
-  //     final userId = await authService.getUserId();
-
-  //     if (authToken == null || userId == null) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Authentication error. Please log in again.')),
-  //       );
-  //       return false;
-  //     }
-
-  //     // Parse date
-  //     final dateStr = _eventDateController.text;
-  //     DateTime? eventDate;
-  //     try {
-  //       eventDate = DateFormat('MMMM d').parse(dateStr);
-  //       if (eventDate.year != DateTime.now().year) {
-  //         eventDate =
-  //             DateTime(DateTime.now().year, eventDate.month, eventDate.day);
-  //       }
-  //     } catch (e) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Invalid date format')),
-  //       );
-  //       return false;
-  //     }
-
-  //     // Parse times
-  //     TimeOfDay startTime, endTime;
-  //     try {
-  //       startTime = _parseTimeString(_eventStartTimeController.text);
-  //       endTime = _parseTimeString(_eventEndTimeController.text);
-  //     } catch (e) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Invalid time format')),
-  //       );
-  //       return false;
-  //     }
-
-  //     // Create DateTime objects
-  //     final startDateTime = DateTime(
-  //       eventDate.year,
-  //       eventDate.month,
-  //       eventDate.day,
-  //       startTime.hour,
-  //       startTime.minute,
-  //     );
-
-  //     final endDateTime = DateTime(
-  //       eventDate.year,
-  //       eventDate.month,
-  //       eventDate.day,
-  //       endTime.hour,
-  //       endTime.minute,
-  //     );
-
-  //     // Prepare event data with proper date handling
-  //     final Map<String, dynamic> eventInput = {
-  //       'user_id': userId,
-  //       'createdBy': userId,
-  //       'event_organizer': userId,
-  //       'event_title': _eventTitleController.text,
-  //       'is_AllDay': _allDay,
-  //       'recurrenceRule': _recurrence != 'None' ? _buildRecurrenceRule() : '',
-  //       'category': _selectedCategory,
-  //       'event_attendees': _eventParticipants.text,
-  //       'event_body': _eventDescriptionController.text,
-  //       'event_location': _eventLocation.text,
-  //       'event_startDate': startDateTime.toIso8601String(),
-  //       'event_endDate': endDateTime.toIso8601String(),
-  //     };
-
-  //     // Handle server response with proper date parsing
-  //     final eventProvider = Provider.of<EventProvider>(context, listen: false);
-  //     final isUpdate = widget._id != null && widget._id!.isNotEmpty;
-
-  //     CustomAppointment? result;
-  //     if (isUpdate) {
-  //       result = _allDay
-  //           ? await eventProvider.updateDayEvent(
-  //               widget._id!, eventInput, authToken)
-  //           : await eventProvider.updateTimeEvent(
-  //               widget._id!, eventInput, authToken);
-  //     } else {
-  //       result = _allDay
-  //           ? await eventProvider.createDayEvent(eventInput, authToken)
-  //           : await eventProvider.createTimeEvent(eventInput, authToken);
-  //     }
-
-  //     // Handle server response dates properly
-  //     if (result != null) {
-  //       // Ensure dates are properly parsed from server response
-  //       // if (result.createdAt != null) {
-  //       //   try {
-  //       //     // Handle both ISO string and timestamp formats
-  //       //     final createdAt = result.createdAt is String
-  //       //         ? DateTime.parse(result.createdAt as String)
-  //       //         : DateTime.fromMillisecondsSinceEpoch(result.createdAt as int);
-  //       //     // Use the parsed date as needed
-  //       //   } catch (e) {
-  //       //     print('Error parsing server date: $e');
-  //       //   }
-  //       // }
-  //       return true;
-  //     }
-  //     return false;
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Error saving event: ${e.toString()}')),
-  //     );
-  //     return false;
-  //   }
-  // }
-
   Future<bool> _saveEvent(BuildContext context) async {
     if (!_appFormKey.currentState!.validate()) {
       return false;
@@ -867,107 +754,46 @@ class EventDetailsScreenState extends State<EventDetails> {
 
   // Method to delete an event
   Future<void> _deleteEvent() async {
-    if (widget._id == null || widget._id!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Cannot delete: Event ID is missing'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
     // Show confirmation dialog
     final shouldDelete = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Confirm Deletion'),
-        content: Text('Are you sure you want to delete this event?'),
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Event'),
+        content: const Text('Are you sure you want to delete this event?'),
         actions: [
           TextButton(
-            style: TextButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('Cancel',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                )),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
           ),
           TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
             style: TextButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Colors.red,
             ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Delete',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onError,
-                )),
           ),
         ],
       ),
     );
 
-    if (shouldDelete != true) {
-      return;
-    }
+    if (shouldDelete == true) {
+      setState(() {
+        _isLoading = true;
+      });
 
-    setState(() {
-      _isLoading = true;
-    });
+      try {
+        final success = await EventDeletionController.deleteEvent(
+            context, widget._id, _allDay);
 
-    try {
-      // Get auth token
-      final authService = AuthService();
-      final authToken = await authService.getAuthToken();
-
-      if (authToken == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Authentication error. Please log in again.'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return;
-      }
-
-      final eventProvider = Provider.of<EventProvider>(context, listen: false);
-      bool success = false;
-
-      if (_allDay) {
-        success = await eventProvider.deleteDayEvent(widget._id!, authToken);
-      } else {
-        success = await eventProvider.deleteTimeEvent(widget._id!, authToken);
-      }
-
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Event deleted successfully'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        Navigator.of(context).pop(true); // Return true to indicate deletion
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to delete event'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        if (success) {
+          Navigator.of(context).pop(true); // Return true to indicate deletion
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -1402,55 +1228,3 @@ class EventDetailsScreenState extends State<EventDetails> {
           );
   }
 }
-
-//dummy events
-List<Calendar> calendars = [
-  Calendar(
-    user: '',
-    kind: '',
-    etag: '',
-    id: '',
-    //calendarId: '1',
-    sourceCalendar: 'Google',
-    title: 'Family',
-    //email: 'test@gmail.com',
-    //password: 'password',
-    category: 'Kids',
-    // events: [],
-    // dateImported: DateTime.now(),
-    // dateCreated: DateTime.now(),
-    // dateUpdated: DateTime.now()
-  ),
-  Calendar(
-    user: '',
-    kind: '',
-    etag: '',
-    id: '',
-    //calendarId: '1',
-    sourceCalendar: 'Outlook',
-    title: 'Work',
-    //email: 'test@gmail.com',
-    //password: 'password',
-    category: 'Work',
-    // events: [],
-    // dateImported: DateTime.now(),
-    // dateCreated: DateTime.now(),
-    // dateUpdated: DateTime.now()
-  ),
-  Calendar(
-    user: '',
-    kind: '',
-    etag: '',
-    id: '',
-    //calendarId: '1',
-    sourceCalendar: 'Google',
-    title: 'Personal',
-    //email: 'test@gmail.com',
-    //password: 'password',
-    category: 'Study',
-    // events: [],
-    // dateImported: DateTime.now(),
-    // dateCreated: DateTime.now(),
-    // dateUpdated: DateTime.now()
-  ),
-];
