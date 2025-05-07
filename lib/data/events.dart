@@ -732,7 +732,7 @@ class EventService {
         print('Error: TimeEventInput is null or empty');
         throw Exception('Cannot update time event with empty data');
       }
-      
+
       // Remove ID from the update data if it exists to prevent ID conversion issues
       timeEventInput.remove('id');
 
@@ -852,7 +852,7 @@ class EventService {
     print("Event Id: $id");
 
     final String mutation = '''
-      mutation UpdateDayEvent(\$id: String, \$dayEventInput: DayEventInputData!) {
+      mutation UpdateDayEvent(\$id: String!, \$dayEventInput: DayEventInputData!) {
         updateDayEvent(id: \$id, dayEventInput: \$dayEventInput) {
           id
           user_id
@@ -884,7 +884,7 @@ class EventService {
     try {
       // Remove ID from the update data if it exists to prevent ID conversion issues
       dayEventInput.remove('id');
-      
+
       // Send the HTTP POST request
       final response = await http.post(
         Uri.parse(Config.backendGraphqlURL),
@@ -938,46 +938,105 @@ class EventService {
     print("Event Id: $id");
 
     final String mutation = '''
-      mutation DeleteTimeEvent(\$id: String) {
+      mutation DeleteTimeEvent(\$id: String!) {
         deleteTimeEvent(id: \$id)
       }
     ''';
 
     try {
+      // Validate input data before sending
+      if (id.isEmpty) {
+        print('Error: Event ID is empty');
+        throw Exception('Cannot delete time event with empty ID');
+      }
+
+      // Validate auth token
+      if (authToken.isEmpty) {
+        print('Error: Authentication token is missing');
+        throw Exception(
+            'Authentication token is required to delete a time event');
+      }
+
       // Send the HTTP POST request
-      final response = await http.post(
-        Uri.parse(Config.backendGraphqlURL),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $authToken',
-        },
-        body: jsonEncode({
-          'query': mutation,
-          'variables': {'id': id},
-        }),
-      );
+      http.Response response;
+      try {
+        response = await http
+            .post(
+          Uri.parse(Config.backendGraphqlURL),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          body: jsonEncode({
+            'query': mutation,
+            'variables': {'id': id},
+          }),
+        )
+            .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            print('Error: Request timed out');
+            throw Exception(
+                'Network request timed out. Please check your connection and try again.');
+          },
+        );
+      } on http.ClientException catch (e) {
+        print('HTTP client error: $e');
+        throw Exception(
+            'Network error: Unable to connect to the server. Please check your connection.');
+      }
+
+      // Log the response for debugging
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       // Check the status code
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        // Try to parse the response body
+        Map<String, dynamic> data;
+        try {
+          data = jsonDecode(response.body);
+        } catch (e) {
+          print('Error parsing response JSON: $e');
+          throw Exception('Server returned invalid JSON response');
+        }
 
         // Check for GraphQL errors
         if (data['errors'] != null && data['errors'].length > 0) {
           final errors = data['errors'];
           print('Deleting time event failed with errors: $errors');
+
+          // Extract error messages
+          final errorMessages = errors.map((e) => e['message']).join(", ");
+          throw Exception('Deleting time event failed: $errorMessages');
+        }
+
+        // Check if data and deleteTimeEvent exist
+        if (data['data'] == null || data['data']['deleteTimeEvent'] == null) {
+          print('Error: Response missing expected data structure');
           throw Exception(
-              'Deleting time event failed: ${errors.map((e) => e['message']).join(", ")}');
+              'Server returned success but with invalid data structure');
         }
 
         print('Time event deleted successfully');
-        return data['data']['deleteTimeEvent'];
+        return data['data']['deleteTimeEvent'] == true;
       } else {
-        print('Failed to delete time event: ${response.statusCode}');
-        throw Exception('Failed to delete time event: ${response.statusCode}');
+        // Handle other status codes
+        print(
+            'Unexpected status code: ${response.statusCode}, body: ${response.body}');
+        throw Exception(
+            'Failed to delete time event: Unexpected error (${response.statusCode})');
       }
     } catch (e) {
+      // Handle any uncaught exceptions
       print('Failed to delete time event: $e');
-      throw Exception('Failed to delete time event: $e');
+      if (e is Exception) {
+        // Rethrow exceptions that we've already formatted
+        rethrow;
+      } else {
+        // Wrap other errors
+        throw Exception('Failed to delete time event: $e');
+      }
     }
   }
 
@@ -987,46 +1046,105 @@ class EventService {
     print("Event Id: $id");
 
     final String mutation = '''
-      mutation DeleteDayEvent(\$id: String) {
+      mutation DeleteDayEvent(\$id: String!) {
         deleteDayEvent(id: \$id)
       }
     ''';
 
     try {
+      // Validate input data before sending
+      if (id.isEmpty) {
+        print('Error: Event ID is empty');
+        throw Exception('Cannot delete day event with empty ID');
+      }
+
+      // Validate auth token
+      if (authToken.isEmpty) {
+        print('Error: Authentication token is missing');
+        throw Exception(
+            'Authentication token is required to delete a day event');
+      }
+
       // Send the HTTP POST request
-      final response = await http.post(
-        Uri.parse(Config.backendGraphqlURL),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $authToken',
-        },
-        body: jsonEncode({
-          'query': mutation,
-          'variables': {'id': id},
-        }),
-      );
+      http.Response response;
+      try {
+        response = await http
+            .post(
+          Uri.parse(Config.backendGraphqlURL),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          body: jsonEncode({
+            'query': mutation,
+            'variables': {'id': id},
+          }),
+        )
+            .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            print('Error: Request timed out');
+            throw Exception(
+                'Network request timed out. Please check your connection and try again.');
+          },
+        );
+      } on http.ClientException catch (e) {
+        print('HTTP client error: $e');
+        throw Exception(
+            'Network error: Unable to connect to the server. Please check your connection.');
+      }
+
+      // Log the response for debugging
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       // Check the status code
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        // Try to parse the response body
+        Map<String, dynamic> data;
+        try {
+          data = jsonDecode(response.body);
+        } catch (e) {
+          print('Error parsing response JSON: $e');
+          throw Exception('Server returned invalid JSON response');
+        }
 
         // Check for GraphQL errors
         if (data['errors'] != null && data['errors'].length > 0) {
           final errors = data['errors'];
           print('Deleting day event failed with errors: $errors');
+
+          // Extract error messages
+          final errorMessages = errors.map((e) => e['message']).join(", ");
+          throw Exception('Deleting day event failed: $errorMessages');
+        }
+
+        // Check if data and deleteDayEvent exist
+        if (data['data'] == null || data['data']['deleteDayEvent'] == null) {
+          print('Error: Response missing expected data structure');
           throw Exception(
-              'Deleting day event failed: ${errors.map((e) => e['message']).join(", ")}');
+              'Server returned success but with invalid data structure');
         }
 
         print('Day event deleted successfully');
-        return data['data']['deleteDayEvent'];
+        return data['data']['deleteDayEvent'] == true;
       } else {
-        print('Failed to delete day event: ${response.statusCode}');
-        throw Exception('Failed to delete day event: ${response.statusCode}');
+        // Handle other status codes
+        print(
+            'Unexpected status code: ${response.statusCode}, body: ${response.body}');
+        throw Exception(
+            'Failed to delete day event: Unexpected error (${response.statusCode})');
       }
     } catch (e) {
+      // Handle any uncaught exceptions
       print('Failed to delete day event: $e');
-      throw Exception('Failed to delete day event: $e');
+      if (e is Exception) {
+        // Rethrow exceptions that we've already formatted
+        rethrow;
+      } else {
+        // Wrap other errors
+        throw Exception('Failed to delete day event: $e');
+      }
     }
   }
 }
