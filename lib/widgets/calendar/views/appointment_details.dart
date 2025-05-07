@@ -866,6 +866,47 @@ class EventDetailsScreentate extends State<EventDetails> {
   // Method to delete an event
   Future<void> _deleteEvent() async {
     if (widget._id == null || widget._id!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cannot delete: Event ID is missing'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // Show confirmation dialog
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Confirm Deletion'),
+        content: Text('Are you sure you want to delete this event?'),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancel',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                )),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text('Delete',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onError,
+                )),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true) {
       return;
     }
 
@@ -921,9 +962,11 @@ class EventDetailsScreentate extends State<EventDetails> {
         ),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
