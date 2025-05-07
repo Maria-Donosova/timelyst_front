@@ -46,10 +46,10 @@ class EventDetails extends StatefulWidget {
   final String? _eventLocation;
 
   @override
-  State<EventDetails> createState() => EventDetailsScreentate();
+  State<EventDetails> createState() => EventDetailsScreenState();
 }
 
-class EventDetailsScreentate extends State<EventDetails> {
+class EventDetailsScreenState extends State<EventDetails> {
   late TextEditingController _eventTitleController;
   late TextEditingController _eventDateController;
   late TextEditingController _eventStartTimeController;
@@ -83,7 +83,7 @@ class EventDetailsScreentate extends State<EventDetails> {
     _selectedCategory = widget._catTitle ?? 'Misc'; // Added default value
     _eventParticipants = TextEditingController(text: widget._participants);
     _allDay = widget._allDay ?? false; // Added null check
-    
+
     // If we have an ID, we're editing an existing event
     _isEditing = widget._id != null && widget._id!.isNotEmpty;
   }
@@ -669,7 +669,8 @@ class EventDetailsScreentate extends State<EventDetails> {
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Invalid date format. Please use format like "April 26"'),
+            content:
+                Text('Invalid date format. Please use format like "April 26"'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -684,7 +685,8 @@ class EventDetailsScreentate extends State<EventDetails> {
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Invalid time format. Please use format like "2:30 PM"'),
+            content:
+                Text('Invalid time format. Please use format like "2:30 PM"'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -981,403 +983,423 @@ class EventDetailsScreentate extends State<EventDetails> {
     return _isLoading
         ? Center(child: CircularProgressIndicator())
         : Form(
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      key: _appFormKey,
-      child: SizedBox(
-        width: width * 0.3,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            SizedBox(
-              width: width * 0.8,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            key: _appFormKey,
+            child: SizedBox(
+              width: width * 0.3,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  SizedBox(
+                    width: width * 0.8,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: SizedBox(
+                            width: width * 1,
+                            child: TextFormField(
+                              autocorrect: true,
+                              enabled: true,
+                              controller: _eventTitleController,
+                              style: Theme.of(context).textTheme.displaySmall,
+                              maxLines: null,
+                              decoration: InputDecoration(
+                                labelText: 'Subject',
+                                labelStyle:
+                                    Theme.of(context).textTheme.bodyLarge,
+                                border: InputBorder.none,
+                                errorStyle: TextStyle(
+                                    color: Theme.of(context).colorScheme.error),
+                              ),
+                              textInputAction: TextInputAction.next,
+                              keyboardType: TextInputType.name,
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Please provide a value.';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ),
+                        //profile icon button to select the associated the calendar to which the event is to be added
+                        IconButton(
+                          iconSize: Theme.of(context).iconTheme.size,
+                          icon: Icon(Icons.person),
+                          onPressed: () {
+                            _selectCalendar(context);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    spacing: 8,
+                    children: [
+                      SizedBox(
+                        width: 100,
+                        child: TextFormField(
+                            autocorrect: true,
+                            controller: _eventDateController,
+                            style: Theme.of(context).textTheme.displaySmall,
+                            decoration: InputDecoration(
+                              labelText: 'Date',
+                              labelStyle:
+                                  Theme.of(context).textTheme.bodyMedium,
+                              border: InputBorder.none,
+                              errorStyle: TextStyle(
+                                  color: Theme.of(context).colorScheme.error),
+                            ),
+                            textInputAction: TextInputAction.next,
+                            keyboardType: TextInputType.datetime,
+                            onTap: () async {
+                              await _selectDate(context);
+                            }),
+                      ),
+                      SizedBox(
+                        width: 80,
+                        child: TextFormField(
+                          autocorrect: true,
+                          controller: _eventStartTimeController,
+                          style: Theme.of(context).textTheme.displaySmall,
+                          decoration: InputDecoration(
+                            labelText: 'Begin',
+                            labelStyle: Theme.of(context).textTheme.bodyMedium,
+                            border: InputBorder.none,
+                            errorStyle: TextStyle(
+                                color: Theme.of(context).colorScheme.error),
+                          ),
+                          textInputAction: TextInputAction.next,
+                          keyboardType: TextInputType.datetime,
+                          onTap: () async {
+                            await _selectStart(context, true);
+                          },
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please provide a value.';
+                            } else {
+                              return null;
+                            }
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 80,
+                        child: TextFormField(
+                          autocorrect: true,
+                          controller: _eventEndTimeController,
+                          style: Theme.of(context).textTheme.displaySmall,
+                          decoration: InputDecoration(
+                            labelText: 'End',
+                            labelStyle: Theme.of(context).textTheme.bodyMedium,
+                            border: InputBorder.none,
+                            errorStyle: TextStyle(
+                                color: Theme.of(context).colorScheme.error),
+                          ),
+                          textInputAction: TextInputAction.next,
+                          keyboardType: TextInputType.datetime,
+                          onTap: () async {
+                            await _selectEndTime(context, false);
+                          },
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please provide a value.';
+                            } else {
+                              return null;
+                            }
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        iconSize: Theme.of(context).iconTheme.size,
+                        onPressed: () {
+                          setState(() {
+                            _allDay = !_allDay;
+                            _setAllDay();
+                            isAllDay = !isAllDay!;
+                          });
+                        },
+                        color: _allDay
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.tertiary,
+                        icon: _allDay
+                            ? Icon(Icons.hourglass_full_rounded)
+                            : Icon(Icons.hourglass_empty_rounded),
+                        tooltip: "All Day",
+                      ),
+                      if (_recurrence == 'Weekly')
+                        Tooltip(
+                          message: _selectedDays.join(', '),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: _isRecurring
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .tertiary,
+                                    textStyle: Theme.of(context)
+                                        .textTheme
+                                        .displaySmall,
+                                  ),
+                                  icon: Icon(
+                                      size: Theme.of(context).iconTheme.size,
+                                      Icons.event_repeat_rounded),
+                                  onPressed: () {
+                                    _selectRecurrenceRule(context);
+                                    setState(() {
+                                      _isRecurring = !_isRecurring;
+                                    });
+                                  }),
+                              Text(_recurrence.toString(),
+                                  style:
+                                      Theme.of(context).textTheme.displaySmall),
+                            ],
+                          ),
+                        )
+                      else
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                                style: TextButton.styleFrom(
+                                  foregroundColor: _isRecurring
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.tertiary,
+                                  textStyle:
+                                      Theme.of(context).textTheme.displaySmall,
+                                ),
+                                icon: Icon(
+                                    size: Theme.of(context).iconTheme.size,
+                                    Icons.event_repeat_rounded),
+                                onPressed: () {
+                                  _selectRecurrenceRule(context);
+                                  setState(() {
+                                    _isRecurring = !_isRecurring;
+                                  });
+                                }),
+                            Text(
+                              _recurrence.toString(),
+                              style: Theme.of(context).textTheme.displaySmall,
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6.0),
                     child: SizedBox(
-                      width: width * 1,
+                      width: width,
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.end,
+                        children: categories.map((String category) {
+                          categoryColor = catColor(category);
+                          return ChoiceChip(
+                            visualDensity: VisualDensity.standard,
+                            avatar: CircleAvatar(
+                              backgroundColor: categoryColor,
+                              radius: 4.5,
+                            ),
+                            label: Text(
+                              category,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            selected: _selectedCategory == category,
+                            selectedColor: Colors.grey.shade200,
+                            backgroundColor: Colors.white,
+                            onSelected: (bool selected) {
+                              setState(() {
+                                _selectedCategory =
+                                    (selected ? category : null)!;
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: SizedBox(
+                      width: width * 0.8,
                       child: TextFormField(
                         autocorrect: true,
-                        enabled: true,
-                        controller: _eventTitleController,
+                        controller: _eventLocation,
                         style: Theme.of(context).textTheme.displaySmall,
                         maxLines: null,
-                        decoration: InputDecoration(
-                          labelText: 'Subject',
-                          labelStyle: Theme.of(context).textTheme.bodyLarge,
+                        decoration: const InputDecoration(
+                          labelText: 'Location',
+                          labelStyle: TextStyle(fontSize: 14),
                           border: InputBorder.none,
-                          errorStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.error),
+                          errorStyle: TextStyle(color: Colors.redAccent),
+                        ),
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: SizedBox(
+                      width: width * 0.8,
+                      child: TextFormField(
+                          autocorrect: true,
+                          controller: _eventParticipants,
+                          style: Theme.of(context).textTheme.displaySmall,
+                          maxLines: null,
+                          decoration: const InputDecoration(
+                            labelText: 'Participants',
+                            labelStyle: TextStyle(fontSize: 14),
+                            border: InputBorder.none,
+                            errorStyle: TextStyle(color: Colors.redAccent),
+                          ),
+                          textInputAction: TextInputAction.next,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (value) {
+                            const pattern =
+                                r'^([\w-\.]+@([\w-]+\.)+[\w-]{2,4},\s*)*[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$|^$';
+                            final regExp = RegExp(pattern);
+                            if (!regExp.hasMatch(value!)) {
+                              return 'Please enter a valid email';
+                            }
+                            return null;
+                          }),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: SizedBox(
+                      width: 500,
+                      child: TextFormField(
+                        autocorrect: true,
+                        controller: _eventDescriptionController,
+                        style: Theme.of(context).textTheme.displaySmall,
+                        maxLines: null,
+                        decoration: const InputDecoration(
+                          labelText: 'Description',
+                          fillColor: Colors.grey,
+                          labelStyle: TextStyle(fontSize: 14),
+                          border: InputBorder.none,
+                          errorStyle: TextStyle(color: Colors.redAccent),
                         ),
                         textInputAction: TextInputAction.next,
                         keyboardType: TextInputType.name,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Please provide a value.';
-                          }
-                          return null;
-                        },
                       ),
                     ),
                   ),
-                  //profile icon button to select the associated the calendar to which the event is to be added
-                  IconButton(
-                    iconSize: Theme.of(context).iconTheme.size,
-                    icon: Icon(Icons.person),
-                    onPressed: () {
-                      _selectCalendar(context);
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Wrap(
-              crossAxisAlignment: WrapCrossAlignment.end,
-              spacing: 8,
-              children: [
-                SizedBox(
-                  width: 100,
-                  child: TextFormField(
-                      autocorrect: true,
-                      controller: _eventDateController,
-                      style: Theme.of(context).textTheme.displaySmall,
-                      decoration: InputDecoration(
-                        labelText: 'Date',
-                        labelStyle: Theme.of(context).textTheme.bodyMedium,
-                        border: InputBorder.none,
-                        errorStyle: TextStyle(
-                            color: Theme.of(context).colorScheme.error),
-                      ),
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.datetime,
-                      onTap: () async {
-                        await _selectDate(context);
-                      }),
-                ),
-                SizedBox(
-                  width: 80,
-                  child: TextFormField(
-                    autocorrect: true,
-                    controller: _eventStartTimeController,
-                    style: Theme.of(context).textTheme.displaySmall,
-                    decoration: InputDecoration(
-                      labelText: 'Begin',
-                      labelStyle: Theme.of(context).textTheme.bodyMedium,
-                      border: InputBorder.none,
-                      errorStyle:
-                          TextStyle(color: Theme.of(context).colorScheme.error),
-                    ),
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.datetime,
-                    onTap: () async {
-                      await _selectStart(context, true);
-                    },
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please provide a value.';
-                      } else {
-                        return null;
-                      }
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 80,
-                  child: TextFormField(
-                    autocorrect: true,
-                    controller: _eventEndTimeController,
-                    style: Theme.of(context).textTheme.displaySmall,
-                    decoration: InputDecoration(
-                      labelText: 'End',
-                      labelStyle: Theme.of(context).textTheme.bodyMedium,
-                      border: InputBorder.none,
-                      errorStyle:
-                          TextStyle(color: Theme.of(context).colorScheme.error),
-                    ),
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.datetime,
-                    onTap: () async {
-                      await _selectEndTime(context, false);
-                    },
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please provide a value.';
-                      } else {
-                        return null;
-                      }
-                    },
-                  ),
-                ),
-                IconButton(
-                  iconSize: Theme.of(context).iconTheme.size,
-                  onPressed: () {
-                    setState(() {
-                      _allDay = !_allDay;
-                      _setAllDay();
-                      isAllDay = !isAllDay!;
-                    });
-                  },
-                  color: _allDay
-                      ? Theme.of(context).colorScheme.onPrimary
-                      : Theme.of(context).colorScheme.tertiary,
-                  icon: _allDay
-                      ? Icon(Icons.hourglass_full_rounded)
-                      : Icon(Icons.hourglass_empty_rounded),
-                  tooltip: "All Day",
-                ),
-                if (_recurrence == 'Weekly')
-                  Tooltip(
-                    message: _selectedDays.join(', '),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 120),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        IconButton(
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: TextButton(
                             style: TextButton.styleFrom(
-                              foregroundColor: _isRecurring
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : Theme.of(context).colorScheme.tertiary,
-                              textStyle:
-                                  Theme.of(context).textTheme.displaySmall,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.secondary,
                             ),
-                            icon: Icon(
-                                size: Theme.of(context).iconTheme.size,
-                                Icons.event_repeat_rounded),
                             onPressed: () {
-                              _selectRecurrenceRule(context);
                               setState(() {
-                                _isRecurring = !_isRecurring;
+                                print("Cancel");
                               });
-                            }),
-                        Text(_recurrence.toString(),
-                            style: Theme.of(context).textTheme.displaySmall),
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('Cancel',
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                )),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.secondary,
+                                ),
+                                child: Text('Delete',
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                    )),
+                                onPressed: _isLoading
+                                    ? null
+                                    : () {
+                                        if (_isEditing) {
+                                          _deleteEvent();
+                                        } else {
+                                          Navigator.of(context).pop();
+                                        }
+                                      },
+                              ),
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.secondary,
+                              ),
+                              child: Text('Save',
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                  )),
+                              onPressed: _isLoading
+                                  ? null
+                                  : () async {
+                                      if (_appFormKey.currentState!
+                                          .validate()) {
+                                        final success =
+                                            await _saveEvent(context);
+                                        // Only try to pop if we can
+                                        if (success &&
+                                            Navigator.of(context).canPop()) {
+                                          // We already showed success message in _saveEvent
+                                          // Only pop once - the _saveEvent already popped once if possible
+                                          try {
+                                            Navigator.of(context).pop();
+                                          } catch (e) {
+                                            print('Navigation error: $e');
+                                            // Handle the error gracefully
+                                            if (Navigator.of(context)
+                                                .canPop()) {
+                                              Navigator.of(context)
+                                                  .pushReplacementNamed(
+                                                      '/agenda');
+                                            }
+                                          }
+                                        }
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'Please fix the errors in the form')),
+                                        );
+                                      }
+                                    },
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   )
-                else
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                          style: TextButton.styleFrom(
-                            foregroundColor: _isRecurring
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Theme.of(context).colorScheme.tertiary,
-                            textStyle: Theme.of(context).textTheme.displaySmall,
-                          ),
-                          icon: Icon(
-                              size: Theme.of(context).iconTheme.size,
-                              Icons.event_repeat_rounded),
-                          onPressed: () {
-                            _selectRecurrenceRule(context);
-                            setState(() {
-                              _isRecurring = !_isRecurring;
-                            });
-                          }),
-                      Text(
-                        _recurrence.toString(),
-                        style: Theme.of(context).textTheme.displaySmall,
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 6.0),
-              child: SizedBox(
-                width: width,
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.end,
-                  children: categories.map((String category) {
-                    categoryColor = catColor(category);
-                    return ChoiceChip(
-                      visualDensity: VisualDensity.standard,
-                      avatar: CircleAvatar(
-                        backgroundColor: categoryColor,
-                        radius: 4.5,
-                      ),
-                      label: Text(
-                        category,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      selected: _selectedCategory == category,
-                      selectedColor: Colors.grey.shade200,
-                      backgroundColor: Colors.white,
-                      onSelected: (bool selected) {
-                        setState(() {
-                          _selectedCategory = (selected ? category : null)!;
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: SizedBox(
-                width: width * 0.8,
-                child: TextFormField(
-                  autocorrect: true,
-                  controller: _eventLocation,
-                  style: Theme.of(context).textTheme.displaySmall,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    labelText: 'Location',
-                    labelStyle: TextStyle(fontSize: 14),
-                    border: InputBorder.none,
-                    errorStyle: TextStyle(color: Colors.redAccent),
-                  ),
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: SizedBox(
-                width: width * 0.8,
-                child: TextFormField(
-                    autocorrect: true,
-                    controller: _eventParticipants,
-                    style: Theme.of(context).textTheme.displaySmall,
-                    maxLines: null,
-                    decoration: const InputDecoration(
-                      labelText: 'Participants',
-                      labelStyle: TextStyle(fontSize: 14),
-                      border: InputBorder.none,
-                      errorStyle: TextStyle(color: Colors.redAccent),
-                    ),
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      const pattern =
-                          r'^([\w-\.]+@([\w-]+\.)+[\w-]{2,4},\s*)*[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$|^$';
-                      final regExp = RegExp(pattern);
-                      if (!regExp.hasMatch(value!)) {
-                        return 'Please enter a valid email';
-                      }
-                      return null;
-                    }),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: SizedBox(
-                width: 500,
-                child: TextFormField(
-                  autocorrect: true,
-                  controller: _eventDescriptionController,
-                  style: Theme.of(context).textTheme.displaySmall,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    fillColor: Colors.grey,
-                    labelStyle: TextStyle(fontSize: 14),
-                    border: InputBorder.none,
-                    errorStyle: TextStyle(color: Colors.redAccent),
-                  ),
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.name,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 120),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          print("Cancel");
-                        });
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Cancel',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          )),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.secondary,
-                          ),
-                          child: Text('Delete',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              )),
-                          onPressed: _isLoading
-                              ? null
-                              : () {
-                                  if (_isEditing) {
-                                    _deleteEvent();
-                                  } else {
-                                    Navigator.of(context).pop();
-                                  }
-                                },
-                        ),
-                      ),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
-                        ),
-                        child: Text('Save',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            )),
-                        onPressed: _isLoading
-                            ? null
-                            : () async {
-                                if (_appFormKey.currentState!.validate()) {
-                                  final success = await _saveEvent(context);
-                                  // Only try to pop if we can
-                                  if (success && Navigator.of(context).canPop()) {
-                                    // We already showed success message in _saveEvent
-                                    // Only pop once - the _saveEvent already popped once if possible
-                                    try {
-                                      Navigator.of(context).pop();
-                                    } catch (e) {
-                                      print('Navigation error: $e');
-                                      // Handle the error gracefully
-                                      if (Navigator.of(context).canPop()) {
-                                        Navigator.of(context)
-                                            .pushReplacementNamed('/agenda');
-                                      }
-                                    }
-                                  }
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text(
-                                            'Please fix the errors in the form')),
-                                  );
-                                }
-                              },
-                      ),
-                    ],
-                  ),
                 ],
               ),
-            )
-          ],
-        ),
-      ),
-    );
+            ),
+          );
   }
 }
 
