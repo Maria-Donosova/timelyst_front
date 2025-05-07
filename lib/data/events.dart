@@ -732,6 +732,9 @@ class EventService {
         print('Error: TimeEventInput is null or empty');
         throw Exception('Cannot update time event with empty data');
       }
+      
+      // Remove ID from the update data if it exists to prevent ID conversion issues
+      timeEventInput.remove('id');
 
       // Validate ID
       if (id == null || id.isEmpty) {
@@ -879,6 +882,9 @@ class EventService {
     ''';
 
     try {
+      // Remove ID from the update data if it exists to prevent ID conversion issues
+      dayEventInput.remove('id');
+      
       // Send the HTTP POST request
       final response = await http.post(
         Uri.parse(Config.backendGraphqlURL),
