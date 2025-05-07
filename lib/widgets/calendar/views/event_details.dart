@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
+//import 'package:provider/provider.dart';
 import '../../../models/calendars.dart';
-import '../../../models/customApp.dart';
-import '../../../providers/eventProvider.dart';
+// import '../../../models/customApp.dart';
+// import '../../../providers/eventProvider.dart';
 import '../../../services/authService.dart';
 import '../../shared/categories.dart';
 import '../controllers/event_deletion_controller.dart';
+import '../controllers/event_save_controller.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
@@ -611,7 +612,7 @@ class EventDetailsScreenState extends State<EventDetails> {
       );
 
       // Prepare event data
-      final Map<String, dynamic> eventInput = {
+      final Map<String, dynamic> eventData = {
         'user_id': userId,
         'createdBy': userId,
         'event_organizer': userId,
@@ -624,62 +625,40 @@ class EventDetailsScreenState extends State<EventDetails> {
         'event_location': _eventLocation.text,
         'start': start.toIso8601String(),
         'end': end.toIso8601String(),
+        'isUpdate': widget._id != null && widget._id!.isNotEmpty,
+        'eventId': widget._id,
+        'isAllDay': _allDay,
       };
 
-      // Save to server
-      final eventProvider = Provider.of<EventProvider>(context, listen: false);
-      final isUpdate = widget._id != null && widget._id!.isNotEmpty;
+      // Use the EventSaveController to save the event
+      final success = await EventSaveController.saveEvent(context, eventData);
 
-      try {
-        CustomAppointment? result;
-        if (isUpdate) {
-          result = _allDay
-              ? await eventProvider.updateDayEvent(
-                  widget._id!, eventInput, authToken)
-              : await eventProvider.updateTimeEvent(
-                  widget._id!, eventInput, authToken);
-        } else {
-          result = _allDay
-              ? await eventProvider.createDayEvent(eventInput, authToken)
-              : await eventProvider.createTimeEvent(eventInput, authToken);
-        }
-
-        if (result != null) {
-          // Show success message before navigation
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(isUpdate
-                  ? 'Event updated successfully!'
-                  : 'Event created successfully!'),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-
-          // Safe navigation - check if we can pop before attempting to
-          if (Navigator.of(context).canPop()) {
-            try {
-              Navigator.of(context).pop(true);
-            } catch (e) {
-              print('Navigation error in _saveEvent: $e');
-              // Don't attempt additional navigation here
-            }
-          }
-          return true;
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to save event. Please try again.'),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          return false;
-        }
-      } catch (e) {
+      if (success) {
+        // Show success message before navigation
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving event: ${e.toString()}'),
+            content: Text(widget._id != null && widget._id!.isNotEmpty
+                ? 'Event updated successfully!'
+                : 'Event created successfully!'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        // Safe navigation - check if we can pop before attempting to
+        if (Navigator.of(context).canPop()) {
+          try {
+            Navigator.of(context).pop(true);
+          } catch (e) {
+            print('Navigation error in _saveEvent: $e');
+            // Don't attempt additional navigation here
+          }
+        }
+        return true;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save event. Please try again.'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
