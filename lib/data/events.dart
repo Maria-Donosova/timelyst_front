@@ -341,7 +341,7 @@ class EventService {
 
     try {
       // Validate input data before sending
-      if (timeEventInput == null || timeEventInput.isEmpty) {
+      if (timeEventInput.isEmpty) {
         print('Error: TimeEventInput is null or empty');
         throw Exception('Cannot create time event with empty data');
       }
@@ -357,7 +357,7 @@ class EventService {
       }
 
       // Validate auth token
-      if (authToken == null || authToken.isEmpty) {
+      if (authToken.isEmpty) {
         print('Error: Authentication token is missing');
         throw Exception(
             'Authentication token is required to create a time event');
@@ -545,7 +545,7 @@ class EventService {
 
     try {
       // Validate input data before sending
-      if (dayEventInput == null || dayEventInput.isEmpty) {
+      if (dayEventInput.isEmpty) {
         print('Error: DayEventInput is null or empty');
         throw Exception('Cannot create day event with empty data');
       }
@@ -561,7 +561,7 @@ class EventService {
       }
 
       // Validate auth token
-      if (authToken == null || authToken.isEmpty) {
+      if (authToken.isEmpty) {
         print('Error: Authentication token is missing');
         throw Exception(
             'Authentication token is required to create a day event');
@@ -728,7 +728,7 @@ class EventService {
     print("Event ID: $id");
     try {
       // Validate input data before sending
-      if (timeEventInput == null || timeEventInput.isEmpty) {
+      if (timeEventInput.isEmpty) {
         print('Error: TimeEventInput is null or empty');
         throw Exception('Cannot update time event with empty data');
       }
@@ -737,13 +737,13 @@ class EventService {
       timeEventInput.remove('id');
 
       // Validate ID
-      if (id == null || id.isEmpty) {
+      if (id.isEmpty) {
         print('Error: Event ID is null or empty');
         throw Exception('Cannot update time event without a valid ID');
       }
 
       // Validate auth token
-      if (authToken == null || authToken.isEmpty) {
+      if (authToken.isEmpty) {
         print('Error: Authentication token is missing');
         throw Exception(
             'Authentication token is required to update a time event');
