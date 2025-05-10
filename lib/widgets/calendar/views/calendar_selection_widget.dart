@@ -48,6 +48,7 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("Entering calendar selection widget");
     return AlertDialog(
       title:
           Text('Calendars', style: Theme.of(context).textTheme.displayMedium),
