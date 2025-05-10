@@ -9,6 +9,7 @@ import '../../shared/categories.dart';
 import '../controllers/event_deletion_controller.dart';
 import '../controllers/event_save_controller.dart';
 import 'calendar_selection_widget.dart';
+import 'recurrence_selection_widget.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
@@ -248,185 +249,25 @@ class EventDetailsScreenState extends State<EventDetails> {
   }
 
   Future<void> _selectRecurrenceRule(BuildContext context) async {
-    final selectedRecurrenceRule = await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                  actions: [
-                    TextButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary),
-                      child: Text('Delete',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          )),
-                      onPressed: () {
-                        Navigator.of(context).pop(true);
-                      },
-                    ),
-                    TextButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary),
-                      child: Text('Save',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          )),
-                      onPressed: () {
-                        _changeRecurringColor();
-                        _changeRecurringPattern();
-                        Navigator.of(context).pop(true);
-                      },
-                    )
-                  ],
-                  title: const Text('Select Recurrence'),
-                  content: Column(mainAxisSize: MainAxisSize.min, children: [
-                    RadioListTile<String>(
-                      activeColor: Theme.of(context).colorScheme.onPrimary,
-                      title: Text('None'),
-                      value: 'None',
-                      groupValue: _recurrence,
-                      onChanged: (value) {
-                        setState(() {
-                          _recurrence = value!;
-                          _selectedDays.clear();
-                        });
-                      },
-                    ),
-                    RadioListTile<String>(
-                      title: Text('Daily'),
-                      value: 'Daily',
-                      groupValue: _recurrence,
-                      onChanged: (value) {
-                        setState(() {
-                          _recurrence = value!;
-                          _selectedDays.clear();
-                        });
-                      },
-                    ),
-                    RadioListTile<String>(
-                      title: Text('Weekly'),
-                      value: 'Weekly',
-                      groupValue: _recurrence,
-                      onChanged: (value) {
-                        setState(() {
-                          _recurrence = value!;
-                        });
-                      },
-                    ),
-                    RadioListTile<String>(
-                      title: Text('Yearly'),
-                      value: 'Yearly',
-                      groupValue: _recurrence,
-                      onChanged: (value) {
-                        setState(() {
-                          _recurrence = value!;
-                          _selectedDays.clear();
-                        });
-                      },
-                    ),
-                    if (_recurrence == 'Weekly')
-                      Column(children: [
-                        CheckboxListTile(
-                          title: Text('Monday'),
-                          value: _selectedDays.contains('Monday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Monday');
-                              } else {
-                                _selectedDays.remove('Monday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Tuesday'),
-                          value: _selectedDays.contains('Tuesday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Tuesday');
-                              } else {
-                                _selectedDays.remove('Tuesday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Wednesday'),
-                          value: _selectedDays.contains('Wednesday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Wednesday');
-                              } else {
-                                _selectedDays.remove('Wednesday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Thursday'),
-                          value: _selectedDays.contains('Thursday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Thursday');
-                              } else {
-                                _selectedDays.remove('Thursday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Friday'),
-                          value: _selectedDays.contains('Friday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Friday');
-                              } else {
-                                _selectedDays.remove('Friday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Saturday'),
-                          value: _selectedDays.contains('Saturday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Saturday');
-                              } else {
-                                _selectedDays.remove('Saturday');
-                              }
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Sunday'),
-                          value: _selectedDays.contains('Sunday'),
-                          onChanged: (bool? value) {
-                            setState(() {
-                              if (value == true) {
-                                _selectedDays.add('Sunday');
-                              } else {
-                                _selectedDays.remove('Sunday');
-                              }
-                            });
-                          },
-                        )
-                      ])
-                  ]));
-            },
-          );
-        });
+    final result = await showRecurrenceSelectionDialog(
+      context,
+      initialRecurrence: _recurrence,
+      initialSelectedDays: _selectedDays,
+    );
+
+    if (result != null) {
+      setState(() {
+        _recurrence = result['recurrence'];
+        _selectedDays = List<String>.from(result['selectedDays']);
+
+        // Update UI state based on selection
+        if (_recurrence != 'None') {
+          _isRecurring = true;
+        }
+      });
+    }
   }
+  // Remove the extra closing brace that was here
 
   Future<bool> _saveEvent(BuildContext context) async {
     if (!_appFormKey.currentState!.validate()) {
