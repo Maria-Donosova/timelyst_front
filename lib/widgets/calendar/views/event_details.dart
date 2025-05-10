@@ -8,6 +8,7 @@ import '../../../services/authService.dart';
 import '../../shared/categories.dart';
 import '../controllers/event_deletion_controller.dart';
 import '../controllers/event_save_controller.dart';
+import 'calendar_selection_widget.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
@@ -67,6 +68,7 @@ class EventDetailsScreenState extends State<EventDetails> {
   bool _isLoading = false;
 
   List<Calendar> calendars = [];
+  Map<String, bool> _selectedCalendars = {};
 
   bool _allDay = false;
   bool _isRecurring = false;
@@ -223,119 +225,24 @@ class EventDetailsScreenState extends State<EventDetails> {
   }
 
   Future<void> _selectCalendar(BuildContext context) async {
-    final selectedCalendar = await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          // Use a Set to store unique categories
-          Set<String> uniqueCategories = {};
-          Map<String, List<Calendar>> categoryCalendarsMap = {};
-          Map<String, bool> checkedCalendars = {};
+    final result = await showCalendarSelectionDialog(
+      context,
+      calendars,
+      initialSelection: _selectedCalendars,
+    );
 
-          // Populate the Set and Map with unique categories and their calendars
-          for (var calendar in calendars) {
-            final category = calendar.category;
-
-            if (!uniqueCategories.contains(category)) {
-              uniqueCategories.add(category!);
-              categoryCalendarsMap[category] =
-                  []; // Initialize with an empty list
-            }
-            categoryCalendarsMap[category]!.add(calendar);
-            // checkedCalendars[calendar.title] =
-            //     calendars.contains(widget._userCalendars);
-          }
-
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                title: Text('Calendars',
-                    style: Theme.of(context).textTheme.displayMedium),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: uniqueCategories.map((category) {
-                    final categoryCalendars = categoryCalendarsMap[category]!;
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                category,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ),
-                            CircleAvatar(
-                              backgroundColor: catColor(category),
-                              radius: 4.5,
-                            ),
-                          ],
-                        ),
-                        if (categoryCalendars.isNotEmpty)
-                          Column(
-                            children: categoryCalendars.map((calendar) {
-                              return Tooltip(
-                                message: calendar.user,
-                                child: CheckboxListTile(
-                                  title: Text(
-                                    calendar.title
-                                    //+
-                                    // ' ' +
-                                    // calendar.sourceCalendar
-                                    ,
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  value: checkedCalendars[calendar.title],
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      checkedCalendars[calendar.title] = value!;
-                                    });
-                                  },
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-                actions: [
-                  TextButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary),
-                    child: Text('Cancel',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        )),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary),
-                    child: Text('Save',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        )),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-        });
-    if (selectedCalendar != null) {
+    if (result != null) {
       setState(() {
-        _eventCalendar?.text = selectedCalendar;
+        _selectedCalendars = result;
+        // Update the calendar text field if needed
+        final selectedCalendarNames = result.entries
+            .where((entry) => entry.value)
+            .map((entry) => entry.key)
+            .join(', ');
+
+        if (_eventCalendar != null) {
+          _eventCalendar!.text = selectedCalendarNames;
+        }
       });
     }
   }
