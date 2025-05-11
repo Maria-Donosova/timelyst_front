@@ -27,6 +27,7 @@ class _CategorySelectionWidgetState extends State<CategorySelectionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("Entering CategorySelectionWidget");
     return InkWell(
       onTap: () => _showCategoryDialog(context),
       child: Row(

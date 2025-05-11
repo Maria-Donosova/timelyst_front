@@ -33,6 +33,7 @@ class _DateTimeSelectionWidgetState extends State<DateTimeSelectionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("Entering date time selection widget");
     return InkWell(
       onTap: () => _selectDateTime(context),
       child: InputDecorator(
