@@ -10,6 +10,8 @@ import '../controllers/event_deletion_controller.dart';
 import '../controllers/event_save_controller.dart';
 import 'calendar_selection_widget.dart';
 import 'recurrence_selection_widget.dart';
+import 'category_selection_widget.dart';
+import 'date_time_selection_widget.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
@@ -87,7 +89,7 @@ class EventDetailsScreenState extends State<EventDetails> {
     _eventLocation = TextEditingController(text: widget._eventLocation);
     _eventDescriptionController =
         TextEditingController(text: widget._eventBody);
-    _selectedCategory = widget._catTitle ?? 'Misc'; // Added default value
+    _selectedCategory = widget._catTitle ?? 'Misc'; // Provide a default value
     _eventParticipants = TextEditingController(text: widget._participants);
     _allDay = widget._allDay ?? false; // Added null check
 
@@ -183,7 +185,7 @@ class EventDetailsScreenState extends State<EventDetails> {
     }
   }
 
-  Future<void> _selectEndTime(BuildContext context, bool isStart) async {
+  Future<void> _selectEndTime(BuildContext context) async {
     final selectedEnd = await showTimePicker(
       context: context,
       initialTime:
@@ -207,6 +209,13 @@ class EventDetailsScreenState extends State<EventDetails> {
     }
   }
 
+  void _toggleAllDay(bool value) {
+    setState(() {
+      _allDay = value;
+      _setAllDay();
+    });
+  }
+
   //  function the changes the color of eventrepeat icon once the user chooses a recurrence pattern and clicked Saved within the _selectRecurrenceRule function
   void _changeRecurringColor() {
     if (_recurrence != 'None') {
@@ -218,9 +227,8 @@ class EventDetailsScreenState extends State<EventDetails> {
 
   void _changeRecurringPattern() {
     if (_recurrence != 'None') {
-      setState(() {
-        _recurrence = _recurrence;
-      });
+      // No need to set _recurrence to itself
+      // Just call parseRRule if needed
       //parseRRule(_recurrence);
     }
   }
@@ -267,7 +275,19 @@ class EventDetailsScreenState extends State<EventDetails> {
       });
     }
   }
-  // Remove the extra closing brace that was here
+
+  // Future<void> _selectCategory(BuildContext context) async {
+  //   final result = await showCategorySelectionDialog(
+  //     context,
+  //     initialCategory: _selectedCategory,
+  //   );
+
+  //   if (result != null) {
+  //     setState(() {
+  //       _selectedCategory = result;
+  //     });
+  //   }
+  // }
 
   Future<bool> _saveEvent(BuildContext context) async {
     if (!_appFormKey.currentState!.validate()) {
@@ -528,8 +548,8 @@ class EventDetailsScreenState extends State<EventDetails> {
   @override
   Widget build(BuildContext context) {
     //bool _isSelected = false;
-    final selectedCategory = widget._catTitle;
-    var categoryColor = catColor(selectedCategory!);
+    final selectedCategory = widget._catTitle ?? 'Misc';
+    var categoryColor = catColor(selectedCategory);
     var isAllDay = widget._allDay;
     final width = MediaQuery.of(context).size.width;
 
@@ -656,7 +676,7 @@ class EventDetailsScreenState extends State<EventDetails> {
                           textInputAction: TextInputAction.next,
                           keyboardType: TextInputType.datetime,
                           onTap: () async {
-                            await _selectEndTime(context, false);
+                            await _selectEndTime(context);
                           },
                           validator: (value) {
                             if (value!.isEmpty) {
