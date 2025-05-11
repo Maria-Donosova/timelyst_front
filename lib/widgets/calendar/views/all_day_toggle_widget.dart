@@ -25,6 +25,7 @@ class _AllDayToggleWidgetState extends State<AllDayToggleWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("Entering AllDayToggleWidget");
     return Row(
       children: [
         Text(
