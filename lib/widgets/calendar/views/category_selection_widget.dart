@@ -94,3 +94,42 @@ class _CategorySelectionWidgetState extends State<CategorySelectionWidget> {
     }
   }
 }
+
+// Helper function to show the category selection dialog
+Future<String?> showCategorySelectionDialog(
+    BuildContext context,
+    {required String initialCategory}) async {
+  return await showDialog<String>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Select Category',
+            style: Theme.of(context).textTheme.titleLarge),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: categories.map((category) {
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: catColor(category),
+                  radius: 10,
+                ),
+                title: Text(category),
+                onTap: () {
+                  Navigator.of(context).pop(category);
+                },
+                selected: initialCategory == category,
+              );
+            }).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Cancel'),
+          ),
+        ],
+      );
+    },
+  );
+}
