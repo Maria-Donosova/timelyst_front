@@ -805,9 +805,9 @@ import '../../shared/categories.dart';
 import '../controllers/event_deletion_controller.dart';
 import '../controllers/event_save_controller.dart';
 import 'calendar_selection_widget.dart';
-import 'recurrence_selection_widget.dart';
-import 'category_selection_widget.dart';
-import 'date_time_selection_widget.dart';
+//import 'event_recurrence_selector.dart';
+import 'event_category_selector.dart';
+import 'event_date_time_picker.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
@@ -1052,25 +1052,25 @@ class EventDetailsScreenState extends State<EventDetails> {
     }
   }
 
-  Future<void> _selectRecurrenceRule(BuildContext context) async {
-    final result = await showRecurrenceSelectionDialog(
-      context,
-      initialRecurrence: _recurrence,
-      initialSelectedDays: _selectedDays,
-    );
+  // Future<void> _selectRecurrenceRule(BuildContext context) async {
+  //   final result = await showRecurrenceSelectionDialog(
+  //     context,
+  //     initialRecurrence: _recurrence,
+  //     initialSelectedDays: _selectedDays,
+  //   );
 
-    if (result != null) {
-      setState(() {
-        _recurrence = result['recurrence'];
-        _selectedDays = List<String>.from(result['selectedDays']);
+  //   if (result != null) {
+  //     setState(() {
+  //       _recurrence = result['recurrence'];
+  //       _selectedDays = List<String>.from(result['selectedDays']);
 
-        // Update UI state based on selection
-        if (_recurrence != 'None') {
-          _isRecurring = true;
-        }
-      });
-    }
-  }
+  //       // Update UI state based on selection
+  //       if (_recurrence != 'None') {
+  //         _isRecurring = true;
+  //       }
+  //     });
+  //   }
+  // }
 
   // Future<void> _selectCategory(BuildContext context) async {
   //   final result = await showCategorySelectionDialog(
@@ -1523,7 +1523,7 @@ class EventDetailsScreenState extends State<EventDetails> {
                                       size: Theme.of(context).iconTheme.size,
                                       Icons.event_repeat_rounded),
                                   onPressed: () {
-                                    _selectRecurrenceRule(context);
+                                    //_selectRecurrenceRule(context);
                                     setState(() {
                                       _isRecurring = !_isRecurring;
                                     });
@@ -1550,7 +1550,7 @@ class EventDetailsScreenState extends State<EventDetails> {
                                     size: Theme.of(context).iconTheme.size,
                                     Icons.event_repeat_rounded),
                                 onPressed: () {
-                                  _selectRecurrenceRule(context);
+                                  //_selectRecurrenceRule(context);
                                   setState(() {
                                     _isRecurring = !_isRecurring;
                                   });

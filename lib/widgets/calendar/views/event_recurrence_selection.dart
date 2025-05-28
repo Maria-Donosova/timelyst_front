@@ -1,34 +1,188 @@
+// recurrence_selection_widget.dart
 import 'package:flutter/material.dart';
 
-class EventRecurrenceSelector extends StatelessWidget {
-  final bool isRecurring;
-  final String recurrence;
-  final VoidCallback onRecurrenceSelected;
+Future<Map<String, dynamic>?> showRecurrenceSelectionDialog(
+  BuildContext context, {
+  required String initialRecurrence,
+  required List<String> initialSelectedDays,
+}) async {
+  String recurrence = initialRecurrence;
+  List<String> selectedDays = List.from(initialSelectedDays);
 
-  const EventRecurrenceSelector({
-    Key? key,
-    required this.isRecurring,
-    required this.recurrence,
-    required this.onRecurrenceSelected,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.event_repeat),
-          color: isRecurring
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.secondary,
-          onPressed: onRecurrenceSelected,
+  final result = await showDialog<Map<String, dynamic>>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Select Recurrence'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropdownButton<String>(
+              value: recurrence,
+              items: ['None', 'Daily', 'Weekly', 'Yearly'].map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (value) {
+                recurrence = value ?? 'None';
+              },
+            ),
+            if (recurrence == 'Weekly') ...[
+              SizedBox(height: 16),
+              ...['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) {
+                return CheckboxListTile(
+                  title: Text(day),
+                  value: selectedDays.contains(day),
+                  onChanged: (value) {
+                    if (value == true) {
+                      selectedDays.add(day);
+                    } else {
+                      selectedDays.remove(day);
+                    }
+                  },
+                );
+              }),
+            ],
+          ],
         ),
-        Text(recurrence),
-      ],
-    );
-  }
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, {
+              'recurrence': recurrence,
+              'selectedDays': selectedDays,
+            }),
+            child: Text('Save'),
+          ),
+        ],
+      );
+    },
+  );
+
+  return result;
 }
+// import 'package:flutter/material.dart';
+
+// Future<Map<String, dynamic>?> showRecurrenceSelectionDialog(
+//   BuildContext context, {
+//   required String initialRecurrence,
+//   required List<String> initialSelectedDays,
+// }) async {
+//   String recurrence = initialRecurrence;
+//   List<String> selectedDays = List.from(initialSelectedDays);
+//   List<String> weekdays = [
+//     'Monday',
+//     'Tuesday',
+//     'Wednesday',
+//     'Thursday',
+//     'Friday',
+//     'Saturday',
+//     'Sunday'
+//   ];
+
+//   return await showDialog<Map<String, dynamic>>(
+//     context: context,
+//     builder: (context) {
+//       return StatefulBuilder(
+//         builder: (context, setState) {
+//           return AlertDialog(
+//             title: const Text('Recurrence Pattern'),
+//             content: SingleChildScrollView(
+//               child: Column(
+//                 mainAxisSize: MainAxisSize.min,
+//                 children: [
+//                   DropdownButtonFormField<String>(
+//                     value: recurrence,
+//                     items: const [
+//                       DropdownMenuItem(value: 'None', child: Text('None')),
+//                       DropdownMenuItem(value: 'Daily', child: Text('Daily')),
+//                       DropdownMenuItem(value: 'Weekly', child: Text('Weekly')),
+//                       DropdownMenuItem(value: 'Yearly', child: Text('Yearly')),
+//                     ],
+//                     onChanged: (value) {
+//                       setState(() {
+//                         recurrence = value ?? 'None';
+//                       });
+//                     },
+//                   ),
+//                   const SizedBox(height: 16),
+//                   if (recurrence == 'Weekly')
+//                     Column(
+//                       children: weekdays.map((day) {
+//                         return CheckboxListTile(
+//                           title: Text(day),
+//                           value: selectedDays.contains(day),
+//                           onChanged: (value) {
+//                             setState(() {
+//                               if (value == true) {
+//                                 selectedDays.add(day);
+//                               } else {
+//                                 selectedDays.remove(day);
+//                               }
+//                             });
+//                           },
+//                         );
+//                       }).toList(),
+//                     ),
+//                 ],
+//               ),
+//             ),
+//             actions: [
+//               TextButton(
+//                 onPressed: () => Navigator.pop(context),
+//                 child: const Text('Cancel'),
+//               ),
+//               TextButton(
+//                 onPressed: () => Navigator.pop(context, {
+//                   'recurrence': recurrence,
+//                   'selectedDays': selectedDays,
+//                 }),
+//                 child: const Text('Save'),
+//               ),
+//             ],
+//           );
+//         },
+//       );
+//     },
+//   );
+// }
+
+// import 'package:flutter/material.dart';
+
+// class EventRecurrenceSelector extends StatelessWidget {
+//   final bool isRecurring;
+//   final String recurrence;
+//   final VoidCallback onRecurrenceSelected;
+
+//   const EventRecurrenceSelector({
+//     Key? key,
+//     required this.isRecurring,
+//     required this.recurrence,
+//     required this.onRecurrenceSelected,
+//   }) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       mainAxisSize: MainAxisSize.min,
+//       children: [
+//         IconButton(
+//           icon: const Icon(Icons.event_repeat),
+//           color: isRecurring
+//               ? Theme.of(context).colorScheme.primary
+//               : Theme.of(context).colorScheme.secondary,
+//           onPressed: onRecurrenceSelected,
+//         ),
+//         Text(recurrence),
+//       ],
+//     );
+//   }
+// }
 
 // import 'package:flutter/material.dart';
 
