@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:timelyst_flutter/services/authService.dart';
 
 import 'themes.dart';
 
@@ -29,7 +30,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => TaskProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
-        // ChangeNotifierProvider(create: (_) => CalendarProvider()),
+        ChangeNotifierProvider(
+            create: (_) => CalendarProvider(authService: AuthService())),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
