@@ -18,7 +18,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> checkAuthState() async {
     _isLoggedIn = await _authService.isLoggedIn();
     if (_isLoggedIn) {
-      _userId = await _authService.getUserId(); // Retrieve userId if logged in
+      _userId = await _authService.getUserId();
     }
     notifyListeners();
   }
@@ -26,20 +26,15 @@ class AuthProvider with ChangeNotifier {
   Future<void> login(String email, String password) async {
     _errorMessage = null;
     try {
-      // Call the loginUser function
       final response = await loginUser(email, password);
+      final tokenFromResponse = response['token'];
+      final userIdFromResponse = response['userId'];
 
-      // Extract token and userId from the response
-      final token = response['token'];
-      final userId = response['userId'];
+      await _authService.saveAuthToken(tokenFromResponse);
+      await _authService.saveUserId(userIdFromResponse);
 
-      // Save the token and userId
-      await _authService.saveAuthToken(token);
-      await _authService.saveUserId(userId);
-
-      // Update the provider state
       _isLoggedIn = true;
-      _userId = userId;
+      _userId = userIdFromResponse;
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Failed to login: $e';
@@ -51,18 +46,13 @@ class AuthProvider with ChangeNotifier {
   Future<void> register(String email, String password, String name,
       String lastName, bool consent) async {
     try {
-      // Call the registerUser function
       final response =
           await registerUser(email, password, name, lastName, consent);
-
-      // Extract token, userId, and role from the response
-      final token = response['token'];
-
-      // Save the token and userId
-      await _authService.saveAuthToken(token);
-
-      // Set _isLoggedIn to true
-      _isLoggedIn = true;
+      final tokenFromResponse = response['token'];
+      await _authService.saveAuthToken(tokenFromResponse);
+      // Handle userId and login state as per your app's flow after registration
+      _isLoggedIn = true; // Example: assuming registration logs in
+      // _userId = ... // if returned by register API and auto-login
       notifyListeners();
     } catch (e) {
       print('Error during registration: $e');
@@ -74,7 +64,8 @@ class AuthProvider with ChangeNotifier {
     await _authService.clearAuthToken();
     await _authService.clearUserId();
     _isLoggedIn = false;
-    _userId = null; // Reset userId in the provider
+    _userId = null;
+    // _token = null;
     notifyListeners();
   }
 }
