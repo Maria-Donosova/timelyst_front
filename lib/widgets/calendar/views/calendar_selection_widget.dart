@@ -44,7 +44,8 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
     }
 
     return AlertDialog(
-      title: const Text('Select Calendar(s)'),
+      title: Text('Select Calendar(s)',
+          style: Theme.of(context).textTheme.displayMedium),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
