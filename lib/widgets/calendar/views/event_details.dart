@@ -96,10 +96,10 @@ class EventDetailsScreenState extends State<EventDetails> {
     _selectedCategory = widget._catTitle ?? 'Misc';
     _eventParticipants = TextEditingController(text: widget._participants);
     _allDay = widget._allDay ?? false;
-    _eventCalendar = TextEditingController(
-        text: 'Loading calendars...'); // Initialize _eventCalendar
+    _eventCalendar = TextEditingController(text: 'Loading calendars...');
+    _selectedCalendarId = null; // Initialize _eventCalendar
 
-    _isEditing = widget._id != null && widget._id!.isNotEmpty;
+    // _isEditing = widget._id != null && widget._id!.isNotEmpty;
 
     // It's generally better to fetch data in didChangeDependencies or a post-frame callback
     // if it depends on context, but for simplicity in initState if not context-dependent yet.
@@ -110,80 +110,44 @@ class EventDetailsScreenState extends State<EventDetails> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Fetch calendars if not already fetched
-    if (_calendars.isEmpty) {
-      _fetchCalendarsAndInitializeSelection();
-    }
+    // Schedule the calendar fetch after the current build frame completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_calendars.isEmpty) {
+        _fetchCalendarsAndInitializeSelection();
+      }
+    });
   }
 
   Future<void> _fetchCalendarsAndInitializeSelection() async {
+    // Use AuthProvider now
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final calendarProvider =
         Provider.of<CalendarProvider>(context, listen: false);
 
-    if (authProvider.userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User not authenticated')),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
+    // Access userId and token from AuthProvider
+    if (authProvider.userId != null) {
+      setState(() {
+        _isLoading = true;
+      });
+      // Pass the userId and token from AuthProvider
       await calendarProvider.fetchCalendars(authProvider.userId!);
-
-      // Initialize calendars and selection
       setState(() {
         _calendars = calendarProvider.calendars;
-
-        // Initialize selection - select first calendar by default or previously selected
-        if (_calendars.isNotEmpty) {
-          _selectedCalendarId = widget._id ?? _calendars.first.id;
-          _eventCalendar.text = _calendars
-                  .firstWhere((cal) => cal.id == _selectedCalendarId)
-                  .title ??
-              'Default Calendar';
-        }
+        _selectedCalendars = {
+          for (var cal in _calendars) cal.id!: false,
+        };
+        _isLoading = false;
       });
-    } catch (e) {
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load calendars: ${e.toString()}')),
+        const SnackBar(
+            content: Text('User not authenticated. Cannot fetch calendars.')),
       );
-    } finally {
-      setState(() => _isLoading = false);
     }
   }
-
-  // Future<void> _fetchCalendarsAndInitializeSelection() async {
-  //   // Use AuthProvider now
-  //   final authProvider = Provider.of<AuthProvider>(context, listen: false);
-  //   final calendarProvider =
-  //       Provider.of<CalendarProvider>(context, listen: false);
-
-  //   // Access userId and token from AuthProvider
-  //   if (authProvider.userId != null) {
-  //     setState(() {
-  //       _isLoading = true;
-  //     });
-  //     // Pass the userId and token from AuthProvider
-  //     await calendarProvider.fetchCalendars(authProvider.userId!);
-  //     setState(() {
-  //       _calendars = calendarProvider.calendars;
-  //       _selectedCalendars = {
-  //         for (var cal in _calendars) cal.id!: false,
-  //       };
-  //       _isLoading = false;
-  //     });
-  //   } else {
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //           content: Text('User not authenticated. Cannot fetch calendars.')),
-  //     );
-  //   }
-  // }
 
   @override
   void dispose() {
