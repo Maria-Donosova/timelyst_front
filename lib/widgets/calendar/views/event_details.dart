@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-//import 'package:provider/provider.dart';
+import 'package:provider/provider.dart';
 import '../../../models/calendars.dart';
+import '../../../providers/calendarProvider.dart';
 // import '../../../models/customApp.dart';
 // import '../../../providers/eventProvider.dart';
-import '../../../services/authService.dart';
+import '../../../providers/authProvider.dart'; // Import AuthProvider
 import '../../shared/categories.dart';
 import '../controllers/event_deletion_controller.dart';
 import '../controllers/event_save_controller.dart';
 import 'calendar_selection_widget.dart';
 //import 'event_recurrence_selector.dart';
-import 'event_category_selector.dart';
-import 'event_date_time_picker.dart';
+// import 'event_category_selector.dart';
+// import 'event_date_time_picker.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
@@ -63,15 +64,18 @@ class EventDetailsScreenState extends State<EventDetails> {
   late TextEditingController _eventDescriptionController;
   late TextEditingController _eventLocation;
   late TextEditingController _eventParticipants;
-  TextEditingController? _eventCalendar; // Made nullable
+  late TextEditingController
+      _eventCalendar; // Changed to non-nullable and initialized in initState
 
   final _appFormKey = GlobalKey<FormState>();
   bool isChecked = false;
   bool _isEditing = false;
   bool _isLoading = false;
 
-  List<Calendar> calendars = [];
+  List<Calendar> _calendars = []; // Renamed for clarity and made private
   Map<String, bool> _selectedCalendars = {};
+  String?
+      _selectedCalendarId; // To store the ID of the single selected calendar
 
   bool _allDay = false;
   bool _isRecurring = false;
@@ -89,13 +93,97 @@ class EventDetailsScreenState extends State<EventDetails> {
     _eventLocation = TextEditingController(text: widget._eventLocation);
     _eventDescriptionController =
         TextEditingController(text: widget._eventBody);
-    _selectedCategory = widget._catTitle ?? 'Misc'; // Provide a default value
+    _selectedCategory = widget._catTitle ?? 'Misc';
     _eventParticipants = TextEditingController(text: widget._participants);
-    _allDay = widget._allDay ?? false; // Added null check
+    _allDay = widget._allDay ?? false;
+    _eventCalendar = TextEditingController(
+        text: 'Loading calendars...'); // Initialize _eventCalendar
 
-    // If we have an ID, we're editing an existing event
     _isEditing = widget._id != null && widget._id!.isNotEmpty;
+
+    // It's generally better to fetch data in didChangeDependencies or a post-frame callback
+    // if it depends on context, but for simplicity in initState if not context-dependent yet.
+    // However, CalendarProvider will be accessed via context, so moving to didChangeDependencies.
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Fetch calendars if not already fetched
+    if (_calendars.isEmpty) {
+      _fetchCalendarsAndInitializeSelection();
+    }
+  }
+
+  Future<void> _fetchCalendarsAndInitializeSelection() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final calendarProvider =
+        Provider.of<CalendarProvider>(context, listen: false);
+
+    if (authProvider.userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User not authenticated')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await calendarProvider.fetchCalendars(authProvider.userId!);
+
+      // Initialize calendars and selection
+      setState(() {
+        _calendars = calendarProvider.calendars;
+
+        // Initialize selection - select first calendar by default or previously selected
+        if (_calendars.isNotEmpty) {
+          _selectedCalendarId = widget._id ?? _calendars.first.id;
+          _eventCalendar.text = _calendars
+                  .firstWhere((cal) => cal.id == _selectedCalendarId)
+                  .title ??
+              'Default Calendar';
+        }
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load calendars: ${e.toString()}')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  // Future<void> _fetchCalendarsAndInitializeSelection() async {
+  //   // Use AuthProvider now
+  //   final authProvider = Provider.of<AuthProvider>(context, listen: false);
+  //   final calendarProvider =
+  //       Provider.of<CalendarProvider>(context, listen: false);
+
+  //   // Access userId and token from AuthProvider
+  //   if (authProvider.userId != null) {
+  //     setState(() {
+  //       _isLoading = true;
+  //     });
+  //     // Pass the userId and token from AuthProvider
+  //     await calendarProvider.fetchCalendars(authProvider.userId!);
+  //     setState(() {
+  //       _calendars = calendarProvider.calendars;
+  //       _selectedCalendars = {
+  //         for (var cal in _calendars) cal.id!: false,
+  //       };
+  //       _isLoading = false;
+  //     });
+  //   } else {
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //           content: Text('User not authenticated. Cannot fetch calendars.')),
+  //     );
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -106,7 +194,7 @@ class EventDetailsScreenState extends State<EventDetails> {
     _eventDescriptionController.dispose();
     _eventLocation.dispose();
     _eventParticipants.dispose();
-    _eventCalendar?.dispose(); // Safe disposal
+    _eventCalendar.dispose(); // Now non-nullable, direct disposal
     super.dispose();
   }
 
@@ -234,9 +322,11 @@ class EventDetailsScreenState extends State<EventDetails> {
   }
 
   Future<void> _selectCalendar(BuildContext context) async {
+    if (_calendars.isEmpty) return;
+
     final result = await showCalendarSelectionDialog(
       context,
-      calendars,
+      _calendars,
       initialSelection: _selectedCalendars,
     );
 
@@ -250,7 +340,7 @@ class EventDetailsScreenState extends State<EventDetails> {
             .join(', ');
 
         if (_eventCalendar != null) {
-          _eventCalendar!.text = selectedCalendarNames;
+          _eventCalendar.text = selectedCalendarNames;
         }
       });
     }
@@ -289,149 +379,159 @@ class EventDetailsScreenState extends State<EventDetails> {
   //   }
   // }
 
-  Future<bool> _saveEvent(BuildContext context) async {
-    if (!_appFormKey.currentState!.validate()) {
-      return false;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
+  Future<void> _saveEvent(BuildContext context) async {
     try {
-      final authService = AuthService();
-      final authToken = await authService.getAuthToken();
-      final userId = await authService.getUserId();
+      if (_appFormKey.currentState!.validate()) {
+        _appFormKey.currentState!.save();
+        setState(() {
+          _isLoading = true;
+        });
 
-      if (authToken == null || userId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Authentication error. Please log in again.'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return false;
-      }
+        // Use AuthProvider
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final String? currentUserId = authProvider.userId;
 
-      // Parse date
-      final dateStr = _eventDateController.text;
-      DateTime? eventDate;
-      try {
-        eventDate = DateFormat('MMMM d').parse(dateStr);
-        if (eventDate.year != DateTime.now().year) {
-          eventDate =
-              DateTime(DateTime.now().year, eventDate.month, eventDate.day);
+        if (currentUserId == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Authentication error. Please log in again.')),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          return;
         }
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('Invalid date format. Please use format like "April 26"'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return false;
-      }
 
-      // Parse times
-      TimeOfDay startTime, endTime;
-      try {
-        startTime = _parseTimeString(_eventStartTimeController.text);
-        endTime = _parseTimeString(_eventEndTimeController.text);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('Invalid time format. Please use format like "2:30 PM"'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return false;
-      }
-
-      // Validate end time is after start time
-      if (endTime.hour < startTime.hour ||
-          (endTime.hour == startTime.hour &&
-              endTime.minute <= startTime.minute)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('End time must be after start time'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return false;
-      }
-
-      // Create DateTime objects
-      final start = DateTime(
-        eventDate.year,
-        eventDate.month,
-        eventDate.day,
-        startTime.hour,
-        startTime.minute,
-      );
-
-      final end = DateTime(
-        eventDate.year,
-        eventDate.month,
-        eventDate.day,
-        endTime.hour,
-        endTime.minute,
-      );
-
-      // Prepare event data
-      final Map<String, dynamic> eventData = {
-        'user_id': userId,
-        'createdBy': userId,
-        'event_organizer': userId,
-        'event_title': _eventTitleController.text,
-        'is_AllDay': _allDay,
-        'recurrenceRule': _recurrence != 'None' ? _buildRecurrenceRule() : '',
-        'category': _selectedCategory,
-        'event_attendees': _eventParticipants.text,
-        'event_body': _eventDescriptionController.text,
-        'event_location': _eventLocation.text,
-        'start': start.toIso8601String(),
-        'end': end.toIso8601String(),
-        'isUpdate': widget._id != null && widget._id!.isNotEmpty,
-        'eventId': widget._id,
-        'isAllDay': _allDay,
-      };
-
-      // Use the EventSaveController to save the event
-      final success = await EventSaveController.saveEvent(context, eventData);
-
-      if (success) {
-        // Show success message before navigation
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(widget._id != null && widget._id!.isNotEmpty
-                ? 'Event updated successfully!'
-                : 'Event created successfully!'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-
-        // Safe navigation - check if we can pop before attempting to
-        if (Navigator.of(context).canPop()) {
-          try {
-            Navigator.of(context).pop(true);
-          } catch (e) {
-            print('Navigation error in _saveEvent: $e');
-            // Don't attempt additional navigation here
+        // Parse date
+        final dateStr = _eventDateController.text;
+        DateTime? eventDate;
+        try {
+          eventDate = DateFormat('MMMM d').parse(dateStr);
+          if (eventDate.year != DateTime.now().year) {
+            eventDate =
+                DateTime(DateTime.now().year, eventDate.month, eventDate.day);
           }
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Invalid date format. Please use format like "April 26"'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          return;
         }
-        return true;
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to save event. Please try again.'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
+
+        // Parse times
+        TimeOfDay startTime, endTime;
+        try {
+          startTime = _parseTimeString(_eventStartTimeController.text);
+          endTime = _parseTimeString(_eventEndTimeController.text);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text('Invalid time format. Please use format like "2:30 PM"'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
+        // Validate end time is after start time
+        if (endTime.hour < startTime.hour ||
+            (endTime.hour == startTime.hour &&
+                endTime.minute <= startTime.minute)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('End time must be after start time'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
+        // Create DateTime objects
+        final start = DateTime(
+          eventDate.year,
+          eventDate.month,
+          eventDate.day,
+          startTime.hour,
+          startTime.minute,
         );
-        return false;
+
+        final end = DateTime(
+          eventDate.year,
+          eventDate.month,
+          eventDate.day,
+          endTime.hour,
+          endTime.minute,
+        );
+
+        // Prepare event data
+        final Map<String, dynamic> eventData = {
+          'user_id': currentUserId, // Use currentUserId from AuthProvider
+          'calendar_id': _selectedCalendarId,
+          'createdBy': currentUserId, // Use currentUserId from AuthProvider
+          'event_organizer':
+              currentUserId, // Use currentUserId from AuthProvider
+          'event_title': _eventTitleController.text,
+          'is_AllDay': _allDay,
+          'recurrenceRule': _recurrence != 'None' ? _buildRecurrenceRule() : '',
+          'category': _selectedCategory,
+          'event_attendees': _eventParticipants.text,
+          'event_body': _eventDescriptionController.text,
+          'event_location': _eventLocation.text,
+          'start': start.toIso8601String(),
+          'end': end.toIso8601String(),
+          'isUpdate': widget._id != null && widget._id!.isNotEmpty,
+          'eventId': widget._id,
+          'isAllDay': _allDay,
+        };
+
+        // Use the EventSaveController to save the event
+        final success = await EventSaveController.saveEvent(context, eventData);
+
+        if (success) {
+          // Show success message before navigation
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(widget._id != null && widget._id!.isNotEmpty
+                  ? 'Event updated successfully!'
+                  : 'Event created successfully!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+
+          // Safe navigation - check if we can pop before attempting to
+          if (Navigator.of(context).canPop()) {
+            try {
+              Navigator.of(context).pop(true); // Indicate success
+            } catch (e) {
+              print('Navigation error in _saveEvent: $e');
+              // Don't attempt additional navigation here
+            }
+          }
+          // No return true needed as it's Future<void>
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save event. Please try again.'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } // No return false needed
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -441,7 +541,7 @@ class EventDetailsScreenState extends State<EventDetails> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-      return false;
+      // No return false needed
     } finally {
       setState(() {
         _isLoading = false;
@@ -934,26 +1034,11 @@ class EventDetailsScreenState extends State<EventDetails> {
                                   : () async {
                                       if (_appFormKey.currentState!
                                           .validate()) {
-                                        final success =
-                                            await _saveEvent(context);
-                                        // Only try to pop if we can
-                                        if (success &&
-                                            Navigator.of(context).canPop()) {
-                                          // We already showed success message in _saveEvent
-                                          // Only pop once - the _saveEvent already popped once if possible
-                                          try {
-                                            Navigator.of(context).pop();
-                                          } catch (e) {
-                                            print('Navigation error: $e');
-                                            // Handle the error gracefully
-                                            if (Navigator.of(context)
-                                                .canPop()) {
-                                              Navigator.of(context)
-                                                  .pushReplacementNamed(
-                                                      '/agenda');
-                                            }
-                                          }
-                                        }
+                                        await _saveEvent(context);
+                                        // _saveEvent now handles its own navigation on success.
+                                        // The pop(true) inside _saveEvent will be caught by the showDialog's future if this is inside a dialog.
+                                        // If not, it will just pop the current screen.
+                                        // No need for additional success check and pop here as _saveEvent handles it.
                                       } else {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
