@@ -2,21 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/data/calendars.dart';
 import 'package:timelyst_flutter/models/calendars.dart';
 
+import '../services/authService.dart'; // Import AuthService
+
 class CalendarProvider with ChangeNotifier {
   List<Calendar> _calendars = [];
   bool _isLoading = false;
   String _errorMessage = '';
 
+  final AuthService authService;
+
+  CalendarProvider({required this.authService});
   List<Calendar> get calendars => _calendars;
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  // Fetch all calendars for a user
-  Future<void> fetchCalendars(String userId, String authToken) async {
+  Future<void> fetchCalendars(String userId) async {
     _isLoading = true;
     notifyListeners();
 
     try {
+      String? authToken = await authService.getAuthToken();
+      if (authToken == null) {
+        throw Exception('User not authenticated');
+      }
+      // CalendarsService.fetchUserCalendars now takes the token directly
       _calendars = await CalendarsService.fetchUserCalendars(userId, authToken);
       _errorMessage = '';
     } catch (e) {
