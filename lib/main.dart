@@ -28,10 +28,12 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
+        Provider<AuthService>(create: (_) => AuthService()),
         ChangeNotifierProvider(create: (_) => TaskProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
         ChangeNotifierProvider(
-            create: (_) => CalendarProvider(authService: AuthService())),
+            create: (context) => CalendarProvider(
+                authService: Provider.of<AuthService>(context, listen: false))),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
