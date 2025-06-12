@@ -278,6 +278,9 @@ class EventDetailsScreenState extends State<EventDetails> {
   }
 
   Future<void> _selectCalendar(BuildContext context) async {
+    print("Entering _selectCalendar in event details");
+    print("Calendars: $_calendars");
+
     if (_calendars.isEmpty) return;
 
     final result = await showCalendarSelectionDialog(
@@ -296,31 +299,6 @@ class EventDetailsScreenState extends State<EventDetails> {
       });
     }
   }
-
-  // Future<void> _selectCalendar(BuildContext context) async {
-  //   if (_calendars.isEmpty) return;
-
-  //   final result = await showCalendarSelectionDialog(
-  //     context,
-  //     _calendars,
-  //     initialSelection: _selectedCalendars,
-  //   );
-
-  //   if (result != null) {
-  //     setState(() {
-  //       _selectedCalendars = result;
-  //       // Update the calendar text field if needed
-  //       final selectedCalendarNames = result.entries
-  //           .where((entry) => entry.value)
-  //           .map((entry) => entry.key)
-  //           .join(', ');
-
-  //       if (_eventCalendar != null) {
-  //         _eventCalendar.text = selectedCalendarNames;
-  //       }
-  //     });
-  //   }
-  // }
 
   // Future<void> _selectRecurrenceRule(BuildContext context) async {
   //   final result = await showRecurrenceSelectionDialog(
