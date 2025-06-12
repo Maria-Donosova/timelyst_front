@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:timelyst_flutter/providers/calendarProvider.dart';
+import 'package:timelyst_flutter/services/authService.dart';
 import '../../../models/calendars.dart';
-import '../../shared/categories.dart';
+//import '../../shared/categories.dart';
 
 class CalendarSelectionWidget extends StatefulWidget {
-  final List<Calendar> calendars;
-  final List<Calendar> initiallySelected;
-
   const CalendarSelectionWidget({
     Key? key,
-    required this.calendars,
-    required this.initiallySelected,
   }) : super(key: key);
 
   @override
@@ -18,12 +16,43 @@ class CalendarSelectionWidget extends StatefulWidget {
 }
 
 class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
-  late List<Calendar> _selectedCalendars;
+  List<Calendar> _selectedCalendars = [];
+  late CalendarProvider _calendarProvider;
+  late AuthService _authService;
+  bool _isLoading = false;
+  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _selectedCalendars = List.from(widget.initiallySelected);
+    _authService = Provider.of<AuthService>(context, listen: false);
+    _calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+    _loadCalendars();
+  }
+
+  Future<void> _loadCalendars() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+    try {
+      final userId = _authService.getUserId();
+      await _calendarProvider.fetchCalendars(userId as String);
+      setState(() {
+        _selectedCalendars = List.from(_calendarProvider.calendars);
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to load calendars: $e';
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_errorMessage)),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _toggleCalendar(Calendar calendar, bool selected) {
@@ -83,9 +112,18 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("entering calendar selection widget");
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage.isNotEmpty) {
+      return Center(child: Text(_errorMessage));
+    }
+
     final groupedCalendars = <String, List<Calendar>>{};
 
-    for (final calendar in widget.calendars) {
+    for (final calendar in _calendarProvider.calendars) {
       final category = calendar.category ?? 'Other';
       groupedCalendars.putIfAbsent(category, () => []).add(calendar);
     }
@@ -133,15 +171,10 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
 }
 
 Future<List<Calendar>?> showCalendarSelectionDialog(
-  BuildContext context, {
-  required List<Calendar> availableCalendars,
-  required List<Calendar> initiallySelected,
-}) async {
+  BuildContext context,
+) async {
   return await showDialog<List<Calendar>>(
     context: context,
-    builder: (context) => CalendarSelectionWidget(
-      calendars: availableCalendars,
-      initiallySelected: initiallySelected,
-    ),
+    builder: (context) => const CalendarSelectionWidget(),
   );
 }
