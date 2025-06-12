@@ -72,7 +72,7 @@ class EventDetailsScreenState extends State<EventDetails> {
   bool _isEditing = false;
   bool _isLoading = false;
 
-  List<Calendar> _calendars = []; // Renamed for clarity and made private
+  List<Calendar> _calendars = [];
   Map<String, bool> _selectedCalendars = {};
   String?
       _selectedCalendarId; // To store the ID of the single selected calendar
@@ -98,12 +98,6 @@ class EventDetailsScreenState extends State<EventDetails> {
     _allDay = widget._allDay ?? false;
     _eventCalendar = TextEditingController(text: 'Loading calendars...');
     _selectedCalendarId = null; // Initialize _eventCalendar
-
-    // _isEditing = widget._id != null && widget._id!.isNotEmpty;
-
-    // It's generally better to fetch data in didChangeDependencies or a post-frame callback
-    // if it depends on context, but for simplicity in initState if not context-dependent yet.
-    // However, CalendarProvider will be accessed via context, so moving to didChangeDependencies.
   }
 
   @override
@@ -999,10 +993,6 @@ class EventDetailsScreenState extends State<EventDetails> {
                                       if (_appFormKey.currentState!
                                           .validate()) {
                                         await _saveEvent(context);
-                                        // _saveEvent now handles its own navigation on success.
-                                        // The pop(true) inside _saveEvent will be caught by the showDialog's future if this is inside a dialog.
-                                        // If not, it will just pop the current screen.
-                                        // No need for additional success check and pop here as _saveEvent handles it.
                                       } else {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
