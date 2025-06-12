@@ -100,36 +100,8 @@ class EventDetailsScreenState extends State<EventDetails> {
     _allDay = widget._allDay ?? false;
     _selectedCalendarId =
         widget._calendarId; // Initialize _selectedCalendarId from widget
-    _eventCalendar = TextEditingController(
-        text: _selectedCalendarId != null
-            ? 'Selected Calendar'
-            : 'Loading calendars...'); // Update text based on initial selection
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_selectedCalendarId != null && _selectedCalendars.isEmpty) {
-      final calendarProvider =
-          Provider.of<CalendarProvider>(context, listen: false);
-      final selectedCalendar = calendarProvider.calendars.firstWhere(
-        (cal) => cal.id == _selectedCalendarId,
-        orElse: () => Calendar(
-            id: 'unknown',
-            title: 'Unknown Calendar',
-            color: 0xFFFFFFFF,
-            isDefault: false,
-            isPrimary: false,
-            type: 'local',
-            user: ''),
-      );
-      if (selectedCalendar.id != 'unknown') {
-        _selectedCalendars.add(selectedCalendar);
-        _eventCalendar.text = selectedCalendar.title;
-      } else {
-        _eventCalendar.text = 'Calendar not found';
-      }
-    }
+    _eventCalendar =
+        TextEditingController(text: ''); // Initialize with empty text
   }
 
   @override
@@ -279,9 +251,11 @@ class EventDetailsScreenState extends State<EventDetails> {
         _selectedCalendars = result;
 
         if (result.isNotEmpty) {
+          _selectedCalendars = result;
           _selectedCalendarId = result.first.id;
           _eventCalendar.text = result.first.title;
         } else {
+          _selectedCalendars = [];
           _selectedCalendarId = null;
           _eventCalendar.text = 'No calendar selected';
         }
