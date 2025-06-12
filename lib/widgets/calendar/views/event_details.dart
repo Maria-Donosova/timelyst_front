@@ -28,6 +28,7 @@ class EventDetails extends StatefulWidget {
     String? participants,
     String? body,
     String? location,
+    String? calendarId,
   })  : _id = id,
         _subject = subject,
         _dateText = dateText,
@@ -38,7 +39,8 @@ class EventDetails extends StatefulWidget {
         _catTitle = catTitle,
         _participants = participants,
         _eventBody = body,
-        _eventLocation = location;
+        _eventLocation = location,
+        _calendarId = calendarId;
 
   final String? _id;
   final String? _subject;
@@ -51,6 +53,7 @@ class EventDetails extends StatefulWidget {
   final String? _participants;
   final String? _eventBody;
   final String? _eventLocation;
+  final String? _calendarId;
 
   @override
   State<EventDetails> createState() => EventDetailsScreenState();
@@ -72,8 +75,6 @@ class EventDetailsScreenState extends State<EventDetails> {
   bool _isEditing = false;
   bool _isLoading = false;
 
-  List<Calendar> _calendars = [];
-  //Map<String, bool> _selectedCalendars = {};
   List<Calendar> _selectedCalendars = [];
   String?
       _selectedCalendarId; // To store the ID of the single selected calendar
@@ -97,47 +98,37 @@ class EventDetailsScreenState extends State<EventDetails> {
     _selectedCategory = widget._catTitle ?? 'Misc';
     _eventParticipants = TextEditingController(text: widget._participants);
     _allDay = widget._allDay ?? false;
-    _eventCalendar = TextEditingController(text: 'Loading calendars...');
-    _selectedCalendarId = null; // Initialize _eventCalendar
+    _selectedCalendarId =
+        widget._calendarId; // Initialize _selectedCalendarId from widget
+    _eventCalendar = TextEditingController(
+        text: _selectedCalendarId != null
+            ? 'Selected Calendar'
+            : 'Loading calendars...'); // Update text based on initial selection
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Fetch calendars if not already fetched
-    // Schedule the calendar fetch after the current build frame completes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_calendars.isEmpty) {
-        _fetchCalendarsAndInitializeSelection();
-      }
-    });
-  }
-
-  Future<void> _fetchCalendarsAndInitializeSelection() async {
-    // Use AuthProvider now
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final calendarProvider =
-        Provider.of<CalendarProvider>(context, listen: false);
-
-    // Access userId and token from AuthProvider
-    if (authProvider.userId != null) {
-      setState(() {
-        _isLoading = true;
-      });
-      // Pass the userId and token from AuthProvider
-      await calendarProvider.fetchCalendars(authProvider.userId!);
-      setState(() {
-        _calendars = calendarProvider.calendars;
-        _isLoading = false;
-      });
-    } else {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('User not authenticated. Cannot fetch calendars.')),
+    if (_selectedCalendarId != null && _selectedCalendars.isEmpty) {
+      final calendarProvider =
+          Provider.of<CalendarProvider>(context, listen: false);
+      final selectedCalendar = calendarProvider.calendars.firstWhere(
+        (cal) => cal.id == _selectedCalendarId,
+        orElse: () => Calendar(
+            id: 'unknown',
+            title: 'Unknown Calendar',
+            color: 0xFFFFFFFF,
+            isDefault: false,
+            isPrimary: false,
+            type: 'local',
+            user: ''),
       );
+      if (selectedCalendar.id != 'unknown') {
+        _selectedCalendars.add(selectedCalendar);
+        _eventCalendar.text = selectedCalendar.title;
+      } else {
+        _eventCalendar.text = 'Calendar not found';
+      }
     }
   }
 
@@ -279,22 +270,20 @@ class EventDetailsScreenState extends State<EventDetails> {
 
   Future<void> _selectCalendar(BuildContext context) async {
     print("Entering _selectCalendar in event details");
-    print("Calendars: $_calendars");
-
-    if (_calendars.isEmpty) return;
-
     final result = await showCalendarSelectionDialog(
       context,
-      availableCalendars: _calendars,
-      initiallySelected: _selectedCalendars,
     );
 
     if (result != null) {
       setState(() {
         _selectedCalendars = result;
 
-        if (_eventCalendar != null) {
-          _eventCalendar.text = result.map((c) => c.title).join(', ');
+        if (result.isNotEmpty) {
+          _selectedCalendarId = result.first.id;
+          _eventCalendar.text = result.first.title;
+        } else {
+          _selectedCalendarId = null;
+          _eventCalendar.text = 'No calendar selected';
         }
       });
     }
@@ -434,7 +423,9 @@ class EventDetailsScreenState extends State<EventDetails> {
         // Prepare event data
         final Map<String, dynamic> eventData = {
           'user_id': currentUserId, // Use currentUserId from AuthProvider
-          'calendar_id': _selectedCalendarId,
+          'calendar_id': _selectedCalendars.isNotEmpty
+              ? _selectedCalendars.first.id
+              : null,
           'createdBy': currentUserId, // Use currentUserId from AuthProvider
           'event_organizer':
               currentUserId, // Use currentUserId from AuthProvider
@@ -667,6 +658,15 @@ class EventDetailsScreenState extends State<EventDetails> {
                     crossAxisAlignment: WrapCrossAlignment.end,
                     spacing: 8,
                     children: [
+                      TextFormField(
+                        controller: _eventCalendar,
+                        readOnly: true, // Make it read-only
+                        decoration: InputDecoration(
+                          labelText: 'Calendar',
+                          labelStyle: Theme.of(context).textTheme.bodyLarge,
+                          border: InputBorder.none,
+                        ),
+                      ),
                       SizedBox(
                         width: 100,
                         child: TextFormField(
