@@ -73,7 +73,8 @@ class EventDetailsScreenState extends State<EventDetails> {
   bool _isLoading = false;
 
   List<Calendar> _calendars = [];
-  Map<String, bool> _selectedCalendars = {};
+  //Map<String, bool> _selectedCalendars = {};
+  List<Calendar> _selectedCalendars = [];
   String?
       _selectedCalendarId; // To store the ID of the single selected calendar
 
@@ -127,9 +128,6 @@ class EventDetailsScreenState extends State<EventDetails> {
       await calendarProvider.fetchCalendars(authProvider.userId!);
       setState(() {
         _calendars = calendarProvider.calendars;
-        _selectedCalendars = {
-          for (var cal in _calendars) cal.id!: false,
-        };
         _isLoading = false;
       });
     } else {
@@ -284,25 +282,45 @@ class EventDetailsScreenState extends State<EventDetails> {
 
     final result = await showCalendarSelectionDialog(
       context,
-      _calendars,
-      initialSelection: _selectedCalendars,
+      availableCalendars: _calendars,
+      initiallySelected: _selectedCalendars,
     );
 
     if (result != null) {
       setState(() {
         _selectedCalendars = result;
-        // Update the calendar text field if needed
-        final selectedCalendarNames = result.entries
-            .where((entry) => entry.value)
-            .map((entry) => entry.key)
-            .join(', ');
 
         if (_eventCalendar != null) {
-          _eventCalendar.text = selectedCalendarNames;
+          _eventCalendar.text = result.map((c) => c.title).join(', ');
         }
       });
     }
   }
+
+  // Future<void> _selectCalendar(BuildContext context) async {
+  //   if (_calendars.isEmpty) return;
+
+  //   final result = await showCalendarSelectionDialog(
+  //     context,
+  //     _calendars,
+  //     initialSelection: _selectedCalendars,
+  //   );
+
+  //   if (result != null) {
+  //     setState(() {
+  //       _selectedCalendars = result;
+  //       // Update the calendar text field if needed
+  //       final selectedCalendarNames = result.entries
+  //           .where((entry) => entry.value)
+  //           .map((entry) => entry.key)
+  //           .join(', ');
+
+  //       if (_eventCalendar != null) {
+  //         _eventCalendar.text = selectedCalendarNames;
+  //       }
+  //     });
+  //   }
+  // }
 
   // Future<void> _selectRecurrenceRule(BuildContext context) async {
   //   final result = await showRecurrenceSelectionDialog(
