@@ -36,8 +36,14 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
       _errorMessage = '';
     });
     try {
-      final userId = _authService.getUserId();
-      await _calendarProvider.fetchCalendars(userId as String);
+      final userId = await _authService.getUserId();
+      if (userId == null) {
+        setState(() {
+          _errorMessage = 'User ID not available. Please log in.';
+        });
+        return;
+      }
+      await _calendarProvider.fetchCalendars(userId);
       setState(() {
         _selectedCalendars = List.from(_calendarProvider.calendars);
       });
@@ -130,7 +136,7 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
 
     return AlertDialog(
       title: Text('Select Calendars',
-          style: Theme.of(context).textTheme.headlineSmall),
+          style: Theme.of(context).textTheme.titleMedium),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -159,11 +165,27 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+          ),
+          child: Text(
+            'Cancel',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSecondary,
+            ),
+          ),
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(context, _selectedCalendars),
-          child: const Text('Confirm'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+          ),
+          child: Text(
+            'Confirm',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSecondary,
+            ),
+          ),
         ),
       ],
     );
