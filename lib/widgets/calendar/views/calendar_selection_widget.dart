@@ -49,7 +49,7 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
         return;
       }
 
-      await _calendarProvider.fetchCalendars(userId);
+      await _calendarProvider.loadInitialCalendars();
 
       // Initialize selection with any new calendars that match initially selected IDs
       if (widget.initiallySelectedCalendars != null) {
