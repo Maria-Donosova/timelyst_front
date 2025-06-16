@@ -253,7 +253,7 @@ class EventDetailsScreenState extends State<EventDetails> {
         if (result.isNotEmpty) {
           _selectedCalendars = result;
           _selectedCalendarId = result.first.id;
-          _eventCalendar.text = result.first.title;
+          _eventCalendar.text = result.first.metadata.title;
         } else {
           _selectedCalendars = [];
           _selectedCalendarId = null;
