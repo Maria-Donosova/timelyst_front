@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'agenda.dart';
 import '../../models/calendars.dart';
@@ -255,7 +257,11 @@ class _CalendarSettingsState extends State<CalendarSettings> {
         importBody: calendar.importBody,
         importConferenceInfo: calendar.importConferenceInfo,
         importOrganizer: calendar.importOrganizer,
-        importRecipients: calendar.importRecipients,
+        //importRecipients: json['importRecipients'] ?? false,
+        color: 0xFFA4BDFC,
+        isDefault: false,
+        isPrimary: false,
+        type: '',
       );
     }).toList();
 
