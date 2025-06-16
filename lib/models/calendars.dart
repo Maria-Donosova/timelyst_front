@@ -43,6 +43,32 @@ class Calendar {
     );
   }
 
+  Calendar copyWith({
+    String? id,
+    String? userId,
+    CalendarSource? source,
+    String? providerCalendarId,
+    bool? isSelected,
+    bool? isPrimary,
+    CalendarMetadata? metadata,
+    CalendarPreferences? preferences,
+    CalendarSyncInfo? sync,
+    List<String>? eventCount,
+  }) {
+    return Calendar(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      source: source ?? this.source,
+      providerCalendarId: providerCalendarId ?? this.providerCalendarId,
+      isSelected: isSelected ?? this.isSelected,
+      isPrimary: isPrimary ?? this.isPrimary,
+      metadata: metadata ?? this.metadata,
+      preferences: preferences ?? this.preferences,
+      sync: sync ?? this.sync,
+      eventCount: eventCount ?? this.eventCount,
+    );
+  }
+
   static CalendarSource _parseSource(String source) {
     switch (source.toUpperCase()) {
       case 'GOOGLE':
@@ -175,7 +201,7 @@ class CalendarMetadata {
 }
 
 class CalendarPreferences {
-  final CalendarImportSettings importSettings;
+  late final CalendarImportSettings importSettings;
   final String? category;
   final Color? userColor;
 
@@ -203,6 +229,18 @@ class CalendarPreferences {
           ? '#${userColor!.value.toRadixString(16).padLeft(8, '0')}'
           : null,
     };
+  }
+
+  CalendarPreferences copyWith({
+    CalendarImportSettings? importSettings,
+    String? category,
+    Color? userColor,
+  }) {
+    return CalendarPreferences(
+      importSettings: importSettings ?? this.importSettings,
+      category: category ?? this.category,
+      userColor: userColor ?? this.userColor,
+    );
   }
 }
 
@@ -336,6 +374,24 @@ class CalendarImportSettings {
       'importOrganizer': importOrganizer,
       'importRecipients': importRecipients,
     };
+  }
+
+  CalendarImportSettings copyWith({
+    bool? importAll,
+    bool? importSubject,
+    bool? importBody,
+    bool? importConferenceInfo,
+    bool? importOrganizer,
+    bool? importRecipients,
+  }) {
+    return CalendarImportSettings(
+      importAll: importAll ?? this.importAll,
+      importSubject: importSubject ?? this.importSubject,
+      importBody: importBody ?? this.importBody,
+      importConferenceInfo: importConferenceInfo ?? this.importConferenceInfo,
+      importOrganizer: importOrganizer ?? this.importOrganizer,
+      importRecipients: importRecipients ?? this.importRecipients,
+    );
   }
 }
 
