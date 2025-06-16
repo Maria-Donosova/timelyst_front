@@ -239,7 +239,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
               onChanged: (String? value) => setState(() {
                 if (value == null) return;
 
-                _selectedCategories[index] = value!;
+                _selectedCategories[index] = value;
 
                 // Create new calendar with updated preferences
                 final updatedCalendar = widget.calendars[index].copyWith(
