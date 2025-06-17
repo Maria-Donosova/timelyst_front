@@ -2,8 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/models/calendars.dart';
+
 import './../data/calendars.dart';
 import './../services/authService.dart';
+
+import 'eventProvider.dart';
 
 class CalendarProvider with ChangeNotifier {
   // State management
@@ -17,6 +20,9 @@ class CalendarProvider with ChangeNotifier {
   final int _pageSize = 20;
   final AuthService _authService;
   String? _userId;
+
+  // New: Track which calendars have loaded events
+  final Set<String> _calendarsWithLoadedEvents = {};
 
   // Cache for calendar events
   final Map<String, List<CalendarEvent>> _eventsCache = {};
