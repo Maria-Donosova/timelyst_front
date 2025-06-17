@@ -4,12 +4,34 @@ import 'package:timelyst_flutter/models/customApp.dart';
 
 class EventProvider with ChangeNotifier {
   List<CustomAppointment> _events = [];
+  // Change from List<CustomAppointment> to a map by calendar ID
+  final Map<String, List<CustomAppointment>> _eventsByCalendar = {};
+
   bool _isLoading = false;
   String _errorMessage = '';
 
   List<CustomAppointment> get events => _events;
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
+
+  // Add calendar-specific event methods, uncomment once ready to switch from calendar agnostic to calendar aware approach
+  // Future<void> fetchEventsForCalendar(String calendarId) async {
+  //   _isLoading = true;
+  //   notifyListeners();
+
+  //   try {
+  //     final events =
+  //         await EventService.fetchEventsForCalendar(calendarId, authToken);
+  //     _eventsByCalendar[calendarId] = events;
+  //   } finally {
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   }
+  // }
+
+  // List<CustomAppointment> getEventsForCalendar(String calendarId) {
+  //   return _eventsByCalendar[calendarId] ?? [];
+  // }
 
   // Fetch day events
   Future<void> fetchDayEvents(String userId, String authToken) async {
