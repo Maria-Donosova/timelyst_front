@@ -7,6 +7,7 @@ class Calendar {
   final String userId;
   final CalendarSource source;
   final String providerCalendarId;
+  final String email;
   final bool isSelected;
   final bool isPrimary;
   final CalendarMetadata metadata;
@@ -19,6 +20,7 @@ class Calendar {
     required this.userId,
     required this.source,
     required this.providerCalendarId,
+    required this.email,
     required this.isSelected,
     required this.isPrimary,
     required this.metadata,
@@ -33,6 +35,7 @@ class Calendar {
       userId: json['user'] ?? '',
       source: _parseSource(json['source']),
       providerCalendarId: json['providerCalendarId'] ?? '',
+      email: json['email'] ?? '',
       isSelected: json['isSelected'] ?? false,
       isPrimary: json['isPrimary'] ?? false,
       metadata: CalendarMetadata.fromJson(json['metadata'] ?? {}),
@@ -48,6 +51,7 @@ class Calendar {
     String? userId,
     CalendarSource? source,
     String? providerCalendarId,
+    String? email,
     bool? isSelected,
     bool? isPrimary,
     CalendarMetadata? metadata,
@@ -60,6 +64,7 @@ class Calendar {
       userId: userId ?? this.userId,
       source: source ?? this.source,
       providerCalendarId: providerCalendarId ?? this.providerCalendarId,
+      email: email ?? this.email,
       isSelected: isSelected ?? this.isSelected,
       isPrimary: isPrimary ?? this.isPrimary,
       metadata: metadata ?? this.metadata,
@@ -82,7 +87,7 @@ class Calendar {
     }
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson({required email}) {
     return {
       'id': id,
       'user': userId,
@@ -104,6 +109,7 @@ class Calendar {
       userId: json['user'] ?? '',
       source: _parseSource(json['sourceCalendar'] ?? 'Google'),
       providerCalendarId: json['calendarId'] ?? '',
+      email: json['email'] ?? '',
       isSelected: json['isSelected'] ?? false,
       isPrimary: json['isPrimary'] ?? false,
       metadata: CalendarMetadata(
