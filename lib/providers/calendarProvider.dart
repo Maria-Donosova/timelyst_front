@@ -6,7 +6,7 @@ import 'package:timelyst_flutter/models/calendars.dart';
 import './../data/calendars.dart';
 import './../services/authService.dart';
 
-import 'eventProvider.dart';
+//import 'eventProvider.dart';
 
 class CalendarProvider with ChangeNotifier {
   // State management
@@ -281,7 +281,7 @@ class CalendarProvider with ChangeNotifier {
         throw CalendarServiceException('User not authenticated');
 
       final result = await CalendarsService.fetchUserCalendars(
-        _userId!, // Now passing the user ID
+        userId: _userId!, // Now passing the user ID
         authToken: authToken,
         limit: _pageSize,
         offset: _currentOffset,

@@ -40,7 +40,7 @@ class _AccountSettingsState extends State<AccountSettings> {
       if (token == null) throw Exception('No authentication token available');
 
       final paginatedCalendars = await CalendarsService.fetchUserCalendars(
-        widget.userId,
+        userId: widget.userId,
         authToken: token,
       );
 

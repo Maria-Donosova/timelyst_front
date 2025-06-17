@@ -6,8 +6,9 @@ import '../../config/env_variables_config.dart';
 
 class CalendarsService {
   static Future<PaginatedCalendars> fetchUserCalendars({
+    required String userId,
     required String authToken,
-    int limit = 50,
+    int limit = 20,
     int offset = 0,
   }) async {
     //logger.i('Fetching user calendars with limit $limit and offset $offset');
