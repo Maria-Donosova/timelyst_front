@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../widgets/shared/customAppbar.dart';
-import '../../widgets/layout/left_panel.dart';
-import '../../widgets/layout/right_panel.dart';
+import '../../widgets/layout/leftPanel.dart';
+import '../../widgets/layout/rightPanel.dart';
 
 class Agenda extends StatelessWidget {
   const Agenda({
