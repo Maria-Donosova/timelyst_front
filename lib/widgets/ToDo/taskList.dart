@@ -6,10 +6,10 @@ import 'package:timelyst_flutter/models/task.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
 import 'package:timelyst_flutter/services/authService.dart';
 //import 'package:timelyst_flutter/widgets/shared/categories.dart';
-import '../../widgets/ToDo/task_item.dart';
-import '../../widgets/ToDo/new_task.dart';
-import '../../widgets/ToDo/delete_task.dart';
-import '../../widgets/ToDo/done_task.dart';
+import '../../widgets/ToDo/taskItem.dart';
+import '../../widgets/ToDo/newTask.dart';
+import '../../widgets/ToDo/deleteTask.dart';
+import '../../widgets/ToDo/doneTask.dart';
 
 class TaskListW extends StatefulWidget {
   @override
