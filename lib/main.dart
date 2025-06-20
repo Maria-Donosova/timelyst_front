@@ -11,7 +11,7 @@ import 'providers/eventProvider.dart';
 import 'providers/taskProvider.dart';
 
 import '../../screens/common/logIn.dart';
-import '../../services/googleIntegration/googleSignInOut.dart';
+import '../../ext_apis/googleIntegration/googleSignInOut.dart';
 
 Future main() async {
   await dotenv.load(fileName: 'lib/.env');

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/googleIntegration/googleOrchestrator.dart';
+import '../../ext_apis/googleIntegration/googleOrchestrator.dart';
 import '../../models/calendars.dart';
 
 class CalendarSelectionScreen extends StatefulWidget {
