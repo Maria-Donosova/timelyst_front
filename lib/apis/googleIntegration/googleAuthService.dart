@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_sign_in_web/web_only.dart';
 
-import '../authService.dart';
-import '../../config/env_variables_config.dart';
+import '../../services/authService.dart';
+import '../../config/envVariablesConfig.dart';
 
 class GoogleAuthService {
   // Method for requesting server authentication code

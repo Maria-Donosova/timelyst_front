@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:timelyst_flutter/config/env_variables_config.dart';
+import '../../config/envVariablesConfig.dart';
 import 'package:timelyst_flutter/services/authService.dart';
 import '../../models/calendars.dart';
 

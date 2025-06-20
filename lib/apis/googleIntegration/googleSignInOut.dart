@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../../config/env_variables_config.dart';
+import '../../config/envVariablesConfig.dart';
 
 import 'googleAuthService.dart';
 
