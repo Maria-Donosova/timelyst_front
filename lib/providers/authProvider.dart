@@ -4,7 +4,9 @@ import '../data/loginUser.dart';
 import '../data/registerUser.dart';
 
 class AuthProvider with ChangeNotifier {
-  final AuthService _authService = AuthService();
+  final AuthService _authService;
+
+  AuthProvider(this._authService);
 
   bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
