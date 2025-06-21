@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../ext_apis/googleIntegration/googleSignInOut.dart';
+import '../../apis/googleIntegration/googleSignInOut.dart';
 import '../../services/authService.dart';
 import '../../screens/common/connectCalendars.dart';
 import '../../screens/common/account.dart';
