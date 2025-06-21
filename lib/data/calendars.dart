@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../models/calendars.dart';
-import '../../config/env_variables_config.dart';
+import '../../config/envVarConfig.dart';
 //import '../../utils/logger.dart';
 
 class CalendarsService {

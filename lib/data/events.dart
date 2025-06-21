@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../../config/env_variables_config.dart';
+import '../../config/envVarConfig.dart';
 import '../../models/customApp.dart';
 import '../../models/dayEvent.dart';
 import '../../models/timeEvent.dart';

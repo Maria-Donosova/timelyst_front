@@ -7,9 +7,9 @@ import '../../../providers/calendarProvider.dart';
 // import '../../../providers/eventProvider.dart';
 import '../../../providers/authProvider.dart'; // Import AuthProvider
 import '../../shared/categories.dart';
-import '../controllers/event_deletion_controller.dart';
-import '../controllers/event_save_controller.dart';
-import 'calendar_selection_widget.dart';
+import '../controllers/eventDeletionController.dart';
+import '../controllers/eventSaveController.dart';
+import '../../shared/calendarSelection.dart';
 //import 'event_recurrence_selector.dart';
 // import 'event_category_selector.dart';
 // import 'event_date_time_picker.dart';

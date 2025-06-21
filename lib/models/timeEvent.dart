@@ -1,4 +1,4 @@
-import '../../utils/date_utils.dart';
+import '../../utils/dateUtils.dart';
 
 class TimeEvent {
   final String id;

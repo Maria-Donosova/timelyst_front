@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../config/env_variables_config.dart';
+import '../../config/envVarConfig.dart';
 
 import '../../models/task.dart';
 

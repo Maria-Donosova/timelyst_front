@@ -5,10 +5,10 @@ import 'package:intl/intl.dart';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-import '../views/week_days.dart';
-import '../views/appointment_cell_builder.dart';
-import '../views/monthly_appointment_cell_builder.dart';
-import '../views/event_details.dart';
+import '../views/weekDays.dart';
+import '../views/appointmentCellBuilder.dart';
+import '../views/monthlyAppointmentCellBuilder.dart';
+import '../views/eventDetails.dart';
 import '../../../models/customApp.dart';
 import '../../../providers/authProvider.dart';
 import '../../../providers/eventProvider.dart';

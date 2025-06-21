@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/customApp.dart';
 import '../models/timeEvent.dart';
 import '../models/dayEvent.dart';
-import '../../utils/date_utils.dart';
+import '../../utils/dateUtils.dart';
 
 class EventMapper {
   static CustomAppointment mapDayEventToCustomAppointment(DayEvent dayEvent) {
