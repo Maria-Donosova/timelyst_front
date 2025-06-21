@@ -1,5 +1,5 @@
 import 'package:http/http.dart' as http;
-import 'package:timelyst_flutter/config/env_variables_config.dart';
+import 'package:timelyst_flutter/config/envVarConfig.dart';
 import 'dart:convert';
 
 import '../services/authService.dart';
