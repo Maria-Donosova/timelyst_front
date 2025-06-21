@@ -10,17 +10,20 @@ import 'providers/calendarProvider.dart';
 import 'providers/eventProvider.dart';
 import 'providers/taskProvider.dart';
 
-import '../../screens/common/logIn.dart';
-import '../../ext_apis/googleIntegration/googleSignInOut.dart';
+import 'package:timelyst_flutter/screens/common/logIn.dart';
+import 'package:timelyst_flutter/apis/googleIntegration/googleSignInOut.dart';
 
 Future main() async {
   await dotenv.load(fileName: 'lib/.env');
   GoogleSignInOutService().initialize();
-  runApp(const MyApp());
+  // Create an instance of AuthService
+  final authService = AuthService();
+  runApp(MyApp(authService: authService));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthService authService;
+  const MyApp({super.key, required this.authService});
 
   // This widget is the root of your application.
   @override
@@ -28,12 +31,13 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
-        Provider<AuthService>(create: (_) => AuthService()),
+        // Provide the authService instance that was created in main()
+        Provider<AuthService>.value(value: authService),
         ChangeNotifierProvider(create: (_) => TaskProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
+        // Pass the authService instance directly to CalendarProvider
         ChangeNotifierProvider(
-            create: (context) => CalendarProvider(
-                authService: Provider.of<AuthService>(context, listen: false))),
+            create: (_) => CalendarProvider(authService: authService)),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
