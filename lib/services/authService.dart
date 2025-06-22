@@ -1,37 +1,101 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:jwt_decode/jwt_decode.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:timelyst_flutter/config/envVarConfig.dart';
 
 class AuthService {
-  static final AuthService _instance = AuthService._internal();
-  factory AuthService() => _instance;
-  AuthService._internal();
-
   static const String _authTokenKey = 'authToken';
   static const String _userIdKey = 'userId';
-  //static const String _refreshTokenKey = 'refreshToken';
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  // Methods for managing the authentication token
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    final String query = '''
+      mutation UserLogin(\$email: String!, \$password: String!) {
+        userLogin(email: \$email, password: \$password) {
+          token
+          userId
+          role
+        }
+      }
+    ''';
+
+    final Map<String, dynamic> variables = {
+      'email': email,
+      'password': password,
+    };
+
+    final response = await http.post(
+      Uri.parse(Config.backendGraphqlURL),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'query': query, 'variables': variables}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['errors'] != null && data['errors'].isNotEmpty) {
+        throw Exception('Login failed: ${data['errors'].map((e) => e['message']).join(", ")}');
+      }
+      final loginData = data['data']['userLogin'];
+      await saveAuthToken(loginData['token']);
+      await saveUserId(loginData['userId']);
+      return loginData;
+    } else {
+      throw Exception('Failed to login: ${response.statusCode}');
+    }
+  }
+
+  Future<Map<String, dynamic>> register(String email, String password, String name, String lastName, bool consent) async {
+    final String query = '''
+      mutation RegisterUser(\$email: String!, \$name: String!, \$lastName: String!, \$password: String!, \$consent: Boolean!) {
+        registerUser(userInput: {email: \$email, name: \$name, last_name: \$lastName, password: \$password, consent: \$consent}) {
+          token
+          userId
+          role
+        }
+      }
+    ''';
+
+    final Map<String, dynamic> variables = {
+      'email': email,
+      'name': name,
+      'lastName': lastName,
+      'password': password,
+      'consent': consent,
+    };
+
+    final response = await http.post(
+      Uri.parse(Config.backendGraphqlURL),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'query': query, 'variables': variables}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['errors'] != null && data['errors'].isNotEmpty) {
+        throw Exception('Registration failed: ${data['errors'].map((e) => e['message']).join(", ")}');
+      }
+      final registerData = data['data']['registerUser'];
+      await saveAuthToken(registerData['token']);
+      await saveUserId(registerData['userId']);
+      return registerData;
+    } else {
+      throw Exception('Failed to signup: ${response.statusCode}');
+    }
+  }
+
   Future<void> saveAuthToken(String token) async {
-    print("Entering saveAuthToken, token: $token");
     try {
       await _storage.write(key: _authTokenKey, value: token);
-      print("Token saved successfully");
-      // Decode and log the token content
-      final payload = Jwt.parseJwt(token);
-      print("Token payload: $payload");
+
     } catch (e) {
       print('Error saving auth token: $e');
       rethrow;
     }
   }
 
-  // Save userId
   Future<void> saveUserId(String userId) async {
-    print("Entering saveUserId, userId: $userId");
     try {
       await _storage.write(key: _userIdKey, value: userId);
-      print("UserId saved successfully");
     } catch (e) {
       print('Error saving userId: $e');
       rethrow;
@@ -39,7 +103,6 @@ class AuthService {
   }
 
   Future<String?> getAuthToken() async {
-    print("Entering getAuthToken, key: $_authTokenKey");
     try {
       return await _storage.read(key: _authTokenKey);
     } catch (e) {
@@ -48,9 +111,7 @@ class AuthService {
     }
   }
 
-  // Get userId
   Future<String?> getUserId() async {
-    print("Entering getUserId, key: $_userIdKey");
     try {
       return await _storage.read(key: _userIdKey);
     } catch (e) {
@@ -60,22 +121,17 @@ class AuthService {
   }
 
   Future<void> clearAuthToken() async {
-    print("Entering clearAuthToken");
     try {
       await _storage.delete(key: _authTokenKey);
-      print("Cleared");
     } catch (e) {
       print('Error clearing auth token: $e');
       rethrow;
     }
   }
 
-  // Clear userId
   Future<void> clearUserId() async {
-    print("Entering clearUserId");
     try {
       await _storage.delete(key: _userIdKey);
-      print("User ID cleared");
     } catch (e) {
       print('Error clearing userId: $e');
       rethrow;
@@ -85,30 +141,10 @@ class AuthService {
   Future<bool> isLoggedIn() async {
     try {
       final token = await getAuthToken();
-      print('getAuthToken: $token');
       return token != null;
     } catch (e) {
       print('Error checking login status: $e');
       return false;
     }
   }
-
-  // Methods for managing the refresh token
-  // Future<void> saveRefreshToken(String refreshToken) async {
-  //   try {
-  //     await _storage.write(key: _refreshTokenKey, value: refreshToken);
-  //   } catch (e) {
-  //     print('Error saving refresh token: $e');
-  //     rethrow;
-  //   }
-  // }
-
-  // Future<String?> getRefreshToken() async {
-  //   try {
-  //     return await _storage.read(key: _refreshTokenKey);
-  //   } catch (e) {
-  //     print('Error reading refresh token: $e');
-  //     return null;
-  //   }
-  // }
 }
