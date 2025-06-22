@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/authService.dart';
-import '../data/loginUser.dart';
-import '../data/registerUser.dart';
+import 'package:timelyst_flutter/services/authService.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
@@ -26,39 +24,31 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> login(String email, String password) async {
-    _errorMessage = null;
     try {
-      final response = await loginUser(email, password);
-      final tokenFromResponse = response['token'];
-      final userIdFromResponse = response['userId'];
-
-      await _authService.saveAuthToken(tokenFromResponse);
-      await _authService.saveUserId(userIdFromResponse);
-
+      final result = await _authService.login(email, password);
+      _userId = result['userId'];
       _isLoggedIn = true;
-      _userId = userIdFromResponse;
+      _errorMessage = null;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Failed to login: $e';
+      _errorMessage = e.toString();
       notifyListeners();
-      throw Exception('Failed to login: $e');
+      rethrow;
     }
   }
 
   Future<void> register(String email, String password, String name,
       String lastName, bool consent) async {
     try {
-      final response =
-          await registerUser(email, password, name, lastName, consent);
-      final tokenFromResponse = response['token'];
-      await _authService.saveAuthToken(tokenFromResponse);
-      // Handle userId and login state as per your app's flow after registration
-      _isLoggedIn = true; // Example: assuming registration logs in
-      // _userId = ... // if returned by register API and auto-login
+      final result = await _authService.register(email, password, name, lastName, consent);
+      _userId = result['userId'];
+      _isLoggedIn = true;
+      _errorMessage = null;
       notifyListeners();
     } catch (e) {
-      print('Error during registration: $e');
-      throw Exception('Failed to register: $e');
+      _errorMessage = e.toString();
+      notifyListeners();
+      rethrow;
     }
   }
 
@@ -67,7 +57,6 @@ class AuthProvider with ChangeNotifier {
     await _authService.clearUserId();
     _isLoggedIn = false;
     _userId = null;
-    // _token = null;
     notifyListeners();
   }
 }
