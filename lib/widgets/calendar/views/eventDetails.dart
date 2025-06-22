@@ -93,15 +93,25 @@ class EventDetailsScreenState extends State<EventDetails> {
     _eventStartTimeController = TextEditingController(text: widget._start);
     _eventEndTimeController = TextEditingController(text: widget._end);
     _eventLocation = TextEditingController(text: widget._eventLocation);
-    _eventDescriptionController =
-        TextEditingController(text: widget._eventBody);
+    _eventDescriptionController = TextEditingController(text: widget._eventBody);
     _selectedCategory = widget._catTitle ?? 'Misc';
     _eventParticipants = TextEditingController(text: widget._participants);
     _allDay = widget._allDay ?? false;
-    _selectedCalendarId =
-        widget._calendarId; // Initialize _selectedCalendarId from widget
-    _eventCalendar =
-        TextEditingController(text: ''); // Initialize with empty text
+    _selectedCalendarId = widget._calendarId;
+    _eventCalendar = TextEditingController();
+
+    // Use addPostFrameCallback to access the provider after the build cycle.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_selectedCalendarId != null) {
+        final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+        final calendar = calendarProvider.getCalendarById(_selectedCalendarId!);
+        if (calendar != null) {
+          setState(() {
+            _eventCalendar.text = calendar.metadata.title;
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -241,21 +251,17 @@ class EventDetailsScreenState extends State<EventDetails> {
   }
 
   Future<void> _selectCalendar(BuildContext context) async {
-    print("Entering _selectCalendar in event details");
-    final result = await showCalendarSelectionDialog(
-      context,
-    );
+    final result = await showCalendarSelectionDialog(context);
 
     if (result != null) {
       setState(() {
         _selectedCalendars = result;
 
         if (result.isNotEmpty) {
-          _selectedCalendars = result;
-          _selectedCalendarId = result.first.id;
-          _eventCalendar.text = result.first.metadata.title;
+          final firstCalendar = result.first;
+          _selectedCalendarId = firstCalendar.id;
+          _eventCalendar.text = firstCalendar.metadata.title;
         } else {
-          _selectedCalendars = [];
           _selectedCalendarId = null;
           _eventCalendar.text = 'No calendar selected';
         }
