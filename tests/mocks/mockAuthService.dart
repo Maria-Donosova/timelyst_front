@@ -1,47 +1,75 @@
 import 'package:timelyst_flutter/services/authService.dart';
 
 class MockAuthService implements AuthService {
-  bool _isLoggedIn = false;
-  String? _userId;
+  final Map<String, String> _storage = {};
+
+  @override
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    if (email == 'test@test.com' && password == 'password') {
+      final userId = '123';
+      final token = 'mock_token';
+      await saveAuthToken(token);
+      await saveUserId(userId);
+      return {'token': token, 'userId': userId, 'role': 'user'};
+    } else {
+      throw Exception('Invalid credentials');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> register(
+      String email, String password, String name, String lastName, bool consent) async {
+    final userId = '456';
+    final token = 'mock_token_reg';
+    await saveAuthToken(token);
+    await saveUserId(userId);
+    return {'token': token, 'userId': userId, 'role': 'user'};
+  }
 
   @override
   Future<void> clearAuthToken() async {
-    // Simulate clearing the token
+    _storage.remove('authToken');
   }
 
   @override
   Future<void> clearUserId() async {
-    _userId = null;
+    _storage.remove('userId');
   }
 
   @override
   Future<String?> getAuthToken() async {
-    return null;
+    return _storage['authToken'];
   }
 
   @override
   Future<String?> getUserId() async {
-    return _userId;
+    return _storage['userId'];
   }
 
   @override
   Future<bool> isLoggedIn() async {
-    return _isLoggedIn;
+    return _storage.containsKey('authToken');
   }
 
   @override
   Future<void> saveAuthToken(String token) async {
-    // Simulate saving the token
+    _storage['authToken'] = token;
   }
 
   @override
   Future<void> saveUserId(String userId) async {
-    _userId = userId;
+    _storage['userId'] = userId;
   }
 
   // Helper method for testing
-  void setLoginState(bool isLoggedIn, {String? userId}) {
-    _isLoggedIn = isLoggedIn;
-    _userId = userId;
+  void setLoginState(bool isLoggedIn, {String? userId, String? token}) {
+    if (isLoggedIn) {
+      _storage['authToken'] = token ?? 'mock_token';
+      if (userId != null) {
+        _storage['userId'] = userId;
+      }
+    } else {
+      _storage.clear();
+    }
   }
 }
