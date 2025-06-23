@@ -21,7 +21,7 @@ class Config {
 
   static String get backendFetchGoogleCalendars =>
       dotenv.env['BACKEND_FETCH_GOOGLE_CALENDARS'] ??
-      'https://timelyst-back.fly.dev/google/fetch-calendars';
+      'https://timelyst-back.fly.dev/google';
   static String get backendSaveGoogleCalendars =>
       dotenv.env['BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS'] ??
       'https://timelyst-back.fly.dev/google/save-calendars';
