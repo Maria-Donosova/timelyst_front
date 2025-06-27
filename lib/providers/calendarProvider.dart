@@ -21,8 +21,7 @@ class CalendarProvider with ChangeNotifier {
   final AuthService _authService;
   String? _userId;
 
-  // New: Track which calendars have loaded events
-  final Set<String> _calendarsWithLoadedEvents = {};
+
 
   // Cache for calendar events
   final Map<String, List<CalendarEvent>> _eventsCache = {};
