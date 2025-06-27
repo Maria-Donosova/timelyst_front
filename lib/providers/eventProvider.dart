@@ -4,8 +4,7 @@ import 'package:timelyst_flutter/models/customApp.dart';
 
 class EventProvider with ChangeNotifier {
   List<CustomAppointment> _events = [];
-  // Change from List<CustomAppointment> to a map by calendar ID
-  final Map<String, List<CustomAppointment>> _eventsByCalendar = {};
+
 
   bool _isLoading = false;
   String _errorMessage = '';
