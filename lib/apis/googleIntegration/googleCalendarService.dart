@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../../config/envVarConfig.dart';
 import 'package:timelyst_flutter/services/authService.dart';
@@ -28,30 +30,59 @@ class GoogleCalendarService {
     print(
         'Fetching calendars page $userId $email in fetchCalendarsPage google calendar service');
     try {
-      final token = await _getValidToken();
+      final token = await _getValidToken().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw TimeoutException('Token fetch timeout'),
+      );
+
+      // 2. Prepare headers
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+        'X-Client-Version': '1.0.0',
+      };
+
+      print('Request headers prepared');
+
+      // Make the request
       final response = await http
           .post(
             Uri.parse('$_baseUrl/calendars/list'),
-            headers: _buildHeaders(token),
+            headers: headers,
             body: json.encode({
               'userId': userId,
               'email': email,
-              'pageSize': pageSize,
-              'pageToken': pageToken,
-              'modifiedSince': modifiedSince?.toIso8601String(),
+              // 'pageSize': pageSize,
+              // 'pageToken': pageToken,
+              // 'modifiedSince': modifiedSince?.toIso8601String(),
             }),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () => throw TimeoutException('Request timeout'),
+          );
 
-      return _parseCalendarPage(response);
+      // 4. Handle response
+      if (response.statusCode == 200) {
+        return _parseCalendarPage(response);
+      } else {
+        throw HttpException(
+          'Failed to load calendars: ${response.statusCode}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      print('Timeout during calendar fetch: $e');
+      rethrow;
+    } on http.ClientException catch (e) {
+      print('Network error: $e');
+      throw Exception('Network error. Please check your connection.');
     } catch (e) {
-      print('Error in fetchCalendarsPage: $e');
-      print(StackTrace.current);
-      throw _handleError('fetching calendars', e);
+      print('Unexpected error: $e');
+      rethrow;
     }
   }
 
-  /// Gets calendar changes since last sync (delta sync)
+  // Gets calendar changes since last sync (delta sync)
   Future<CalendarDelta> fetchCalendarChanges({
     required String userId,
     required String email,
