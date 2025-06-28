@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -9,8 +10,15 @@ import '../../config/envVarConfig.dart';
 class GoogleAuthService {
   // Method for requesting server authentication code
   Future<String?> requestServerAuthenticatioinCode() async {
-    print("entering request server auth code");
-    return requestServerAuthCode();
+    try {
+      return await requestServerAuthCode().timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => throw TimeoutException('Google auth timed out'),
+      );
+    } catch (e) {
+      print('Error requesting auth code: $e');
+      rethrow;
+    }
   }
 
   // Method for sending the authentication code to the backend
@@ -27,16 +35,20 @@ class GoogleAuthService {
         throw Exception('No JWT token found. Please log in again.');
       }
 
+      // Create the properly encoded request body
+      final body = jsonEncode({
+        'code': authCode,
+      });
+
       // Send the HTTP POST request with the Authorization header
       final response = await http.post(
         Uri.parse(Config.backendGoogleCallback),
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
+          //'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': 'Bearer $token', // Include the JWT token
         },
-        body: {
-          'code': authCode,
-        },
+        body: body,
       );
 
       // Check the response status code
