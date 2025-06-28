@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -61,8 +63,11 @@ class GoogleSignInOutService {
     if (kIsWeb) {
       print("kIsWeb is true");
       try {
-        final serverAuthCode =
-            await _googleAuthService.requestServerAuthenticatioinCode();
+        final serverAuthCode = await _googleAuthService
+            .requestServerAuthenticatioinCode()
+            .timeout(const Duration(seconds: 30),
+                onTimeout: () =>
+                    throw TimeoutException('Google Sign-In timed out'));
 
         if (serverAuthCode != null) {
           final response =
