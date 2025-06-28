@@ -44,6 +44,7 @@ trigger: always_on
 - Use themes.dart for all UI components
 
 # Data Fetching & Forms
+- Content-Type (application/json) 
 
 # State Management
 - Use ChangeNotifier + Provider for state management
