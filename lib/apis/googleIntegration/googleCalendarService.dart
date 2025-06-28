@@ -43,6 +43,7 @@ class GoogleCalendarService {
       };
 
       print('Request headers prepared');
+      print('Making request to: ${_baseUrl}/calendars/list');
 
       // Make the request
       final response = await http
