@@ -7,6 +7,12 @@ import '../../models/calendars.dart';
 class GoogleCalendarService {
   final AuthService _authService;
   final String _baseUrl = Config.backendFetchGoogleCalendars;
+  String? _cachedToken;
+
+  // Token initialization
+  Future<void> initialize() async {
+    _cachedToken = await _authService.getAuthToken();
+  }
 
   GoogleCalendarService({AuthService? authService})
       : _authService = authService ?? AuthService();
@@ -23,20 +29,24 @@ class GoogleCalendarService {
         'Fetching calendars page $userId $email in fetchCalendarsPage google calendar service');
     try {
       final token = await _getValidToken();
-      final response = await http.post(
-        Uri.parse('$_baseUrl/calendars/list'),
-        headers: _buildHeaders(token),
-        body: json.encode({
-          'userId': userId,
-          'email': email,
-          'pageSize': pageSize,
-          'pageToken': pageToken,
-          'modifiedSince': modifiedSince?.toIso8601String(),
-        }),
-      );
+      final response = await http
+          .post(
+            Uri.parse('$_baseUrl/calendars/list'),
+            headers: _buildHeaders(token),
+            body: json.encode({
+              'userId': userId,
+              'email': email,
+              'pageSize': pageSize,
+              'pageToken': pageToken,
+              'modifiedSince': modifiedSince?.toIso8601String(),
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
 
       return _parseCalendarPage(response);
     } catch (e) {
+      print('Error in fetchCalendarsPage: $e');
+      print(StackTrace.current);
       throw _handleError('fetching calendars', e);
     }
   }
@@ -99,13 +109,20 @@ class GoogleCalendarService {
   // Helper methods
 
   Future<String> _getValidToken() async {
-    print('Getting valid token in _getValidToken google calendar service');
-    final token = await _authService.getAuthToken();
-    if (token == null) {
-      throw Exception('Authentication required. Please log in again.');
+    if (_cachedToken == null) {
+      _cachedToken = await _authService.getAuthToken();
     }
-    return token;
+    return _cachedToken!;
   }
+
+  // Future<String> _getValidToken() async {
+  //   print('Getting valid token in _getValidToken google calendar service');
+  //   final token = await _authService.getAuthToken();
+  //   if (token == null) {
+  //     throw Exception('Authentication required. Please log in again.');
+  //   }
+  //   return token;
+  // }
 
   Map<String, String> _buildHeaders(String token) {
     print('Building headers in _buildHeaders google calendar service');
