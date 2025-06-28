@@ -19,6 +19,8 @@ class GoogleCalendarService {
     String? pageToken,
     DateTime? modifiedSince,
   }) async {
+    print(
+        'Fetching calendars page $userId $email in fetchCalendarsPage google calendar service');
     try {
       final token = await _getValidToken();
       final response = await http.post(
@@ -46,6 +48,8 @@ class GoogleCalendarService {
     required String syncToken,
     int maxResults = 250,
   }) async {
+    print(
+        'Fetching calendar changes $userId $email in fetchCalendarChanges google calendar service');
     try {
       final token = await _getValidToken();
       final response = await http.post(
@@ -71,6 +75,8 @@ class GoogleCalendarService {
     required String email,
     required List<Calendar> calendars,
   }) async {
+    print(
+        'Saving selected calendars $userId $email in saveCalendarsBatch google calendar service');
     try {
       final token = await _getValidToken();
       final response = await http.post(
@@ -93,6 +99,7 @@ class GoogleCalendarService {
   // Helper methods
 
   Future<String> _getValidToken() async {
+    print('Getting valid token in _getValidToken google calendar service');
     final token = await _authService.getAuthToken();
     if (token == null) {
       throw Exception('Authentication required. Please log in again.');
@@ -101,6 +108,7 @@ class GoogleCalendarService {
   }
 
   Map<String, String> _buildHeaders(String token) {
+    print('Building headers in _buildHeaders google calendar service');
     return {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -109,6 +117,8 @@ class GoogleCalendarService {
   }
 
   CalendarPage _parseCalendarPage(http.Response response) {
+    print(
+        'Parsing calendar page in _parseCalendarPage google calendar service');
     if (response.statusCode != 200) {
       throw Exception('Failed to load calendars: ${response.statusCode}');
     }
@@ -126,6 +136,8 @@ class GoogleCalendarService {
   }
 
   CalendarDelta _parseCalendarDelta(http.Response response) {
+    print(
+        'Parsing calendar delta in _parseCalendarDelta google calendar service');
     if (response.statusCode != 200) {
       throw Exception(
           'Failed to load calendar changes: ${response.statusCode}');
@@ -144,6 +156,8 @@ class GoogleCalendarService {
   }
 
   void _handleBatchResponse(http.Response response) {
+    print(
+        'Handling batch response in _handleBatchResponse google calendar service');
     if (response.statusCode != 200) {
       final errorBody = json.decode(response.body);
       throw Exception(
@@ -161,6 +175,7 @@ class GoogleCalendarService {
   }
 
   Exception _handleError(String operation, dynamic error) {
+    print('Handling error in _handleError google calendar service');
     if (error is http.ClientException) {
       return Exception('Network error while $operation: ${error.message}');
     }

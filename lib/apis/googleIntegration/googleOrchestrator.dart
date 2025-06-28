@@ -19,13 +19,16 @@ class GoogleOrchestrator {
   Future<CalendarSyncResult> signInAndSyncCalendars(
       BuildContext context) async {
     try {
+      print('Signing in and syncing calendars in signInAndSyncCalendars');
       // Step 1: Sign in with Google
       final signInResult = await _googleSignInOutService.googleSignIn(context);
+      print('Sign in result: $signInResult');
       final userId = signInResult['userId'];
       final email = signInResult['email'];
 
       // Step 2: Perform initial calendar sync
       final initialSyncResult = await _performInitialSync(userId, email);
+      print('Initial sync result: $initialSyncResult');
 
       // Step 3: Navigate to calendar settings
       if (context.mounted) {
@@ -57,6 +60,8 @@ class GoogleOrchestrator {
     String email,
   ) async {
     final allCalendars = <Calendar>[];
+    print(
+        'Performing initial calendar sync $userId $email in _performInitialSync');
     String? pageToken;
     bool hasMore = true;
 
@@ -84,6 +89,7 @@ class GoogleOrchestrator {
     String userId,
     String email,
   ) async {
+    print('Performing incremental sync $userId $email in syncCalendarChanges');
     if (_currentSyncToken == null) {
       return await _performInitialSync(userId, email);
     }
@@ -118,6 +124,7 @@ class GoogleOrchestrator {
     required String email,
     required List<Calendar> selectedCalendars,
   }) async {
+    print('Saving selected calendars $userId $email in saveSelectedCalendars');
     try {
       await _googleCalendarService.saveCalendarsBatch(
         userId: userId,
@@ -201,5 +208,3 @@ class CalendarSaveResult {
   factory CalendarSaveResult.error(String error) =>
       CalendarSaveResult._(error: error);
 }
-
-
