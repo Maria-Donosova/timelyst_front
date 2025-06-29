@@ -45,7 +45,6 @@ class GoogleAuthService {
         Uri.parse(Config.backendGoogleCallback),
         headers: {
           'Content-Type': 'application/json',
-          //'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': 'Bearer $token', // Include the JWT token
         },
         body: body,
