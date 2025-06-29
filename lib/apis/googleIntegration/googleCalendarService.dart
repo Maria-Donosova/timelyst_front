@@ -40,6 +40,7 @@ class GoogleCalendarService {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
         'X-Client-Version': '1.0.0',
+        'X-Requested-With': 'XMLHttpRequest',
       };
 
       print('Request headers prepared');
