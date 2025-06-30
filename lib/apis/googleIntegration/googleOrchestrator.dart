@@ -25,6 +25,7 @@ class GoogleOrchestrator {
       print('Sign in result: $signInResult');
       final userId = signInResult['userId'];
       final email = signInResult['email'];
+      print('User ID: $userId signed in with email: $email');
 
       // Step 2: Perform initial calendar sync
       final initialSyncResult = await _performInitialSync(userId, email);
