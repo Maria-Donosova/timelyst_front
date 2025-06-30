@@ -71,8 +71,8 @@ class GoogleCalendarService {
           // The backend nests the actual page data inside a 'data' field
           return CalendarPage.fromJson(decoded['data']);
         } else {
-          throw Exception(
-              decoded['message'] ?? 'Failed to fetch calendar page');
+          final message = decoded['message'] ?? 'Failed to fetch calendar page';
+          throw Exception(message is String ? message : json.encode(message));
         }
       } else {
         throw HttpException(
