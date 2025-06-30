@@ -405,158 +405,55 @@ enum ReminderMethod { email, popup, sms }
 
 enum NotificationType { eventCreation, eventChange, eventCancellation }
 
-// import 'package:flutter/material.dart';
+class CalendarPage {
+  final List<Calendar> calendars;
+  final String? nextPageToken;
+  final bool hasMore;
+  final String? syncToken;
+  final int totalItems;
 
-// class Calendar {
-//   final String user;
-//   final String? sourceCalendar;
-//   final String? calendarId;
-//   final String? kind;
-//   final String? etag;
-//   final String? id;
-//   final String title;
-//   final String? description;
-//   final String? timeZone;
-//   final String? category;
-//   final Color? catColor; // Directly use Color object
-//   final List<Map<String, dynamic>>? defaultReminders;
-//   final Map<String, dynamic>? notificationSettings;
-//   final Map<String, dynamic>? conferenceProperties;
-//   final String? organizer;
-//   final List<String>? recipients;
+  CalendarPage({
+    required this.calendars,
+    this.nextPageToken,
+    this.hasMore = false,
+    this.syncToken,
+    this.totalItems = 0,
+  });
 
-//   // Import settings
-//   bool importAll;
-//   bool importSubject;
-//   bool importBody;
-//   bool importConferenceInfo;
-//   bool importOrganizer;
-//   bool importRecipients;
+  factory CalendarPage.fromJson(Map<String, dynamic> json) {
+    return CalendarPage(
+      calendars: (json['calendars'] as List)
+          .map((json) => Calendar.fromJson(json))
+          .toList(),
+      nextPageToken: json['nextPageToken'],
+      hasMore: json['hasMore'] ?? false,
+      syncToken: json['syncToken'],
+      totalItems: json['totalItems'] ?? 0,
+    );
+  }
+}
 
-//   Calendar({
-//     required this.user,
-//     this.kind,
-//     this.etag,
-//     this.id,
-//     required this.title,
-//     this.calendarId,
-//     this.description,
-//     this.sourceCalendar = '',
-//     this.timeZone = '',
-//     this.category = '',
-//     this.catColor = const Color(0xFFA4BDFC), // Default color
-//     this.defaultReminders = const [],
-//     this.notificationSettings = const {},
-//     this.conferenceProperties = const {},
-//     this.organizer,
-//     this.recipients,
-//     this.importAll = false,
-//     this.importSubject = false,
-//     this.importBody = false,
-//     this.importConferenceInfo = false,
-//     this.importOrganizer = false,
-//     this.importRecipients = false,
-//     required int color,
-//     required bool isDefault,
-//     required bool isPrimary,
-//     required String type,
-//   });
+class CalendarDelta {
+  final List<Calendar> changes;
+  final List<String> deletedCalendarIds;
+  final String newSyncToken;
+  final bool hasMoreChanges;
 
-//   // Convert JSON to Calendar object
-//   factory Calendar.fromJson(Map<String, dynamic> json) {
-//     return Calendar(
-//       user: json['user'] ?? '',
-//       kind: json['kind'] ?? '',
-//       etag: json['etag'] ?? '',
-//       id: json['id'] ?? '',
-//       title: json['summary'] ?? '',
-//       description: json['description'] ?? '',
-//       sourceCalendar: json['sourceCalendar'] ?? '',
-//       timeZone: json['timeZone'] ?? '',
-//       category: json['category'] ?? '',
-//       catColor:
-//           _parseColor(json['catColor']), // Deserialize hex string to Color
-//       defaultReminders: (json['defaultReminders'] as List<dynamic>?)
-//               ?.cast<Map<String, dynamic>>() ??
-//           [],
-//       notificationSettings:
-//           (json['notificationSettings'] as Map<String, dynamic>?) ?? {},
-//       conferenceProperties:
-//           (json['conferenceProperties'] as Map<String, dynamic>?) ?? {},
-//       organizer: json['organizer'],
-//       recipients: (json['recipients'] as List<dynamic>?)?.cast<String>(),
-//       importAll: json['importAll'] ?? false,
-//       importSubject: json['importSubject'] ?? false,
-//       importBody: json['importBody'] ?? false,
-//       importConferenceInfo: json['importConferenceInfo'] ?? false,
-//       importOrganizer: json['importOrganizer'] ?? false,
-//       importRecipients: json['importRecipients'] ?? false, color: 0xFFA4BDFC,
-//       isDefault: false, isPrimary: false, type: '',
-//     );
-//   }
+  CalendarDelta({
+    required this.changes,
+    required this.deletedCalendarIds,
+    required this.newSyncToken,
+    this.hasMoreChanges = false,
+  });
 
-//   // Convert Calendar object to JSON
-//   Map<String, dynamic> toJson({required String email}) {
-//     return {
-//       'user': user,
-//       'kind': kind,
-//       'etag': etag,
-//       'id': id,
-//       'summary': title,
-//       'description': description,
-//       'sourceCalendar': _getSourceCalendarFromEmail(email),
-//       'timeZone': timeZone,
-//       'category': category,
-//       'catColor': _colorToHex(catColor), // Serialize Color to hex string
-//       'defaultReminders': defaultReminders,
-//       'notificationSettings': notificationSettings,
-//       'conferenceProperties': conferenceProperties,
-//       'organizer': organizer,
-//       'recipients': recipients,
-//       'importAll': importAll,
-//       'importSubject': importSubject,
-//       'importBody': importBody,
-//       'importConferenceInfo': importConferenceInfo,
-//       'importOrganizer': importOrganizer,
-//       'importRecipients': importRecipients,
-//     };
-//   }
-
-//   // Helper function to convert hex string to Color
-//   static Color _parseColor(String? hexColor) {
-//     if (hexColor == null || hexColor.isEmpty) {
-//       return const Color(0xFFA4BDFC); // Default color
-//     }
-//     hexColor = hexColor.replaceAll('#', '');
-//     if (hexColor.length == 6) {
-//       hexColor = 'FF$hexColor'; // Add opacity if missing
-//     }
-//     return Color(int.parse(hexColor, radix: 16));
-//   }
-
-//   // Helper function to convert Color to hex string
-//   static String _colorToHex(Color? color) {
-//     if (color == null) {
-//       return '#A4BDFC'; // Default color
-//     }
-//     return '#${color.value.toRadixString(16).padLeft(8, '0')}';
-//   }
-
-//   // Helper function to identify the source calendar
-//   String _getSourceCalendarFromEmail(String email) {
-//     final lowercaseEmail = email.toLowerCase();
-//     if (lowercaseEmail.endsWith('@gmail.com')) {
-//       return 'Google';
-//     } else if (lowercaseEmail.endsWith('@outlook.com') ||
-//         lowercaseEmail.endsWith('@hotmail.com') ||
-//         lowercaseEmail.endsWith('@live.com')) {
-//       return 'Outlook';
-//     } else if (lowercaseEmail.endsWith('@icloud.com') ||
-//         lowercaseEmail.endsWith('@me.com') ||
-//         lowercaseEmail.endsWith('@mac.com')) {
-//       return 'Apple';
-//     } else {
-//       throw ArgumentError('Unsupported email domain: $email');
-//     }
-//   }
-// }
+  factory CalendarDelta.fromJson(Map<String, dynamic> json) {
+    return CalendarDelta(
+      changes: (json['changes'] as List)
+          .map((json) => Calendar.fromJson(json))
+          .toList(),
+      deletedCalendarIds: (json['deleted'] as List?)?.cast<String>() ?? [],
+      newSyncToken: json['newSyncToken'],
+      hasMoreChanges: json['hasMoreChanges'] ?? false,
+    );
+  }
+}
