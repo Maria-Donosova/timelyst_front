@@ -19,23 +19,18 @@ class GoogleCalendarService {
   GoogleCalendarService({AuthService? authService})
       : _authService = authService ?? AuthService();
 
-  /// Fetches Google calendars with pagination support
-  Future<CalendarPage> fetchCalendarsPage({
-    required String userId,
-    required String email,
-    int pageSize = 50,
-    String? pageToken,
-    DateTime? modifiedSince,
+  /// Fetches the initial list of Google Calendars using a one-time auth code.
+  Future<List<Calendar>> firstCalendarFetch({
+    required String authCode,
   }) async {
     print(
-        'Fetching calendars page $userId $email in fetchCalendarsPage google calendar service');
+        'Performing first calendar fetch with auth code in GoogleCalendarService');
     try {
       final token = await _getValidToken().timeout(
         const Duration(seconds: 10),
         onTimeout: () => throw TimeoutException('Token fetch timeout'),
       );
 
-      // 2. Prepare headers
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -43,35 +38,31 @@ class GoogleCalendarService {
         'X-Requested-With': 'XMLHttpRequest',
       };
 
-      print('Request headers prepared');
-      print('Making request to: ${_baseUrl}/calendars/list');
-
-      // Make the request
       final response = await http
           .post(
-            Uri.parse('$_baseUrl/calendars/list'),
+            Uri.parse(
+                '$_baseUrl/calendars/list'), // Using the existing endpoint
             headers: headers,
             body: json.encode({
-              'userId': userId,
-              'email': email,
-              // 'pageSize': pageSize,
-              // 'pageToken': pageToken,
-              // 'modifiedSince': modifiedSince?.toIso8601String(),
+              'authCode': authCode, // Sending authCode as requested
             }),
           )
           .timeout(
-            const Duration(seconds: 15),
+            const Duration(seconds: 20),
             onTimeout: () => throw TimeoutException('Request timeout'),
           );
 
-      // 4. Handle response
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
         if (decoded['success'] == true && decoded['data'] != null) {
-          // The backend nests the actual page data inside a 'data' field
-          return CalendarPage.fromJson(decoded['data']);
+          // Assuming the backend returns the list under a 'calendars' key
+          final calendarsData = decoded['data']['calendars'] as List;
+          return calendarsData
+              .map((json) => Calendar.fromLegacyJson(json))
+              .toList();
         } else {
-          final message = decoded['message'] ?? 'Failed to fetch calendar page';
+          final message =
+              decoded['message'] ?? 'Failed to fetch initial calendars';
           throw Exception(message is String ? message : json.encode(message));
         }
       } else {
@@ -80,13 +71,13 @@ class GoogleCalendarService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout during calendar fetch: $e');
+      print('Timeout during first calendar fetch: $e');
       rethrow;
     } on http.ClientException catch (e) {
       print('Network error: $e');
       throw Exception('Network error. Please check your connection.');
     } catch (e) {
-      print('Unexpected error: $e');
+      print('Unexpected error during first fetch: $e');
       rethrow;
     }
   }

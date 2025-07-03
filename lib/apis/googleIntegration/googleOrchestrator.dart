@@ -27,9 +27,15 @@ class GoogleOrchestrator {
       final email = signInResult['email'];
       print('User ID: $userId signed in with email: $email');
 
+      // Step 2: Sync google calendars
+      final calendars = await _googleCalendarService.fetchCalendarsPage(
+        userId: userId,
+        email: email,
+      );
+      print('Calendars: $calendars');
       // Step 2: Perform initial calendar sync
-      final initialSyncResult = await _performInitialSync(userId, email);
-      print('Initial sync result: $initialSyncResult');
+      // final initialSyncResult = await _performInitialSync(userId, email);
+      // print('Initial sync result: $initialSyncResult');
 
       // Step 3: Navigate to calendar settings
       if (context.mounted) {
@@ -39,16 +45,17 @@ class GoogleOrchestrator {
             builder: (context) => CalendarSettings(
               userId: userId,
               email: email,
-              calendars: initialSyncResult.calendars,
+              calendars:
+                  CalendarSyncResult.success(calendars: calendars).calendars,
             ),
           ),
         );
 
         // After returning from CalendarSettings, perform a sync to get any changes
-        return await syncCalendarChanges(userId, email);
+        return CalendarSyncResult.success(calendars: calendars);
       }
 
-      return initialSyncResult;
+      return CalendarSyncResult.success(calendars: calendars);
     } catch (e) {
       _showError(context, 'Failed to sync calendars: $e');
       return CalendarSyncResult.error(e.toString());
@@ -70,7 +77,6 @@ class GoogleOrchestrator {
       final page = await _googleCalendarService.fetchCalendarsPage(
         userId: userId,
         email: email,
-        pageToken: pageToken,
       );
 
       allCalendars.addAll(page.calendars);
