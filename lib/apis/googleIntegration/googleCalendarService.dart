@@ -193,4 +193,6 @@ class GoogleCalendarService {
     }
     return Exception('Error $operation: ${error.toString()}');
   }
+
+  Future fetchCalendarsPage({required userId, required email}) async {}
 }
