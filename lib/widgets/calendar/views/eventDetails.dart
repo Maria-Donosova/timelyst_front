@@ -93,7 +93,8 @@ class EventDetailsScreenState extends State<EventDetails> {
     _eventStartTimeController = TextEditingController(text: widget._start);
     _eventEndTimeController = TextEditingController(text: widget._end);
     _eventLocation = TextEditingController(text: widget._eventLocation);
-    _eventDescriptionController = TextEditingController(text: widget._eventBody);
+    _eventDescriptionController =
+        TextEditingController(text: widget._eventBody);
     _selectedCategory = widget._catTitle ?? 'Misc';
     _eventParticipants = TextEditingController(text: widget._participants);
     _allDay = widget._allDay ?? false;
@@ -103,7 +104,8 @@ class EventDetailsScreenState extends State<EventDetails> {
     // Use addPostFrameCallback to access the provider after the build cycle.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_selectedCalendarId != null) {
-        final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+        final calendarProvider =
+            Provider.of<CalendarProvider>(context, listen: false);
         final calendar = calendarProvider.getCalendarById(_selectedCalendarId!);
         if (calendar != null) {
           setState(() {
