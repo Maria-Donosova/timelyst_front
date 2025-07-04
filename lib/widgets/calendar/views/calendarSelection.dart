@@ -1,39 +1,70 @@
+/// A widget that allows users to select from a list of available calendars.
+///
+/// This widget is presented as a dialog and is used to manage which calendars
+/// are displayed throughout the application. It fetches calendars from a
+/// [CalendarProvider] and allows for multiple selections.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/providers/calendarProvider.dart';
 import 'package:timelyst_flutter/services/authService.dart';
 import '../../../models/calendars.dart';
 
+/// A stateful widget that provides a UI for selecting calendars.
+///
+/// It takes an optional list of [initiallySelectedCalendars] to pre-select
+/// calendars when the widget is first displayed.
 class CalendarSelectionWidget extends StatefulWidget {
-  final List<Calendar>? initiallySelectedCalendars;
+  final List<Calendar>? selectedCalendars;
 
   const CalendarSelectionWidget({
-    Key? key,
-    this.initiallySelectedCalendars,
-  }) : super(key: key);
+    super.key,
+    this.selectedCalendars,
+  });
 
   @override
-  _CalendarSelectionWidgetState createState() =>
+  State<CalendarSelectionWidget> createState() =>
       _CalendarSelectionWidgetState();
 }
 
+/// The state for the [CalendarSelectionWidget].
+///
+/// This class manages the state of the calendar selection, including the list
+/// of selected calendars, loading state, and any potential error messages.
 class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
+  /// The list of calendars that are currently selected by the user.
   late List<Calendar> _selectedCalendars;
-  late CalendarProvider _calendarProvider;
-  late AuthService _authService;
-  bool _isLoading = false;
-  String _errorMessage = '';
-  bool _hasChanges = false;
 
+  /// The provider responsible for fetching and managing calendar data.
+  late CalendarProvider _calendarProvider;
+
+  /// The service for handling user authentication and retrieving user information.
+  late AuthService _authService;
+
+  /// A flag to indicate whether the calendar data is currently being loaded.
+  bool _isLoading = false;
+
+  /// A message to display if an error occurs while loading calendars.
+  String _errorMessage = '';
+
+  /// Initializes the state of the widget.
+  ///
+  /// This method is called when the widget is first created. It sets up the
+  /// initial list of selected calendars, initializes the required providers and
+  /// services, and triggers the loading of calendar data.
   @override
   void initState() {
     super.initState();
-    _selectedCalendars = widget.initiallySelectedCalendars ?? [];
+    _selectedCalendars = widget.selectedCalendars?.toList() ?? [];
     _authService = Provider.of<AuthService>(context, listen: false);
     _calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
     _loadCalendars();
   }
 
+  /// Fetches the list of calendars from the [CalendarProvider].
+  ///
+  /// Sets the loading state, retrieves the user ID, and then loads the calendars.
+  /// If calendars are already loaded, it does nothing. It also handles any
+  /// errors that might occur during the process.
   Future<void> _loadCalendars() async {
     if (_calendarProvider.calendars.isNotEmpty) return;
 
@@ -52,9 +83,8 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
       await _calendarProvider.loadInitialCalendars();
 
       // Initialize selection with any new calendars that match initially selected IDs
-      if (widget.initiallySelectedCalendars != null) {
-        final initialIds =
-            widget.initiallySelectedCalendars!.map((c) => c.id).toSet();
+      if (widget.selectedCalendars != null) {
+        final initialIds = widget.selectedCalendars!.map((c) => c.id).toSet();
         _selectedCalendars = _calendarProvider.calendars
             .where((c) => initialIds.contains(c.id))
             .toList();
@@ -70,6 +100,10 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
     }
   }
 
+  /// Adds or removes a calendar from the list of selected calendars.
+  ///
+  /// This method is called when a user taps on a calendar's checkbox.
+  /// It updates the [_selectedCalendars] list.
   void _toggleCalendar(Calendar calendar, bool selected) {
     setState(() {
       if (selected) {
@@ -77,10 +111,13 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
       } else {
         _selectedCalendars.removeWhere((c) => c.id == calendar.id);
       }
-      _hasChanges = true;
     });
   }
 
+  /// Builds a UI section for a specific category of calendars.
+  ///
+  /// Each section consists of a category title and a list of calendars belonging
+  /// to that category, each with a checkbox for selection.
   Widget _buildCategorySection(String category, List<Calendar> calendars) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,6 +153,10 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
     );
   }
 
+  /// Builds a single calendar list tile with selection controls.
+  ///
+  /// This tile displays the calendar's title, color, and a checkbox to indicate
+  /// its selection status.
   Widget _buildCalendarTile(Calendar calendar) {
     final isSelected = _selectedCalendars.any((c) => c.id == calendar.id);
     return InkWell(
@@ -165,6 +206,10 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
     );
   }
 
+  /// Builds a wrap of chips for the currently selected calendars.
+  ///
+  /// Each chip displays the title of a selected calendar and includes a delete
+  /// icon to allow for quick deselection.
   Widget _buildSelectedChips() {
     return Wrap(
       spacing: 8,
@@ -189,6 +234,9 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
     );
   }
 
+  /// Builds the UI to be displayed when no calendars are available.
+  ///
+  /// This provides a user-friendly message indicating that no calendars were found.
   Widget _buildEmptyState() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
@@ -220,8 +268,14 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
     );
   }
 
+  /// Builds the main UI of the calendar selection dialog.
+  ///
+  /// It handles displaying a loading indicator, an error message, or the list
+  /// of calendars grouped by category. It also includes action buttons for
+  /// canceling or applying the selection.
   @override
   Widget build(BuildContext context) {
+    print("Entering calendar selection build");
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -236,44 +290,76 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
       groupedCalendars.putIfAbsent(category, () => []).add(calendar);
     }
 
-    return AlertDialog(
-      title: Row(
-        children: [
-          Icon(
-            Icons.calendar_month,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'Select Calendars',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ],
-      ),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
           children: [
-            if (_selectedCalendars.isNotEmpty) ...[
-              Text(
-                'Selected (${_selectedCalendars.length})',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              _buildSelectedChips(),
-              const SizedBox(height: 16),
-            ],
-            if (groupedCalendars.isNotEmpty)
-              ...groupedCalendars.entries
-                  .map((entry) => _buildCategorySection(entry.key, entry.value))
-                  .toList(),
-            if (groupedCalendars.isEmpty) _buildEmptyState(),
+            Icon(
+              Icons.calendar_month,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Select Calendars',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
           ],
+        ),
+        const SizedBox(height: 16),
+        SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_selectedCalendars.isNotEmpty) ...[
+                Text(
+                  'Selected (${_selectedCalendars.length})',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                _buildSelectedChips(),
+                const SizedBox(height: 16),
+              ],
+              if (groupedCalendars.isNotEmpty)
+                ...groupedCalendars.entries
+                    .map((entry) =>
+                        _buildCategorySection(entry.key, entry.value))
+                    .toList(),
+              if (groupedCalendars.isEmpty) _buildEmptyState(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A utility function to show the [CalendarSelectionWidget] as a dialog.
+///
+/// This function simplifies the process of displaying the calendar selection
+/// dialog and returns the list of selected calendars when the dialog is closed.
+Future<List<Calendar>?> showCalendarSelectionDialog(
+  BuildContext context, {
+  List<Calendar>? selectedCalendars,
+}) async {
+  return await showDialog<List<Calendar>>(
+    context: context,
+    builder: (context) => AlertDialog(
+      insetPadding: const EdgeInsets.all(20),
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      content: SizedBox(
+        width: 600,
+        height: MediaQuery.of(context).size.height * 0.8,
+        child: CalendarSelectionWidget(
+          selectedCalendars: selectedCalendars,
         ),
       ),
       actions: [
@@ -287,32 +373,18 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
           ),
         ),
         ElevatedButton(
-          onPressed: _hasChanges || widget.initiallySelectedCalendars == null
-              ? () => Navigator.pop(context, _selectedCalendars)
-              : null,
+          onPressed: () => Navigator.pop(context, selectedCalendars),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
           ),
-          child: const Text('Apply Selection'),
+          child: const Text('Save'),
         ),
       ],
       actionsPadding: const EdgeInsets.symmetric(
         horizontal: 24,
         vertical: 16,
       ),
-    );
-  }
-}
-
-Future<List<Calendar>?> showCalendarSelectionDialog(
-  BuildContext context, {
-  List<Calendar>? initiallySelectedCalendars,
-}) async {
-  return await showDialog<List<Calendar>>(
-    context: context,
-    builder: (context) => CalendarSelectionWidget(
-      initiallySelectedCalendars: initiallySelectedCalendars,
     ),
   );
 }
