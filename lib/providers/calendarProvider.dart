@@ -21,8 +21,6 @@ class CalendarProvider with ChangeNotifier {
   final AuthService _authService;
   String? _userId;
 
-
-
   // Cache for calendar events
   final Map<String, List<CalendarEvent>> _eventsCache = {};
   final Map<String, DateTime> _lastEventFetchTime = {};
