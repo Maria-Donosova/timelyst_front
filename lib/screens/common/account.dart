@@ -3,7 +3,7 @@ import '../../services/authService.dart';
 import '../../widgets/shared/customAppbar.dart';
 import '../../screens/common/agenda.dart';
 import '../../models/calendars.dart';
-import '../../data/calendars.dart';
+import '../../services/calendarsService.dart';
 
 class AccountSettings extends StatefulWidget {
   final AuthService authService;
@@ -353,7 +353,7 @@ class _AccountSettingsState extends State<AccountSettings> {
 // import '../../widgets/shared/customAppbar.dart';
 // import '../../screens/common/agenda.dart';
 // import '../../models/calendars.dart';
-// import '../../data/calendars.dart';
+// import '../../services/calendarsService.dart';
 
 // class AccountSettings extends StatefulWidget {
 //   final AuthService authService;

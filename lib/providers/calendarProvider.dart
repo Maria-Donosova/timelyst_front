@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/models/calendars.dart';
 
-import './../data/calendars.dart';
+import './../services/calendarsService.dart';
 import './../services/authService.dart';
 
 //import 'eventProvider.dart';
@@ -378,7 +378,7 @@ class CalendarEvent {
 }
 
 // import 'package:flutter/material.dart';
-// import './../data/calendars.dart';
+// import './../services/calendarsService.dart';
 // import 'package:timelyst_flutter/models/calendars.dart';
 // import './../services/authService.dart';
 

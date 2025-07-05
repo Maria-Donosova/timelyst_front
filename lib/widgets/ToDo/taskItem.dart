@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/task.dart';
-import '../../data/tasks.dart';
+import '../../services/tasksService.dart';
 import '../../services/authService.dart';
 import '../shared/categories.dart';
 import '../todo/editTask.dart';
