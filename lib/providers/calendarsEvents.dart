@@ -1,28 +1,28 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/models/calendars.dart';
 import 'package:timelyst_flutter/providers/calendarProvider.dart';
 
-import './../data/calendars.dart';
+import './../services/calendarsEventsService.dart';
 import './../services/authService.dart';
 
 class EventCalendarAssociationProvider with ChangeNotifier {
   final CalendarProvider _calendarProvider;
-  final Map<String, List<String>> _associations = {}; // eventId -> calendarIds
+  final AuthService _authService;
+  Map<String, List<String>> _associations = {}; // eventId -> calendarIds
   bool _isSyncing = false;
 
-  EventCalendarAssociationProvider(this._calendarProvider);
+  EventCalendarAssociationProvider(this._calendarProvider, this._authService);
 
-  // Fetch from DB (call this on app startup)
+  // Fetch from CalendarsEventsService (call this on app startup)
   Future<void> loadAssociations() async {
     _isSyncing = true;
     notifyListeners();
-
     try {
-      final data = await ApiService.get('/event-calendars');
-      _associations =
-          Map.from(data); // Assume data is {eventId: [calendarId1, ...]}
+      final token = await _authService.getAuthToken();
+      if (token == null) throw Exception('Auth token is required');
+      final data =
+          await CalendarsEventsService.fetchEventCalendarAssociations(token);
+      _associations = data;
     } finally {
       _isSyncing = false;
       notifyListeners();
@@ -47,9 +47,11 @@ class EventCalendarAssociationProvider with ChangeNotifier {
       // Optimistic UI update
       _associations[eventId] = calendarIds;
 
-      // Sync with DB
-      await ApiService.post(
-          '/event-calendars', {'eventId': eventId, 'calendarIds': calendarIds});
+      // Sync with CalendarsEventsService
+      final token = await _authService.getAuthToken();
+      if (token == null) throw Exception('Auth token is required');
+      await CalendarsEventsService.updateEventCalendarAssociations(
+          token, eventId, calendarIds);
     } catch (e) {
       // Revert on error
       _associations.remove(eventId);
