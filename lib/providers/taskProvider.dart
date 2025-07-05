@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/data/tasks.dart';
+import 'package:timelyst_flutter/services/tasksService.dart';
 import 'package:timelyst_flutter/models/task.dart';
 
 class TaskProvider with ChangeNotifier {

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/data/events.dart';
+import 'package:timelyst_flutter/services/eventsService.dart';
 import 'package:timelyst_flutter/models/customApp.dart';
 
 class EventProvider with ChangeNotifier {
   List<CustomAppointment> _events = [];
-
 
   bool _isLoading = false;
   String _errorMessage = '';
@@ -20,7 +19,7 @@ class EventProvider with ChangeNotifier {
 
   //   try {
   //     final events =
-  //         await EventService.fetchEventsForCalendar(calendarId, authToken);
+  //         await EventsService.fetchEventsForCalendar(calendarId, authToken);
   //     _eventsByCalendar[calendarId] = events;
   //   } finally {
   //     _isLoading = false;

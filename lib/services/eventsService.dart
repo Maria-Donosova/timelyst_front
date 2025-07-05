@@ -1148,3 +1148,153 @@ class EventService {
     }
   }
 }
+
+// Formerly lib/data/events.dart
+// Service for event-related data operations
+
+// import 'package:http/http.dart' as http;
+// import 'dart:convert';
+// import '../config/envVarConfig.dart';
+// import '../models/customApp.dart';
+// import '../models/dayEvent.dart';
+// import '../models/timeEvent.dart';
+// import '../utils/eventsMapper.dart';
+
+// class EventsService {
+//   // Fetch DayEvents and map them to CustomAppointment
+//   static Future<List<CustomAppointment>> fetchDayEvents(
+//       String userId, String authToken) async {
+//     // (Move full implementation from data/events.dart)
+//     final String query = '''
+//       query DayEvents {
+//         dayEvents {
+//           dayEvents {
+//             id
+//             user_id
+//             createdBy
+//             user_calendars
+//             source_calendar
+//             event_organizer
+//             event_title
+//             start
+//             end
+//             is_AllDay
+//             recurrenceId
+//             recurrenceRule
+//             exceptionDates
+//             day_EventInstance
+//             category
+//             event_attendees
+//             event_body
+//             event_location
+//             event_ConferenceDetails
+//             reminder
+//             holiday
+//             createdAt
+//             updatedAt
+//           }
+//         }
+//       }
+//     ''';
+
+//     final response = await http.post(
+//       Uri.parse(Config.backendGraphqlURL),
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': 'Bearer $authToken',
+//       },
+//       body: jsonEncode({'query': query}),
+//     );
+
+//     if (response.statusCode == 200) {
+//       final data = jsonDecode(response.body);
+//       if (data['errors'] != null && data['errors'].length > 0) {
+//         final errors = data['errors'];
+//         throw Exception(
+//             'Fetching day events failed: ${errors.map((e) => e['message']).join(", ")}');
+//       }
+//       final List<dynamic> dayEventsJson =
+//           data['data']['dayEvents']['dayEvents'];
+//       final List<DayEvent> dayEvents = dayEventsJson.map((json) {
+//         if (json['user_id'] is Map) {
+//           json['user_id'] = json['user_id']['_id'];
+//         }
+//         return DayEvent.fromJson(json);
+//       }).toList();
+//       return dayEvents
+//           .map((event) => EventMapper.mapDayEventToCustomAppointment(event))
+//           .toList();
+//     } else {
+//       throw Exception('Failed to fetch day events: ${response.statusCode}');
+//     }
+//   }
+
+//   static Future<CustomAppointment> fetchTimeEvent(
+//       String id, String authToken) async {
+//     final String query = '''
+//       query TimeEvent( 24id: String) {
+//         timeEvent(id:  24id) {
+//           id
+//           user_id
+//           createdBy
+//           user_calendars
+//           source_calendar
+//           event_organizer
+//           event_title
+//           start
+//           end
+//           timeZone
+//           is_AllDay
+//           recurrenceId
+//           recurrenceRule
+//           exceptionDates
+//           time_EventInstance
+//           category
+//           event_attendees
+//           event_body
+//           event_location
+//           event_ConferenceDetails
+//           reminder
+//           holiday
+//           createdAt
+//           updatedAt
+//         }
+//       }
+//     ''';
+
+//     final response = await http.post(
+//       Uri.parse(Config.backendGraphqlURL),
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': 'Bearer $authToken',
+//       },
+//       body: jsonEncode({
+//         'query': query,
+//         'variables': {'id': id}
+//       }),
+//     );
+
+//     if (response.statusCode == 200) {
+//       final data = jsonDecode(response.body);
+//       if (data['errors'] != null && data['errors'].length > 0) {
+//         final errors = data['errors'];
+//         throw Exception(
+//             'Fetching time event failed: ${errors.map((e) => e['message']).join(", ")}');
+//       }
+//       final timeEventJson = data['data']['timeEvent'];
+//       if (timeEventJson['user_id'] is Map) {
+//         timeEventJson['user_id'] = timeEventJson['user_id']['_id'];
+//       }
+//       final TimeEvent timeEvent = TimeEvent.fromJson(timeEventJson);
+//       return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+//     } else {
+//       throw Exception('Failed to fetch time event: ${response.statusCode}');
+//     }
+//   }
+
+//   static Future<List<CustomAppointment>> fetchTimeEvents(
+//       String userId, String authToken) async {
+//     // Implement similar to fetchDayEvents, but for time events. (Placeholder)
+//     throw UnimplementedError('fetchTimeEvents is not yet implemented');
+//   }
+// }

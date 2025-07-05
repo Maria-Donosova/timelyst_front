@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../shared/categories.dart';
-import '../../data/tasks.dart';
+import '../../services/tasksService.dart';
 import '../../models/task.dart';
 import '../../services/authService.dart';
 

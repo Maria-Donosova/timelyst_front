@@ -821,3 +821,46 @@ class CalendarServiceException implements Exception {
 //     }
 //   }
 // }
+
+
+// // Formerly lib/data/calendars.dart
+// // Service for calendar-related data operations
+
+
+
+// class CalendarsService {
+//   static Future fetchUserCalendars({required String userId, required String authToken}) async {
+//     throw UnimplementedError('fetchUserCalendars is not yet implemented');
+//   }
+
+//   static Future<void> createCalendar(/* params as needed */) async {
+//     // TODO: Implement create logic
+//     throw UnimplementedError('createCalendar is not yet implemented');
+//   }
+
+//   static Future<void> updateCalendar(/* params as needed */) async {
+//     // TODO: Implement update logic
+//     throw UnimplementedError('updateCalendar is not yet implemented');
+//   }
+
+//   static Future<void> deleteCalendar(/* params as needed */) async {
+//     // TODO: Implement delete logic
+//     throw UnimplementedError('deleteCalendar is not yet implemented');
+//   }
+// }
+
+// class PaginatedCalendars {
+//   // ... (existing class definition)
+// }
+
+// class CalendarInput {
+//   // ... (existing class definition)
+// }
+
+// class CalendarServiceException implements Exception {
+//   final String message;
+//   CalendarServiceException(this.message);
+//   @override
+//   String toString() => 'CalendarServiceException: $message';
+// }
+
