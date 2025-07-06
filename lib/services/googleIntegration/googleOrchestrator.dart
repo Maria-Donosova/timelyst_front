@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'googleSignInOut.dart';
 import 'googleCalendarService.dart';
 import '../../models/calendars.dart';
-import '../../screens/common/calendarSettings.dart';
+import '../../widgets/screens/common/calendarSettings.dart';
 
 class GoogleOrchestrator {
   final GoogleCalendarService _googleCalendarService;

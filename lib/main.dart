@@ -10,7 +10,8 @@ import 'providers/calendarProvider.dart';
 import 'providers/eventProvider.dart';
 import 'providers/taskProvider.dart';
 
-import 'package:timelyst_flutter/screens/common/logIn.dart';
+import 'widgets/screens/common/logIn.dart';
+
 import 'package:timelyst_flutter/services/googleIntegration/googleSignInOut.dart';
 
 Future main() async {
