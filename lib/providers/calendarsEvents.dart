@@ -6,6 +6,7 @@ import './../services/calendarsEventsService.dart';
 import './../services/authService.dart';
 
 class EventCalendarAssociationProvider with ChangeNotifier {
+  bool get isSyncing => _isSyncing;
   final CalendarProvider _calendarProvider;
   final AuthService _authService;
   Map<String, List<String>> _associations = {}; // eventId -> calendarIds

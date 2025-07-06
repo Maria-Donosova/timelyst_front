@@ -70,7 +70,6 @@ class GoogleOrchestrator {
     final allCalendars = <Calendar>[];
     print(
         'Performing initial calendar sync $userId $email in _performInitialSync');
-    String? pageToken;
     bool hasMore = true;
 
     while (hasMore) {
@@ -81,7 +80,6 @@ class GoogleOrchestrator {
 
       allCalendars.addAll(page.calendars);
       hasMore = page.hasMore;
-      pageToken = page.nextPageToken;
       _currentSyncToken = page.syncToken;
     }
 
