@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../widgets/shared/customAppbar.dart';
+import '../../shared/customAppbar.dart';
 
 class UsersAdminScreen extends StatelessWidget {
   const UsersAdminScreen({
