@@ -134,7 +134,6 @@ class TasksService {
     final String mutation = '''
     mutation MarkTaskAsDone(\$taskId: String!) {
       markTaskAsDone(taskId: \$taskId) {
-        id
         status
       }
     }
