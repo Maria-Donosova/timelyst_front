@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:timelyst_flutter/screens/common/agenda.dart';
-import '../../models/calendars.dart';
-import '../../services/googleIntegration/googleOrchestrator.dart';
-import '../../widgets/shared/customAppbar.dart';
-import '../../widgets/shared/categories.dart';
+import 'package:timelyst_flutter/widgets/screens/common/agenda.dart';
+import '../../../models/calendars.dart';
+import '../../../services/googleIntegration/googleOrchestrator.dart';
+import '../../shared/customAppbar.dart';
+import '../../shared/categories.dart';
 
 class CalendarSettings extends StatefulWidget {
   final List<Calendar> calendars;

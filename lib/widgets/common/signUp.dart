@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/authProvider.dart';
 
-import '../../widgets/shared/customAppbar.dart';
+import '../shared/customAppbar.dart';
 
 import 'connectCalendars.dart';
 
