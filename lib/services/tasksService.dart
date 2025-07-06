@@ -218,9 +218,7 @@ class TasksService {
   static Future<void> deleteTask(String id, String authToken) async {
     final String mutation = '''
     mutation DeleteTask(\$id: String!) {
-      deleteTask(id: \$id) {
-        id
-      }
+      deleteTask(id: \$id) 
     }
   ''';
     final Map<String, dynamic> variables = {'id': id};
