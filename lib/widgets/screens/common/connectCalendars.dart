@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/shared/customAppbar.dart';
-import '../../services/googleIntegration/googleOrchestrator.dart';
+import '../../shared/customAppbar.dart';
+import '../../../services/googleIntegration/googleOrchestrator.dart';
 
 import 'agenda.dart';
 

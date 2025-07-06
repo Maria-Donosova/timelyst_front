@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../services/authService.dart';
-import '../../widgets/shared/customAppbar.dart';
-import '../../screens/common/agenda.dart';
-import '../../models/calendars.dart';
-import '../../services/calendarsService.dart';
+import '../../../services/authService.dart';
+import '../../shared/customAppbar.dart';
+import 'agenda.dart';
+import '../../../models/calendars.dart';
+import '../../../services/calendarsService.dart';
 
 class AccountSettings extends StatefulWidget {
   final AuthService authService;
@@ -278,7 +278,8 @@ class _AccountSettingsState extends State<AccountSettings> {
           Icon(
             Icons.calendar_today,
             size: 48,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
