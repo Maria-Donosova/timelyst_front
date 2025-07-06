@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/googleIntegration/googleSignInOut.dart';
 import '../../services/authService.dart';
-import '../../screens/common/connectCalendars.dart';
-import '../../screens/common/account.dart';
-import '../../screens/common/signUp.dart';
-import '../../screens/common/logIn.dart';
+import '../screens/common/connectCalendars.dart';
+import '../screens/common/account.dart';
+import '../screens/common/signUp.dart';
+import '../screens/common/logIn.dart';
 import '../../providers/authProvider.dart';
 
 enum _timelystMenu { about, contact_us }
