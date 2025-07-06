@@ -1147,6 +1147,11 @@ class CalendarsEventsService {
       }
     }
   }
+
+  static Future fetchEventCalendarAssociations(String token) async {}
+
+  static Future<void> updateEventCalendarAssociations(
+      String token, String eventId, List<String> calendarIds) async {}
 }
 
 // import 'dart:convert';
