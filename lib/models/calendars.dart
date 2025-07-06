@@ -198,7 +198,7 @@ class CalendarMetadata {
       'title': title,
       'description': description,
       'timeZone': timeZone,
-      'color': '#${color.value.toRadixString(16).padLeft(8, '0')}',
+      'color': '#${color.toARGB32().toRadixString(16).padLeft(8, '0')}',
       'defaultReminders': defaultReminders.map((r) => r.toJson()).toList(),
       'notifications': notifications.map((n) => n.toJson()).toList(),
       'allowedConferenceTypes': allowedConferenceTypes,
@@ -232,7 +232,7 @@ class CalendarPreferences {
       'importSettings': importSettings.toJson(),
       'category': category,
       'color': userColor != null
-          ? '#${userColor!.value.toRadixString(16).padLeft(8, '0')}'
+          ? '#${userColor!.toARGB32().toRadixString(16).padLeft(8, '0')}'
           : null,
     };
   }

@@ -20,7 +20,7 @@ class AppLogger {
         lineLength: 50,
         colors: true,
         printEmojis: true,
-        printTime: true,
+        dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
       ),
       filter: ProductionFilter(),
     );
@@ -28,7 +28,7 @@ class AppLogger {
 
   static void v(dynamic message, [dynamic error, StackTrace? stackTrace]) {
     if (kDebugMode) {
-      _instance._logger.v(message, error: error, stackTrace: stackTrace);
+      _instance._logger.t(message, error: error, stackTrace: stackTrace);
     }
     developer.log('🐛 VERBOSE: $message',
         name: 'APP', level: 0, error: error, stackTrace: stackTrace);
@@ -64,7 +64,7 @@ class AppLogger {
   }
 
   static void wtf(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    _instance._logger.wtf(message, error: error, stackTrace: stackTrace);
+    _instance._logger.f(message, error: error, stackTrace: stackTrace);
     developer.log('🖤 WTF: $message',
         name: 'APP', level: 5, error: error, stackTrace: stackTrace);
   }

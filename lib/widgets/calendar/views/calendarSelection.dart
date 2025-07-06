@@ -128,7 +128,7 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
             category.toUpperCase(),
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
                   letterSpacing: 1.2,
                 ),
           ),
@@ -157,54 +157,6 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
   ///
   /// This tile displays the calendar's title, color, and a checkbox to indicate
   /// its selection status.
-  Widget _buildCalendarTile(Calendar calendar) {
-    final isSelected = _selectedCalendars.any((c) => c.id == calendar.id);
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: () => _toggleCalendar(calendar, !isSelected),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              margin: const EdgeInsets.only(right: 16),
-              decoration: BoxDecoration(
-                color: Color(calendar.preferences.userColor as int),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.transparent,
-                  width: 2,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Text(
-                calendar.metadata.title,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-              ),
-            ),
-            Checkbox(
-              value: isSelected,
-              onChanged: (value) => _toggleCalendar(calendar, value ?? false),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   /// Builds a wrap of chips for the currently selected calendars.
   ///
@@ -245,14 +197,14 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
           Icon(
             Icons.calendar_today,
             size: 48,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             'No calendars available',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color:
-                      Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                      Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
           ),
           const SizedBox(height: 8),
@@ -260,7 +212,7 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
             'Create a calendar to get started',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color:
-                      Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                      Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
           ),
         ],

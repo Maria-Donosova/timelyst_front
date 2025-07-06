@@ -78,7 +78,7 @@ class _AccountSettingsState extends State<AccountSettings> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       margin: const EdgeInsets.only(bottom: 8, top: 16),
@@ -125,7 +125,7 @@ class _AccountSettingsState extends State<AccountSettings> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
-          color: Theme.of(context).dividerColor.withOpacity(0.1),
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
         ),
       ),
       child: ListTile(
@@ -215,6 +215,8 @@ class _AccountSettingsState extends State<AccountSettings> {
         ),
         onPressed: () {
           // TODO: Implement account connection flow
+// This should trigger the OAuth or relevant flow for connecting an external calendar account (Google, Outlook, Apple, etc.).
+// Consider using a dialog or a dedicated screen for the connection process, and update user state on success.
         },
       ),
     );
@@ -276,7 +278,7 @@ class _AccountSettingsState extends State<AccountSettings> {
           Icon(
             Icons.calendar_today,
             size: 48,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

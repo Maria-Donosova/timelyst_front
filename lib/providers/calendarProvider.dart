@@ -205,7 +205,7 @@ class CalendarProvider with ChangeNotifier {
         timeZone: calendar.metadata.timeZone ?? 'UTC',
         isPrimary: calendar.isPrimary,
         source: calendar.source.name,
-        color: '#${calendar.metadata.color.value.toRadixString(16)}',
+        color: '#${calendar.metadata.color.toARGB32().toRadixString(16)}',
         description: calendar.metadata.description,
       );
 
