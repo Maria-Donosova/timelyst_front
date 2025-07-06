@@ -130,10 +130,10 @@ class TasksService {
     }
   }
 
-  static Future<void> markTaskAsDone(String taskId, String authToken) async {
+  static Future<void> markTaskAsDone(String id, String authToken) async {
     final String mutation = '''
-    mutation MarkTaskAsDone(\$taskId: String!) {
-      markTaskAsDone(taskId: \$taskId) {
+    mutation MarkTaskAsDone(\$id: String!) {
+      markTaskAsDone(id: \$id) {
         status
       }
     }
@@ -146,7 +146,7 @@ class TasksService {
       },
       body: jsonEncode({
         'query': mutation,
-        'variables': {'taskId': taskId}
+        'variables': {'id': id}
       }),
     );
     if (response.statusCode == 200) {
@@ -163,14 +163,14 @@ class TasksService {
   }
 
   static Future<void> updateTask(
-      String taskId, String authToken, Task updatedTask) async {
+      String id, String authToken, Task updatedTask) async {
     final String mutation = '''
     mutation UpdateTask(
-      \$taskId: String!,
+      \$id: String!,
       \$taskInput: TaskInputData!
     ) {
       updateTask(
-        taskId: \$taskId,
+        id: \$id,
         taskInput: \$taskInput
       ) {
         id
@@ -184,7 +184,7 @@ class TasksService {
   ''';
 
     final Map<String, dynamic> variables = {
-      'taskId': taskId,
+      'id': id,
       'taskInput': {
         'title': updatedTask.title,
         'status': updatedTask.status,
@@ -215,15 +215,15 @@ class TasksService {
     }
   }
 
-  static Future<void> deleteTask(String taskId, String authToken) async {
+  static Future<void> deleteTask(String id, String authToken) async {
     final String mutation = '''
-    mutation DeleteTask(\$taskId: String!) {
-      deleteTask(taskId: \$taskId) {
+    mutation DeleteTask(\$id: String!) {
+      deleteTask(id: \$id) {
         id
       }
     }
   ''';
-    final Map<String, dynamic> variables = {'taskId': taskId};
+    final Map<String, dynamic> variables = {'id': id};
     final response = await http.post(
       Uri.parse(Config.backendGraphqlURL),
       headers: {
