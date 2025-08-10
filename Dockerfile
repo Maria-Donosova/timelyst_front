@@ -1,39 +1,39 @@
-# syntax = docker/dockerfile:1
+# Build stage
+FROM ghcr.io/cirruslabs/flutter:stable AS build
 
-# Adjust NODE_VERSION as desired
-ARG NODE_VERSION=22.9.0
-FROM node:${NODE_VERSION}-slim as base
-
-LABEL fly_launch_runtime="NodeJS"
-
-# NodeJS app lives here
 WORKDIR /app
+COPY pubspec.yaml pubspec.lock ./
+RUN flutter pub get
+COPY . .
+RUN flutter build web --release
 
-# Set production environment
-ENV NODE_ENV=production
+# Production stage - simple HTTP server
+FROM python:3.11-alpine
 
+WORKDIR /app
+COPY --from=build /app/build/web ./
 
-# Throw-away build stage to reduce size of final image
-FROM base as build
+# Create a simple HTTP server script
+RUN echo 'import http.server \
+import socketserver \
+import os \
+\
+PORT = int(os.environ.get("PORT", 7357)) \
+\
+class Handler(http.server.SimpleHTTPRequestHandler): \
+    def end_headers(self): \
+        self.send_header("Cross-Origin-Embedder-Policy", "require-corp") \
+        self.send_header("Cross-Origin-Opener-Policy", "same-origin") \
+        super().end_headers() \
+\
+    def do_GET(self): \
+        if self.path != "/" and not os.path.exists(self.path[1:]): \
+            self.path = "/index.html" \
+        return super().do_GET() \
+\
+with socketserver.TCPServer(("0.0.0.0", PORT), Handler) as httpd: \
+    print(f"Serving at http://0.0.0.0:{PORT}") \
+    httpd.serve_forever()' > server.py
 
-# Install packages needed to build node modules
-RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential 
-
-# Install node modules
-COPY --link package.json package-lock.json .
-RUN npm install
-
-# Copy application code
-COPY --link . .
-
-
-
-# Final stage for app image
-FROM base
-
-# Copy built application
-COPY --from=build /app /app
-
-# Start the server by default, this can be overwritten at runtime
-CMD [ "npm", "run", "start" ]
+EXPOSE 7357
+CMD ["python", "server.py"]
