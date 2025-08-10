@@ -3,7 +3,7 @@ import '../../models/task.dart';
 import '../../services/tasksService.dart';
 import '../../services/authService.dart';
 import '../shared/categories.dart';
-import '../todo/editTask.dart';
+import '../ToDo/editTask.dart';
 
 class TaskItem extends StatefulWidget {
   final String id;
