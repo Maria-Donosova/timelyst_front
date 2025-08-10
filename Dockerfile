@@ -2,8 +2,16 @@
 FROM ghcr.io/cirruslabs/flutter:stable AS build
 
 WORKDIR /app
+
+# Copy the .env file and load environment variables
+COPY .env .
+RUN pub run dotenv:load
+
+# Copy pubspec files and get dependencies
 COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
+
+# Copy rest of the code and build
 COPY . .
 RUN flutter build web --release
 
@@ -11,7 +19,13 @@ RUN flutter build web --release
 FROM python:3.11-alpine
 
 WORKDIR /app
+
+# Copy the built web app
 COPY --from=build /app/build/web ./
+
+# Copy the .env file and load environment variables for production
+COPY .env .
+RUN pip install python-dotenv && python -c "from dotenv import load_dotenv; load_dotenv()"
 
 # Create a simple HTTP server script
 RUN echo 'import http.server \
