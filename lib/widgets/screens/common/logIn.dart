@@ -205,7 +205,7 @@ class _LogInScreenState extends State<LogInScreen> {
                       image: DecorationImage(
                         fit: BoxFit.cover,
                         image: AssetImage(
-                            '/images/photos/web/landing_background.png'),
+                            'assets/images/photos/web/landing_background.png'),
                       ),
                     ),
                   ),
