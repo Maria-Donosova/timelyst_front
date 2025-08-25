@@ -15,12 +15,13 @@ class AuthProvider with ChangeNotifier {
   String? _userId;
   String? get userId => _userId;
 
-  Future<void> checkAuthState() async {
-    _isLoggedIn = await _authService.isLoggedIn();
-    if (_isLoggedIn) {
+  Future<void> tryAutoLogin() async {
+    final token = await _authService.getAuthToken();
+    if (token != null) {
+      _isLoggedIn = true;
       _userId = await _authService.getUserId();
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   Future<void> login(String email, String password) async {

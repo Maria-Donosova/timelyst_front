@@ -15,7 +15,7 @@ void main() {
     test('logout should clear user session', () async {
       // Arrange: Simulate a logged-in user
       mockAuthService.setLoginState(true, userId: '123');
-      await authProvider.checkAuthState();
+      await authProvider.tryAutoLogin();
       expect(authProvider.isLoggedIn, true);
       expect(authProvider.userId, '123');
 

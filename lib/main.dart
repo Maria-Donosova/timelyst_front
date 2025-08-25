@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
         title: 'Sign Up',
         theme: CustomTheme.lightTheme,
         themeMode: currentTheme.currentTheme,
-        home: LogInScreen(),
+        home: Wrapper(),
       ),
     );
   }
