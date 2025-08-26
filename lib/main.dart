@@ -13,6 +13,7 @@ import 'providers/taskProvider.dart';
 import 'widgets/screens/common/logIn.dart';
 
 import 'package:timelyst_flutter/services/googleIntegration/googleSignInOut.dart';
+import 'package:timelyst_flutter/widgets/screens/common/wrapper.dart';
 
 Future main() async {
   await dotenv.load(fileName: 'lib/.env');
