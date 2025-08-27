@@ -10,6 +10,9 @@ RUN flutter pub get
 # Copy rest of the code
 COPY . .
 
+# Remove .env file before building for web
+RUN rm -f lib/.env
+
 # Declare build arguments from fly secrets
 ARG GOOGLE_CLIENT_ID
 ARG GOOGLE_CLIENT_SECRET
