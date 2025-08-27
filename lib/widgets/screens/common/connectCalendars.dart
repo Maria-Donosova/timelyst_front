@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../shared/customAppbar.dart';
-import '../../../services/googleIntegration/googleOrchestrator.dart';
+
 import '../../../services/googleIntegration/googleSignInManager.dart';
+import '../../../services/googleIntegration/calendarSyncManager.dart';
 import './calendarSettings.dart';
 
 import 'agenda.dart';
@@ -53,7 +54,7 @@ class _ConnectCalBody extends StatelessWidget {
                     final signInResult = await signInManager.signIn(context);
 
                     if (signInResult != null) {
-                      final orchestrator = GoogleOrchestrator();
+                      final orchestrator = CalendarSyncManager();
                       final syncResult = await orchestrator.syncCalendars(
                         signInResult.userId,
                         signInResult.email,
