@@ -26,5 +26,4 @@ class User {
   });
 }
 
-
 //add logic to handle admin role and different permission models: superadmin, admin, moderator?

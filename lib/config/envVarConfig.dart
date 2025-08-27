@@ -1,28 +1,57 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Config {
-  // Google OAuth2
-  static String? get clientId => dotenv.env['CLIENT_ID'];
-  static String? get clientSecret => dotenv.env['CLIENT_SECRET'];
-  static String? get googleOath =>
-      dotenv.env['GOOGLE_OATH_URL'];
-  static String? get googleOath2Token =>
-      dotenv.env['GOOGLE_OATH2_TOKEN_URL'];
+  static String get clientId {
+    final value = dotenv.env['CLIENT_ID'];
+    if (value == null) throw Exception('CLIENT_ID is not set in .env file');
+    return value;
+  }
 
-// Backend google APIs
-  static String? get backendGoogleCallback =>
-      dotenv.env['BACKEND_GOOGLE_CALLBACK'];
+  static String get clientSecret {
+    final value = dotenv.env['CLIENT_SECRET'];
+    if (value == null) throw Exception('CLIENT_SECRET is not set in .env file');
+    return value;
+  }
 
-  static String? get backendFetchGoogleCalendars =>
-      dotenv.env['BACKEND_FETCH_GOOGLE_CALENDARS'];
-  static String? get backendSaveGoogleCalendars =>
-      dotenv.env['BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS'];
+  static String get googleOath {
+    return dotenv.env['GOOGLE_OATH_URL'] ?? 'https://accounts.google.com/o/oauth2/auth';
+  }
+
+  static String get googleOath2Token {
+    return dotenv.env['GOOGLE_OATH2_TOKEN_URL'] ?? 'https://accounts.google.com/o/oauth2/token';
+  }
+
+  static String get backendGoogleCallback {
+    final value = dotenv.env['BACKEND_GOOGLE_CALLBACK'];
+    if (value == null) throw Exception('BACKEND_GOOGLE_CALLBACK is not set in .env file');
+    return value;
+  }
+
+  static String get backendFetchGoogleCalendars {
+    final value = dotenv.env['BACKEND_FETCH_GOOGLE_CALENDARS'];
+    if (value == null) throw Exception('BACKEND_FETCH_GOOGLE_CALENDARS is not set in .env file');
+    return value;
+  }
+
+  static String get backendSaveGoogleCalendars {
+    final value = dotenv.env['BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS'];
+    if (value == null) throw Exception('BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS is not set in .env file');
+    return value;
+  }
+
   static String? get redirectUri => dotenv.env['REDIRECT_URI'];
 
-  static String? get frontendURL =>
-      dotenv.env['FRONTEND_URL'];
-  static String? get backendURL =>
-      dotenv.env['BACKEND_URL'];
-  static String? get backendGraphqlURL =>
-      dotenv.env['BACKEND_URL_GRAPHQL'];
+  static String get frontendURL {
+    return dotenv.env['FRONTEND_URL'] ?? 'http://localhost:7357';
+  }
+
+  static String get backendURL {
+    return dotenv.env['BACKEND_URL'] ?? 'https://timelyst-back.fly.dev';
+  }
+
+  static String get backendGraphqlURL {
+    final value = dotenv.env['BACKEND_URL_GRAPHQL'];
+    if (value == null) throw Exception('BACKEND_URL_GRAPHQL is not set in .env file');
+    return value;
+  }
 }

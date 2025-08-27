@@ -14,7 +14,8 @@ class CalendarSelectionScreen extends StatefulWidget {
   });
 
   @override
-  State<CalendarSelectionScreen> createState() => _CalendarSelectionScreenState();
+  State<CalendarSelectionScreen> createState() =>
+      _CalendarSelectionScreenState();
 }
 
 class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
@@ -74,7 +75,8 @@ Future<List<Calendar>?> showCalendarSelectionDialog(
   BuildContext context, {
   List<Calendar> selectedCalendars = const [],
 }) async {
-  final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+  final calendarProvider =
+      Provider.of<CalendarProvider>(context, listen: false);
   final allCalendars = calendarProvider.calendars;
 
   return await Navigator.of(context).push<List<Calendar>>(

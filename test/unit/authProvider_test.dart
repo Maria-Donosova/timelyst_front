@@ -50,7 +50,8 @@ void main() {
 
     test('register should create a new user and log them in', () async {
       // Act
-      await authProvider.register('new@test.com', 'newpassword', 'Test', 'User', true);
+      await authProvider.register(
+          'new@test.com', 'newpassword', 'Test', 'User', true);
 
       // Assert
       expect(authProvider.isLoggedIn, true);

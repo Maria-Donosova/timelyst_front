@@ -4,11 +4,13 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../../config/envVarConfig.dart';
 import 'package:timelyst_flutter/services/authService.dart';
+import '../../utils/apiClient.dart';
 import '../../models/calendars.dart';
 
 class GoogleCalendarService {
+  final ApiClient _apiClient = ApiClient();
   final AuthService _authService;
-  final String _baseUrl = Config.backendFetchGoogleCalendars;
+  final String _baseUrl = Config.backendFetchGoogleCalendars!;
   String? _cachedToken;
 
   // Token initialization
@@ -23,34 +25,18 @@ class GoogleCalendarService {
   Future<List<Calendar>> firstCalendarFetch({
     required String authCode,
   }) async {
-    print(
-        'Performing first calendar fetch with auth code in GoogleCalendarService');
+    // logger.i(
+    //     'Performing first calendar fetch with auth code in GoogleCalendarService');
     try {
-      final token = await _getValidToken().timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw TimeoutException('Token fetch timeout'),
+      final response = await _apiClient.post(
+        '$_baseUrl/calendars/list',
+        body: {
+          'authCode': authCode,
+        },
+      ).timeout(
+        const Duration(seconds: 20),
+        onTimeout: () => throw TimeoutException('Request timeout'),
       );
-
-      final headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-        'X-Client-Version': '1.0.0',
-        'X-Requested-With': 'XMLHttpRequest',
-      };
-
-      final response = await http
-          .post(
-            Uri.parse(
-                '$_baseUrl/calendars/list'), // Using the existing endpoint
-            headers: headers,
-            body: json.encode({
-              'authCode': authCode, // Sending authCode as requested
-            }),
-          )
-          .timeout(
-            const Duration(seconds: 20),
-            onTimeout: () => throw TimeoutException('Request timeout'),
-          );
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
@@ -71,13 +57,13 @@ class GoogleCalendarService {
         );
       }
     } on TimeoutException catch (e) {
-      print('Timeout during first calendar fetch: $e');
+      // logger.e('Timeout during first calendar fetch: $e');
       rethrow;
     } on http.ClientException catch (e) {
-      print('Network error: $e');
+      // logger.e('Network error: $e');
       throw Exception('Network error. Please check your connection.');
     } catch (e) {
-      print('Unexpected error during first fetch: $e');
+      // logger.e('Unexpected error during first fetch: $e');
       rethrow;
     }
   }
@@ -89,19 +75,17 @@ class GoogleCalendarService {
     required String syncToken,
     int maxResults = 250,
   }) async {
-    print(
-        'Fetching calendar changes $userId $email in fetchCalendarChanges google calendar service');
+    // logger.i(
+    //     'Fetching calendar changes $userId $email in fetchCalendarChanges google calendar service');
     try {
-      final token = await _getValidToken();
-      final response = await http.post(
-        Uri.parse('$_baseUrl/calendars/delta'),
-        headers: _buildHeaders(token),
-        body: json.encode({
+      final response = await _apiClient.post(
+        '$_baseUrl/calendars/delta',
+        body: {
           'userId': userId,
           'email': email,
           'syncToken': syncToken,
           'maxResults': maxResults,
-        }),
+        },
       );
 
       if (response.statusCode == 200) {
@@ -128,19 +112,17 @@ class GoogleCalendarService {
     required String email,
     required List<Calendar> calendars,
   }) async {
-    print(
-        'Saving selected calendars $userId $email in saveCalendarsBatch google calendar service');
+    // logger.i(
+    //     'Saving selected calendars $userId $email in saveCalendarsBatch google calendar service');
     try {
-      final token = await _getValidToken();
-      final response = await http.post(
-        Uri.parse('$_baseUrl/calendars/batch'),
-        headers: _buildHeaders(token),
-        body: json.encode({
+      final response = await _apiClient.post(
+        '$_baseUrl/calendars/batch',
+        body: {
           'user': userId,
           'email': email,
           'calendars': calendars.map((c) => c.toJson(email: email)).toList(),
           'batchSize': calendars.length,
-        }),
+        },
       );
 
       _handleBatchResponse(response);
@@ -158,18 +140,9 @@ class GoogleCalendarService {
     return _cachedToken!;
   }
 
-  Map<String, String> _buildHeaders(String token) {
-    print('Building headers in _buildHeaders google calendar service');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-      'X-Client-Version': '1.0.0', // For API versioning
-    };
-  }
-
   void _handleBatchResponse(http.Response response) {
-    print(
-        'Handling batch response in _handleBatchResponse google calendar service');
+    // logger.i(
+    //     'Handling batch response in _handleBatchResponse google calendar service');
     if (response.statusCode != 200) {
       final errorBody = json.decode(response.body);
       throw Exception(
@@ -187,7 +160,7 @@ class GoogleCalendarService {
   }
 
   Exception _handleError(String operation, dynamic error) {
-    print('Handling error in _handleError google calendar service');
+    // logger.i('Handling error in _handleError google calendar service');
     if (error is http.ClientException) {
       return Exception('Network error while $operation: ${error.message}');
     }

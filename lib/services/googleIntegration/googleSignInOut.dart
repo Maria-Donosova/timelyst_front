@@ -7,6 +7,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../config/envVarConfig.dart';
 
+import 'package:timelyst_flutter/services/googleIntegration/google_sign_in_result.dart';
+
 import 'googleAuthService.dart';
 
 class GoogleSignInOutService {
@@ -25,16 +27,23 @@ class GoogleSignInOutService {
   ];
 
   void initialize() {
-    _googleSignIn = kIsWeb
-        ? GoogleSignIn(
-            clientId: Config.clientId,
-            forceCodeForRefreshToken: true,
-            scopes: _scopes,
-          )
-        : GoogleSignIn(
-            forceCodeForRefreshToken: true,
-            scopes: _scopes,
-          );
+    if (kIsWeb) {
+      final clientId = Config.clientId;
+      if (clientId == null) {
+        throw Exception(
+            'Google Client ID is not configured. Please set the CLIENT_ID environment variable.');
+      }
+      _googleSignIn = GoogleSignIn(
+        clientId: clientId,
+        forceCodeForRefreshToken: true,
+        scopes: _scopes,
+      );
+    } else {
+      _googleSignIn = GoogleSignIn(
+        forceCodeForRefreshToken: true,
+        scopes: _scopes,
+      );
+    }
   }
   // final GoogleSignIn _googleSignIn = (kIsWeb)
   //     ? GoogleSignIn(
@@ -58,10 +67,10 @@ class GoogleSignInOutService {
   GoogleAuthService _googleAuthService = GoogleAuthService();
   //ConnectedAccounts _connectedAccounts = ConnectedAccounts();
 
-  Future<Map<String, dynamic>> googleSignIn(BuildContext context) async {
-    print("entering googleSignIn");
+  Future<GoogleSignInResult> googleSignIn() async {
+    // logger.i("entering googleSignIn");
     if (kIsWeb) {
-      print("kIsWeb is true");
+      // logger.i("kIsWeb is true");
       try {
         final serverAuthCode = await _googleAuthService
             .requestServerAuthenticatioinCode()
@@ -73,101 +82,80 @@ class GoogleSignInOutService {
           final response =
               await _googleAuthService.sendAuthCodeToBackend(serverAuthCode);
 
-          // Check if the response is valid
-          if (response.containsKey('success')) {
-            if (response['success']) {
-              print('Success: ${response['message']}');
-              print('User email: ${response['email']}');
-
-              // Return the email and success message
-              return {
-                'userId': response['data']['userId'],
-                'email': response['email'],
-                'message': response['message'],
-              };
-              //return 'Success: ${response['message']}';
-            } else {
-              print('Error: ${response['message']}');
-              return {
-                'email': null,
-                'message': 'Error: ${response['message']}',
-              };
-            }
+          if (response['success']) {
+            // logger.i('Success: ${response['message']}');
+            // logger.i('User email: ${response['email']}');
+            return GoogleSignInResult(
+              userId: response['data']['userId'],
+              email: response['email'],
+            );
           } else {
-            print('Invalid response from backend: $response');
-            return {
-              'email': null,
-              'message': 'Invalid response from backend',
-            };
+            // logger.e('Error: ${response['message']}');
+            throw GoogleSignInException(
+                'Error from backend: ${response['message']}');
           }
         } else {
-          return {
-            'email': null,
-            'message': 'Failed to get auth code from Google',
-          };
+          // logger.e('Failed to get auth code from Google');
+          throw GoogleSignInException('Failed to get auth code from Google');
         }
+      } on TimeoutException {
+        // logger.e('Google Sign-In timed out');
+        throw GoogleSignInException('Google Sign-In timed out');
       } catch (error) {
-        print('Error during web sign-in: $error');
-        return {
-          'email': null,
-          'message': 'Error during web sign-in: $error',
-        };
+        // logger.e('Error during web sign-in: $error');
+        throw GoogleSignInException('Error during web sign-in: $error');
       }
     } else {
+      // Mobile platform is not fully implemented, so I will leave it as it is for now.
+      // I will add a comment to indicate that this part needs to be implemented.
       try {
         GoogleSignInAccount? account = await _googleSignIn.signIn();
 
         if (account != null) {
           GoogleSignInAuthentication auth = await account.authentication;
-          print("Google Account: ${account.email}");
-          print("Id token : ${auth.idToken}");
-          print("Access token: ${auth.accessToken}");
+          // logger.i("Google Account: ${account.email}");
+          // logger.i("Id token : ${auth.idToken}");
+          // logger.i("Access token: ${auth.accessToken}");
           String? serverAuthCode = account.serverAuthCode;
-          print("Server Auth Code: $serverAuthCode");
+          // logger.i("Server Auth Code: $serverAuthCode");
+          // This part needs to be implemented to call the backend and get the userId
+          throw UnimplementedError(
+              'Mobile Google Sign-In is not fully implemented.');
+        } else {
+          throw GoogleSignInException(
+              'Google Sign-In was cancelled by the user.');
         }
       } catch (error) {
-        print(error);
-        return {
-          'email': null,
-          'message': 'Invalid response from backend',
-        };
+        // logger.e(error);
+        throw GoogleSignInException('An error occurred during Google Sign-In.');
       }
     }
-    return {
-      'email': null,
-      'message': 'Signed in failed',
-    };
   }
 
   // google sign out method
-  Future<String> googleDisconnect() async {
+  Future<void> googleDisconnect() async {
     try {
       await _googleSignIn.disconnect();
-      //await _googleSignIn.signOut();
-      // await _googleAuthService.clearTokensOnBackend();
-      // await storage.deleteAll();
       if (_googleSignIn.currentUser == null) {
-        print("User is disconnected");
-        return "User is disconnected";
+        // logger.i("User is disconnected");
       } else {
-        print("Disconnect failed");
-        return "Disconnect failed";
+        // logger.e("Disconnect failed");
+        throw GoogleSignInException('Failed to disconnect Google account.');
       }
     } catch (e) {
-      print(e);
-      return "Error: $e";
+      // logger.e(e);
+      throw GoogleSignInException('Error disconnecting Google account: $e');
     }
   }
 
   // google sign out method
   Future<void> googleSignOut() async {
     try {
-      //await _googleSignIn.disconnect();
       await _googleSignIn.signOut();
-      print("User signed out and cookies cleared");
+      // logger.i("User signed out and cookies cleared");
     } catch (e) {
-      print(e);
-      throw Exception('Google sign-out failed: $e');
+      // logger.e(e);
+      throw GoogleSignInException('Google sign-out failed: $e');
     }
   }
 }

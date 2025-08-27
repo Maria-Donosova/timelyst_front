@@ -17,8 +17,8 @@ class MockAuthService implements AuthService {
   }
 
   @override
-  Future<Map<String, dynamic>> register(
-      String email, String password, String name, String lastName, bool consent) async {
+  Future<Map<String, dynamic>> register(String email, String password,
+      String name, String lastName, bool consent) async {
     final userId = '456';
     final token = 'mock_token_reg';
     await saveAuthToken(token);
