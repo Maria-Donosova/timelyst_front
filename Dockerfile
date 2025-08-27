@@ -41,32 +41,8 @@ FROM nginx:alpine
 # Copy built web app to nginx
 COPY --from=build /app/build/web /usr/share/nginx/html
 
-# Create nginx config for Flutter web app
-RUN echo 'server { \
-    listen 7357; \
-    server_name _; \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    \
-    # Handle Flutter routing \
-    location / { \
-        try_files $uri $uri/ /index.html; \
-    } \
-    \
-    # Cache static assets \
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ { \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
-    } \
-    \
-    # Security headers \
-    add_header X-Frame-Options "SAMEORIGIN" always; \
-    add_header X-Content-Type-Options "nosniff" always; \
-    add_header Referrer-Policy "no-referrer-when-downgrade" always; \
-}' > /etc/nginx/conf.d/default.conf
-
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf.default 2>/dev/null || true
+# Copy nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 7357
 EXPOSE 7357
