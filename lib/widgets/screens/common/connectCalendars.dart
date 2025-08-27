@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../shared/customAppbar.dart';
 import '../../../services/googleIntegration/googleOrchestrator.dart';
+import '../../../services/googleIntegration/googleSignInManager.dart';
+import './calendarSettings.dart';
 
 import 'agenda.dart';
 
@@ -47,9 +49,29 @@ class _ConnectCalBody extends StatelessWidget {
                   color: const Color.fromARGB(255, 198, 23, 10),
                   onPressed: () async {
                     print('Gmail button pressed');
-                    await GoogleOrchestrator().signInAndSyncCalendars(
-                      context,
-                    );
+                    final signInManager = GoogleSignInManager();
+                    final signInResult = await signInManager.signIn(context);
+
+                    if (signInResult != null) {
+                      final orchestrator = GoogleOrchestrator();
+                      final syncResult = await orchestrator.syncCalendars(
+                        signInResult.userId,
+                        signInResult.email,
+                      );
+
+                      if (syncResult.isSuccess && context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CalendarSettings(
+                              userId: signInResult.userId,
+                              email: signInResult.email,
+                              calendars: syncResult.calendars,
+                            ),
+                          ),
+                        );
+                      }
+                    }
                   },
                 ),
                 _ServiceButton(
