@@ -34,7 +34,7 @@ class GoogleAuthService {
       };
 
       final response = await _apiClient.post(
-        Config.backendGoogleCallback,
+        Config.backendGoogleCalendar,
         body: body,
       );
 

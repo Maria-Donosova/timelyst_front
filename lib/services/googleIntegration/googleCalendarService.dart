@@ -10,7 +10,7 @@ import '../../models/calendars.dart';
 class GoogleCalendarService {
   final ApiClient _apiClient = ApiClient();
   final AuthService _authService;
-  final String _baseUrl = Config.backendFetchGoogleCalendars!;
+  final String _baseUrl = Config.backendFetchGoogleCalendars;
   String? _cachedToken;
 
   // Token initialization
@@ -116,7 +116,7 @@ class GoogleCalendarService {
     //     'Saving selected calendars $userId $email in saveCalendarsBatch google calendar service');
     try {
       final response = await _apiClient.post(
-        '$_baseUrl/calendars/batch',
+        Config.backendSaveSelectedGoogleCalendars,
         body: {
           'user': userId,
           'email': email,

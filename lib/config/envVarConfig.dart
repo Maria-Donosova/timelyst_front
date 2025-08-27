@@ -1,15 +1,15 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Config {
-  static String get clientId {
-    final value = dotenv.env['CLIENT_ID'];
-    if (value == null) throw Exception('CLIENT_ID is not set in .env file');
+  static String get googleClientId {
+    final value = dotenv.env['GOOGLE_CLIENT_ID'];
+    if (value == null) throw Exception('GOOGLE_CLIENT_ID is not set in .env file');
     return value;
   }
 
-  static String get clientSecret {
-    final value = dotenv.env['CLIENT_SECRET'];
-    if (value == null) throw Exception('CLIENT_SECRET is not set in .env file');
+  static String get googleClientSecret {
+    final value = dotenv.env['GOOGLE_CLIENT_SECRET'];
+    if (value == null) throw Exception('GOOGLE_CLIENT_SECRET is not set in .env file');
     return value;
   }
 
@@ -21,9 +21,9 @@ class Config {
     return dotenv.env['GOOGLE_OATH2_TOKEN_URL'] ?? 'https://accounts.google.com/o/oauth2/token';
   }
 
-  static String get backendGoogleCallback {
-    final value = dotenv.env['BACKEND_GOOGLE_CALLBACK'];
-    if (value == null) throw Exception('BACKEND_GOOGLE_CALLBACK is not set in .env file');
+  static String get backendGoogleCalendar {
+    final value = dotenv.env['BACKEND_GOOGLE_CALENDAR'];
+    if (value == null) throw Exception('BACKEND_GOOGLE_CALENDAR is not set in .env file');
     return value;
   }
 
@@ -33,7 +33,7 @@ class Config {
     return value;
   }
 
-  static String get backendSaveGoogleCalendars {
+  static String get backendSaveSelectedGoogleCalendars {
     final value = dotenv.env['BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS'];
     if (value == null) throw Exception('BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS is not set in .env file');
     return value;

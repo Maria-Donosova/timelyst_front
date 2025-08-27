@@ -2,11 +2,13 @@
 // Service for task-related data operations
 
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../config/envVarConfig.dart';
 import '../models/task.dart';
+import '../utils/apiClient.dart';
 
 class TasksService {
+  static final ApiClient _apiClient = ApiClient();
+
   static Future<List<Task>> fetchUserTasks(String authToken) async {
     final String query = '''
         query UserTasks {
@@ -21,13 +23,12 @@ class TasksService {
           }
         }
     ''';
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
+    final response = await _apiClient.post(
+      Config.backendGraphqlURL,
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
       },
-      body: jsonEncode({'query': query}),
+      body: {'query': query},
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -62,16 +63,15 @@ class TasksService {
       }
     }
   ''';
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
+    final response = await _apiClient.post(
+      Config.backendGraphqlURL,
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
       },
-      body: jsonEncode({
+      body: {
         'query': query,
         'variables': {'taskId': taskId, 'userId': userId}
-      }),
+      },
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -104,13 +104,12 @@ class TasksService {
         'category': newTask.category,
       },
     };
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
+    final response = await _apiClient.post(
+      Config.backendGraphqlURL,
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
       },
-      body: jsonEncode({'query': mutation, 'variables': variables}),
+      body: {'query': mutation, 'variables': variables},
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -138,16 +137,15 @@ class TasksService {
       }
     }
   ''';
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
+    final response = await _apiClient.post(
+      Config.backendGraphqlURL,
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
       },
-      body: jsonEncode({
+      body: {
         'query': mutation,
         'variables': {'id': id}
-      }),
+      },
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -193,13 +191,12 @@ class TasksService {
       },
     };
 
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
+    final response = await _apiClient.post(
+      Config.backendGraphqlURL,
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
       },
-      body: jsonEncode({'query': mutation, 'variables': variables}),
+      body: {'query': mutation, 'variables': variables},
     );
 
     if (response.statusCode == 200) {
@@ -222,13 +219,12 @@ class TasksService {
     }
   ''';
     final Map<String, dynamic> variables = {'id': id};
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
+    final response = await _apiClient.post(
+      Config.backendGraphqlURL,
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': 'Bearer $authToken',
       },
-      body: jsonEncode({'query': mutation, 'variables': variables}),
+      body: {'query': mutation, 'variables': variables},
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
