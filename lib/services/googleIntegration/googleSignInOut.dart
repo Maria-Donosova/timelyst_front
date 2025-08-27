@@ -28,7 +28,7 @@ class GoogleSignInOutService {
 
   void initialize() {
     if (kIsWeb) {
-      final clientId = Config.clientId;
+      final clientId = Config.googleClientId;
       if (clientId == null) {
         throw Exception(
             'Google Client ID is not configured. Please set the CLIENT_ID environment variable.');

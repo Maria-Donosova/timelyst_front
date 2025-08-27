@@ -39,7 +39,7 @@ class CalendarsService {
 
     try {
       final response = await _apiClient.post(
-        Config.backendGraphqlURL!,
+        Config.backendGraphqlURL,
         body: {
           'query': query,
           'variables': {
@@ -115,7 +115,7 @@ class CalendarsService {
 
     try {
       final response = await _apiClient.post(
-        Config.backendGraphqlURL!,
+        Config.backendGraphqlURL,
         body: {
           'query': query,
           'variables': {
@@ -175,7 +175,7 @@ class CalendarsService {
 
     try {
       final response = await _apiClient.post(
-        Config.backendGraphqlURL!,
+        Config.backendGraphqlURL,
         body: {
           'query': mutation,
           'variables': {
@@ -238,7 +238,7 @@ class CalendarsService {
 
     try {
       final response = await _apiClient.post(
-        Config.backendGraphqlURL!,
+        Config.backendGraphqlURL,
         body: {
           'query': mutation,
           'variables': {
@@ -293,7 +293,7 @@ class CalendarsService {
 
     try {
       final response = await _apiClient.post(
-        Config.backendGraphqlURL!,
+        Config.backendGraphqlURL,
         body: {
           'query': mutation,
           'variables': {
@@ -347,7 +347,7 @@ class CalendarsService {
 
     try {
       final response = await _apiClient.post(
-        Config.backendGraphqlURL!,
+        Config.backendGraphqlURL,
         body: {
           'query': mutation,
           'variables': {

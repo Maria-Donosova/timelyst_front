@@ -1,12 +1,13 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:timelyst_flutter/config/envVarConfig.dart';
+import 'package:timelyst_flutter/utils/apiClient.dart';
 
 class AuthService {
   static const String _authTokenKey = 'authToken';
   static const String _userIdKey = 'userId';
   final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final ApiClient _apiClient = ApiClient();
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     final String query = '''
@@ -24,10 +25,9 @@ class AuthService {
       'password': password,
     };
 
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'query': query, 'variables': variables}),
+    final response = await _apiClient.post(
+      Config.backendGraphqlURL,
+      body: {'query': query, 'variables': variables},
     );
 
     if (response.statusCode == 200) {
@@ -65,10 +65,9 @@ class AuthService {
       'consent': consent,
     };
 
-    final response = await http.post(
-      Uri.parse(Config.backendGraphqlURL),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'query': query, 'variables': variables}),
+    final response = await _apiClient.post(
+      Config.backendGraphqlURL,
+      body: {'query': query, 'variables': variables},
     );
 
     if (response.statusCode == 200) {
