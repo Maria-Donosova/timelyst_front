@@ -10,19 +10,19 @@ class Config {
       dotenv.env['GOOGLE_OATH2_TOKEN_URL'];
 
 // Backend google APIs
-  static String get backendGoogleCallback =>
+  static String? get backendGoogleCallback =>
       dotenv.env['BACKEND_GOOGLE_CALLBACK'];
 
-  static String get backendFetchGoogleCalendars =>
+  static String? get backendFetchGoogleCalendars =>
       dotenv.env['BACKEND_FETCH_GOOGLE_CALENDARS'];
-  static String get backendSaveGoogleCalendars =>
+  static String? get backendSaveGoogleCalendars =>
       dotenv.env['BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS'];
   static String? get redirectUri => dotenv.env['REDIRECT_URI'];
 
-  static String get frontendURL =>
+  static String? get frontendURL =>
       dotenv.env['FRONTEND_URL'];
-  static String get backendURL =>
+  static String? get backendURL =>
       dotenv.env['BACKEND_URL'];
-  static String get backendGraphqlURL =>
+  static String? get backendGraphqlURL =>
       dotenv.env['BACKEND_URL_GRAPHQL'];
 }
