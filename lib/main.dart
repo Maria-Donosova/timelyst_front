@@ -20,7 +20,6 @@ Future main() async {
   if (!kIsWeb) {
     await dotenv.load(fileName: 'lib/.env');
   }
-}
   GoogleSignInOutService().initialize();
   // Create an instance of AuthService
   final authService = AuthService();
