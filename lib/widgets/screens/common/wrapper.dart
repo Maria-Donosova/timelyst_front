@@ -11,7 +11,7 @@ class Wrapper extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context);
 
     if (authProvider.isLoggedIn) {
-      return AgendaView();
+      return Agenda();
     } else {
       return FutureBuilder(
         future: authProvider.tryAutoLogin(),
@@ -24,7 +24,7 @@ class Wrapper extends StatelessWidget {
             );
           } else {
             if (authProvider.isLoggedIn) {
-              return AgendaView();
+              return Agenda();
             } else {
               return LogInScreen();
             }
