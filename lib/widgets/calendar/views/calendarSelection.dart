@@ -128,7 +128,10 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
             category.toUpperCase(),
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.7),
                   letterSpacing: 1.2,
                 ),
           ),
@@ -197,22 +200,27 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
           Icon(
             Icons.calendar_today,
             size: 48,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             'No calendars available',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color:
-                      Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.7),
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             'Create a calendar to get started',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color:
-                      Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.5),
                 ),
           ),
         ],

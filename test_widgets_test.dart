@@ -29,7 +29,7 @@
 //         ),
 //       ],
 //     );
-//     expect(() => monthCellBuilder(context, monthCellDetails), 
+//     expect(() => monthCellBuilder(context, monthCellDetails),
 //         returnsNormally);
 //   });
 

@@ -5,9 +5,12 @@ import 'package:http/http.dart' as http;
 import 'package:google_sign_in_web/web_only.dart';
 
 import '../authService.dart';
+import '../../utils/apiClient.dart';
 import '../../config/envVarConfig.dart';
 
 class GoogleAuthService {
+  final ApiClient _apiClient = ApiClient();
+
   // Method for requesting server authentication code
   Future<String?> requestServerAuthenticatioinCode() async {
     try {
@@ -23,38 +26,23 @@ class GoogleAuthService {
 
   // Method for sending the authentication code to the backend
   Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode) async {
-    print('Entering sendAuthCodeToBackend Future');
-    print("Auth Code: $authCode");
+    // logger.i('Entering sendAuthCodeToBackend Future');
+    // logger.i("Auth Code: $authCode");
     try {
-      // Retrieve the JWT token from secure storage
-      final authService = AuthService();
-      final token = await authService.getAuthToken();
-      print("Token: $token");
-
-      if (token == null) {
-        throw Exception('No JWT token found. Please log in again.');
-      }
-
-      // Create the properly encoded request body
-      final body = jsonEncode({
+      final body = {
         'code': authCode,
-      });
+      };
 
-      // Send the HTTP POST request with the Authorization header
-      final response = await http.post(
-        Uri.parse(Config.backendGoogleCallback),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token', // Include the JWT token
-        },
+      final response = await _apiClient.post(
+        Config.backendGoogleCallback,
         body: body,
       );
 
       // Check the response status code
       if (response.statusCode == 200) {
-        print('Auth code sent to backend successfully');
+        // logger.i('Auth code sent to backend successfully');
         final responseData = jsonDecode(response.body);
-        print('Response data: $responseData');
+        // logger.i('Response data: $responseData');
 
         // Return the response data as a JSON object
         return {
@@ -64,9 +52,9 @@ class GoogleAuthService {
           'data': responseData,
         };
       } else {
-        print('Failed to send Auth code to backend: ${response.statusCode}');
+        // logger.e('Failed to send Auth code to backend: ${response.statusCode}');
         final errorData = jsonDecode(response.body);
-        print('Error data: $errorData');
+        // logger.e('Error data: $errorData');
 
         // Return the error data as a JSON object
         return {
@@ -77,7 +65,7 @@ class GoogleAuthService {
         };
       }
     } catch (e) {
-      print('Error sending Auth code to backend: $e');
+      // logger.e('Error sending Auth code to backend: $e');
       return {
         'success': false,
         'message': 'Failed to send Auth code to backend',

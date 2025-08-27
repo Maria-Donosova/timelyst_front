@@ -41,7 +41,8 @@ class AuthProvider with ChangeNotifier {
   Future<void> register(String email, String password, String name,
       String lastName, bool consent) async {
     try {
-      final result = await _authService.register(email, password, name, lastName, consent);
+      final result =
+          await _authService.register(email, password, name, lastName, consent);
       _userId = result['userId'];
       _isLoggedIn = true;
       _errorMessage = null;

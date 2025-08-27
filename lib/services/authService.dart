@@ -33,7 +33,8 @@ class AuthService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (data['errors'] != null && data['errors'].isNotEmpty) {
-        throw Exception('Login failed: ${data['errors'].map((e) => e['message']).join(", ")}');
+        throw Exception(
+            'Login failed: ${data['errors'].map((e) => e['message']).join(", ")}');
       }
       final loginData = data['data']['userLogin'];
       await saveAuthToken(loginData['token']);
@@ -44,7 +45,8 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>> register(String email, String password, String name, String lastName, bool consent) async {
+  Future<Map<String, dynamic>> register(String email, String password,
+      String name, String lastName, bool consent) async {
     final String query = '''
       mutation RegisterUser(\$email: String!, \$name: String!, \$lastName: String!, \$password: String!, \$consent: Boolean!) {
         registerUser(userInput: {email: \$email, name: \$name, last_name: \$lastName, password: \$password, consent: \$consent}) {
@@ -72,7 +74,8 @@ class AuthService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (data['errors'] != null && data['errors'].isNotEmpty) {
-        throw Exception('Registration failed: ${data['errors'].map((e) => e['message']).join(", ")}');
+        throw Exception(
+            'Registration failed: ${data['errors'].map((e) => e['message']).join(", ")}');
       }
       final registerData = data['data']['registerUser'];
       await saveAuthToken(registerData['token']);
@@ -86,7 +89,6 @@ class AuthService {
   Future<void> saveAuthToken(String token) async {
     try {
       await _storage.write(key: _authTokenKey, value: token);
-
     } catch (e) {
       print('Error saving auth token: $e');
       rethrow;
