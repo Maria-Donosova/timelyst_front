@@ -26,17 +26,7 @@ ARG FRONTEND_URL
 ARG REDIRECT_URL
 
 # Build web app with environment variables passed as dart-define
-RUN flutter build web --release \
-    --dart-define=GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
-    --dart-define=GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" \
-    --dart-define=GOOGLE_OAUTH_URL="$GOOGLE_OAUTH_URL" \
-    --dart-define=GOOGLE_OAUTH2_TOKEN_URL="$GOOGLE_OAUTH2_TOKEN_URL" \
-    --dart-define=BACKEND_GOOGLE_CALENDAR="$BACKEND_GOOGLE_CALENDAR" \
-    --dart-define=BACKEND_FETCH_GOOGLE_CALENDARS="$BACKEND_FETCH_GOOGLE_CALENDARS" \
-    --dart-define=BACKEND_URL="$BACKEND_URL" \
-    --dart-define=BACKEND_URL_GRAPHQL="$BACKEND_URL_GRAPHQL" \
-    --dart-define=FRONTEND_URL="$FRONTEND_URL" \
-    --dart-define=REDIRECT_URL="$REDIRECT_URL"
+RUN flutter build web --release --dart-define=GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" --dart-define=GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" --dart-define=GOOGLE_OAUTH_URL="$GOOGLE_OAUTH_URL" --dart-define=GOOGLE_OAUTH2_TOKEN_URL="$GOOGLE_OAUTH2_TOKEN_URL" --dart-define=BACKEND_GOOGLE_CALENDAR="$BACKEND_GOOGLE_CALENDAR" --dart-define=BACKEND_FETCH_GOOGLE_CALENDARS="$BACKEND_FETCH_GOOGLE_CALENDARS" --dart-define=BACKEND_URL="$BACKEND_URL" --dart-define=BACKEND_URL_GRAPHQL="$BACKEND_URL_GRAPHQL" --dart-define=FRONTEND_URL="$FRONTEND_URL" --dart-define=REDIRECT_URL="$REDIRECT_URL"
 
 # Production stage - serve with nginx
 FROM nginx:alpine
