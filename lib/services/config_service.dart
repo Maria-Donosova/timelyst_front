@@ -1,15 +1,13 @@
-import 'package:universal_html/html.dart' as html;
-import 'dart:convert';
+import 'dart:js_util' as js_util;
 
 class ConfigService {
   final dynamic _windowConfig;
 
-  ConfigService() : _windowConfig = html.window.getProperty('config');
+  ConfigService() : _windowConfig = js_util.getProperty(js_util.globalThis, 'config');
 
   String? get(String name) {
     if (_windowConfig != null) {
-      final properties = Map<String, dynamic>.from(json.decode(json.encode(_windowConfig)));
-      return properties[name];
+      return js_util.getProperty(_windowConfig, name);
     }
     return null;
   }
