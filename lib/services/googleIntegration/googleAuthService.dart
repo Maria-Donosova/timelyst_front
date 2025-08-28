@@ -10,6 +10,7 @@ import '../../config/envVarConfig.dart';
 
 class GoogleAuthService {
   final ApiClient _apiClient = ApiClient();
+  final AuthService _authService = AuthService();
 
   // Method for requesting server authentication code
   Future<String?> requestServerAuthenticatioinCode() async {
@@ -36,6 +37,7 @@ class GoogleAuthService {
       final response = await _apiClient.post(
         Config.backendGoogleCalendar,
         body: body,
+        token: await _authService.getAuthToken(),
       );
 
       // Check the response status code

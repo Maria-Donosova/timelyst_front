@@ -28,6 +28,7 @@ class AuthService {
     final response = await _apiClient.post(
       Config.backendGraphqlURL,
       body: {'query': query, 'variables': variables},
+      token: await getAuthToken(),
     );
 
     if (response.statusCode == 200) {
@@ -68,6 +69,7 @@ class AuthService {
     final response = await _apiClient.post(
       Config.backendGraphqlURL,
       body: {'query': query, 'variables': variables},
+      token: await getAuthToken(),
     );
 
     if (response.statusCode == 200) {
