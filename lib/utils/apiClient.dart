@@ -1,14 +1,9 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:timelyst_flutter/services/authService.dart';
-
 class ApiClient {
-  final AuthService _authService = AuthService();
-
   Future<http.Response> post(String url,
-      {Map<String, String>? headers, dynamic body}) async {
-    final token = await _authService.getAuthToken();
+      {Map<String, String>? headers, dynamic body, String? token}) async {
     final defaultHeaders = {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',

@@ -33,6 +33,7 @@ class GoogleCalendarService {
         body: {
           'authCode': authCode,
         },
+        token: await _authService.getAuthToken(),
       ).timeout(
         const Duration(seconds: 20),
         onTimeout: () => throw TimeoutException('Request timeout'),
@@ -86,6 +87,7 @@ class GoogleCalendarService {
           'syncToken': syncToken,
           'maxResults': maxResults,
         },
+        token: await _authService.getAuthToken(),
       );
 
       if (response.statusCode == 200) {
@@ -123,6 +125,7 @@ class GoogleCalendarService {
           'calendars': calendars.map((c) => c.toJson(email: email)).toList(),
           'batchSize': calendars.length,
         },
+        token: await _authService.getAuthToken(),
       );
 
       _handleBatchResponse(response);
