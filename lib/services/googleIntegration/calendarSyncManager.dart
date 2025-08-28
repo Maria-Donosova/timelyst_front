@@ -13,13 +13,16 @@ class CalendarSyncManager {
     try {
       // logger.i('Syncing calendars');
 
-      final calendars = await _googleCalendarService.fetchCalendarsPage(
+      final calendarPage = await _googleCalendarService.fetchCalendarsPage(
         userId: userId,
         email: email,
       );
-      // logger.i('Calendars: $calendars');
+      // logger.i('Calendars: ${calendarPage.calendars}');
 
-      return CalendarSyncResult.success(calendars: calendars);
+      return CalendarSyncResult.success(
+        calendars: calendarPage.calendars,
+        syncToken: calendarPage.syncToken,
+      );
     } catch (e) {
       return CalendarSyncResult.error(e.toString());
     }
