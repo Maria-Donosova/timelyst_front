@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/services/authService.dart';
 
@@ -18,11 +18,6 @@ import 'package:timelyst_flutter/services/googleIntegration/googleSignInOut.dart
 import 'package:timelyst_flutter/widgets/screens/common/wrapper.dart';
 
 Future main() async {
-  if (kIsWeb) {
-    await dotenv.load();
-  } else {
-    await dotenv.load(fileName: 'lib/.env');
-  }
   GoogleSignInOutService().initialize();
   // Create an instance of AuthService
   final authService = AuthService();

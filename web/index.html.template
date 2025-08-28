@@ -16,8 +16,6 @@
   -->
   <base href="$FLUTTER_BASE_HREF">
 
-  <meta name="google-signin-client_id" content="287872468745-3s590is0k581repee2ngshs1ngucghgm.apps.googleusercontent.com">
-
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
@@ -33,6 +31,21 @@
 
   <title>timelyst_front</title>
   <link rel="manifest" href="manifest.json">
+
+  <script>
+    window.config = {
+      GOOGLE_CLIENT_ID: '${GOOGLE_CLIENT_ID}',
+      GOOGLE_CLIENT_SECRET: '${GOOGLE_CLIENT_SECRET}',
+      GOOGLE_OAUTH_URL: '${GOOGLE_OAUTH_URL}',
+      GOOGLE_OAUTH2_TOKEN_URL: '${GOOGLE_OAUTH2_TOKEN_URL}',
+      BACKEND_GOOGLE_CALENDAR: '${BACKEND_GOOGLE_CALENDAR}',
+      BACKEND_FETCH_GOOGLE_CALENDARS: '${BACKEND_FETCH_GOOGLE_CALENDARS}',
+      BACKEND_URL: '${BACKEND_URL}',
+      BACKEND_URL_GRAPHQL: '${BACKEND_URL_GRAPHQL}',
+      FRONTEND_URL: '${FRONTEND_URL}',
+      REDIRECT_URL: '${REDIRECT_URL}'
+    };
+  </script>
 
   <script>
     // The value below is injected by flutter build, do not touch.
