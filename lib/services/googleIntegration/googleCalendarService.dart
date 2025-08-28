@@ -170,5 +170,45 @@ class GoogleCalendarService {
     return Exception('Error $operation: ${error.toString()}');
   }
 
-  Future fetchCalendarsPage({required userId, required email}) async {}
+  Future<CalendarPage> fetchCalendarsPage({
+    required String userId,
+    required String email,
+    String? pageToken,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        '$_baseUrl/calendars/list',
+        body: {
+          'userId': userId,
+          'email': email,
+          'pageToken': pageToken,
+        },
+        token: await _authService.getAuthToken(),
+      ).timeout(
+        const Duration(seconds: 20),
+        onTimeout: () => throw TimeoutException('Request timeout'),
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
+        if (decoded['success'] == true && decoded['data'] != null) {
+          return CalendarPage.fromJson(decoded['data']);
+        } else {
+          final message =
+              decoded['message'] ?? 'Failed to fetch calendars page';
+          throw Exception(message is String ? message : json.encode(message));
+        }
+      } else {
+        throw HttpException(
+          'Failed to load calendars page: ${response.statusCode}',
+        );
+      }
+    } on TimeoutException catch (e) {
+      rethrow;
+    } on http.ClientException catch (e) {
+      throw Exception('Network error. Please check your connection.');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
