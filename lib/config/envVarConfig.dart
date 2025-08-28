@@ -40,7 +40,7 @@ class Config {
   }
 
   static String? get redirectUri {
-    final value = dotenv.env['REDIRECT_URI']
+    final value = dotenv.env['REDIRECT_URI'];
     if (value == null) throw Exception('REDIRECT_URI is not set in .env file');
     return value;
   } 
