@@ -39,10 +39,15 @@ class Config {
     return value;
   }
 
-  static String? get redirectUri => dotenv.env['REDIRECT_URI'];
+  static String? get redirectUri {
+    final value = dotenv.env['REDIRECT_URI']
+    if (value == null) throw Exception('REDIRECT_URI is not set in .env file');
+    return value;
+  } 
+  
 
   static String get frontendURL {
-    return dotenv.env['FRONTEND_URL'] ?? 'http://localhost:7357';
+    return dotenv.env['FRONTEND_URL'] ?? 'https://timelyst-front.fly.dev';
   }
 
   static String get backendURL {
