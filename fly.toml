@@ -4,7 +4,7 @@
 #
 
 app = 'timelyst-front'
-primary_region = 'iad'
+primary_region = 'bos'
 
 [build]
   [build.args]
@@ -31,6 +31,4 @@ primary_region = 'iad'
   processes = ['app']
 
 [[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
+  size = 'shared-cpu-1x'
