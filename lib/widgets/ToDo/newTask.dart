@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timelyst_flutter/services/tasksService.dart';
-import 'package:timelyst_flutter/models/task.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
-import 'package:timelyst_flutter/services/authService.dart';
 import 'package:timelyst_flutter/widgets/shared/categories.dart';
 
 class NewTaskW extends StatefulWidget {
@@ -35,81 +32,55 @@ class _NewTaskWState extends State<NewTaskW> {
 
   Future<void> _createTask(BuildContext context) async {
     if (_form.currentState!.validate() && selectedCategory != null) {
-      // Get the task provider
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+      try {
+        await taskProvider.createTask(
+          _taskController.text,
+          selectedCategory!,
+        );
 
-      // Get auth token and user ID
-      final authService = AuthService();
-      final authToken = await authService.getAuthToken();
-      final userId = await authService.getUserId();
+        final scaffoldContext = ScaffoldMessenger.of(context);
+        final themeData = Theme.of(context);
 
-      if (authToken != null && userId != null) {
-        try {
-          // Create a new task with non-null values
-          final newTask = Task(
-            title: _taskController.text,
-            status: 'New',
-            category: selectedCategory!,
-            task_type: 'Task',
+        Navigator.of(context).pop();
+
+        Future.delayed(Duration(milliseconds: 500), () {
+          scaffoldContext.showSnackBar(
+            SnackBar(
+              backgroundColor: themeData.colorScheme.shadow,
+              content: Text(
+                'Task created successfully',
+                style: themeData.textTheme.bodyLarge,
+              ),
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.all(10),
+              elevation: 6,
+            ),
           );
+        });
+      } catch (e) {
+        print('Error creating task: $e');
+        final scaffoldContext = ScaffoldMessenger.of(context);
+        final themeData = Theme.of(context);
 
-          // Call the service to create the task
-          await TasksService.createTask(authToken, newTask);
+        Navigator.of(context).pop();
 
-          // Refresh the task list
-          await taskProvider.fetchTasks(authToken);
-
-          // Capture the scaffold context before popping
-          final scaffoldContext = ScaffoldMessenger.of(context);
-          final themeData = Theme.of(context);
-
-          // Close the modal first
-          Navigator.of(context).pop();
-
-          // Wait for the modal to close completely before showing the SnackBar
-          Future.delayed(Duration(milliseconds: 500), () {
-            // Show success message using the captured context
-            scaffoldContext.showSnackBar(
-              SnackBar(
-                backgroundColor: themeData.colorScheme.shadow,
-                content: Text(
-                  'Task created successfully',
-                  style: themeData.textTheme.bodyLarge,
-                ),
-                duration: Duration(seconds: 2),
-                behavior: SnackBarBehavior.floating,
-                margin: EdgeInsets.all(10),
-                elevation: 6,
+        Future.delayed(Duration(milliseconds: 500), () {
+          scaffoldContext.showSnackBar(
+            SnackBar(
+              backgroundColor: themeData.colorScheme.shadow,
+              content: Text(
+                'Failed to create task: $e',
+                style: themeData.textTheme.bodyLarge,
               ),
-            );
-          });
-        } catch (e) {
-          print('Error creating task: $e');
-          // Capture the scaffold context before popping
-          final scaffoldContext = ScaffoldMessenger.of(context);
-          final themeData = Theme.of(context);
-
-          // Close the modal first
-          Navigator.of(context).pop();
-
-          // Wait for the modal to close completely before showing the error SnackBar
-          Future.delayed(Duration(milliseconds: 500), () {
-            // Show error message using the captured context
-            scaffoldContext.showSnackBar(
-              SnackBar(
-                backgroundColor: themeData.colorScheme.shadow,
-                content: Text(
-                  'Failed to create task: $e',
-                  style: themeData.textTheme.bodyLarge,
-                ),
-                duration: Duration(seconds: 2),
-                behavior: SnackBarBehavior.floating,
-                margin: EdgeInsets.all(10),
-                elevation: 6,
-              ),
-            );
-          });
-        }
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.all(10),
+              elevation: 6,
+            ),
+          );
+        });
       }
     }
   }

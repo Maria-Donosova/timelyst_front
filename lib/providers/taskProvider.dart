@@ -36,6 +36,25 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
+  Future<void> createTask(String title, String category) async {
+    if (_authService == null) return;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return;
+
+    try {
+      final newTask = Task(
+        title: title,
+        category: category,
+        status: 'pending',
+      );
+      await TasksService.createTask(authToken, newTask);
+      await fetchTasks();
+    } catch (e) {
+      _errorMessage = 'Failed to create task: $e';
+      notifyListeners();
+    }
+  }
+
   Future<void> markTaskAsComplete(String taskId) async {
     if (_authService == null) return;
     final authToken = await _authService!.getAuthToken();
