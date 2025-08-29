@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/services/tasksService.dart';
 import 'package:timelyst_flutter/models/task.dart';
+import 'package:timelyst_flutter/services/authService.dart';
 
 class TaskProvider with ChangeNotifier {
+  AuthService? _authService;
   List<Task> _tasks = [];
   bool _isLoading = false;
   String _errorMessage = '';
@@ -11,7 +13,15 @@ class TaskProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  Future<void> fetchTasks(String authToken) async {
+  void updateAuth(AuthService authService) {
+    _authService = authService;
+  }
+
+  Future<void> fetchTasks() async {
+    if (_authService == null) return;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return;
+
     _isLoading = true;
     notifyListeners();
 
@@ -26,7 +36,11 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  Future<void> markTaskAsComplete(String taskId, String authToken) async {
+  Future<void> markTaskAsComplete(String taskId) async {
+    if (_authService == null) return;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return;
+
     try {
       // Use the dedicated markTaskAsDone method from TasksService
       await TasksService.markTaskAsDone(taskId, authToken);
@@ -42,8 +56,11 @@ class TaskProvider with ChangeNotifier {
   }
 
   // Update to allow for updates of title and category
-  Future<void> updateTask(
-      String taskId, String authToken, String title, String category) async {
+  Future<void> updateTask(String taskId, String title, String category) async {
+    if (_authService == null) return;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return;
+
     try {
       // Find the task to update
       final task = _tasks.firstWhere((task) => task.taskId == taskId);
@@ -70,7 +87,11 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  Future<void> deleteTask(String taskId, String authToken) async {
+  Future<void> deleteTask(String taskId) async {
+    if (_authService == null) return;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return;
+
     try {
       await TasksService.deleteTask(taskId, authToken);
 

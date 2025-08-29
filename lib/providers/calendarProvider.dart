@@ -16,7 +16,7 @@ class CalendarProvider with ChangeNotifier {
   bool _hasMore = true;
   int _currentOffset = 0;
   final int _pageSize = 20;
-  final AuthService _authService;
+  AuthService _authService;
   String? _userId;
 
   // Cache for calendar events
@@ -25,6 +25,10 @@ class CalendarProvider with ChangeNotifier {
 
   CalendarProvider({required AuthService authService})
       : _authService = authService;
+
+  void updateAuth(AuthService authService) {
+    _authService = authService;
+  }
 
   // Getters
   List<Calendar> get calendars => List.unmodifiable(_calendars);
