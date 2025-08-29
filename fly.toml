@@ -30,5 +30,9 @@ primary_region = 'bos'
   min_machines_running = 0
   processes = ['app']
 
+# Add timeout configurations
+  [timeout]
+  idle_timeout = '15m'  # Keep running longer before auto-stop
+
 [[vm]]
   size = 'shared-cpu-1x'
