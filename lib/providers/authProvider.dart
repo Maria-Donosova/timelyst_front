@@ -6,6 +6,8 @@ class AuthProvider with ChangeNotifier {
 
   AuthProvider(this._authService);
 
+  AuthService get authService => _authService;
+
   bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
 

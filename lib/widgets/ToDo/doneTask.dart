@@ -33,25 +33,18 @@ class DoneTaskW extends StatelessWidget {
       BuildContext context, String taskId) async {
     try {
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-      final authService = AuthService();
-      final authToken = await authService.getAuthToken();
+      await taskProvider.markTaskAsComplete(taskId);
 
-      if (authToken != null) {
-        await taskProvider.markTaskAsComplete(taskId, authToken);
-
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Theme.of(context).colorScheme.shadow,
-            content: Text(
-              'Well Done!',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).colorScheme.shadow,
+          content: Text(
+            'Well Done!',
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
-        );
-      } else {
-        throw Exception('Authentication token not found');
-      }
+        ),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to mark task as done: $e')),

@@ -33,13 +33,7 @@ class _TaskListWState extends State<TaskListW> {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     if (taskProvider.tasks.isEmpty && !taskProvider.isLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final authService = AuthService();
-        final authToken = await authService.getAuthToken();
-        final userId = await authService.getUserId();
-        print("User ID: $userId");
-        if (authToken != null) {
-          taskProvider.fetchTasks(authToken);
-        }
+        await taskProvider.fetchTasks();
       });
     }
   }
@@ -117,18 +111,10 @@ class _TaskListWState extends State<TaskListW> {
                                   category: task.category,
                                   status: task.status,
                                   onTaskUpdated: (updatedTask) async {
-                                    final authService = AuthService();
-                                    final authToken =
-                                        await authService.getAuthToken();
-                                    if (authToken != null) {
-                                      await taskProvider.updateTask(
-                                          updatedTask.taskId,
-                                          authToken,
-                                          updatedTask.title,
-                                          updatedTask.category);
-                                      // Refresh the task list after update
-                                      await taskProvider.fetchTasks(authToken);
-                                    }
+                                    await taskProvider.updateTask(
+                                        updatedTask.taskId,
+                                        updatedTask.title,
+                                        updatedTask.category);
                                   },
                                 ),
                                 onDismissed:
