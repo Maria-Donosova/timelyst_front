@@ -17,6 +17,7 @@ class EventProvider with ChangeNotifier {
   EventProvider({AuthService? authService}) : _authService = authService;
 
   void updateAuth(AuthService authService) {
+    print("EventProvider updateAuth called");
     _authService = authService;
     fetchAllEvents();
   }
@@ -64,10 +65,17 @@ class EventProvider with ChangeNotifier {
   }
 
   Future<void> fetchAllEvents() async {
-    if (_authService == null) return;
+    print("Entered fetchAllEvents in EventProvider");
+    if (_authService == null) {
+      print("AuthService is null in EventProvider");
+      return;
+    }
     final authToken = await _authService!.getAuthToken();
     final userId = await _authService!.getUserId();
-    if (authToken == null || userId == null) return;
+    if (authToken == null || userId == null) {
+      print("AuthToken or UserId is null in EventProvider");
+      return;
+    }
 
     _isLoading = true;
     notifyListeners();
@@ -91,6 +99,7 @@ class EventProvider with ChangeNotifier {
       _errorMessage = '';
     } catch (e) {
       _errorMessage = 'Failed to fetch events: $e';
+      print(_errorMessage);
     } finally {
       _isLoading = false;
       notifyListeners();
