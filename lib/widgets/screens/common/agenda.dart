@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/providers/eventProvider.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
-import '../../../shared/customAppbar.dart';
-import '../../../layout/leftPanel.dart';
-import '../../../layout/rightPanel.dart';
+import '../../shared/customAppbar.dart';
+import '../../layout/leftPanel.dart';
+import '../../layout/rightPanel.dart';
 
 class Agenda extends StatefulWidget {
   const Agenda({
@@ -45,11 +45,11 @@ class _AgendaState extends State<Agenda> {
           !isLandscape
               ? Expanded(
                   flex: 2,
-                  child: const RightPanel(),
+                  child: RightPanel(),
                 )
               : Expanded(
                   flex: 2,
-                  child: const RightPanel(),
+                  child: RightPanel(),
                 ),
         ]),
       ),
