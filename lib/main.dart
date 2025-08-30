@@ -36,11 +36,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider(authService)),
         ChangeNotifierProxyProvider<AuthProvider, TaskProvider>(
           create: (_) => TaskProvider(authService: authService),
-          update: (_, auth, previous) => previous!..updateAuth(auth.authService),
+          update: (_, auth, previous) => previous!..setAuth(auth.authService),
         ),
         ChangeNotifierProxyProvider<AuthProvider, EventProvider>(
           create: (_) => EventProvider(authService: authService),
-          update: (_, auth, previous) => previous!..updateAuth(auth.authService),
+          update: (_, auth, previous) => previous!..setAuth(auth.authService),
         ),
         ChangeNotifierProxyProvider<AuthProvider, CalendarProvider>(
           create: (_) => CalendarProvider(authService: authService),

@@ -16,11 +16,11 @@ class EventProvider with ChangeNotifier {
 
   EventProvider({AuthService? authService}) : _authService = authService;
 
-  void updateAuth(AuthService authService) {
-    print("EventProvider updateAuth called");
+  void setAuth(AuthService authService) {
     _authService = authService;
-    fetchAllEvents();
   }
+
+  
 
   Future<void> fetchDayEvents() async {
     if (_authService == null) return;

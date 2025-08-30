@@ -55,6 +55,13 @@ class _CalendarWState extends State<CalendarW> {
     final isWeek = _controller.view == CalendarView.week;
 
     final eventProvider = Provider.of<EventProvider>(context);
+
+    if (eventProvider.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     final List<CustomAppointment> appointments = eventProvider.events;
 
     print('Building calendar with ${appointments.length} events');
