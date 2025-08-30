@@ -26,7 +26,7 @@ ARG FRONTEND_URL
 ARG REDIRECT_URL
 
 # Build web app
-RUN flutter build web --release
+RUN flutter build web --release --no-source-maps
 
 # Production stage - serve with nginx
 FROM nginx:alpine
