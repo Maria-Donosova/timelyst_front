@@ -16,23 +16,33 @@ class TaskProvider with ChangeNotifier {
   TaskProvider({AuthService? authService}) : _authService = authService;
 
   void updateAuth(AuthService authService) {
+    print("TaskProvider updateAuth called");
     _authService = authService;
     fetchTasks();
   }
 
   Future<void> fetchTasks() async {
-    if (_authService == null) return;
+    print("Entered fetchTasks in TaskProvider");
+    if (_authService == null) {
+      print("AuthService is null in TaskProvider");
+      return;
+    }
     final authToken = await _authService!.getAuthToken();
-    if (authToken == null) return;
+    if (authToken == null) {
+      print("AuthToken is null in TaskProvider");
+      return;
+    }
 
     _isLoading = true;
     notifyListeners();
 
     try {
       _tasks = await TasksService.fetchUserTasks(authToken);
+      print("Fetched ${_tasks.length} tasks in TaskProvider");
       _errorMessage = '';
     } catch (e) {
       _errorMessage = 'Failed to fetch tasks: $e';
+      print(_errorMessage);
     } finally {
       _isLoading = false;
       notifyListeners();
