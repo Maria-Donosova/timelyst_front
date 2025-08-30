@@ -15,11 +15,11 @@ class TaskProvider with ChangeNotifier {
 
   TaskProvider({AuthService? authService}) : _authService = authService;
 
-  void updateAuth(AuthService authService) {
-    print("TaskProvider updateAuth called");
+  void setAuth(AuthService authService) {
     _authService = authService;
-    fetchTasks();
   }
+
+  
 
   Future<void> fetchTasks() async {
     print("Entered fetchTasks in TaskProvider");

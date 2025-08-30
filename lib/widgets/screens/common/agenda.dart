@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../shared/customAppbar.dart';
-import '../../layout/leftPanel.dart';
-import '../../layout/rightPanel.dart';
+import 'package:provider/provider.dart';
+import 'package:timelyst_flutter/providers/eventProvider.dart';
+import 'package:timelyst_flutter/providers/taskProvider.dart';
+import '../../../shared/customAppbar.dart';
+import '../../../layout/leftPanel.dart';
+import '../../../layout/rightPanel.dart';
 
-class Agenda extends StatelessWidget {
+class Agenda extends StatefulWidget {
   const Agenda({
     Key? key,
     calendars,
@@ -11,6 +14,20 @@ class Agenda extends StatelessWidget {
     email,
   }) : super(key: key);
   static const routeName = '/tasks-month-calendar';
+
+  @override
+  State<Agenda> createState() => _AgendaState();
+}
+
+class _AgendaState extends State<Agenda> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TaskProvider>(context, listen: false).fetchTasks();
+      Provider.of<EventProvider>(context, listen: false).fetchAllEvents();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
