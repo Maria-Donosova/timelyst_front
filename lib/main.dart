@@ -35,10 +35,13 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider(authService)),
         ChangeNotifierProxyProvider<AuthProvider, TaskProvider>(
-          create: (_) => TaskProvider(),
+          create: (_) => TaskProvider(authService: authService),
           update: (_, auth, previous) => previous!..updateAuth(auth.authService),
         ),
-        ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, EventProvider>(
+          create: (_) => EventProvider(authService: authService),
+          update: (_, auth, previous) => previous!..updateAuth(auth.authService),
+        ),
         ChangeNotifierProxyProvider<AuthProvider, CalendarProvider>(
           create: (_) => CalendarProvider(authService: authService),
           update: (_, auth, previous) =>
@@ -47,7 +50,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Sign Up',
+        title: 'Sign-up',
         theme: CustomTheme.lightTheme,
         themeMode: currentTheme.currentTheme,
         home: Wrapper(),

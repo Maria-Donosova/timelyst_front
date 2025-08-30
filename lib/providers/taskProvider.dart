@@ -13,8 +13,11 @@ class TaskProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
+  TaskProvider({AuthService? authService}) : _authService = authService;
+
   void updateAuth(AuthService authService) {
     _authService = authService;
+    fetchTasks();
   }
 
   Future<void> fetchTasks() async {
