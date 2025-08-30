@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:timelyst_flutter/services/authService.dart';
 import 'package:timelyst_flutter/services/eventsService.dart';
 import 'package:timelyst_flutter/models/customApp.dart';
 
 class EventProvider with ChangeNotifier {
+  AuthService? _authService;
   List<CustomAppointment> _events = [];
 
   bool _isLoading = false;
@@ -12,33 +14,24 @@ class EventProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  // Add calendar-specific event methods, uncomment once ready to switch from calendar agnostic to calendar aware approach
-  // Future<void> fetchEventsForCalendar(String calendarId) async {
-  //   _isLoading = true;
-  //   notifyListeners();
+  EventProvider({AuthService? authService}) : _authService = authService;
 
-  //   try {
-  //     final events =
-  //         await EventsService.fetchEventsForCalendar(calendarId, authToken);
-  //     _eventsByCalendar[calendarId] = events;
-  //   } finally {
-  //     _isLoading = false;
-  //     notifyListeners();
-  //   }
-  // }
+  void updateAuth(AuthService authService) {
+    _authService = authService;
+    fetchAllEvents();
+  }
 
-  // List<CustomAppointment> getEventsForCalendar(String calendarId) {
-  //   return _eventsByCalendar[calendarId] ?? [];
-  // }
+  Future<void> fetchDayEvents() async {
+    if (_authService == null) return;
+    final authToken = await _authService!.getAuthToken();
+    final userId = await _authService!.getUserId();
+    if (authToken == null || userId == null) return;
 
-  // Fetch day events
-  Future<void> fetchDayEvents(String userId, String authToken) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       final dayEvents = await EventService.fetchDayEvents(userId, authToken);
-      // Merge with existing events, replacing any duplicates
       _updateEvents(dayEvents);
       _errorMessage = '';
     } catch (e) {
@@ -49,14 +42,17 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Fetch time events
-  Future<void> fetchTimeEvents(String userId, String authToken) async {
+  Future<void> fetchTimeEvents() async {
+    if (_authService == null) return;
+    final authToken = await _authService!.getAuthToken();
+    final userId = await _authService!.getUserId();
+    if (authToken == null || userId == null) return;
+
     _isLoading = true;
     notifyListeners();
 
     try {
       final timeEvents = await EventService.fetchTimeEvents(userId, authToken);
-      // Merge with existing events, replacing any duplicates
       _updateEvents(timeEvents);
       _errorMessage = '';
     } catch (e) {
@@ -67,23 +63,28 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Fetch all events (both day and time events)
-  Future<void> fetchAllEvents(String userId, String authToken) async {
+  Future<void> fetchAllEvents() async {
+    if (_authService == null) return;
+    final authToken = await _authService!.getAuthToken();
+    final userId = await _authService!.getUserId();
+    if (authToken == null || userId == null) return;
+
     _isLoading = true;
     notifyListeners();
 
     try {
-      // Clear existing events before fetching all
       _events = [];
 
-      // Fetch both types of events
-      final dayEvents = await EventService.fetchDayEvents(userId, authToken);
-      final timeEvents = await EventService.fetchTimeEvents(userId, authToken);
+      final results = await Future.wait([
+        EventService.fetchDayEvents(userId, authToken),
+        EventService.fetchTimeEvents(userId, authToken),
+      ]);
 
-      // Combine all events
+      final dayEvents = results[0];
+      final timeEvents = results[1];
+
       _events = [...dayEvents, ...timeEvents];
 
-      // Debug print to verify events are loaded
       print(
           'Fetched ${_events.length} total events (${dayEvents.length} day events, ${timeEvents.length} time events in eventProvider)');
 
@@ -96,23 +97,21 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Fetch a single event by ID
-  Future<CustomAppointment?> fetchEvent(String id, String authToken,
-      {bool isAllDay = false}) async {
+  Future<CustomAppointment?> fetchEvent(String id, {bool isAllDay = false}) async {
+    if (_authService == null) return null;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return null;
+
     _isLoading = true;
     notifyListeners();
 
     try {
       CustomAppointment event;
       if (isAllDay) {
-        // This is a day event
         event = await EventService.fetchTimeEvent(id, authToken);
       } else {
-        // This is a time event
         event = await EventService.fetchTimeEvent(id, authToken);
       }
-
-      // Update the event in the local list if it exists
       _updateSingleEvent(event);
       _errorMessage = '';
       return event;
@@ -125,15 +124,17 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Add a method to add a CustomAppointment directly
   void addSingleEvent(CustomAppointment event) {
     _updateSingleEvent(event);
     notifyListeners();
   }
 
-  // Create a new day event
   Future<CustomAppointment?> createDayEvent(
-      Map<String, dynamic> dayEventInput, String authToken) async {
+      Map<String, dynamic> dayEventInput) async {
+    if (_authService == null) return null;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return null;
+
     _isLoading = true;
     notifyListeners();
 
@@ -154,9 +155,12 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Create a new time event
   Future<CustomAppointment?> createTimeEvent(
-      Map<String, dynamic> timeEventInput, String authToken) async {
+      Map<String, dynamic> timeEventInput) async {
+    if (_authService == null) return null;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return null;
+
     _isLoading = true;
     notifyListeners();
 
@@ -175,9 +179,12 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Update a day event
   Future<CustomAppointment?> updateDayEvent(
-      String id, Map<String, dynamic> dayEventInput, String authToken) async {
+      String id, Map<String, dynamic> dayEventInput) async {
+    if (_authService == null) return null;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return null;
+
     _isLoading = true;
     notifyListeners();
 
@@ -196,9 +203,12 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Update a time event
   Future<CustomAppointment?> updateTimeEvent(
-      String id, Map<String, dynamic> timeEventInput, String authToken) async {
+      String id, Map<String, dynamic> timeEventInput) async {
+    if (_authService == null) return null;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return null;
+
     if (id.isEmpty) {
       _errorMessage = 'Event ID cannot be empty';
       notifyListeners();
@@ -223,8 +233,11 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Delete a day event
-  Future<bool> deleteDayEvent(String id, String authToken) async {
+  Future<bool> deleteDayEvent(String id) async {
+    if (_authService == null) return false;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return false;
+
     _isLoading = true;
     notifyListeners();
 
@@ -244,8 +257,11 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Delete a time event
-  Future<bool> deleteTimeEvent(String id, String authToken) async {
+  Future<bool> deleteTimeEvent(String id) async {
+    if (_authService == null) return false;
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) return false;
+
     _isLoading = true;
     notifyListeners();
 
@@ -265,17 +281,12 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Helper method to update the events list with new events
   void _updateEvents(List<CustomAppointment> newEvents) {
-    // Remove any events that are being replaced
     final newEventIds = newEvents.map((e) => e.id).toSet();
     _events.removeWhere((event) => newEventIds.contains(event.id));
-
-    // Add the new events
     _events.addAll(newEvents);
   }
 
-  // Helper method to update a single event in the list
   void _updateSingleEvent(CustomAppointment updatedEvent) {
     final index = _events.indexWhere((event) => event.id == updatedEvent.id);
     if (index >= 0) {
@@ -285,7 +296,6 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  // Add a single event to the list
   void addEvent(CustomAppointment event) {
     _events.add(event);
     notifyListeners();

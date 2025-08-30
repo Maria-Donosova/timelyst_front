@@ -10,9 +10,7 @@ import '../views/appointmentCellBuilder.dart';
 import '../views/monthlyAppointmentCellBuilder.dart';
 import '../views/eventDetails.dart';
 import '../../../models/customApp.dart';
-import '../../../providers/authProvider.dart';
 import '../../../providers/eventProvider.dart';
-import '../../../services/authService.dart';
 
 enum _calView { day, week, month }
 
@@ -25,8 +23,6 @@ class CalendarW extends StatefulWidget {
 
 class _CalendarWState extends State<CalendarW> {
   final CalendarController _controller = CalendarController();
-  late EventProvider _eventProvider;
-  bool _isInitialized = false;
 
   String? _headerText,
       _weekStart,
@@ -41,77 +37,15 @@ class _CalendarWState extends State<CalendarW> {
   @override
   void initState() {
     _headerText = 'header';
-
     _startTimeText = '';
     _endTimeText = '';
     _dateText = '';
-
     _cellDateText = '';
-
     width = 0.0;
     cellWidth = 0.0;
-
     super.initState();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_isInitialized) {
-      _eventProvider = Provider.of<EventProvider>(context);
-      // Add listener to update when events change
-      _eventProvider.addListener(_onEventsChanged);
-      // Fetch events when the widget is first initialized
-      _fetchEvents();
-      _isInitialized = true;
-    }
-  }
-
-  void _onEventsChanged() {
-    // When events in the provider change, update the UI
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  @override
-  void dispose() {
-    // Remove listener when widget is disposed
-    _eventProvider.removeListener(_onEventsChanged);
-    super.dispose();
-  }
-
-  Future<void> _fetchEvents() async {
-    // Get authProvider to access user credentials
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-    try {
-      // Get the userId and authToken from authProvider
-      final userId = authProvider.userId;
-      final authToken = await AuthService().getAuthToken();
-
-      if (userId != null && authToken != null) {
-        // Fetch both day and time events
-        await _eventProvider.fetchAllEvents(userId, authToken);
-
-        // Debug: Print the number of events loaded
-        print('Loaded ${_eventProvider.events.length} events in calendar.dart');
-
-        // Force a rebuild after fetching events
-        if (mounted) {
-          setState(() {});
-        }
-      } else {
-        print('Error: userId or authToken is null');
-        // Handle the case when user is not authenticated
-      }
-    } catch (e) {
-      print('Error fetching events: $e');
-      // Handle error - maybe show a snackbar
-    }
-  }
-
-  // Modify the build method to ensure the data source is updated
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -120,14 +54,10 @@ class _CalendarWState extends State<CalendarW> {
     final isMonth = _controller.view == CalendarView.month;
     final isWeek = _controller.view == CalendarView.week;
 
-    // Get events from provider
-    final List<CustomAppointment> appointments = _eventProvider.events;
+    final eventProvider = Provider.of<EventProvider>(context);
+    final List<CustomAppointment> appointments = eventProvider.events;
 
-    // Debug: Print the events being displayed
     print('Building calendar with ${appointments.length} events');
-
-    // Create a new data source with the updated appointments
-    //final _dataSource = _EventDataSource(appointments);
 
     return Card(
       child: Column(
@@ -172,7 +102,6 @@ class _CalendarWState extends State<CalendarW> {
                 ],
                 timeSlotViewSettings: TimeSlotViewSettings(
                   timeIntervalHeight: 50,
-                  //allDayPanelColor: Theme.of(context).colorScheme.shadow,
                 ),
                 controller: _controller,
                 allowViewNavigation: false,
@@ -214,13 +143,11 @@ class _CalendarWState extends State<CalendarW> {
                         .toString();
                   }
                   if (_controller.view == CalendarView.week) {
-                    // Add a safety check to ensure we don't access out-of-bounds indices
                     final visibleDatesLength =
                         viewChangedDetails.visibleDates.length;
                     _weekStart = DateFormat('d')
                         .format(viewChangedDetails.visibleDates[0])
                         .toString();
-                    // Make sure we don't access an index that doesn't exist
                     _weekEnd = DateFormat('d')
                         .format(viewChangedDetails.visibleDates[
                             visibleDatesLength > 6
@@ -267,7 +194,6 @@ class _CalendarWState extends State<CalendarW> {
         Padding(
           padding: const EdgeInsets.only(right: 8, left: 10),
           child: SizedBox(
-            //width: mediaQuery.size.width * 0.03,
             child: PopupMenuButton(
               tooltip: 'Mode',
               icon: Icon(
@@ -304,15 +230,11 @@ class _CalendarWState extends State<CalendarW> {
                 );
               },
             ),
-            //},
           ),
         ),
-        //),
       ],
     );
   }
-
-  //function that updates datasource collection to reflect the changes on UI that fs an appointment added to the datasource or removed from the datasource
 
   void _calendarTapped(CalendarTapDetails details) {
     if (details.targetElement == CalendarElement.calendarCell) {
@@ -323,7 +245,6 @@ class _CalendarWState extends State<CalendarW> {
           .toString();
     }
     if (details.targetElement == CalendarElement.appointment) {
-      // Add safety check to ensure appointments list is not null or empty
       if (details.appointments != null && details.appointments!.isNotEmpty) {
         final CustomAppointment _customAppointment = details.appointments![0];
 
@@ -344,10 +265,6 @@ class _CalendarWState extends State<CalendarW> {
               return AlertDialog(
                 content: EventDetails(
                   id: _customAppointment.id,
-                  // creator: '',
-                  // userProfiles: [],
-                  //userCalendars: [],
-                  // eventOrganizer: '',
                   subject: _customAppointment.title,
                   dateText: _dateText,
                   start: _startTimeText,
@@ -358,9 +275,7 @@ class _CalendarWState extends State<CalendarW> {
                   body: _customAppointment.description,
                   location: _customAppointment.location,
                   isAllDay: _customAppointment.isAllDay,
-                  // recurrenceId: '',
                   recurrenceRule: _customAppointment.recurrenceRule,
-                  // recurrenceExceptionDates: [],
                 ),
               );
             });
@@ -372,9 +287,6 @@ class _CalendarWState extends State<CalendarW> {
             return AlertDialog(
               content: EventDetails(
                 id: '',
-                // eventOrganizer: '',
-                // userProfiles: [],
-                //userCalendars: [],
                 subject: '',
                 dateText: _cellDateText,
                 start: _startTimeText,
@@ -384,31 +296,24 @@ class _CalendarWState extends State<CalendarW> {
                 participants: '',
                 body: '',
                 isAllDay: false,
-                // recurrenceId: '',
                 recurrenceRule: '',
                 location: '',
-                // recurrenceExceptionDates: [],
               ),
             );
           });
   }
 
-  // Add this method to refresh the calendar with a new event
   void addEventAndRefresh(CustomAppointment event) {
     if (mounted) {
-      // Use addPostFrameCallback to ensure we're not in the middle of a build cycle
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        // Add the event to the provider
-        _eventProvider.addSingleEvent(event);
+        final eventProvider = Provider.of<EventProvider>(context, listen: false);
+        eventProvider.addSingleEvent(event);
         setState(() {});
       });
     }
   }
 }
 
-// Remove the dummy events list as we'll use the provider's events
-
-//datasource connector: override syncfusion appointment properties with custom appointment properties
 class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   _EventDataSource(List<CustomAppointment> source) {
     appointments = source;
@@ -439,7 +344,6 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
     return appointments![index].isAllDay;
   }
 
-  // Make sure all other required properties are properly mapped
   @override
   String? getRecurrenceRule(int index) {
     return appointments![index].recurrenceRule;
@@ -454,16 +358,6 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   String getLocation(int index) {
     return appointments![index].location;
   }
-
-  // @override
-  // Object? getRecurrenceId(int index) {
-  //   return appointments[index].recurrenceId as Object?;
-  // }
-
-  // @override
-  // List<DateTime> getRecurrenceExceptionDates(int index) {
-  //   return appointments![index].recurrenceExceptionDates;
-  // }
 
   @override
   CustomAppointment convertAppointmentToObject(
@@ -481,7 +375,7 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
         location: _customAppointment.location,
         participants: _customAppointment.participants,
         recurrenceRule: appointment.recurrenceRule,
-        exceptionDates: null, // Properly handle exceptionDates
+        exceptionDates: null, 
         timeEventInstance: _customAppointment.timeEventInstance);
   }
 }
