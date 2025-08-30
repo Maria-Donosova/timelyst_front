@@ -80,6 +80,8 @@ class EventProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
+    await Future.delayed(const Duration(seconds: 2));
+
     try {
       _events = [];
 

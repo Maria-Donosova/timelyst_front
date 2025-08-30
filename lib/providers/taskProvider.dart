@@ -36,6 +36,8 @@ class TaskProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
+    await Future.delayed(const Duration(seconds: 2));
+
     try {
       _tasks = await TasksService.fetchUserTasks(authToken);
       print("Fetched ${_tasks.length} tasks in TaskProvider");
