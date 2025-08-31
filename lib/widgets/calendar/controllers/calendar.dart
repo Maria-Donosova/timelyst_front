@@ -56,12 +56,6 @@ class _CalendarWState extends State<CalendarW> {
 
     final eventProvider = Provider.of<EventProvider>(context);
 
-    if (eventProvider.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
     final List<CustomAppointment> appointments = eventProvider.events;
 
     print('Building calendar with ${appointments.length} events');
@@ -100,83 +94,91 @@ class _CalendarWState extends State<CalendarW> {
                     : Container(),
           ]),
           Expanded(
-            child: SfCalendar(
-                view: CalendarView.day,
-                allowedViews: const [
-                  CalendarView.day,
-                  CalendarView.week,
-                  CalendarView.month
-                ],
-                timeSlotViewSettings: TimeSlotViewSettings(
-                  timeIntervalHeight: 50,
-                ),
-                controller: _controller,
-                allowViewNavigation: false,
-                headerHeight: 0,
-                viewHeaderHeight: 0,
-                cellBorderColor: const Color.fromRGBO(238, 243, 246, 1.0),
-                selectionDecoration: BoxDecoration(
-                  color: Colors.transparent,
-                  border: Border.all(color: Colors.grey, width: 0.5),
-                  borderRadius: const BorderRadius.all(Radius.circular(4)),
-                  shape: BoxShape.rectangle,
-                ),
-                showWeekNumber: true,
-                weekNumberStyle: WeekNumberStyle(
-                  backgroundColor: Colors.white,
-                  textStyle: TextStyle(fontSize: 8, color: Colors.grey[600]),
-                ),
-                todayHighlightColor: Color.fromRGBO(171, 178, 183, 1),
-                todayTextStyle: TextStyle(color: Colors.grey[800]),
-                showNavigationArrow: true,
-                showCurrentTimeIndicator: true,
-                monthCellBuilder: monthCellBuilder,
-                monthViewSettings: MonthViewSettings(
-                  appointmentDisplayMode: MonthAppointmentDisplayMode.none,
-                  showTrailingAndLeadingDates: false,
-                ),
-                appointmentBuilder: appointmentBuilder,
-                allowAppointmentResize: true,
-                allowDragAndDrop: true,
-                dragAndDropSettings:
-                    DragAndDropSettings(showTimeIndicator: true),
-                dataSource: _EventDataSource(appointments),
-                onTap: _calendarTapped,
-                onViewChanged: (ViewChangedDetails viewChangedDetails) {
-                  if (_controller.view == CalendarView.month) {
-                    _headerText = DateFormat('yMMMM')
-                        .format(viewChangedDetails.visibleDates[
-                            viewChangedDetails.visibleDates.length ~/ 2])
-                        .toString();
-                  }
-                  if (_controller.view == CalendarView.week) {
-                    final visibleDatesLength =
-                        viewChangedDetails.visibleDates.length;
-                    _weekStart = DateFormat('d')
-                        .format(viewChangedDetails.visibleDates[0])
-                        .toString();
-                    _weekEnd = DateFormat('d')
-                        .format(viewChangedDetails.visibleDates[
-                            visibleDatesLength > 6
-                                ? 6
-                                : visibleDatesLength - 1])
-                        .toString();
-                    _month = DateFormat('MMMM')
-                        .format(viewChangedDetails.visibleDates[0])
-                        .toString();
-                    _headerText =
-                        _month! + ' ' + _weekStart! + ' - ' + _weekEnd!;
-                  }
-                  if (_controller.view == CalendarView.day) {
-                    _headerText = DateFormat('MMMMEEEEd')
-                        .format(viewChangedDetails.visibleDates[
-                            viewChangedDetails.visibleDates.length ~/ 2])
-                        .toString();
-                  }
-                  SchedulerBinding.instance.addPostFrameCallback((duration) {
-                    setState(() {});
-                  });
-                }),
+            child: Stack(
+              children: [
+                SfCalendar(
+                    view: CalendarView.day,
+                    allowedViews: const [
+                      CalendarView.day,
+                      CalendarView.week,
+                      CalendarView.month
+                    ],
+                    timeSlotViewSettings: TimeSlotViewSettings(
+                      timeIntervalHeight: 50,
+                    ),
+                    controller: _controller,
+                    allowViewNavigation: false,
+                    headerHeight: 0,
+                    viewHeaderHeight: 0,
+                    cellBorderColor: const Color.fromRGBO(238, 243, 246, 1.0),
+                    selectionDecoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border.all(color: Colors.grey, width: 0.5),
+                      borderRadius: const BorderRadius.all(Radius.circular(4)),
+                      shape: BoxShape.rectangle,
+                    ),
+                    showWeekNumber: true,
+                    weekNumberStyle: WeekNumberStyle(
+                      backgroundColor: Colors.white,
+                      textStyle: TextStyle(fontSize: 8, color: Colors.grey[600]),
+                    ),
+                    todayHighlightColor: Color.fromRGBO(171, 178, 183, 1),
+                    todayTextStyle: TextStyle(color: Colors.grey[800]),
+                    showNavigationArrow: true,
+                    showCurrentTimeIndicator: true,
+                    monthCellBuilder: monthCellBuilder,
+                    monthViewSettings: MonthViewSettings(
+                      appointmentDisplayMode: MonthAppointmentDisplayMode.none,
+                      showTrailingAndLeadingDates: false,
+                    ),
+                    appointmentBuilder: appointmentBuilder,
+                    allowAppointmentResize: true,
+                    allowDragAndDrop: true,
+                    dragAndDropSettings:
+                        DragAndDropSettings(showTimeIndicator: true),
+                    dataSource: _EventDataSource(appointments),
+                    onTap: _calendarTapped,
+                    onViewChanged: (ViewChangedDetails viewChangedDetails) {
+                      if (_controller.view == CalendarView.month) {
+                        _headerText = DateFormat('yMMMM')
+                            .format(viewChangedDetails.visibleDates[
+                                viewChangedDetails.visibleDates.length ~/ 2])
+                            .toString();
+                      }
+                      if (_controller.view == CalendarView.week) {
+                        final visibleDatesLength =
+                            viewChangedDetails.visibleDates.length;
+                        _weekStart = DateFormat('d')
+                            .format(viewChangedDetails.visibleDates[0])
+                            .toString();
+                        _weekEnd = DateFormat('d')
+                            .format(viewChangedDetails.visibleDates[
+                                visibleDatesLength > 6
+                                    ? 6
+                                    : visibleDatesLength - 1])
+                            .toString();
+                        _month = DateFormat('MMMM')
+                            .format(viewChangedDetails.visibleDates[0])
+                            .toString();
+                        _headerText =
+                            _month! + ' ' + _weekStart! + ' - ' + _weekEnd!;
+                      }
+                      if (_controller.view == CalendarView.day) {
+                        _headerText = DateFormat('MMMMEEEEd')
+                            .format(viewChangedDetails.visibleDates[
+                                viewChangedDetails.visibleDates.length ~/ 2])
+                            .toString();
+                      }
+                      SchedulerBinding.instance.addPostFrameCallback((duration) {
+                        setState(() {});
+                      });
+                    }),
+                if (eventProvider.isLoading)
+                  const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+              ],
+            ),
           )
         ],
       ),

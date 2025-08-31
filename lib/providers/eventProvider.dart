@@ -7,7 +7,7 @@ class EventProvider with ChangeNotifier {
   AuthService? _authService;
   List<CustomAppointment> _events = [];
 
-  bool _isLoading = false;
+  bool _isLoading = true;
   String _errorMessage = '';
 
   List<CustomAppointment> get events => _events;
@@ -68,19 +68,21 @@ class EventProvider with ChangeNotifier {
     print("Entered fetchAllEvents in EventProvider");
     if (_authService == null) {
       print("AuthService is null in EventProvider");
+      _isLoading = false;
+      notifyListeners();
       return;
     }
     final authToken = await _authService!.getAuthToken();
     final userId = await _authService!.getUserId();
     if (authToken == null || userId == null) {
       print("AuthToken or UserId is null in EventProvider");
+      _isLoading = false;
+      notifyListeners();
       return;
     }
 
     _isLoading = true;
     notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 2));
 
     try {
       _events = [];

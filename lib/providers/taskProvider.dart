@@ -6,7 +6,7 @@ import 'package:timelyst_flutter/services/authService.dart';
 class TaskProvider with ChangeNotifier {
   AuthService? _authService;
   List<Task> _tasks = [];
-  bool _isLoading = false;
+  bool _isLoading = true;
   String _errorMessage = '';
 
   List<Task> get tasks => _tasks;
@@ -35,8 +35,6 @@ class TaskProvider with ChangeNotifier {
 
     _isLoading = true;
     notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 2));
 
     try {
       _tasks = await TasksService.fetchUserTasks(authToken);
