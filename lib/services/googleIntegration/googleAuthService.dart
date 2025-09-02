@@ -9,8 +9,15 @@ import '../../utils/apiClient.dart';
 import '../../config/envVarConfig.dart';
 
 class GoogleAuthService {
-  final ApiClient _apiClient = ApiClient();
-  final AuthService _authService = AuthService();
+  late final ApiClient _apiClient;
+  late final AuthService _authService;
+
+  GoogleAuthService() {
+    _apiClient = ApiClient();
+    _authService = AuthService();
+  }
+
+  GoogleAuthService.test(this._apiClient, this._authService);
 
   // Method for requesting server authentication code
   Future<String?> requestServerAuthenticatioinCode() async {

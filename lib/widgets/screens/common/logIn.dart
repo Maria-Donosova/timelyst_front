@@ -75,7 +75,7 @@ class _LogInScreenState extends State<LogInScreen> {
     final mediaQuery = MediaQuery.of(context);
 
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: AppBar(),
       body: SafeArea(
         child: Stack(
           children: [
