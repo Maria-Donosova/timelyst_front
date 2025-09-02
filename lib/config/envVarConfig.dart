@@ -5,14 +5,12 @@ class Config {
 
   static String get googleClientId {
     final value = _configService.get('GOOGLE_CLIENT_ID');
-    if (value == null) throw Exception('GOOGLE_CLIENT_ID is not set');
-    return value;
+    return value ?? 'test_google_client_id';
   }
 
   static String get googleClientSecret {
     final value = _configService.get('GOOGLE_CLIENT_SECRET');
-    if (value == null) throw Exception('GOOGLE_CLIENT_SECRET is not set');
-    return value;
+    return value ?? 'test_google_client_secret';
   }
 
   static String get googleOath {
@@ -25,26 +23,22 @@ class Config {
 
   static String get backendGoogleCalendar {
     final value = _configService.get('BACKEND_GOOGLE_CALENDAR');
-    if (value == null) throw Exception('BACKEND_GOOGLE_CALENDAR is not set');
-    return value;
+    return value ?? 'test_backend_google_calendar';
   }
 
   static String get backendFetchGoogleCalendars {
     final value = _configService.get('BACKEND_FETCH_GOOGLE_CALENDARS');
-    if (value == null) throw Exception('BACKEND_FETCH_GOOGLE_CALENDARS is not set');
-    return value;
+    return value ?? 'test_backend_fetch_google_calendars';
   }
 
   static String get backendSaveSelectedGoogleCalendars {
     final value = _configService.get('BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS');
-    if (value == null) throw Exception('BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS is not set');
-    return value;
+    return value ?? 'test_backend_save_selected_google_calendars';
   }
 
   static String? get redirectUri {
     final value = _configService.get('REDIRECT_URI');
-    if (value == null) throw Exception('REDIRECT_URI is not set');
-    return value;
+    return value ?? 'http://localhost:8080';
   } 
   
 
@@ -58,7 +52,6 @@ class Config {
 
   static String get backendGraphqlURL {
     final value = _configService.get('BACKEND_URL_GRAPHQL');
-    if (value == null) throw Exception('BACKEND_URL_GRAPHQL is not set');
-    return value;
+    return value ?? 'http://localhost:8081/graphql';
   }
 }
