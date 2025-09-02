@@ -8,8 +8,8 @@ import '../../utils/apiClient.dart';
 import '../../models/calendars.dart';
 
 class GoogleCalendarService {
-  final ApiClient _apiClient = ApiClient();
-  final AuthService _authService;
+  late final ApiClient _apiClient;
+  late final AuthService _authService;
   final String _baseUrl = Config.backendFetchGoogleCalendars;
   String? _cachedToken;
 
@@ -18,8 +18,9 @@ class GoogleCalendarService {
     _cachedToken = await _authService.getAuthToken();
   }
 
-  GoogleCalendarService({AuthService? authService})
-      : _authService = authService ?? AuthService();
+  GoogleCalendarService({AuthService? authService, ApiClient? apiClient})
+      : _authService = authService ?? AuthService(),
+        _apiClient = apiClient ?? ApiClient();
 
   /// Fetches the initial list of Google Calendars using a one-time auth code.
   Future<List<Calendar>> firstCalendarFetch({

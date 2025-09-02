@@ -12,12 +12,13 @@ import 'package:timelyst_flutter/services/googleIntegration/google_sign_in_resul
 import 'googleAuthService.dart';
 
 class GoogleSignInOutService {
-  static final GoogleSignInOutService _instance =
-      GoogleSignInOutService._internal();
-  factory GoogleSignInOutService() => _instance;
-  GoogleSignInOutService._internal();
-
   late final GoogleSignIn _googleSignIn;
+  late final GoogleAuthService _googleAuthService;
+
+  GoogleSignInOutService({GoogleSignIn? googleSignIn, GoogleAuthService? googleAuthService}) {
+    _googleSignIn = googleSignIn ?? GoogleSignIn();
+    _googleAuthService = googleAuthService ?? GoogleAuthService();
+  }
 
   List<String> _scopes = <String>[
     'openid',
@@ -33,38 +34,18 @@ class GoogleSignInOutService {
         throw Exception(
             'Google Client ID is not configured. Please set the CLIENT_ID environment variable.');
       }
-      _googleSignIn = GoogleSignIn(
-        clientId: clientId,
-        forceCodeForRefreshToken: true,
-        scopes: _scopes,
-      );
+      // _googleSignIn = GoogleSignIn(
+      //   clientId: clientId,
+      //   forceCodeForRefreshToken: true,
+      //   scopes: _scopes,
+      // );
     } else {
-      _googleSignIn = GoogleSignIn(
-        forceCodeForRefreshToken: true,
-        scopes: _scopes,
-      );
+      // _googleSignIn = GoogleSignIn(
+      //   forceCodeForRefreshToken: true,
+      //   scopes: _scopes,
+      // );
     }
   }
-  // final GoogleSignIn _googleSignIn = (kIsWeb)
-  //     ? GoogleSignIn(
-  //         clientId: Config.clientId,
-  //         forceCodeForRefreshToken: true,
-  //         scopes: _scopes,
-  //       )
-  //     : GoogleSignIn(
-  //         forceCodeForRefreshToken: true,
-  //         scopes: _scopes,
-  //       );
-
-  // static const List<String> _scopes = <String>[
-  //   'openid',
-  //   'profile',
-  //   'email',
-  //   'https://www.googleapis.com/auth/peopleapi.readonly',
-  //   'https://www.googleapis.com/auth/calendar',
-  // ];
-
-  GoogleAuthService _googleAuthService = GoogleAuthService();
   //ConnectedAccounts _connectedAccounts = ConnectedAccounts();
 
   Future<GoogleSignInResult> googleSignIn() async {
