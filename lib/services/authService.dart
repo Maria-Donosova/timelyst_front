@@ -6,8 +6,15 @@ import 'package:timelyst_flutter/utils/apiClient.dart';
 class AuthService {
   static const String _authTokenKey = 'authToken';
   static const String _userIdKey = 'userId';
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
-  final ApiClient _apiClient = ApiClient();
+  late final FlutterSecureStorage _storage;
+  late final ApiClient _apiClient;
+
+  AuthService() {
+    _storage = FlutterSecureStorage();
+    _apiClient = ApiClient();
+  }
+
+  AuthService.test(this._apiClient, this._storage);
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     final String query = '''
