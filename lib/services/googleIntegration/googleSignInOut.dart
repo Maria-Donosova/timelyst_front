@@ -139,7 +139,3 @@ class GoogleSignInOutService {
     }
   }
 }
-on('Google sign-out failed: $e');
-    }
-  }
-}
