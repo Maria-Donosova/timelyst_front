@@ -18,7 +18,6 @@ import 'package:timelyst_flutter/services/googleIntegration/googleSignInOut.dart
 import 'package:timelyst_flutter/widgets/screens/common/wrapper.dart';
 
 Future main() async {
-  GoogleSignInOutService().initialize();
   // Create an instance of AuthService
   final authService = AuthService();
   runApp(MyApp(authService: authService));
