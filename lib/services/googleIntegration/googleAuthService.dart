@@ -19,21 +19,8 @@ class GoogleAuthService {
 
   GoogleAuthService.test(this._apiClient, this._authService);
 
-  // Method for requesting server authentication code
-  Future<String?> requestServerAuthenticatioinCode() async {
-    try {
-      return await requestServerAuthCode().timeout(
-        const Duration(seconds: 30),
-        onTimeout: () => throw TimeoutException('Google auth timed out'),
-      );
-    } catch (e) {
-      print('Error requesting auth code: $e');
-      rethrow;
-    }
-  }
-
   // Method for sending the authentication code to the backend
-  Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode) async {
+  Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode, String email) async {
     // logger.i('Entering sendAuthCodeToBackend Future');
     // logger.i("Auth Code: $authCode");
     try {
@@ -66,6 +53,23 @@ class GoogleAuthService {
         // logger.e('Error data: $errorData');
 
         // Return the error data as a JSON object
+        return {
+          'success': false,
+          'message':
+              'Failed to send Auth code to backend: ${response.statusCode}',
+          'error': errorData,
+        };
+      }
+    } catch (e) {
+      // logger.e('Error sending Auth code to backend: $e');
+      return {
+        'success': false,
+        'message': 'Failed to send Auth code to backend',
+      };
+    }
+  }
+}
+object
         return {
           'success': false,
           'message':

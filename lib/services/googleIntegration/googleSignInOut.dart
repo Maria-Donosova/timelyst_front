@@ -48,67 +48,40 @@ class GoogleSignInOutService {
   //ConnectedAccounts _connectedAccounts = ConnectedAccounts();
 
   Future<GoogleSignInResult> googleSignIn() async {
-    // logger.i("entering googleSignIn");
-    if (kIsWeb) {
-      // logger.i("kIsWeb is true");
-      try {
-        final serverAuthCode = await _googleAuthService
-            .requestServerAuthenticatioinCode()
-            .timeout(const Duration(seconds: 30),
-                onTimeout: () =>
-                    throw TimeoutException('Google Sign-In timed out'));
+    try {
+      final GoogleSignInAccount? account = await _googleSignIn.signIn();
 
-        if (serverAuthCode != null) {
-          final response =
-              await _googleAuthService.sendAuthCodeToBackend(serverAuthCode);
-
-          if (response['success']) {
-            // logger.i('Success: ${response['message']}');
-            // logger.i('User email: ${response['email']}');
-            return GoogleSignInResult(
-              userId: response['data']['userId'],
-              email: response['email'],
-            );
-          } else {
-            // logger.e('Error: ${response['message']}');
-            throw GoogleSignInException(
-                'Error from backend: ${response['message']}');
-          }
-        } else {
-          // logger.e('Failed to get auth code from Google');
-          throw GoogleSignInException('Failed to get auth code from Google');
-        }
-      } on TimeoutException {
-        // logger.e('Google Sign-In timed out');
-        throw GoogleSignInException('Google Sign-In timed out');
-      } catch (error) {
-        // logger.e('Error during web sign-in: $error');
-        throw GoogleSignInException('Error during web sign-in: $error');
+      if (account == null) {
+        // User cancelled the sign-in
+        throw GoogleSignInException('Google Sign-In was cancelled by the user.');
       }
-    } else {
-      // Mobile platform is not fully implemented, so I will leave it as it is for now.
-      // I will add a comment to indicate that this part needs to be implemented.
-      try {
-        GoogleSignInAccount? account = await _googleSignIn.signIn();
 
-        if (account != null) {
-          GoogleSignInAuthentication auth = await account.authentication;
-          // logger.i("Google Account: ${account.email}");
-          // logger.i("Id token : ${auth.idToken}");
-          // logger.i("Access token: ${auth.accessToken}");
-          String? serverAuthCode = account.serverAuthCode;
-          // logger.i("Server Auth Code: $serverAuthCode");
-          // This part needs to be implemented to call the backend and get the userId
-          throw UnimplementedError(
-              'Mobile Google Sign-In is not fully implemented.');
-        } else {
-          throw GoogleSignInException(
-              'Google Sign-In was cancelled by the user.');
-        }
-      } catch (error) {
-        // logger.e(error);
-        throw GoogleSignInException('An error occurred during Google Sign-In.');
+      final String? authCode = account.serverAuthCode;
+      final String email = account.email;
+
+      if (authCode == null) {
+        throw GoogleSignInException('Failed to get auth code from Google. Please ensure you have granted offline access.');
       }
+
+      final response = await _googleAuthService.sendAuthCodeToBackend(authCode, email);
+
+      if (response['success']) {
+        return GoogleSignInResult(
+          userId: response['data']['userId'],
+          email: response['email'],
+        );
+      } else {
+        throw GoogleSignInException(
+            'Error from backend: ${response['message']}');
+      }
+    } on TimeoutException {
+      throw GoogleSignInException('Google Sign-In timed out');
+    } catch (error) {
+      // To prevent duplicate exception wrapping
+      if (error is GoogleSignInException) {
+        rethrow;
+      }
+      throw GoogleSignInException('Error during web sign-in: $error');
     }
   }
 
