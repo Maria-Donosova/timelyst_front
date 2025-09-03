@@ -34,11 +34,11 @@ class GoogleSignInOutService {
         throw Exception(
             'Google Client ID is not configured. Please set the CLIENT_ID environment variable.');
       }
-      // _googleSignIn = GoogleSignIn(
-      //   clientId: clientId,
-      //   forceCodeForRefreshToken: true,
-      //   scopes: _scopes,
-      // );
+      _googleSignIn = GoogleSignIn(
+        clientId: clientId,
+        forceCodeForRefreshToken: true,
+        scopes: _scopes,
+      );
     } else {
       // _googleSignIn = GoogleSignIn(
       //   forceCodeForRefreshToken: true,
