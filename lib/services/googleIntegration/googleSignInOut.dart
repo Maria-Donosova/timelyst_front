@@ -20,7 +20,6 @@ class GoogleSignInOutService {
   }
 
   List<String> _scopes = <String>[
-    'openid',
     'email',
     'https://www.googleapis.com/auth/calendar',
   ];
