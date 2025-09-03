@@ -6,13 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../config/envVarConfig.dart';
-
 import 'package:timelyst_flutter/services/googleIntegration/google_sign_in_result.dart';
-
 import 'googleAuthService.dart';
 
 class GoogleSignInOutService {
-  late final GoogleSignIn _googleSignIn;
+  late GoogleSignIn _googleSignIn;
   late final GoogleAuthService _googleAuthService;
 
   GoogleSignInOutService({GoogleSignIn? googleSignIn, GoogleAuthService? googleAuthService}) {
@@ -20,6 +18,8 @@ class GoogleSignInOutService {
   }
 
   List<String> _scopes = <String>[
+    'openid',
+    'profile',
     'email',
     'https://www.googleapis.com/auth/calendar',
   ];
@@ -37,13 +37,12 @@ class GoogleSignInOutService {
         scopes: _scopes,
       );
     } else {
-      // _googleSignIn = GoogleSignIn(
-      //   forceCodeForRefreshToken: true,
-      //   scopes: _scopes,
-      // );
+      _googleSignIn = GoogleSignIn(
+        forceCodeForRefreshToken: true,
+        scopes: _scopes,
+      );
     }
   }
-  //ConnectedAccounts _connectedAccounts = ConnectedAccounts();
 
   Future<GoogleSignInResult> googleSignIn() async {
     try {
@@ -53,7 +52,6 @@ class GoogleSignInOutService {
         throw GoogleSignInException('Failed to get auth code from Google.');
       }
 
-      // After getting the auth code, the user is signed in. We can now get the email.
       final String? email = _googleSignIn.currentUser?.email;
 
       if (email == null) {
@@ -81,7 +79,6 @@ class GoogleSignInOutService {
     }
   }
 
-  // google sign out method
   Future<void> googleDisconnect() async {
     try {
       await _googleSignIn.disconnect();
@@ -97,18 +94,8 @@ class GoogleSignInOutService {
     }
   }
 
-  // google sign out method
   Future<void> googleSignOut() async {
     try {
-      await _googleSignIn.signOut();
-      // logger.i("User signed out and cookies cleared");
-    } catch (e) {
-      // logger.e(e);
-      throw GoogleSignInException('Google sign-out failed: $e');
-    }
-  }
-}
-
       await _googleSignIn.signOut();
       // logger.i("User signed out and cookies cleared");
     } catch (e) {
