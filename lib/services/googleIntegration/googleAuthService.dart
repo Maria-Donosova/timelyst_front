@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:google_sign_in_web/web_only.dart';
 
 import '../authService.dart';
 import '../../utils/apiClient.dart';
@@ -26,6 +25,7 @@ class GoogleAuthService {
     try {
       final body = {
         'code': authCode,
+        'email': email,
       };
 
       final response = await _apiClient.post(
@@ -53,23 +53,6 @@ class GoogleAuthService {
         // logger.e('Error data: $errorData');
 
         // Return the error data as a JSON object
-        return {
-          'success': false,
-          'message':
-              'Failed to send Auth code to backend: ${response.statusCode}',
-          'error': errorData,
-        };
-      }
-    } catch (e) {
-      // logger.e('Error sending Auth code to backend: $e');
-      return {
-        'success': false,
-        'message': 'Failed to send Auth code to backend',
-      };
-    }
-  }
-}
-object
         return {
           'success': false,
           'message':
