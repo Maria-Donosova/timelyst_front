@@ -49,6 +49,8 @@ class GoogleSignInOutService {
 
   Future<GoogleSignInResult> googleSignIn() async {
     try {
+      // Disconnect first to ensure the user is prompted for offline access.
+      await _googleSignIn.disconnect();
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
 
       if (account == null) {
