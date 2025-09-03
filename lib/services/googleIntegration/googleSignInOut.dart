@@ -16,7 +16,6 @@ class GoogleSignInOutService {
   late final GoogleAuthService _googleAuthService;
 
   GoogleSignInOutService({GoogleSignIn? googleSignIn, GoogleAuthService? googleAuthService}) {
-    _googleSignIn = googleSignIn ?? GoogleSignIn();
     _googleAuthService = googleAuthService ?? GoogleAuthService();
   }
 
@@ -137,6 +136,10 @@ class GoogleSignInOutService {
     } catch (e) {
       // logger.e(e);
       throw GoogleSignInException('Google sign-out failed: $e');
+    }
+  }
+}
+on('Google sign-out failed: $e');
     }
   }
 }
