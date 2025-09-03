@@ -47,20 +47,17 @@ class GoogleSignInOutService {
 
   Future<GoogleSignInResult> googleSignIn() async {
     try {
-      // Disconnect first to ensure the user is prompted for offline access.
-      await _googleSignIn.disconnect();
-      final GoogleSignInAccount? account = await _googleSignIn.signIn();
-
-      if (account == null) {
-        // User cancelled the sign-in
-        throw GoogleSignInException('Google Sign-In was cancelled by the user.');
-      }
-
-      final String? authCode = account.serverAuthCode;
-      final String email = account.email;
+      final String? authCode = await _googleAuthService.requestServerAuthenticatioinCode();
 
       if (authCode == null) {
-        throw GoogleSignInException('Failed to get auth code from Google. Please ensure you have granted offline access.');
+        throw GoogleSignInException('Failed to get auth code from Google.');
+      }
+
+      // After getting the auth code, the user is signed in. We can now get the email.
+      final String? email = _googleSignIn.currentUser?.email;
+
+      if (email == null) {
+        throw GoogleSignInException('Could not retrieve email after sign-in.');
       }
 
       final response = await _googleAuthService.sendAuthCodeToBackend(authCode, email);
@@ -77,7 +74,6 @@ class GoogleSignInOutService {
     } on TimeoutException {
       throw GoogleSignInException('Google Sign-In timed out');
     } catch (error) {
-      // To prevent duplicate exception wrapping
       if (error is GoogleSignInException) {
         rethrow;
       }
@@ -104,6 +100,15 @@ class GoogleSignInOutService {
   // google sign out method
   Future<void> googleSignOut() async {
     try {
+      await _googleSignIn.signOut();
+      // logger.i("User signed out and cookies cleared");
+    } catch (e) {
+      // logger.e(e);
+      throw GoogleSignInException('Google sign-out failed: $e');
+    }
+  }
+}
+
       await _googleSignIn.signOut();
       // logger.i("User signed out and cookies cleared");
     } catch (e) {
