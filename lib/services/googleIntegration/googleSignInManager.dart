@@ -10,6 +10,7 @@ class GoogleSignInManager {
 
   Future<GoogleSignInResult?> signIn(BuildContext context) async {
     try {
+      _googleSignInOutService.initialize();
       return await _googleSignInOutService.googleSignIn();
     } on GoogleSignInException catch (e) {
       _showError(context, e.message);
