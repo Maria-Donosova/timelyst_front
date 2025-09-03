@@ -25,6 +25,7 @@ class GoogleCalendarService {
   /// Fetches the initial list of Google Calendars using a one-time auth code.
   Future<List<Calendar>> firstCalendarFetch({
     required String authCode,
+    required String email,
   }) async {
     // logger.i(
     //     'Performing first calendar fetch with auth code in GoogleCalendarService');
@@ -33,6 +34,7 @@ class GoogleCalendarService {
         '$_baseUrl/calendars/list',
         body: {
           'authCode': authCode,
+          'email': email,
         },
         token: await _authService.getAuthToken(),
       ).timeout(
