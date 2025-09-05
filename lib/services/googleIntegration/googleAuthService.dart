@@ -18,7 +18,6 @@ class GoogleAuthService {
 
   GoogleAuthService.test(this._apiClient, this._authService);
 
-  // Method for requesting server authentication code
   Future<String?> requestServerAuthenticatioinCode() async {
     try {
       return await requestServerAuthCode().timeout(
@@ -31,12 +30,10 @@ class GoogleAuthService {
     }
   }
 
-  // Method for sending the authentication code to the backend
-  Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode, String email) async {
+  Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode) async {
     try {
       final body = {
         'code': authCode,
-        'email': email,
       };
 
       final response = await _apiClient.post(

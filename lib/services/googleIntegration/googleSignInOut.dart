@@ -46,28 +46,23 @@ class GoogleSignInOutService {
 
   Future<GoogleSignInResult> googleSignIn() async {
     try {
-      final String? authCode = await _googleAuthService.requestServerAuthenticatioinCode();
+      final serverAuthCode = await _googleAuthService.requestServerAuthenticatioinCode();
 
-      if (authCode == null) {
-        throw GoogleSignInException('Failed to get auth code from Google.');
-      }
+      if (serverAuthCode != null) {
+        final response =
+            await _googleAuthService.sendAuthCodeToBackend(serverAuthCode);
 
-      final String? email = _googleSignIn.currentUser?.email;
-
-      if (email == null) {
-        throw GoogleSignInException('Could not retrieve email after sign-in.');
-      }
-
-      final response = await _googleAuthService.sendAuthCodeToBackend(authCode, email);
-
-      if (response['success']) {
-        return GoogleSignInResult(
-          userId: response['data']['userId'],
-          email: response['email'],
-        );
+        if (response['success']) {
+          return GoogleSignInResult(
+            userId: response['data']['userId'],
+            email: response['email'],
+          );
+        } else {
+          throw GoogleSignInException(
+              'Error from backend: ${response['message']}');
+        }
       } else {
-        throw GoogleSignInException(
-            'Error from backend: ${response['message']}');
+        throw GoogleSignInException('Failed to get auth code from Google');
       }
     } on TimeoutException {
       throw GoogleSignInException('Google Sign-In timed out');
@@ -82,14 +77,7 @@ class GoogleSignInOutService {
   Future<void> googleDisconnect() async {
     try {
       await _googleSignIn.disconnect();
-      if (_googleSignIn.currentUser == null) {
-        // logger.i("User is disconnected");
-      } else {
-        // logger.e("Disconnect failed");
-        throw GoogleSignInException('Failed to disconnect Google account.');
-      }
     } catch (e) {
-      // logger.e(e);
       throw GoogleSignInException('Error disconnecting Google account: $e');
     }
   }
@@ -97,9 +85,7 @@ class GoogleSignInOutService {
   Future<void> googleSignOut() async {
     try {
       await _googleSignIn.signOut();
-      // logger.i("User signed out and cookies cleared");
     } catch (e) {
-      // logger.e(e);
       throw GoogleSignInException('Google sign-out failed: $e');
     }
   }
