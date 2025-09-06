@@ -22,9 +22,10 @@ class GoogleAuthService {
 
   Future<String?> requestServerAuthenticatioinCode() async {
     try {
-      final googleUser = await _googleSignIn.signIn();
-      final googleAuth = await googleUser?.authentication;
-      return googleAuth?.serverAuthCode;
+      print('Requesting server auth code...');
+      final authCode = await _googleSignIn.requestServerAuthCode();
+      print('Server auth code received: $authCode');
+      return authCode;
     } catch (e) {
       print('Error requesting auth code: $e');
       rethrow;
