@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../shared/customAppbar.dart';
-import '../../services/googleIntegration/googleOrchestrator.dart';
+import '../../services/googleIntegration/googleCalendarService.dart';
 import '../../services/googleIntegration/googleSignInManager.dart';
 import './calendarSettings.dart';
 
@@ -52,21 +52,21 @@ class _ConnectCalBody extends StatelessWidget {
                     final signInManager = GoogleSignInManager();
                     final signInResult = await signInManager.signIn(context);
 
-                    if (signInResult != null) {
-                      final orchestrator = GoogleOrchestrator();
-                      final syncResult = await orchestrator.syncCalendars(
-                        signInResult.userId,
-                        signInResult.email,
+                    if (signInResult != null && signInResult.authCode != null) {
+                      final calendarService = GoogleCalendarService();
+                      final calendars = await calendarService.firstCalendarFetch(
+                        authCode: signInResult.authCode!,
+                        email: signInResult.email,
                       );
 
-                      if (syncResult.isSuccess && context.mounted) {
+                      if (context.mounted) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => CalendarSettings(
                               userId: signInResult.userId,
                               email: signInResult.email,
-                              calendars: syncResult.calendars,
+                              calendars: calendars,
                             ),
                           ),
                         );
