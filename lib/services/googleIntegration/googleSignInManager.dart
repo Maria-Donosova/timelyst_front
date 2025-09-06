@@ -14,18 +14,24 @@ class GoogleSignInManager {
 
   Future<GoogleSignInResult?> signIn(BuildContext context) async {
     try {
+      print('GoogleSignInManager: signIn started');
       final serverAuthCode =
           await _googleAuthService.requestServerAuthenticatioinCode();
+      print('GoogleSignInManager: serverAuthCode: $serverAuthCode');
       if (serverAuthCode != null) {
+        print('GoogleSignInManager: serverAuthCode is not null, calling googleSignIn');
         return await _googleSignInOutService.googleSignIn(serverAuthCode);
       } else {
+        print('GoogleSignInManager: serverAuthCode is null, returning null');
         // The user closed the sign-in popup
         return null;
       }
     } on GoogleSignInException catch (e) {
+      print('GoogleSignInManager: caught GoogleSignInException: ${e.message}');
       _showError(context, e.message);
       return null;
     } catch (e) {
+      print('GoogleSignInManager: caught generic exception: $e');
       _showError(context, 'An unexpected error occurred: $e');
       return null;
     }
