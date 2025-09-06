@@ -1,8 +1,10 @@
 class GoogleSignInResult {
   final String userId;
   final String email;
+  final String? authCode;
 
-  GoogleSignInResult({required this.userId, required this.email});
+  GoogleSignInResult(
+      {required this.userId, required this.email, this.authCode});
 }
 
 class GoogleSignInException implements Exception {
