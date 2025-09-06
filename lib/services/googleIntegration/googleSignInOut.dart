@@ -1,69 +1,34 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../../config/envVarConfig.dart';
 import 'package:timelyst_flutter/services/googleIntegration/google_sign_in_result.dart';
 import 'googleAuthService.dart';
+import 'google_sign_in_singleton.dart';
 
 class GoogleSignInOutService {
-  late GoogleSignIn _googleSignIn;
+  final GoogleSignIn _googleSignIn;
   late final GoogleAuthService _googleAuthService;
 
-  GoogleSignInOutService({GoogleSignIn? googleSignIn, GoogleAuthService? googleAuthService}) {
-    _googleAuthService = googleAuthService ?? GoogleAuthService();
-  }
+  GoogleSignInOutService({GoogleSignIn? googleSignIn, GoogleAuthService? googleAuthService})
+      : _googleSignIn = googleSignIn ?? GoogleSignInSingleton().googleSignIn,
+        _googleAuthService = googleAuthService ?? GoogleAuthService();
 
-  List<String> _scopes = <String>[
-    'openid',
-    'profile',
-    'email',
-    'https://www.googleapis.com/auth/calendar',
-  ];
-
-  void initialize() {
-    if (kIsWeb) {
-      final clientId = Config.googleClientId;
-      if (clientId == null) {
-        throw Exception(
-            'Google Client ID is not configured. Please set the CLIENT_ID environment variable.');
-      }
-      _googleSignIn = GoogleSignIn(
-        clientId: clientId,
-        forceCodeForRefreshToken: true,
-        scopes: _scopes,
-      );
-    } else {
-      _googleSignIn = GoogleSignIn(
-        forceCodeForRefreshToken: true,
-        scopes: _scopes,
-      );
-    }
-  }
-
-  Future<GoogleSignInResult> googleSignIn() async {
+  Future<GoogleSignInResult> googleSignIn(String serverAuthCode) async {
     try {
-      final serverAuthCode = await _googleAuthService.requestServerAuthenticatioinCode();
+      final response =
+          await _googleAuthService.sendAuthCodeToBackend(serverAuthCode);
 
-      if (serverAuthCode != null) {
-        final response =
-            await _googleAuthService.sendAuthCodeToBackend(serverAuthCode);
-
-        if (response['success']) {
-          return GoogleSignInResult(
-            userId: response['data']['userId'],
-            email: response['email'],
-            authCode: serverAuthCode,
-          );
-        } else {
-          throw GoogleSignInException(
-              'Error from backend: ${response['message']}');
-        }
+      if (response['success']) {
+        return GoogleSignInResult(
+          userId: response['data']['userId'],
+          email: response['email'],
+          authCode: serverAuthCode,
+        );
       } else {
-        throw GoogleSignInException('Failed to get auth code from Google');
+        throw GoogleSignInException(
+            'Error from backend: ${response['message']}');
       }
     } on TimeoutException {
       throw GoogleSignInException('Google Sign-In timed out');

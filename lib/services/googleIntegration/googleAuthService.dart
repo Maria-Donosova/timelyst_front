@@ -1,29 +1,30 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:google_sign_in_web/web_only.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../authService.dart';
 import '../../utils/apiClient.dart';
 import '../../config/envVarConfig.dart';
+import 'google_sign_in_singleton.dart';
 
 class GoogleAuthService {
   late final ApiClient _apiClient;
   late final AuthService _authService;
+  final GoogleSignIn _googleSignIn;
 
-  GoogleAuthService() {
-    _apiClient = ApiClient();
-    _authService = AuthService();
-  }
+  GoogleAuthService({GoogleSignIn? googleSignIn})
+      : _googleSignIn = googleSignIn ?? GoogleSignInSingleton().googleSignIn,
+        _apiClient = ApiClient(),
+        _authService = AuthService();
 
-  GoogleAuthService.test(this._apiClient, this._authService);
+  GoogleAuthService.test(this._apiClient, this._authService, this._googleSignIn);
 
   Future<String?> requestServerAuthenticatioinCode() async {
     try {
-      return await requestServerAuthCode().timeout(
-        const Duration(seconds: 30),
-        onTimeout: () => throw TimeoutException('Google auth timed out'),
-      );
+      final googleUser = await _googleSignIn.signIn();
+      final googleAuth = await googleUser?.authentication;
+      return googleAuth?.serverAuthCode;
     } catch (e) {
       print('Error requesting auth code: $e');
       rethrow;
