@@ -146,6 +146,47 @@ class Calendar {
     );
   }
 
+  factory Calendar.fromGoogleJson(Map<String, dynamic> json) {
+    return Calendar(
+      id: '', // This will be set by the backend
+      userId: '', // This will be set by the backend
+      source: CalendarSource.google,
+      providerCalendarId: json['id'] ?? '',
+      email: '', // This will be set by the backend
+      isSelected: json['selected'] ?? true,
+      isPrimary: json['primary'] ?? false,
+      metadata: CalendarMetadata(
+        title: json['summary'] ?? '',
+        description: json['description'],
+        timeZone: json['timeZone'],
+        color: _parseColor(json['backgroundColor']),
+        defaultReminders: (json['defaultReminders'] as List?)
+                ?.map((r) => CalendarReminder.fromJson(r))
+                .toList() ??
+            [],
+        notifications: [],
+        allowedConferenceTypes: [],
+      ),
+      preferences: CalendarPreferences(
+        importSettings: CalendarImportSettings(
+          importAll: false,
+          importSubject: true,
+          importBody: false,
+          importConferenceInfo: true,
+          importOrganizer: false,
+          importRecipients: false,
+        ),
+        category: null,
+        userColor: null,
+      ),
+      sync: CalendarSyncInfo(
+        etag: json['etag'],
+        syncToken: null, // This will be set by the backend
+        lastSyncedAt: null, // This will be set by the backend
+      ),
+    );
+  }
+
   static Color _parseColor(String? hexColor) {
     hexColor = hexColor?.replaceAll('#', '');
     if (hexColor == null || hexColor.isEmpty) {
