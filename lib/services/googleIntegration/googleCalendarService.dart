@@ -44,11 +44,11 @@ class GoogleCalendarService {
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
-        if (decoded['success'] == true && decoded['data'] != null) {
+        if (decoded['success'] == true && decoded['calendars'] != null) {
           // Assuming the backend returns the list under a 'calendars' key
-          final calendarsData = decoded['data']['calendars'] as List;
+          final calendarsData = decoded['calendars'] as List;
           return calendarsData
-              .map((json) => Calendar.fromLegacyJson(json))
+              .map((json) => Calendar.fromGoogleJson(json))
               .toList();
         } else {
           final message =
