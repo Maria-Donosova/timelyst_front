@@ -71,6 +71,13 @@ class _ConnectCalBody extends StatelessWidget {
                             ),
                           ),
                         );
+                      } else if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Failed to sync calendars: ${syncResult.error}'),
+                          ),
+                        );
                       }
                     }
                   },

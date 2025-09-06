@@ -24,6 +24,7 @@ class CalendarSyncManager {
         syncToken: calendarPage.syncToken,
       );
     } catch (e) {
+      print('CalendarSyncManager: ERROR syncing calendars: $e');
       return CalendarSyncResult.error(e.toString());
     }
   }
