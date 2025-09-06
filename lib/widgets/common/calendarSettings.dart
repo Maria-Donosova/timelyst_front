@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/widgets/common/agenda.dart';
 import '../../models/calendars.dart';
-import '../../services/googleIntegration/googleOrchestrator.dart';
+import '../../services/googleIntegration/calendarSyncManager.dart';
 import '../shared/customAppbar.dart';
 import '../shared/categories.dart';
 
@@ -272,7 +272,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
     // Save selected calendars using the orchestrator
     try {
-      await GoogleOrchestrator().saveSelectedCalendars(
+      await CalendarSyncManager().saveSelectedCalendars(
         userId: widget.userId,
         email: widget.email,
         selectedCalendars: _selectedCalendars,
