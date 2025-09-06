@@ -51,6 +51,7 @@ class _ConnectCalBody extends StatelessWidget {
                     try {
                       print('Gmail button pressed');
                       final signInManager = GoogleSignInManager();
+                      await signInManager.signOut();
                       final signInResult = await signInManager.signIn(context);
 
                       if (signInResult != null &&

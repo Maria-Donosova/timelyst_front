@@ -21,6 +21,15 @@ class GoogleSignInManager {
     }
   }
 
+  Future<void> signOut() async {
+    try {
+      await _googleSignInOutService.googleSignOut();
+    } on GoogleSignInException catch (e) {
+      // In this context, we can ignore sign-out errors
+      print('Error during sign-out: ${e.message}');
+    }
+  }
+
   void _showError(BuildContext context, String message) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
