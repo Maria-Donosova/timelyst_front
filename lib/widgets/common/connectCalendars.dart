@@ -48,26 +48,39 @@ class _ConnectCalBody extends StatelessWidget {
                   text: 'Gmail',
                   color: const Color.fromARGB(255, 198, 23, 10),
                   onPressed: () async {
-                    print('Gmail button pressed');
-                    final signInManager = GoogleSignInManager();
-                    final signInResult = await signInManager.signIn(context);
+                    try {
+                      print('Gmail button pressed');
+                      final signInManager = GoogleSignInManager();
+                      final signInResult = await signInManager.signIn(context);
 
-                    if (signInResult != null && signInResult.authCode != null) {
-                      final calendarService = GoogleCalendarService();
-                      final calendars = await calendarService.firstCalendarFetch(
-                        authCode: signInResult.authCode!,
-                        email: signInResult.email,
-                      );
+                      if (signInResult != null &&
+                          signInResult.authCode != null) {
+                        final calendarService = GoogleCalendarService();
+                        final calendars =
+                            await calendarService.firstCalendarFetch(
+                          authCode: signInResult.authCode!,
+                          email: signInResult.email,
+                        );
 
-                      if (context.mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CalendarSettings(
-                              userId: signInResult.userId,
-                              email: signInResult.email,
-                              calendars: calendars,
+                        if (context.mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CalendarSettings(
+                                userId: signInResult.userId,
+                                email: signInResult.email,
+                                calendars: calendars,
+                              ),
                             ),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to connect to Google: $e'),
+                            backgroundColor: Colors.red,
                           ),
                         );
                       }
