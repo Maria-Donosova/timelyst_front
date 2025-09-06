@@ -56,6 +56,7 @@ class GoogleSignInOutService {
           return GoogleSignInResult(
             userId: response['data']['userId'],
             email: response['email'],
+            authCode: serverAuthCode,
           );
         } else {
           throw GoogleSignInException(
