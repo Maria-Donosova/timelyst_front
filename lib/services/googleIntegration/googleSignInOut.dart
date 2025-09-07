@@ -25,6 +25,7 @@ class GoogleSignInOutService {
           userId: response['data']['userId'],
           email: response['email'],
           authCode: serverAuthCode,
+          calendars: response['calendars'],
         );
       } else {
         throw GoogleSignInException(

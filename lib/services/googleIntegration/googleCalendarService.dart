@@ -22,56 +22,7 @@ class GoogleCalendarService {
       : _authService = authService ?? AuthService(),
         _apiClient = apiClient ?? ApiClient();
 
-  /// Fetches the initial list of Google Calendars using a one-time auth code.
-  Future<List<Calendar>> firstCalendarFetch({
-    required String authCode,
-    required String email,
-  }) async {
-    // logger.i(
-    //     'Performing first calendar fetch with auth code in GoogleCalendarService');
-    try {
-      final response = await _apiClient.post(
-        '$_baseUrl/calendars/list',
-        body: {
-          'authCode': authCode,
-          'email': email,
-        },
-        token: await _authService.getAuthToken(),
-      ).timeout(
-        const Duration(seconds: 20),
-        onTimeout: () => throw TimeoutException('Request timeout'),
-      );
-
-      if (response.statusCode == 200) {
-        final decoded = json.decode(response.body);
-        if (decoded['success'] == true && decoded['calendars'] != null) {
-          // Assuming the backend returns the list under a 'calendars' key
-          final calendarsData = decoded['calendars'] as List;
-          return calendarsData
-              .map((json) => Calendar.fromGoogleJson(json))
-              .toList();
-        } else {
-          final message =
-              decoded['message'] ?? 'Failed to fetch initial calendars';
-          throw Exception(message is String ? message : json.encode(message));
-        }
-      } else {
-        throw HttpException(
-          'Failed to load calendars: ${response.statusCode}',
-        );
-      }
-    } on TimeoutException catch (e) {
-      // logger.e('Timeout during first calendar fetch: $e');
-      rethrow;
-    } on http.ClientException catch (e) {
-      // logger.e('Network error: $e');
-      throw Exception('Network error. Please check your connection.');
-    } catch (e) {
-      // logger.e('Unexpected error during first fetch: $e');
-      rethrow;
-    }
-  }
-
+  
   // Gets calendar changes since last sync (delta sync)
   Future<CalendarDelta> fetchCalendarChanges({
     required String userId,

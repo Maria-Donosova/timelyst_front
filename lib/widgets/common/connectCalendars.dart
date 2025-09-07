@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../shared/customAppbar.dart';
-import '../../services/googleIntegration/googleCalendarService.dart';
 import '../../services/googleIntegration/googleSignInManager.dart';
 import './calendarSettings.dart';
 
@@ -55,14 +54,7 @@ class _ConnectCalBody extends StatelessWidget {
                       final signInResult = await signInManager.signIn(context);
 
                       if (signInResult != null &&
-                          signInResult.authCode != null) {
-                        final calendarService = GoogleCalendarService();
-                        final calendars =
-                            await calendarService.firstCalendarFetch(
-                          authCode: signInResult.authCode!,
-                          email: signInResult.email,
-                        );
-
+                          signInResult.calendars != null) {
                         if (context.mounted) {
                           Navigator.push(
                             context,
@@ -70,7 +62,7 @@ class _ConnectCalBody extends StatelessWidget {
                               builder: (context) => CalendarSettings(
                                 userId: signInResult.userId,
                                 email: signInResult.email,
-                                calendars: calendars,
+                                calendars: signInResult.calendars!,
                               ),
                             ),
                           );
