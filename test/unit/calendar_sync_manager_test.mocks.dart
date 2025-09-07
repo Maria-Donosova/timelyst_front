@@ -64,18 +64,6 @@ class MockGoogleCalendarService extends _i1.Mock
       ) as _i4.Future<void>);
 
   @override
-  _i4.Future<List<_i2.Calendar>> firstCalendarFetch(
-          {required String? authCode}) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #firstCalendarFetch,
-          [],
-          {#authCode: authCode},
-        ),
-        returnValue: _i4.Future<List<_i2.Calendar>>.value(<_i2.Calendar>[]),
-      ) as _i4.Future<List<_i2.Calendar>>);
-
-  @override
   _i4.Future<_i2.CalendarDelta> fetchCalendarChanges({
     required String? userId,
     required String? email,

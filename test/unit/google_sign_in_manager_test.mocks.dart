@@ -46,26 +46,18 @@ class MockGoogleSignInOutService extends _i1.Mock
   }
 
   @override
-  void initialize() => super.noSuchMethod(
-        Invocation.method(
-          #initialize,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  _i4.Future<_i2.GoogleSignInResult> googleSignIn() => (super.noSuchMethod(
+  _i4.Future<_i2.GoogleSignInResult> googleSignIn(String? serverAuthCode) =>
+      (super.noSuchMethod(
         Invocation.method(
           #googleSignIn,
-          [],
+          [serverAuthCode],
         ),
         returnValue:
             _i4.Future<_i2.GoogleSignInResult>.value(_FakeGoogleSignInResult_0(
           this,
           Invocation.method(
             #googleSignIn,
-            [],
+            [serverAuthCode],
           ),
         )),
       ) as _i4.Future<_i2.GoogleSignInResult>);
