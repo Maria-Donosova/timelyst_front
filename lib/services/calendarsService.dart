@@ -21,12 +21,6 @@ class CalendarsService {
         calendars(limit: \$limit, offset: \$offset) {
           calendars {
             id
-            title
-            description
-            timeZone
-            isPrimary
-            source
-            color
           }
           totalCount
           hasMore
