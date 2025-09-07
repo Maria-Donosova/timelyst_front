@@ -47,6 +47,7 @@ class CalendarsService {
             'offset': offset,
           },
         },
+        token: authToken,
       );
 
       if (response.statusCode == 200) {
@@ -123,6 +124,7 @@ class CalendarsService {
             'withEvents': withEvents,
           },
         },
+        token: authToken,
       );
 
       if (response.statusCode == 200) {
@@ -182,6 +184,7 @@ class CalendarsService {
             'input': input.toJson(),
           },
         },
+        token: authToken,
       );
 
       if (response.statusCode == 200) {
@@ -246,6 +249,7 @@ class CalendarsService {
             'input': input.toJson(),
           },
         },
+        token: authToken,
       );
 
       if (response.statusCode == 200) {
@@ -300,6 +304,7 @@ class CalendarsService {
             'id': calendarId,
           },
         },
+        token: authToken,
       );
 
       if (response.statusCode == 200) {
@@ -354,6 +359,7 @@ class CalendarsService {
             'ids': calendarIds,
           },
         },
+        token: authToken,
       );
 
       if (response.statusCode == 200) {
