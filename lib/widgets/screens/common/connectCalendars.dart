@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../shared/customAppbar.dart';
 
 import '../../../services/googleIntegration/googleSignInManager.dart';
-import '../../../services/googleIntegration/calendarSyncManager.dart';
 import './calendarSettings.dart';
 
 import 'agenda.dart';
@@ -53,32 +52,26 @@ class _ConnectCalBody extends StatelessWidget {
                     final signInManager = GoogleSignInManager();
                     final signInResult = await signInManager.signIn(context);
 
-                    if (signInResult != null) {
-                      final orchestrator = CalendarSyncManager();
-                      final syncResult = await orchestrator.syncCalendars(
-                        signInResult.userId,
-                        signInResult.email,
-                      );
-
-                      if (syncResult.isSuccess && context.mounted) {
+                    if (signInResult != null && signInResult.calendars != null) {
+                      if (context.mounted) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => CalendarSettings(
                               userId: signInResult.userId,
                               email: signInResult.email,
-                              calendars: syncResult.calendars,
+                              calendars: signInResult.calendars!,
                             ),
                           ),
                         );
-                      } else if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Failed to sync calendars: ${syncResult.error}'),
-                          ),
-                        );
                       }
+                    } else if (signInResult != null && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'No calendars found. Please check your Google Calendar settings.'),
+                        ),
+                      );
                     }
                   },
                 ),
