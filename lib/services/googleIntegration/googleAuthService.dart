@@ -68,11 +68,43 @@ class GoogleAuthService {
         print('🔍 [GoogleAuthService] User email: ${responseData['email']}');
         print('🔍 [GoogleAuthService] User ID: ${responseData['userId']}');
         
+        // Debug: Print the entire response structure
+        print('🔍 [GoogleAuthService] Full response structure:');
+        responseData.forEach((key, value) {
+          if (value is Map || value is List) {
+            print('  $key: ${value.runtimeType} (keys/length: ${value is Map ? value.keys.toList() : value.length})');
+          } else {
+            print('  $key: $value (${value.runtimeType})');
+          }
+        });
+        
         // Extract calendars from the unified response
         List<Calendar> calendars = [];
+        List? calendarsData;
+        
+        // Try different possible locations for calendars
         if (responseData['calendars'] != null) {
-          final calendarsData = responseData['calendars'] as List;
+          calendarsData = responseData['calendars'] as List;
+          print('🔍 [GoogleAuthService] Found calendars directly in response');
+        } else if (responseData['data'] != null && responseData['data']['calendars'] != null) {
+          calendarsData = responseData['data']['calendars'] as List;
+          print('🔍 [GoogleAuthService] Found calendars in data.calendars');
+        } else if (responseData['data'] != null && responseData['data']['allCalendars'] != null) {
+          calendarsData = responseData['data']['allCalendars'] as List;
+          print('🔍 [GoogleAuthService] Found calendars in data.allCalendars');
+        } else if (responseData['data'] != null) {
+          // Debug: Show what's in the data object
+          final dataObj = responseData['data'];
+          print('🔍 [GoogleAuthService] Data object keys: ${dataObj is Map ? dataObj.keys.toList() : 'Not a map'}');
+          if (dataObj is Map && dataObj.containsKey('items')) {
+            calendarsData = dataObj['items'] as List;
+            print('🔍 [GoogleAuthService] Found calendars in data.items');
+          }
+        }
+        
+        if (calendarsData != null) {
           print('🔍 [GoogleAuthService] Found ${calendarsData.length} calendars in response');
+          print('🔍 [GoogleAuthService] First calendar sample: ${calendarsData.isNotEmpty ? calendarsData.first : 'None'}');
           calendars = calendarsData
               .map((json) => Calendar.fromGoogleJson(json))
               .toList();
@@ -80,12 +112,15 @@ class GoogleAuthService {
         } else {
           print('⚠️ [GoogleAuthService] No calendars found in backend response');
           print('🔍 [GoogleAuthService] Available response fields: ${responseData.keys.toList()}');
+          if (responseData['data'] != null) {
+            print('🔍 [GoogleAuthService] Data fields: ${responseData['data'] is Map ? responseData['data'].keys.toList() : 'Not a map'}');
+          }
         }
 
         return {
           'success': true,
           'message': 'Auth code sent to backend successfully',
-          'email': responseData['email'],
+          'email': responseData['email'] ?? responseData['data']?['email'],
           'data': responseData,
           'calendars': calendars,
         };
