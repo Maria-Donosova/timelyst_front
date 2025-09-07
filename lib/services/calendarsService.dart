@@ -1,4 +1,3 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../models/calendars.dart';
 import '../../config/envVarConfig.dart';
@@ -28,8 +27,6 @@ class CalendarsService {
             isPrimary
             source
             color
-            createdAt
-            updatedAt
           }
           totalCount
           hasMore
@@ -67,7 +64,7 @@ class CalendarsService {
 
         return PaginatedCalendars(
           calendars:
-              calendarsData.map((json) => Calendar.fromJson(json)).toList(),
+              calendarsData.map((json) => Calendar.fromLegacyJson(json)).toList(),
           totalCount: responseData['totalCount'],
           hasMore: responseData['hasMore'],
         );
