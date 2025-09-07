@@ -48,12 +48,19 @@ class _ConnectCalBody extends StatelessWidget {
                   text: 'Gmail',
                   color: const Color.fromARGB(255, 198, 23, 10),
                   onPressed: () async {
-                    print('Gmail button pressed');
+                    print('🔍 [ConnectCalendars] Gmail button pressed by user');
                     final signInManager = GoogleSignInManager();
+                    print('🔍 [ConnectCalendars] GoogleSignInManager created');
+                    
                     final signInResult = await signInManager.signIn(context);
+                    print('🔍 [ConnectCalendars] Sign-in result received: ${signInResult != null ? 'SUCCESS' : 'FAILED'}');
 
                     if (signInResult != null && signInResult.calendars != null) {
+                      print('✅ [ConnectCalendars] Sign-in successful with ${signInResult.calendars!.length} calendars');
+                      print('🔍 [ConnectCalendars] User: ${signInResult.email} (${signInResult.userId})');
+                      
                       if (context.mounted) {
+                        print('🔍 [ConnectCalendars] Navigating to CalendarSettings...');
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -64,14 +71,19 @@ class _ConnectCalBody extends StatelessWidget {
                             ),
                           ),
                         );
+                      } else {
+                        print('⚠️ [ConnectCalendars] Context not mounted - cannot navigate');
                       }
                     } else if (signInResult != null && context.mounted) {
+                      print('⚠️ [ConnectCalendars] Sign-in successful but no calendars found');
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
                               'No calendars found. Please check your Google Calendar settings.'),
                         ),
                       );
+                    } else {
+                      print('❌ [ConnectCalendars] Sign-in failed or was cancelled by user');
                     }
                   },
                 ),
