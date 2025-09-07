@@ -32,18 +32,29 @@ void main() {
           'success': true,
           'message': 'Success',
           'email': 'test@example.com',
-          'data': {'userId': 'user1'}
+          'data': {'userId': 'user1'},
+          'calendars': [
+            {
+              'id': 'cal1',
+              'summary': 'Test Calendar',
+              'backgroundColor': '#ffffff',
+              'primary': true
+            }
+          ]
         };
         when(mockGoogleAuthService.requestServerAuthenticatioinCode()).thenAnswer((_) async => serverAuthCode);
         when(mockGoogleAuthService.sendAuthCodeToBackend(serverAuthCode)).thenAnswer((_) async => backendResponse);
 
         // Act
-        final result = await googleSignInOutService.googleSignIn();
+        final result = await googleSignInOutService.googleSignIn(serverAuthCode);
 
         // Assert
         expect(result, isA<GoogleSignInResult>());
         expect(result.userId, 'user1');
         expect(result.email, 'test@example.com');
+        expect(result.authCode, serverAuthCode);
+        expect(result.calendars, isA<List>());
+        expect(result.calendars?.length, 1);
       });
 
       test('should throw GoogleSignInException when server auth code is null', () async {
@@ -51,7 +62,7 @@ void main() {
         when(mockGoogleAuthService.requestServerAuthenticatioinCode()).thenAnswer((_) async => null);
 
         // Act & Assert
-        expect(() => googleSignInOutService.googleSignIn(), throwsA(isA<GoogleSignInException>()));
+        expect(() => googleSignInOutService.googleSignIn(''), throwsA(isA<GoogleSignInException>()));
       });
 
       test('should throw GoogleSignInException on backend error', () async {
@@ -62,7 +73,7 @@ void main() {
         when(mockGoogleAuthService.sendAuthCodeToBackend(serverAuthCode)).thenAnswer((_) async => backendResponse);
 
         // Act & Assert
-        expect(() => googleSignInOutService.googleSignIn(), throwsA(isA<GoogleSignInException>()));
+        expect(() => googleSignInOutService.googleSignIn(serverAuthCode), throwsA(isA<GoogleSignInException>()));
       });
     });
   });

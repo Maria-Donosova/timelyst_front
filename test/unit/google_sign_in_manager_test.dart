@@ -21,27 +21,33 @@ void main() {
 
     test('signIn should return GoogleSignInResult on successful sign-in', () async {
       // Arrange
-      final signInResult = GoogleSignInResult(isSuccess: true, email: 'test@example.com');
-      when(mockGoogleSignInOutService.googleSignIn()).thenAnswer((_) async => signInResult);
+      final signInResult = GoogleSignInResult(
+        userId: 'user123', 
+        email: 'test@example.com',
+        authCode: 'test_auth_code'
+      );
+      when(mockGoogleSignInOutService.googleSignIn('test_auth_code')).thenAnswer((_) async => signInResult);
 
       // Act
       final result = await googleSignInManager.signIn(MockBuildContext());
 
       // Assert
       expect(result, signInResult);
-      verify(mockGoogleSignInOutService.googleSignIn()).called(1);
+      expect(result?.userId, 'user123');
+      expect(result?.email, 'test@example.com');
+      verify(mockGoogleSignInOutService.googleSignIn('test_auth_code')).called(1);
     });
 
     test('signIn should return null on GoogleSignInException', () async {
       // Arrange
-      when(mockGoogleSignInOutService.googleSignIn()).thenThrow(GoogleSignInException('Sign-in failed'));
+      when(mockGoogleSignInOutService.googleSignIn(any)).thenThrow(GoogleSignInException('Sign-in failed'));
 
       // Act
       final result = await googleSignInManager.signIn(MockBuildContext());
 
       // Assert
       expect(result, isNull);
-      verify(mockGoogleSignInOutService.googleSignIn()).called(1);
+      verify(mockGoogleSignInOutService.googleSignIn(any)).called(1);
     });
   });
 }

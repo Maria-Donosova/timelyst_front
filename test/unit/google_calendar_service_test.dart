@@ -24,53 +24,7 @@ void main() {
       googleCalendarService = GoogleCalendarService(authService: mockAuthService, apiClient: mockApiClient);
     });
 
-    group('firstCalendarFetch', () {
-      test('should return a list of calendars on successful fetch', () async {
-        // Arrange
-        final authCode = 'test_auth_code';
-        final token = 'test_token';
-        final responsePayload = {
-          'success': true,
-          'data': {
-            'calendars': [
-              {
-                'id': 'cal1',
-                'summary': 'Calendar 1',
-                'backgroundColor': '#ffffff',
-                'foregroundColor': '#000000',
-                'primary': true,
-                'selected': true,
-                'timeZone': 'America/New_York'
-              }
-            ]
-          }
-        };
-        when(mockAuthService.getAuthToken()).thenAnswer((_) async => token);
-        when(mockApiClient.post(any, body: anyNamed('body'), token: token))
-            .thenAnswer((_) async => http.Response(jsonEncode(responsePayload), 200));
-
-        // Act
-        final result = await googleCalendarService.firstCalendarFetch(authCode: authCode);
-
-        // Assert
-        expect(result, isA<List<Calendar>>());
-        expect(result.length, 1);
-        expect(result[0].id, 'cal1');
-      });
-
-      test('should throw an exception on failed fetch', () async {
-        // Arrange
-        final authCode = 'test_auth_code';
-        final token = 'test_token';
-        when(mockAuthService.getAuthToken()).thenAnswer((_) async => token);
-        when(mockApiClient.post(any, body: anyNamed('body'), token: token))
-            .thenAnswer((_) async => http.Response('{"success": false, "message": "Failed to fetch"}', 200));
-
-        // Act & Assert
-        expect(() => googleCalendarService.firstCalendarFetch(authCode: authCode), throwsException);
-      });
-    });
-
+    
     group('fetchCalendarChanges', () {
       test('should return calendar delta on successful fetch', () async {
         // Arrange
