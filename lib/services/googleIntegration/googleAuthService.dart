@@ -27,7 +27,7 @@ class GoogleAuthService {
       print('🔍 [GoogleAuthService] Starting server auth code request...');
       print('🔍 [GoogleAuthService] GoogleSignIn scopes: ${_googleSignIn.scopes}');
       final authCode = await web_only.requestServerAuthCode();
-      final maskedCode = authCode?.length ?? 0 > 10 ? '${authCode?.substring(0, 10)}...' : authCode;
+      final maskedCode = (authCode?.length ?? 0) > 10 ? '${authCode?.substring(0, 10)}...' : authCode;
       print('✅ [GoogleAuthService] Server auth code received successfully: $maskedCode');
       return authCode;
     } catch (e, stackTrace) {
@@ -44,7 +44,7 @@ class GoogleAuthService {
       print('🔍 [GoogleAuthService] Backend URL: ${Config.backendGoogleCalendar}');
       
       final authToken = await _authService.getAuthToken();
-      final maskedToken = authToken?.length ?? 0 > 10 ? '${authToken?.substring(0, 10)}...' : authToken;
+      final maskedToken = (authToken?.length ?? 0) > 10 ? '${authToken?.substring(0, 10)}...' : authToken;
       print('🔍 [GoogleAuthService] Auth token obtained: $maskedToken');
       
       final body = {
