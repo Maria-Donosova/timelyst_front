@@ -8,6 +8,7 @@ import '../authService.dart';
 import '../../utils/apiClient.dart';
 import '../../config/envVarConfig.dart';
 import 'google_sign_in_singleton.dart';
+import '../../models/calendars.dart';
 
 class GoogleAuthService {
   late final ApiClient _apiClient;
@@ -47,11 +48,22 @@ class GoogleAuthService {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
+        
+        // Extract calendars from the unified response
+        List<Calendar> calendars = [];
+        if (responseData['calendars'] != null) {
+          final calendarsData = responseData['calendars'] as List;
+          calendars = calendarsData
+              .map((json) => Calendar.fromGoogleJson(json))
+              .toList();
+        }
+
         return {
           'success': true,
           'message': 'Auth code sent to backend successfully',
           'email': responseData['email'],
           'data': responseData,
+          'calendars': calendars,
         };
       } else {
         final errorData = jsonDecode(response.body);
