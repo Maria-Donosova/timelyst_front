@@ -36,9 +36,7 @@ class GoogleSignInOutService {
         print('🔍 [GoogleSignInOutService] User email: $email');
         print('🔍 [GoogleSignInOutService] Number of calendars: ${calendars?.length ?? 0}');
         
-        if (calendars != null && calendars.isNotEmpty) {
-          print('🔍 [GoogleSignInOutService] Calendar names: ${(calendars as List<Calendar>).map((c) => c.metadata.title ?? 'No name').toList()}');
-        }
+        
         
         return GoogleSignInResult(
           userId: userId,
