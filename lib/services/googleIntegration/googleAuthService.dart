@@ -39,6 +39,7 @@ class GoogleAuthService {
   }
 
   Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode) async {
+    print('🚀🚀🚀 SANITY CHECK: Running updated code from sendAuthCodeToBackend 🚀🚀🚀');
     try {
       print('🔍 [GoogleAuthService] Starting to send auth code to backend...');
       print('🔍 [GoogleAuthService] Backend URL: ${Config.backendGoogleCalendar}');
