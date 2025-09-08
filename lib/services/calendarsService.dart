@@ -21,27 +21,14 @@ class CalendarsService {
         calendars(limit: \$limit, offset: \$offset) {
           calendars {
             id
-            user
-            sourceCalendar
-            calendarId
-            email
             isSelected
             isPrimary
-            title
-            description
-            timeZone
-            calendarColor
-            catColor
-            importAll
-            importSubject
-            importBody
-            importConferenceInfo
-            importOrganizer
-            importRecipients
-            category
-            etag
-            syncToken
-            lastSyncedAt
+            metadata {
+              title
+              description
+              color
+              timeZone
+            }
           }
           totalCount
           hasMore
@@ -79,7 +66,7 @@ class CalendarsService {
 
         return PaginatedCalendars(
           calendars:
-              calendarsData.map((json) => Calendar.fromLegacyJson(json)).toList(),
+              calendarsData.map((json) => Calendar.fromJson(json)).toList(),
           totalCount: responseData['totalCount'],
           hasMore: responseData['hasMore'],
         );
