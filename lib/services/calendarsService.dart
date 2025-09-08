@@ -61,14 +61,30 @@ class CalendarsService {
           );
         }
 
-        final responseData = data['data']['calendars'];
-        final calendarsData = responseData['calendars'] as List;
+        print('🔍 [CalendarsService] Raw response body: ${response.body}');
+        final responseData = data['data']?['calendars'];
+        if (responseData == null) {
+          print('❌ [CalendarsService] "calendars" key not found in data object.');
+          return PaginatedCalendars(calendars: [], totalCount: 0, hasMore: false);
+        }
+        print('🔍 [CalendarsService] Found paginated data object: $responseData');
+
+        final calendarsData = responseData['calendars'];
+        if (calendarsData == null || calendarsData is! List) {
+          print('❌ [CalendarsService] "calendars" list not found or not a list within paginated data.');
+          return PaginatedCalendars(calendars: [], totalCount: 0, hasMore: false);
+        }
+        print('🔍 [CalendarsService] Found ${calendarsData.length} calendar items in raw list.');
+
+        final parsedCalendars = calendarsData
+            .map((json) => Calendar.fromJson(json as Map<String, dynamic>))
+            .toList();
+        print('🔍 [CalendarsService] Parsed ${parsedCalendars.length} calendar objects.');
 
         return PaginatedCalendars(
-          calendars:
-              calendarsData.map((json) => Calendar.fromJson(json)).toList(),
-          totalCount: responseData['totalCount'],
-          hasMore: responseData['hasMore'],
+          calendars: parsedCalendars,
+          totalCount: responseData['totalCount'] ?? 0,
+          hasMore: responseData['hasMore'] ?? false,
         );
       } else {
         //logger.e('Failed to fetch calendars: HTTP ${response.statusCode}');
