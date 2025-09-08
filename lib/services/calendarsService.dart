@@ -21,6 +21,27 @@ class CalendarsService {
         calendars(limit: \$limit, offset: \$offset) {
           calendars {
             id
+            user
+            sourceCalendar
+            calendarId
+            email
+            isSelected
+            isPrimary
+            title
+            description
+            timeZone
+            calendarColor
+            catColor
+            importAll
+            importSubject
+            importBody
+            importConferenceInfo
+            importOrganizer
+            importRecipients
+            category
+            etag
+            syncToken
+            lastSyncedAt
           }
           totalCount
           hasMore
