@@ -73,9 +73,14 @@ class GoogleAuthService {
         if (responseData['calendars'] != null) {
           final calendarsData = responseData['calendars'] as List;
           print('🔍 [GoogleAuthService] Found ${calendarsData.length} calendars in response');
-          calendars = calendarsData
-              .map((json) => Calendar.fromGoogleJson(json))
-              .toList();
+          calendars = <Calendar>[];
+          for (var item in calendarsData) {
+            if (item is Map<String, dynamic>) {
+              calendars.add(Calendar.fromGoogleJson(item));
+            } else {
+              print('❌ [GoogleAuthService] Found invalid item in calendars list: $item');
+            }
+          }
           print('🔍 [GoogleAuthService] Parsed ${calendars.length} calendar objects');
         } else {
           print('⚠️ [GoogleAuthService] No calendars found in backend response');

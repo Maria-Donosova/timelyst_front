@@ -156,7 +156,7 @@ class Calendar {
       isSelected: true,
       isPrimary: json['primary'] ?? false,
       metadata: CalendarMetadata(
-        title: json['summary'] ?? 'Unknown Calendar',
+        title: json.containsKey('summary') ? json['summary'] : 'Unknown Calendar',
         description: json['description'],
         timeZone: json['timeZone'],
         color: _parseColor(json['backgroundColor']),
