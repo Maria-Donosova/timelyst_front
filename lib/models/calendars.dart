@@ -147,73 +147,16 @@ class Calendar {
   }
 
   factory Calendar.fromGoogleJson(Map<String, dynamic> json) {
-    // Debug: Log the actual structure being received
-    print('🔍 [Calendar.fromGoogleJson] Parsing calendar with keys: ${json.keys.toList()}');
-    print('🔍 [Calendar.fromGoogleJson] Raw JSON: $json');
-    
-    // Check if this is a minified/compressed object
-    if (json.toString().contains('minified:')) {
-      print('⚠️ [Calendar.fromGoogleJson] Received minified object - this might be the issue');
-      print('🔍 [Calendar.fromGoogleJson] Object runtime type: ${json.runtimeType}');
-      
-      // Try to access common calendar fields if they exist
-      final id = _tryGetField(json, 'id') ?? _tryGetField(json, 'id');
-      final summary = _tryGetField(json, 'summary') ?? _tryGetField(json, 'title') ?? 'Unknown Calendar';
-      final description = _tryGetField(json, 'description');
-      final timeZone = _tryGetField(json, 'timeZone');
-      final primary = _tryGetField(json, 'primary') ?? false;
-      final backgroundColor = _tryGetField(json, 'backgroundColor') ?? _tryGetField(json, 'color');
-      
-      print('✅ [Calendar.fromGoogleJson] Extracted fields - id: $id, summary: $summary, primary: $primary');
-      
-      return Calendar(
-        id: '', // This will be set by the backend
-        userId: '', // This will be set by the backend
-        source: CalendarSource.google,
-        providerCalendarId: id ?? '',
-        email: '', // This will be set by the backend
-        isSelected: true,
-        isPrimary: primary ?? false,
-        metadata: CalendarMetadata(
-          title: summary,
-          description: description,
-          timeZone: timeZone,
-          color: _parseColor(backgroundColor),
-          defaultReminders: [],
-          notifications: [],
-          allowedConferenceTypes: [],
-        ),
-        preferences: CalendarPreferences(
-          importSettings: CalendarImportSettings(
-            importAll: false,
-            importSubject: true,
-            importBody: false,
-            importConferenceInfo: true,
-            importOrganizer: false,
-            importRecipients: false,
-          ),
-          category: null,
-          userColor: null,
-        ),
-        sync: CalendarSyncInfo(
-          etag: _tryGetField(json, 'etag'),
-          syncToken: null, // This will be set by the backend
-          lastSyncedAt: null, // This will be set by the backend
-        ),
-      );
-    }
-    
-    // Original logic for non-minified objects
     return Calendar(
       id: '', // This will be set by the backend
       userId: '', // This will be set by the backend
       source: CalendarSource.google,
       providerCalendarId: json['id'] ?? '',
       email: '', // This will be set by the backend
-      isSelected: json['selected'] ?? true,
+      isSelected: true,
       isPrimary: json['primary'] ?? false,
       metadata: CalendarMetadata(
-        title: json['summary'] ?? '',
+        title: json['summary'] ?? 'Unknown Calendar',
         description: json['description'],
         timeZone: json['timeZone'],
         color: _parseColor(json['backgroundColor']),
@@ -244,15 +187,7 @@ class Calendar {
     );
   }
 
-  static dynamic _tryGetField(Map<String, dynamic> json, String field) {
-    try {
-      return json[field];
-    } catch (e) {
-      print('⚠️ [Calendar._tryGetField] Error accessing field "$field": $e');
-      return null;
-    }
-  }
-
+  
   static Color _parseColor(String? hexColor) {
     hexColor = hexColor?.replaceAll('#', '');
     if (hexColor == null || hexColor.isEmpty) {
