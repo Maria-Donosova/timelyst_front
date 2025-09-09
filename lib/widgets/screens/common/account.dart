@@ -35,6 +35,7 @@ class _AccountSettingsState extends State<AccountSettings> {
   }
 
   Future<void> _fetchUserCalendars() async {
+    print('🔍 [AccountSettings] Calling CalendarsService.fetchUserCalendars for userId: ${widget.userId}');
     try {
       final token = await widget.authService.getAuthToken();
       if (token == null) throw Exception('No authentication token available');

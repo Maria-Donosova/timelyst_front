@@ -13,6 +13,7 @@ class CalendarsService {
     int limit = 20,
     int offset = 0,
   }) async {
+    print('🔍 [CalendarsService] Starting fetchUserCalendars for userId: $userId');
     //logger.i('Fetching user calendars with limit $limit and offset $offset');
 
     // Define the optimized GraphQL query
