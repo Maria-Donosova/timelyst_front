@@ -43,7 +43,7 @@ class Config {
   
 
   static String get frontendURL {
-    return _configService.get('FRONTEND_URL') ?? 'https://timelyst-front.fly.dev';
+    return _configService.get('FRONTEND_URL') ?? 'https://timelyst-back.fly.dev';
   }
 
   static String get backendURL {
