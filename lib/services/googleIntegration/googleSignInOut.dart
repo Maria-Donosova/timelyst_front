@@ -6,14 +6,17 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:timelyst_flutter/services/googleIntegration/google_sign_in_result.dart';
 import 'googleAuthService.dart';
 import 'google_sign_in_singleton.dart';
+import '../authService.dart';
 
 class GoogleSignInOutService {
   final GoogleSignIn _googleSignIn;
   late final GoogleAuthService _googleAuthService;
+  late final AuthService _authService;
 
-  GoogleSignInOutService({GoogleSignIn? googleSignIn, GoogleAuthService? googleAuthService})
+  GoogleSignInOutService({GoogleSignIn? googleSignIn, GoogleAuthService? googleAuthService, AuthService? authService})
       : _googleSignIn = googleSignIn ?? GoogleSignInSingleton().googleSignIn,
-        _googleAuthService = googleAuthService ?? GoogleAuthService();
+        _googleAuthService = googleAuthService ?? GoogleAuthService(),
+        _authService = authService ?? AuthService();
 
   Future<GoogleSignInResult> googleSignIn(String serverAuthCode) async {
     try {
@@ -27,7 +30,8 @@ class GoogleSignInOutService {
       print('🔍 [GoogleSignInOutService] Response success: ${response['success']}');
       
       if (response['success']) {
-        final userId = response['data']['userId'];
+        // Get userId from stored auth token instead of backend response  
+        final userId = await _authService.getUserId();
         final email = response['email'];
         final calendars = response['calendars'];
         
@@ -39,8 +43,8 @@ class GoogleSignInOutService {
         
         
         return GoogleSignInResult(
-          userId: userId,
-          email: email,
+          userId: userId ?? '',
+          email: email ?? '',
           authCode: serverAuthCode,
           calendars: calendars,
         );
