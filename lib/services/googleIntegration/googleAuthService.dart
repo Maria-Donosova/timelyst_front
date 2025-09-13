@@ -38,6 +38,24 @@ class GoogleAuthService {
     }
   }
 
+  Future<String?> getCurrentUserEmail() async {
+    try {
+      print('🔍 [GoogleAuthService] Getting current Google user email...');
+      final GoogleSignInAccount? currentUser = _googleSignIn.currentUser;
+      if (currentUser != null) {
+        print('✅ [GoogleAuthService] Found current user email: ${currentUser.email}');
+        return currentUser.email;
+      } else {
+        print('⚠️ [GoogleAuthService] No current user found');
+        return null;
+      }
+    } catch (e, stackTrace) {
+      print('❌ [GoogleAuthService] Error getting user email: $e');
+      print('🔍 [GoogleAuthService] Stack trace: $stackTrace');
+      return null;
+    }
+  }
+
   Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode) async {
     try {
       print('🔍 [GoogleAuthService] Starting to send auth code to backend...');
@@ -87,10 +105,17 @@ class GoogleAuthService {
           print('🔍 [GoogleAuthService] Available response fields: ${responseData.keys.toList()}');
         }
 
+        // Get email from backend response, fallback to Google Sign-In if not provided
+        String? email = responseData['email'];
+        if (email == null) {
+          print('⚠️ [GoogleAuthService] Email not found in backend response, getting from Google Sign-In...');
+          email = await getCurrentUserEmail();
+        }
+
         return {
           'success': true,
           'message': 'Auth code sent to backend successfully',
-          'email': responseData['email'],
+          'email': email,
           'data': responseData,
           'calendars': calendars,
         };
