@@ -33,7 +33,7 @@ class Config {
 
   static String get backendSaveSelectedGoogleCalendars {
     final value = _configService.get('BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS');
-    return value ?? 'test_backend_save_selected_google_calendars';
+    return value ?? '${backendURL}/google/calendars/save';
   }
 
   static String? get redirectUri {
