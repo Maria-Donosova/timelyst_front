@@ -32,12 +32,19 @@ class GoogleSignInOutService {
       if (response['success']) {
         // Get userId from stored auth token instead of backend response  
         final userId = await _authService.getUserId();
-        final email = response['email'];
+        
+        // Try multiple possible locations for email in the response
+        final email = response['email'] ?? 
+                     response['data']?['email'] ?? 
+                     response['data']?['googleEmail'];
         final calendars = response['calendars'];
         
         print('✅ [GoogleSignInOutService] Google Sign-In successful');
         print('🔍 [GoogleSignInOutService] User ID: $userId');
         print('🔍 [GoogleSignInOutService] User email: $email');
+        print('🔍 [GoogleSignInOutService] Email from response["email"]: ${response['email']}');
+        print('🔍 [GoogleSignInOutService] Email from response["data"]["email"]: ${response['data']?['email']}');
+        print('🔍 [GoogleSignInOutService] Email from response["data"]["googleEmail"]: ${response['data']?['googleEmail']}');
         print('🔍 [GoogleSignInOutService] Number of calendars: ${calendars?.length ?? 0}');
         
         
