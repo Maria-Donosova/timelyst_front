@@ -87,9 +87,10 @@ class Calendar {
     }
   }
 
-  Map<String, dynamic> toJson({required email}) {
+  Map<String, dynamic> toJson({required String email}) {
     return {
-      'id': id,
+      'id': providerCalendarId.isNotEmpty ? providerCalendarId : id,
+      'summary': metadata.title,
       'user': userId,
       'source': source.name.toUpperCase(),
       'providerCalendarId': providerCalendarId,
@@ -99,6 +100,7 @@ class Calendar {
       'preferences': preferences.toJson(),
       'sync': sync.toJson(),
       'events': eventCount,
+      'email': email,
     };
   }
 
