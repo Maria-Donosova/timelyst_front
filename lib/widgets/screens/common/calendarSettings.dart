@@ -191,7 +191,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     });
   }
 
-  Widget _buildCheckbox(String label, bool value, Function(bool?) onChanged) {
+  Widget _buildCheckbox(String label, bool value, Function(bool?)? onChanged) {
     return Row(
       children: [
         Expanded(
