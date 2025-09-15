@@ -96,17 +96,21 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                   (value) {
                     bool newValue = value ?? false;
                     setState(() {
-                      calendar.preferences.importSettings =
-                          calendar.preferences.importSettings.copyWith(
-                        importAll: newValue,
-                        // When "All" is checked, set all to true
-                        // When "All" is unchecked, reset all to false so user can choose individually
-                        importSubject: newValue ? true : false,
-                        importBody: newValue ? true : false,
-                        importConferenceInfo: newValue ? true : false,
-                        importOrganizer: newValue ? true : false,
-                        importRecipients: newValue ? true : false,
+                      final updatedCalendar = calendar.copyWith(
+                        preferences: calendar.preferences.copyWith(
+                          importSettings: calendar.preferences.importSettings.copyWith(
+                            importAll: newValue,
+                            // When "All" is checked, set all to true
+                            // When "All" is unchecked, reset all to false so user can choose individually
+                            importSubject: newValue ? true : false,
+                            importBody: newValue ? true : false,
+                            importConferenceInfo: newValue ? true : false,
+                            importOrganizer: newValue ? true : false,
+                            importRecipients: newValue ? true : false,
+                          ),
+                        ),
                       );
+                      widget.calendars[index] = updatedCalendar;
                     });
                   },
                 ),
@@ -116,55 +120,75 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                   'Subject',
                   importSettings.importSubject,
                   importSettings.importAll ? null : (value) => setState(() {
-                    calendar.preferences.importSettings =
-                        calendar.preferences.importSettings.copyWith(
-                      importSubject: value ?? false,
+                    final updatedCalendar = calendar.copyWith(
+                      preferences: calendar.preferences.copyWith(
+                        importSettings: calendar.preferences.importSettings.copyWith(
+                          importSubject: value ?? false,
+                        ),
+                      ),
                     );
-                    _updateAllCheckboxState(calendar);
+                    widget.calendars[index] = updatedCalendar;
+                    _updateAllCheckboxState(widget.calendars[index]);
                   }),
                 ),
                 _buildCheckbox(
                   'Description',
                   importSettings.importBody,
                   importSettings.importAll ? null : (value) => setState(() {
-                    calendar.preferences.importSettings =
-                        calendar.preferences.importSettings.copyWith(
-                      importBody: value ?? false,
+                    final updatedCalendar = calendar.copyWith(
+                      preferences: calendar.preferences.copyWith(
+                        importSettings: calendar.preferences.importSettings.copyWith(
+                          importBody: value ?? false,
+                        ),
+                      ),
                     );
-                    _updateAllCheckboxState(calendar);
+                    widget.calendars[index] = updatedCalendar;
+                    _updateAllCheckboxState(widget.calendars[index]);
                   }),
                 ),
                 _buildCheckbox(
                   'Conference Info',
                   importSettings.importConferenceInfo,
                   importSettings.importAll ? null : (value) => setState(() {
-                    calendar.preferences.importSettings =
-                        calendar.preferences.importSettings.copyWith(
-                      importConferenceInfo: value ?? false,
+                    final updatedCalendar = calendar.copyWith(
+                      preferences: calendar.preferences.copyWith(
+                        importSettings: calendar.preferences.importSettings.copyWith(
+                          importConferenceInfo: value ?? false,
+                        ),
+                      ),
                     );
-                    _updateAllCheckboxState(calendar);
+                    widget.calendars[index] = updatedCalendar;
+                    _updateAllCheckboxState(widget.calendars[index]);
                   }),
                 ),
                 _buildCheckbox(
                   'Organizer',
                   importSettings.importOrganizer,
                   importSettings.importAll ? null : (value) => setState(() {
-                    calendar.preferences.importSettings =
-                        calendar.preferences.importSettings.copyWith(
-                      importOrganizer: value ?? false,
+                    final updatedCalendar = calendar.copyWith(
+                      preferences: calendar.preferences.copyWith(
+                        importSettings: calendar.preferences.importSettings.copyWith(
+                          importOrganizer: value ?? false,
+                        ),
+                      ),
                     );
-                    _updateAllCheckboxState(calendar);
+                    widget.calendars[index] = updatedCalendar;
+                    _updateAllCheckboxState(widget.calendars[index]);
                   }),
                 ),
                 _buildCheckbox(
                   'Recipients',
                   importSettings.importRecipients,
                   importSettings.importAll ? null : (value) => setState(() {
-                    calendar.preferences.importSettings =
-                        calendar.preferences.importSettings.copyWith(
-                      importRecipients: value ?? false,
+                    final updatedCalendar = calendar.copyWith(
+                      preferences: calendar.preferences.copyWith(
+                        importSettings: calendar.preferences.importSettings.copyWith(
+                          importRecipients: value ?? false,
+                        ),
+                      ),
                     );
-                    _updateAllCheckboxState(calendar);
+                    widget.calendars[index] = updatedCalendar;
+                    _updateAllCheckboxState(widget.calendars[index]);
                   }),
                 ),
               ],
@@ -183,12 +207,20 @@ class _CalendarSettingsState extends State<CalendarSettings> {
         importSettings.importOrganizer &&
         importSettings.importRecipients;
 
-    setState(() {
-      calendar.preferences.importSettings =
-          calendar.preferences.importSettings.copyWith(
-        importAll: allChecked,
-      );
-    });
+    // Find the index of this calendar and update it properly
+    final calendarIndex = widget.calendars.indexWhere((c) => c.providerCalendarId == calendar.providerCalendarId);
+    if (calendarIndex != -1) {
+      setState(() {
+        final updatedCalendar = calendar.copyWith(
+          preferences: calendar.preferences.copyWith(
+            importSettings: calendar.preferences.importSettings.copyWith(
+              importAll: allChecked,
+            ),
+          ),
+        );
+        widget.calendars[calendarIndex] = updatedCalendar;
+      });
+    }
   }
 
   Widget _buildCheckbox(String label, bool value, Function(bool?)? onChanged) {
