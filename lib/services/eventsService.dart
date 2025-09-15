@@ -17,8 +17,8 @@ class EventService {
     // print("Entering fetchDayEvents in EventService");
 
     final String query = '''
-      query DayEvents {
-        dayEvents {
+      query DayEvents(\$userId: String!) {
+        dayEvents(userId: \$userId) {
           dayEvents {
             id
             user_id
@@ -56,6 +56,7 @@ class EventService {
       },
       body: {
         'query': query,
+        'variables': {'userId': userId},
       },
     );
 
@@ -183,8 +184,8 @@ class EventService {
     // print("Entering fetchTimeEvents in EventService");
 
     final String query = '''
-      query GetTimeEvents {
-        timeEvents {
+      query GetTimeEvents(\$userId: String!) {
+        timeEvents(userId: \$userId) {
             id
             user_id
             createdBy
@@ -221,6 +222,7 @@ class EventService {
       },
       body: {
         'query': query,
+        'variables': {'userId': userId},
       },
     );
 
