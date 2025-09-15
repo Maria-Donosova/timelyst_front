@@ -128,7 +128,7 @@ class _CalendarWState extends State<CalendarW> {
                     showCurrentTimeIndicator: true,
                     monthCellBuilder: monthCellBuilder,
                     monthViewSettings: MonthViewSettings(
-                      appointmentDisplayMode: MonthAppointmentDisplayMode.none,
+                      appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
                       showTrailingAndLeadingDates: false,
                     ),
                     appointmentBuilder: appointmentBuilder,
