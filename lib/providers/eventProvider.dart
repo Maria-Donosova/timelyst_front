@@ -97,8 +97,9 @@ class EventProvider with ChangeNotifier {
 
       _events = [...dayEvents, ...timeEvents];
 
-      print(
-          'Fetched ${_events.length} total events (${dayEvents.length} day events, ${timeEvents.length} time events in eventProvider)');
+      print('📊 DEBUG: Fetched ${_events.length} total events (${dayEvents.length} day events, ${timeEvents.length} time events)');
+      print('📊 DEBUG: User ID: $userId');
+      print('📊 DEBUG: Auth Token: ${authToken?.substring(0, 10)}...');
 
       _errorMessage = '';
     } catch (e) {

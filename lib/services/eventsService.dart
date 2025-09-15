@@ -17,8 +17,8 @@ class EventService {
     // print("Entering fetchDayEvents in EventService");
 
     final String query = '''
-      query DayEvents(\$userId: String!) {
-        dayEvents(userId: \$userId) {
+      query DayEvents {
+        dayEvents {
           dayEvents {
             id
             user_id
@@ -56,7 +56,6 @@ class EventService {
       },
       body: {
         'query': query,
-        'variables': {'userId': userId},
       },
     );
 
@@ -76,6 +75,11 @@ class EventService {
       // Extract the day events from the response
       final List<dynamic> dayEventsJson =
           data['data']['dayEvents']['dayEvents'];
+
+      print('📅 DEBUG: Received ${dayEventsJson.length} day events from backend');
+      if (dayEventsJson.isNotEmpty) {
+        print('📅 DEBUG: First day event: ${dayEventsJson.first}');
+      }
 
       // Parse the day events into a List<DayEvent>
       final List<DayEvent> dayEvents = dayEventsJson.map((json) {
@@ -184,8 +188,8 @@ class EventService {
     // print("Entering fetchTimeEvents in EventService");
 
     final String query = '''
-      query GetTimeEvents(\$userId: String!) {
-        timeEvents(userId: \$userId) {
+      query GetTimeEvents {
+        timeEvents {
             id
             user_id
             createdBy
@@ -222,7 +226,6 @@ class EventService {
       },
       body: {
         'query': query,
-        'variables': {'userId': userId},
       },
     );
 
@@ -241,12 +244,10 @@ class EventService {
 
       // Extract the time events from the response
       final List<dynamic> timeEventsJson = data['data']['timeEvents'];
-      // print(
-      //     'Received ${timeEventsJson.length} time events from API in eventsService');
-
-      // Add some debug logging for the first event if available
+      
+      print('🕐 DEBUG: Received ${timeEventsJson.length} time events from backend');
       if (timeEventsJson.isNotEmpty) {
-        // print('First time event data: ${timeEventsJson.first}');
+        print('🕐 DEBUG: First time event: ${timeEventsJson.first}');
       }
 
       // Parse the time events into a List<TimeEvent>
