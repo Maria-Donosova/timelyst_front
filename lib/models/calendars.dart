@@ -74,7 +74,9 @@ class Calendar {
     );
   }
 
-  static CalendarSource _parseSource(String source) {
+  static CalendarSource _parseSource(String? source) {
+    if (source == null) return CalendarSource.google; // Default fallback for null
+    
     switch (source.toUpperCase()) {
       case 'GOOGLE':
         return CalendarSource.google;

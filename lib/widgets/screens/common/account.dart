@@ -45,13 +45,17 @@ class _AccountSettingsState extends State<AccountSettings> {
         authToken: token,
       );
 
+      print('✅ [AccountSettings] Successfully fetched ${paginatedCalendars.calendars.length} calendars');
+      
       setState(() {
         _calendars = paginatedCalendars.calendars;
         groupedCalendars = _groupCalendarsBySource(_calendars);
         _isLoading = false;
         _hasError = false;
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ [AccountSettings] Error fetching calendars: $e');
+      print('❌ [AccountSettings] Stack trace: $stackTrace');
       setState(() {
         _isLoading = false;
         _hasError = true;
@@ -64,9 +68,20 @@ class _AccountSettingsState extends State<AccountSettings> {
       List<Calendar> calendars) {
     final Map<CalendarSource, List<Calendar>> grouped = {};
 
+    print('🔍 [AccountSettings] Grouping ${calendars.length} calendars by source');
+    
     for (final cal in calendars) {
-      grouped.putIfAbsent(cal.source, () => []).add(cal);
+      try {
+        print('🔍 [AccountSettings] Processing calendar: ${cal.metadata.title} (source: ${cal.source})');
+        grouped.putIfAbsent(cal.source, () => []).add(cal);
+      } catch (e) {
+        print('❌ [AccountSettings] Error processing calendar ${cal.id}: $e');
+        // Skip this calendar if there's an error
+        continue;
+      }
     }
+
+    print('✅ [AccountSettings] Grouped calendars by ${grouped.keys.length} sources');
 
     // Sort by source type (Google first, then Outlook, then Apple)
     return Map.fromEntries(
