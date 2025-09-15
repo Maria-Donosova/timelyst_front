@@ -24,6 +24,7 @@ class CalendarsService {
             id
             isSelected
             isPrimary
+            source
             metadata {
               title
               description
