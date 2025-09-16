@@ -150,6 +150,44 @@ class Calendar {
     );
   }
 
+  factory Calendar.fromMicrosoftJson(Map<String, dynamic> json) {
+    return Calendar(
+      id: '', // This will be set by the backend
+      userId: '', // This will be set by the backend
+      source: CalendarSource.outlook,
+      providerCalendarId: json['id'] ?? '',
+      email: '', // This will be set by the backend
+      isSelected: true,
+      isPrimary: json['isDefaultCalendar'] ?? false,
+      metadata: CalendarMetadata(
+        title: json['name'] ?? json['summary'] ?? 'Unknown Calendar',
+        description: null, // Microsoft doesn't provide description in calendar list
+        timeZone: null, // Will be filled later from detailed calendar info
+        color: _parseColor(json['hexColor'] ?? json['backgroundColor']),
+        defaultReminders: [], // Will be filled from calendar settings
+        notifications: [],
+        allowedConferenceTypes: [],
+      ),
+      preferences: CalendarPreferences(
+        importSettings: CalendarImportSettings(
+          importAll: false,
+          importSubject: true,
+          importBody: false,
+          importConferenceInfo: true,
+          importOrganizer: false,
+          importRecipients: false,
+        ),
+        category: null,
+        userColor: null,
+      ),
+      sync: CalendarSyncInfo(
+        etag: json['changeKey'],
+        syncToken: null, // This will be set by the backend
+        lastSyncedAt: null, // This will be set by the backend
+      ),
+    );
+  }
+
   factory Calendar.fromGoogleJson(Map<String, dynamic> json) {
     return Calendar(
       id: '', // This will be set by the backend

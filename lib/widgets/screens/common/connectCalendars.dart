@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../shared/customAppbar.dart';
 
 import '../../../services/googleIntegration/googleSignInManager.dart';
+import '../../../services/microsoftIntegration/microsoftSignInManager.dart';
 import './calendarSettings.dart';
 
 import 'agenda.dart';
@@ -90,9 +91,55 @@ class _ConnectCalBody extends StatelessWidget {
                 _ServiceButton(
                   text: 'Outlook',
                   color: const Color.fromARGB(255, 6, 117, 208),
-                  onPressed: () {
-                    print('Outlook button pressed');
-                    // Implement Outlook connection
+                  onPressed: () async {
+                    print('🔍 [ConnectCalendars] Outlook button pressed by user');
+                    final signInManager = MicrosoftSignInManager();
+                    print('🔍 [ConnectCalendars] MicrosoftSignInManager created');
+                    
+                    try {
+                      final signInResult = await signInManager.signIn(context);
+                      print('🔍 [ConnectCalendars] Microsoft sign-in result received: ${signInResult.userId != null ? 'SUCCESS' : 'FAILED'}');
+
+                      if (signInResult.userId != null && signInResult.calendars != null) {
+                        print('✅ [ConnectCalendars] Microsoft sign-in successful with ${signInResult.calendars!.length} calendars');
+                        print('🔍 [ConnectCalendars] User: ${signInResult.email} (${signInResult.userId})');
+                        
+                        if (context.mounted) {
+                          print('🔍 [ConnectCalendars] Navigating to CalendarSettings...');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CalendarSettings(
+                                userId: signInResult.userId!,
+                                email: signInResult.email!,
+                                calendars: signInResult.calendars!,
+                              ),
+                            ),
+                          );
+                        } else {
+                          print('⚠️ [ConnectCalendars] Context not mounted - cannot navigate');
+                        }
+                      } else if (signInResult.userId != null && context.mounted) {
+                        print('⚠️ [ConnectCalendars] Microsoft sign-in successful but no calendars found');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'No calendars found. Please check your Microsoft Calendar settings.'),
+                          ),
+                        );
+                      } else {
+                        print('❌ [ConnectCalendars] Microsoft sign-in failed or was cancelled by user');
+                      }
+                    } catch (e) {
+                      print('❌ [ConnectCalendars] Exception during Microsoft sign-in: $e');
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Microsoft sign-in failed: ${e.toString()}'),
+                          ),
+                        );
+                      }
+                    }
                   },
                 ),
                 _ServiceButton(

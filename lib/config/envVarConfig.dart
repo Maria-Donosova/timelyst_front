@@ -54,4 +54,49 @@ class Config {
     final value = _configService.get('BACKEND_URL_GRAPHQL');
     return value ?? 'http://localhost:8081/graphql';
   }
+
+  // Microsoft OAuth Configuration
+  static String get microsoftClientId {
+    final value = _configService.get('MICROSOFT_CLIENT_ID');
+    return value ?? 'test_microsoft_client_id';
+  }
+
+  static String get microsoftClientSecret {
+    final value = _configService.get('MICROSOFT_CLIENT_SECRET');
+    return value ?? 'test_microsoft_client_secret';
+  }
+
+  static String get microsoftTenantId {
+    final value = _configService.get('MICROSOFT_TENANT_ID');
+    return value ?? 'common';
+  }
+
+  static String get microsoftScopes {
+    final value = _configService.get('MICROSOFT_SCOPE');
+    return value ?? 'https://graph.microsoft.com/calendars.read https://graph.microsoft.com/calendars.readwrite';
+  }
+
+  static String get microsoftAuthUrl {
+    return 'https://login.microsoftonline.com/${microsoftTenantId}/oauth2/v2.0/authorize';
+  }
+
+  static String get microsoftTokenUrl {
+    return 'https://login.microsoftonline.com/${microsoftTenantId}/oauth2/v2.0/token';
+  }
+
+  // Microsoft Backend Endpoints
+  static String get backendMicrosoftAuth {
+    final value = _configService.get('BACKEND_MICROSOFT_AUTH');
+    return value ?? '${backendURL}/microsoft/auth';
+  }
+
+  static String get backendMicrosoftCalendarsSave {
+    final value = _configService.get('BACKEND_MICROSOFT_CALENDARS_SAVE');
+    return value ?? '${backendURL}/microsoft/calendars/save';
+  }
+
+  static String get backendMicrosoftCalendarsFetch {
+    final value = _configService.get('BACKEND_MICROSOFT_CALENDARS_FETCH');
+    return value ?? '${backendURL}/microsoft/calendars/fetch';
+  }
 }
