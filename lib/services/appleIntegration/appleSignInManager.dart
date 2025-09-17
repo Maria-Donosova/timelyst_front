@@ -1,84 +1,109 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:timelyst_flutter/services/appleIntegration/appleSignInResult.dart';
-import 'package:timelyst_flutter/services/appleIntegration/appleAuthService.dart';
-import 'package:timelyst_flutter/services/appleIntegration/appleSignInOut.dart';
+import 'package:timelyst_flutter/services/appleIntegration/appleCalDAVManager.dart';
+import 'package:timelyst_flutter/widgets/calendar/appleCalendarConnectionForm.dart';
 
+/// Updated Apple Sign-In Manager using CalDAV authentication
+/// Maintains the same interface but uses Apple ID + App-Specific Password instead of OAuth
 class AppleSignInManager {
-  final AppleAuthService _authService;
-  final AppleSignInOutService _signInOutService;
+  final AppleCalDAVManager _calDAVManager;
 
   AppleSignInManager({
-    AppleAuthService? authService,
-    AppleSignInOutService? signInOutService,
-  })  : _authService = authService ?? AppleAuthService(),
-        _signInOutService = signInOutService ?? AppleSignInOutService();
+    AppleCalDAVManager? calDAVManager,
+  }) : _calDAVManager = calDAVManager ?? AppleCalDAVManager();
 
-  /// Initiates Apple OAuth sign-in flow
+  /// Shows Apple Calendar connection form instead of OAuth flow
   Future<AppleSignInResult> signIn(BuildContext context) async {
     try {
-      print('🔍 [AppleSignInManager] Starting Apple sign-in process');
+      print('🔍 [AppleSignInManager] Starting Apple Calendar connection process');
 
-      // Generate and launch Apple OAuth URL
-      final authUrl = _authService.generateAuthUrl();
-      print('🔍 [AppleSignInManager] Generated auth URL');
+      final completer = Completer<AppleSignInResult>();
 
-      // Launch the OAuth URL in browser
-      final uri = Uri.parse(authUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-        print('🔍 [AppleSignInManager] Launched OAuth URL in browser');
-      } else {
-        throw Exception('Could not launch Apple OAuth URL');
-      }
-
-      // In a real implementation, you would need to handle the redirect
-      // and extract the authorization code. For now, this is a placeholder.
-      // You might want to use a WebView or implement a custom URL scheme.
-      
-      print('⚠️ [AppleSignInManager] OAuth redirect handling not implemented');
-      print('🔍 [AppleSignInManager] User needs to copy authorization code manually');
-      
-      // For now, return an empty result - this will need to be completed
-      // when you implement the redirect handling
-      return AppleSignInResult(
-        userId: null,
-        email: null,
-        authCode: null,
-        calendars: [],
+      // Show the Apple Calendar connection form
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext dialogContext) {
+          return Dialog(
+            insetPadding: const EdgeInsets.all(16),
+            child: AppleCalendarConnectionForm(
+              onSuccess: (result) {
+                Navigator.of(dialogContext).pop();
+                completer.complete(result);
+              },
+              onError: (error) {
+                Navigator.of(dialogContext).pop();
+                completer.completeError(Exception(error));
+              },
+              onCancel: () {
+                Navigator.of(dialogContext).pop();
+                completer.completeError(Exception('User cancelled Apple Calendar connection'));
+              },
+            ),
+          );
+        },
       );
 
-    } catch (e) {
-      print('❌ [AppleSignInManager] Error during sign-in: $e');
-      rethrow;
-    }
-  }
-
-  /// Handles the OAuth callback with authorization code
-  Future<AppleSignInResult> handleAuthCallback(String authCode) async {
-    try {
-      print('🔍 [AppleSignInManager] Handling auth callback with code');
-      
-      final result = await _signInOutService.appleSignIn(authCode);
-      
-      print('✅ [AppleSignInManager] Apple Sign-In process completed successfully');
+      final result = await completer.future;
+      print('✅ [AppleSignInManager] Apple Calendar connection completed successfully');
       return result;
-      
+
     } catch (e) {
-      print('❌ [AppleSignInManager] Error handling auth callback: $e');
+      print('❌ [AppleSignInManager] Error during Apple Calendar connection: $e');
       rethrow;
     }
   }
 
-  /// Signs out from Apple
-  Future<void> signOut() async {
+  /// Handles calendar saving (replaces auth callback)
+  Future<void> saveSelectedCalendars({
+    required String email,
+    required List<Map<String, dynamic>> selectedCalendars,
+  }) async {
     try {
-      print('🔍 [AppleSignInManager] Starting Apple sign-out process');
-      // Implement Apple sign-out logic if needed
-      print('✅ [AppleSignInManager] Apple sign-out completed');
+      print('🔍 [AppleSignInManager] Saving selected calendars');
+      
+      await _calDAVManager.saveSelectedCalendars(
+        email: email,
+        selectedCalendars: selectedCalendars,
+      );
+      
+      print('✅ [AppleSignInManager] Apple calendars saved successfully');
     } catch (e) {
-      print('❌ [AppleSignInManager] Error during sign-out: $e');
+      print('❌ [AppleSignInManager] Error saving calendars: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetches calendars for an email
+  Future<List<Calendar>> fetchCalendars(String email) async {
+    try {
+      print('🔍 [AppleSignInManager] Fetching calendars for: $email');
+      
+      final calendars = await _calDAVManager.fetchCalendars(email);
+      
+      print('✅ [AppleSignInManager] Fetched ${calendars.length} calendars');
+      return calendars;
+    } catch (e) {
+      print('❌ [AppleSignInManager] Error fetching calendars: $e');
+      rethrow;
+    }
+  }
+
+  /// Disconnects Apple Calendar account
+  Future<void> signOut({String? email}) async {
+    try {
+      print('🔍 [AppleSignInManager] Starting Apple Calendar disconnect');
+      
+      if (email != null) {
+        await _calDAVManager.disconnectAccount(email);
+      } else {
+        await _calDAVManager.deleteCalendars();
+      }
+      
+      print('✅ [AppleSignInManager] Apple Calendar disconnected');
+    } catch (e) {
+      print('❌ [AppleSignInManager] Error during disconnect: $e');
       rethrow;
     }
   }
