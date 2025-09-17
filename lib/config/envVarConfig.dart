@@ -99,4 +99,54 @@ class Config {
     final value = _configService.get('BACKEND_MICROSOFT_CALENDARS_FETCH');
     return value ?? '${backendURL}/microsoft/calendars/fetch';
   }
+
+  // Apple iCloud OAuth Configuration
+  static String get appleClientId {
+    final value = _configService.get('APPLE_CLIENT_ID');
+    return value ?? 'test_apple_client_id';
+  }
+
+  static String get appleClientSecret {
+    final value = _configService.get('APPLE_CLIENT_SECRET');
+    return value ?? 'test_apple_client_secret';
+  }
+
+  static String get appleTeamId {
+    final value = _configService.get('APPLE_TEAM_ID');
+    return value ?? 'test_apple_team_id';
+  }
+
+  static String get appleKeyId {
+    final value = _configService.get('APPLE_KEY_ID');
+    return value ?? 'test_apple_key_id';
+  }
+
+  static String get appleScopes {
+    final value = _configService.get('APPLE_SCOPE');
+    return value ?? 'https://www.icloud.com/calendar https://www.icloud.com/contacts';
+  }
+
+  static String get appleAuthUrl {
+    return 'https://appleid.apple.com/auth/authorize';
+  }
+
+  static String get appleTokenUrl {
+    return 'https://appleid.apple.com/auth/token';
+  }
+
+  // Apple Backend Endpoints
+  static String get backendAppleAuth {
+    final value = _configService.get('BACKEND_APPLE_AUTH');
+    return value ?? '${backendURL}/apple/auth';
+  }
+
+  static String get backendAppleCalendarsSave {
+    final value = _configService.get('BACKEND_APPLE_CALENDARS_SAVE');
+    return value ?? '${backendURL}/apple/calendars/save';
+  }
+
+  static String get backendAppleCalendarsFetch {
+    final value = _configService.get('BACKEND_APPLE_CALENDARS_FETCH');
+    return value ?? '${backendURL}/apple/calendars/fetch';
+  }
 }
