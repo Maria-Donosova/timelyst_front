@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/services/appleIntegration/appleSignInResult.dart';
 import 'package:timelyst_flutter/services/appleIntegration/appleCalDAVManager.dart';
 import 'package:timelyst_flutter/widgets/calendar/appleCalendarConnectionForm.dart';
+import 'package:timelyst_flutter/models/calendars.dart';
 
 /// Updated Apple Sign-In Manager using CalDAV authentication
 /// Maintains the same interface but uses Apple ID + App-Specific Password instead of OAuth
