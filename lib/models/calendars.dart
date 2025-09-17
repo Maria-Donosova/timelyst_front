@@ -188,6 +188,44 @@ class Calendar {
     );
   }
 
+  factory Calendar.fromAppleJson(Map<String, dynamic> json) {
+    return Calendar(
+      id: '', // This will be set by the backend
+      userId: '', // This will be set by the backend
+      source: CalendarSource.apple,
+      providerCalendarId: json['id'] ?? json['calendarId'] ?? '',
+      email: '', // This will be set by the backend
+      isSelected: true,
+      isPrimary: json['isPrimary'] ?? json['isDefault'] ?? false,
+      metadata: CalendarMetadata(
+        title: json['title'] ?? json['name'] ?? json['displayName'] ?? 'Unknown Calendar',
+        description: json['description'],
+        timeZone: json['timeZone'],
+        color: _parseColor(json['color'] ?? json['hexColor']),
+        defaultReminders: [], // Apple calendar reminders will be filled from calendar settings
+        notifications: [],
+        allowedConferenceTypes: [],
+      ),
+      preferences: CalendarPreferences(
+        importSettings: CalendarImportSettings(
+          importAll: false,
+          importSubject: true,
+          importBody: false,
+          importConferenceInfo: true,
+          importOrganizer: false,
+          importRecipients: false,
+        ),
+        category: null,
+        userColor: null,
+      ),
+      sync: CalendarSyncInfo(
+        etag: json['etag'] ?? json['syncTag'],
+        syncToken: null, // This will be set by the backend
+        lastSyncedAt: null, // This will be set by the backend
+      ),
+    );
+  }
+
   factory Calendar.fromGoogleJson(Map<String, dynamic> json) {
     return Calendar(
       id: '', // This will be set by the backend
