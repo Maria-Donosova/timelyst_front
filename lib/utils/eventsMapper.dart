@@ -43,6 +43,7 @@ class EventMapper {
           dayEvent.recurrence.isEmpty ? null : dayEvent.recurrence.join(';'),
       catTitle: dayEvent.category,
       participants: dayEvent.participants,
+      recurrenceExceptionDates: _parseExceptionDates(dayEvent.exceptionDates),
       exceptionDates: dayEvent.exceptionDates.isEmpty
           ? null
           : dayEvent.exceptionDates.join(';'),
@@ -100,6 +101,7 @@ class EventMapper {
           : '',
       recurrenceRule:
           timeEvent.recurrence.isEmpty ? null : timeEvent.recurrence.join(';'),
+      recurrenceExceptionDates: _parseExceptionDates(timeEvent.exceptionDates),
       exceptionDates: timeEvent.exceptionDates.isEmpty
           ? null
           : timeEvent.exceptionDates.join(';'),
@@ -114,6 +116,20 @@ class EventMapper {
       catColor:
           _getColorFromCategory(timeEvent.category), // Map category to color
     );
+  }
+
+  // Helper function to parse exception dates from string list to DateTime list
+  static List<DateTime>? _parseExceptionDates(List<String> exceptionDates) {
+    if (exceptionDates.isEmpty) return null;
+    
+    try {
+      return exceptionDates.map((dateStr) {
+        return DateTimeUtils.parseAnyFormat(dateStr);
+      }).toList();
+    } catch (e) {
+      print('⚠️ Error parsing exception dates: $e');
+      return null;
+    }
   }
 
   // Helper function to map category to a color
