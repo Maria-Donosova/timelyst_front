@@ -39,8 +39,9 @@ class EventMapper {
       location: dayEvent.eventLocation,
       organizer:
           dayEvent.organizer['displayName'] ?? dayEvent.organizer['email'],
-      recurrenceRule:
-          dayEvent.recurrence.isEmpty ? null : dayEvent.recurrence.join(';'),
+      recurrenceRule: dayEvent.recurrence.isEmpty 
+          ? null 
+          : _formatRecurrenceRule(dayEvent.recurrence.join(';')),
       catTitle: dayEvent.category,
       participants: dayEvent.participants,
       recurrenceExceptionDates: _parseExceptionDates(dayEvent.recurrenceExceptionDates),
@@ -96,8 +97,9 @@ class EventMapper {
               timeEvent.organizer['email'] ??
               '')
           : '',
-      recurrenceRule:
-          timeEvent.recurrence.isEmpty ? null : timeEvent.recurrence.join(';'),
+      recurrenceRule: timeEvent.recurrence.isEmpty 
+          ? null 
+          : _formatRecurrenceRule(timeEvent.recurrence.join(';')),
       recurrenceExceptionDates: _parseExceptionDates(timeEvent.recurrenceExceptionDates),
       catTitle: timeEvent.category,
       participants: timeEvent.participants,
@@ -124,6 +126,27 @@ class EventMapper {
       print('⚠️ Error parsing exception dates: $e');
       return null;
     }
+  }
+
+  // Helper function to format recurrence rule for Syncfusion
+  static String _formatRecurrenceRule(String rule) {
+    if (rule.isEmpty) return '';
+    
+    // Clean up the rule - remove any extra RRULE: prefixes
+    rule = rule.replaceAll(RegExp(r'RRULE:'), '').trim();
+    
+    // Add single RRULE: prefix
+    rule = 'RRULE:$rule';
+    
+    // Ensure the rule is properly formatted for Syncfusion
+    // Common formats: RRULE:FREQ=DAILY;COUNT=5 or RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR
+    if (!rule.contains('FREQ=')) {
+      print('⚠️ [EventMapper] Invalid recurrence rule format: "$rule" - missing FREQ parameter');
+      return '';
+    }
+    
+    print('🔄 [EventMapper] Formatted recurrence rule: "$rule"');
+    return rule;
   }
 
   // Helper function to map category to a color
