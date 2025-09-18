@@ -351,7 +351,6 @@ class _CalendarWState extends State<CalendarW> {
           isAllDay: oldAppointment.isAllDay,
           recurrenceRule: oldAppointment.recurrenceRule,
           recurrenceExceptionDates: updatedExceptionDates,
-          exceptionDates: updatedExceptionDates.map((d) => d.toIso8601String()).join(';'),
           userCalendars: oldAppointment.userCalendars,
           timeEventInstance: oldAppointment.timeEventInstance,
         );
@@ -378,7 +377,6 @@ class _CalendarWState extends State<CalendarW> {
           isAllDay: oldAppointment.isAllDay,
           recurrenceRule: oldAppointment.recurrenceRule,
           recurrenceExceptionDates: oldAppointment.recurrenceExceptionDates,
-          exceptionDates: oldAppointment.exceptionDates,
           userCalendars: oldAppointment.userCalendars,
           timeEventInstance: oldAppointment.timeEventInstance,
         );
@@ -471,7 +469,6 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
         participants: _customAppointment.participants,
         recurrenceRule: appointment.recurrenceRule,
         recurrenceExceptionDates: appointment.recurrenceExceptionDates,
-        exceptionDates: appointment.recurrenceExceptionDates?.map((d) => d.toIso8601String()).join(';'), 
         timeEventInstance: _customAppointment.timeEventInstance);
   }
 }

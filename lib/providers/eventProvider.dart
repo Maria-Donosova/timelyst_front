@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/services/authService.dart';
 import 'package:timelyst_flutter/services/eventsService.dart';
+import 'package:timelyst_flutter/services/googleIntegration/googleEventsImportService.dart';
 import 'package:timelyst_flutter/models/customApp.dart';
 
 class EventProvider with ChangeNotifier {
   AuthService? _authService;
+  GoogleEventsImportService? _googleEventsImportService;
   List<CustomAppointment> _events = [];
 
   bool _isLoading = true;
@@ -14,7 +16,9 @@ class EventProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  EventProvider({AuthService? authService}) : _authService = authService;
+  EventProvider({AuthService? authService, GoogleEventsImportService? googleEventsImportService}) 
+    : _authService = authService,
+      _googleEventsImportService = googleEventsImportService ?? GoogleEventsImportService();
 
   void setAuth(AuthService authService) {
     _authService = authService;
@@ -74,6 +78,7 @@ class EventProvider with ChangeNotifier {
     }
     final authToken = await _authService!.getAuthToken();
     final userId = await _authService!.getUserId();
+    final userEmail = await _authService!.getUserEmail();
     if (authToken == null || userId == null) {
       print("AuthToken or UserId is null in EventProvider");
       _isLoading = false;
@@ -87,18 +92,39 @@ class EventProvider with ChangeNotifier {
     try {
       _events = [];
 
-      final results = await Future.wait([
+      // Fetch local events from backend
+      final backendResults = await Future.wait([
         EventService.fetchDayEvents(userId, authToken),
         EventService.fetchTimeEvents(userId, authToken),
       ]);
 
-      final dayEvents = results[0];
-      final timeEvents = results[1];
+      final dayEvents = backendResults[0];
+      final timeEvents = backendResults[1];
 
-      _events = [...dayEvents, ...timeEvents];
+      // Also fetch Google Calendar events if user email is available
+      List<CustomAppointment> googleEvents = [];
+      if (userEmail != null && _googleEventsImportService != null) {
+        try {
+          print('🔍 [EventProvider] Importing Google Calendar events for: $userEmail');
+          googleEvents = await _googleEventsImportService!.getImportedEventsAsAppointments(
+            userId: userId,
+            email: userEmail,
+          );
+          print('✅ [EventProvider] Imported ${googleEvents.length} Google Calendar events');
+        } catch (e) {
+          print('⚠️ [EventProvider] Google Calendar import failed: $e');
+          // Don't fail the whole operation if Google import fails
+        }
+      }
 
-      print('📊 DEBUG: Fetched ${_events.length} total events (${dayEvents.length} day events, ${timeEvents.length} time events)');
+      _events = [...dayEvents, ...timeEvents, ...googleEvents];
+
+      print('📊 DEBUG: Fetched ${_events.length} total events');
+      print('📊 DEBUG: - ${dayEvents.length} day events');
+      print('📊 DEBUG: - ${timeEvents.length} time events');
+      print('📊 DEBUG: - ${googleEvents.length} Google Calendar events');
       print('📊 DEBUG: User ID: $userId');
+      print('📊 DEBUG: User Email: $userEmail');
       print('📊 DEBUG: Auth Token: ${authToken?.substring(0, 10)}...');
 
       _errorMessage = '';
@@ -325,6 +351,44 @@ class EventProvider with ChangeNotifier {
       notifyListeners();
     } else {
       print('⚠️ [EventProvider] Event ${oldEvent.id} not found for update');
+    }
+  }
+
+  /// Manually triggers Google Calendar import
+  Future<void> importGoogleCalendarEvents() async {
+    if (_authService == null || _googleEventsImportService == null) return;
+    
+    final userId = await _authService!.getUserId();
+    final userEmail = await _authService!.getUserEmail();
+    
+    if (userId == null || userEmail == null) {
+      print('⚠️ [EventProvider] Cannot import Google events: missing user info');
+      return;
+    }
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      print('🔄 [EventProvider] Starting manual Google Calendar import');
+      
+      final googleEvents = await _googleEventsImportService!.getImportedEventsAsAppointments(
+        userId: userId,
+        email: userEmail,
+      );
+
+      // Remove existing Google events and add new ones
+      _events.removeWhere((event) => event.userCalendars.contains('google'));
+      _events.addAll(googleEvents);
+
+      print('✅ [EventProvider] Imported ${googleEvents.length} Google Calendar events');
+      _errorMessage = '';
+    } catch (e) {
+      _errorMessage = 'Failed to import Google Calendar events: $e';
+      print('❌ [EventProvider] $_errorMessage');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 }
