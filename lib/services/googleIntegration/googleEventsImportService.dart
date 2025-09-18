@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:timelyst_flutter/config/envVarConfig.dart';
 import 'package:timelyst_flutter/utils/apiClient.dart';
 import 'package:timelyst_flutter/services/authService.dart';
@@ -10,6 +11,56 @@ import 'package:timelyst_flutter/utils/eventsMapper.dart';
 class GoogleEventsImportService {
   final ApiClient _apiClient = ApiClient();
   final AuthService _authService = AuthService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  
+  // Sync token storage for incremental sync
+  String? _currentSyncToken;
+  DateTime? _lastSyncTime;
+  
+  static const String _syncTokenKey = 'google_events_sync_token';
+  static const String _lastSyncTimeKey = 'google_events_last_sync_time';
+
+  /// Loads sync token and last sync time from secure storage
+  Future<void> _loadSyncState() async {
+    try {
+      _currentSyncToken = await _storage.read(key: _syncTokenKey);
+      final lastSyncTimeString = await _storage.read(key: _lastSyncTimeKey);
+      if (lastSyncTimeString != null) {
+        _lastSyncTime = DateTime.parse(lastSyncTimeString);
+      }
+      print('🔍 [GoogleEventsImportService] Loaded sync state - token: ${_currentSyncToken != null ? '${_currentSyncToken!.substring(0, 10)}...' : 'null'}, lastSync: $_lastSyncTime');
+    } catch (e) {
+      print('⚠️ [GoogleEventsImportService] Error loading sync state: $e');
+    }
+  }
+
+  /// Saves sync token and last sync time to secure storage
+  Future<void> _saveSyncState() async {
+    try {
+      if (_currentSyncToken != null) {
+        await _storage.write(key: _syncTokenKey, value: _currentSyncToken);
+      }
+      if (_lastSyncTime != null) {
+        await _storage.write(key: _lastSyncTimeKey, value: _lastSyncTime!.toIso8601String());
+      }
+      print('✅ [GoogleEventsImportService] Saved sync state');
+    } catch (e) {
+      print('⚠️ [GoogleEventsImportService] Error saving sync state: $e');
+    }
+  }
+
+  /// Clears sync state (forces full sync next time)
+  Future<void> _clearSyncState() async {
+    try {
+      await _storage.delete(key: _syncTokenKey);
+      await _storage.delete(key: _lastSyncTimeKey);
+      _currentSyncToken = null;
+      _lastSyncTime = null;
+      print('🔄 [GoogleEventsImportService] Cleared sync state');
+    } catch (e) {
+      print('⚠️ [GoogleEventsImportService] Error clearing sync state: $e');
+    }
+  }
 
   /// Imports events from all selected Google calendars
   Future<GoogleEventsImportResult> importAllCalendarEvents({
@@ -27,9 +78,9 @@ class GoogleEventsImportService {
         throw Exception('No authentication token available');
       }
 
-      // Set default time range if not provided (import last 6 months + next 12 months)
-      timeMin ??= DateTime.now().subtract(const Duration(days: 180));
-      timeMax ??= DateTime.now().add(const Duration(days: 365));
+      // Set default time range if not provided (import last 3 months + next 6 months for better performance)
+      timeMin ??= DateTime.now().subtract(const Duration(days: 90));
+      timeMax ??= DateTime.now().add(const Duration(days: 180));
 
       final response = await _apiClient.post(
         '${Config.backendURL}/google/events/import',
@@ -165,54 +216,121 @@ class GoogleEventsImportService {
     }
   }
 
-  /// Gets the mapped events as CustomAppointments for immediate UI use
+  /// Smart sync method that uses incremental sync when possible
   Future<List<CustomAppointment>> getImportedEventsAsAppointments({
     required String userId,
     required String email,
+    bool forceFullSync = false,
   }) async {
-    print('🔄 [GoogleEventsImportService] Fetching imported events as appointments');
+    print('🔄 [GoogleEventsImportService] Starting smart sync for events');
     
     try {
-      final importResult = await importAllCalendarEvents(
-        userId: userId,
-        email: email,
-      );
-
-      final appointments = <CustomAppointment>[];
+      // Load sync state from storage first
+      await _loadSyncState();
       
-      // Convert imported time events to appointments
-      if (importResult.timeEvents != null) {
-        for (final timeEventData in importResult.timeEvents!) {
-          try {
-            final timeEvent = TimeEvent.fromJson(timeEventData);
-            final appointment = EventMapper.mapTimeEventToCustomAppointment(timeEvent);
-            appointments.add(appointment);
-          } catch (e) {
-            print('⚠️ [GoogleEventsImportService] Error mapping time event: $e');
+      GoogleEventsImportResult importResult;
+      
+      // Determine if we should do incremental sync or full sync
+      final shouldDoIncrementalSync = !forceFullSync && 
+          _currentSyncToken != null && 
+          _lastSyncTime != null &&
+          DateTime.now().difference(_lastSyncTime!).inMinutes < 5; // Sync within last 5 minutes
+          
+      if (shouldDoIncrementalSync) {
+        print('🔄 [GoogleEventsImportService] Performing incremental sync with token: ${_currentSyncToken!.substring(0, 10)}...');
+        try {
+          importResult = await syncCalendarEvents(
+            userId: userId,
+            email: email,
+            syncToken: _currentSyncToken!,
+          );
+          
+          // Update sync token and time
+          if (importResult.nextSyncToken != null) {
+            _currentSyncToken = importResult.nextSyncToken;
+            _lastSyncTime = DateTime.now();
+            await _saveSyncState();
           }
+          
+        } catch (e) {
+          print('⚠️ [GoogleEventsImportService] Incremental sync failed, falling back to full sync: $e');
+          // Fall back to full sync if incremental fails
+          importResult = await _performFullSync(userId, email);
         }
+      } else {
+        print('🔄 [GoogleEventsImportService] Performing full sync (reason: ${forceFullSync ? 'forced' : 'no valid sync token or stale'})');
+        importResult = await _performFullSync(userId, email);
       }
 
-      // Convert imported day events to appointments
-      if (importResult.dayEvents != null) {
-        for (final dayEventData in importResult.dayEvents!) {
-          try {
-            final dayEvent = DayEvent.fromJson(dayEventData);
-            final appointment = EventMapper.mapDayEventToCustomAppointment(dayEvent);
-            appointments.add(appointment);
-          } catch (e) {
-            print('⚠️ [GoogleEventsImportService] Error mapping day event: $e');
-          }
-        }
-      }
-
-      print('✅ [GoogleEventsImportService] Mapped ${appointments.length} events to appointments');
-      return appointments;
+      return _convertImportResultToAppointments(importResult);
       
     } catch (e) {
-      print('❌ [GoogleEventsImportService] Error getting imported events: $e');
+      print('❌ [GoogleEventsImportService] Error in smart sync: $e');
       rethrow;
     }
+  }
+
+  /// Performs a full sync and updates tokens
+  Future<GoogleEventsImportResult> _performFullSync(String userId, String email) async {
+    final result = await importAllCalendarEvents(
+      userId: userId,
+      email: email,
+    );
+    
+    // Store sync token for future incremental syncs
+    if (result.nextSyncToken != null) {
+      _currentSyncToken = result.nextSyncToken;
+      _lastSyncTime = DateTime.now();
+      await _saveSyncState();
+      print('✅ [GoogleEventsImportService] Stored sync token for future incremental syncs');
+    }
+    
+    return result;
+  }
+
+  /// Converts import result to CustomAppointments
+  List<CustomAppointment> _convertImportResultToAppointments(GoogleEventsImportResult importResult) {
+    final appointments = <CustomAppointment>[];
+    
+    // Convert imported time events to appointments
+    if (importResult.timeEvents != null) {
+      for (final timeEventData in importResult.timeEvents!) {
+        try {
+          final timeEvent = TimeEvent.fromJson(timeEventData);
+          final appointment = EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+          appointments.add(appointment);
+        } catch (e) {
+          print('⚠️ [GoogleEventsImportService] Error mapping time event: $e');
+        }
+      }
+    }
+
+    // Convert imported day events to appointments
+    if (importResult.dayEvents != null) {
+      for (final dayEventData in importResult.dayEvents!) {
+        try {
+          final dayEvent = DayEvent.fromJson(dayEventData);
+          final appointment = EventMapper.mapDayEventToCustomAppointment(dayEvent);
+          appointments.add(appointment);
+        } catch (e) {
+          print('⚠️ [GoogleEventsImportService] Error mapping day event: $e');
+        }
+      }
+    }
+
+    print('✅ [GoogleEventsImportService] Mapped ${appointments.length} events to appointments');
+    return appointments;
+  }
+  
+  /// Forces a full sync (useful for manual refresh)
+  Future<void> forceFullSync(String userId, String email) async {
+    print('🔄 [GoogleEventsImportService] Forcing full sync...');
+    await _clearSyncState();
+    await getImportedEventsAsAppointments(
+      userId: userId, 
+      email: email, 
+      forceFullSync: true
+    );
   }
 }
 
