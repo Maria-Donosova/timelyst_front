@@ -47,7 +47,13 @@ class GoogleSignInOutService {
         print('🔍 [GoogleSignInOutService] Email from response["data"]["googleEmail"]: ${response['data']?['googleEmail']}');
         print('🔍 [GoogleSignInOutService] Number of calendars: ${calendars?.length ?? 0}');
         
-        
+        // CRITICAL FIX: Save the email to secure storage for Google Calendar integration
+        if (email != null && email.isNotEmpty) {
+          await _authService.saveUserEmail(email);
+          print('✅ [GoogleSignInOutService] Saved user email to secure storage: $email');
+        } else {
+          print('⚠️ [GoogleSignInOutService] No email found in Google Sign-In response - Google Calendar integration will not work');
+        }
         
         return GoogleSignInResult(
           userId: userId ?? '',

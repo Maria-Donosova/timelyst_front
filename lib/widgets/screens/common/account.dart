@@ -4,6 +4,8 @@ import '../../shared/customAppbar.dart';
 import 'agenda.dart';
 import '../../../models/calendars.dart';
 import '../../../services/calendarsService.dart';
+import '../../../providers/eventProvider.dart';
+import 'package:provider/provider.dart';
 
 class AccountSettings extends StatefulWidget {
   final AuthService authService;
@@ -32,6 +34,40 @@ class _AccountSettingsState extends State<AccountSettings> {
   void initState() {
     super.initState();
     _fetchUserCalendars();
+  }
+
+  Future<void> _importGoogleCalendarEvents() async {
+    try {
+      print('🔄 [AccountSettings] Starting manual Google Calendar import...');
+      
+      // Get the EventProvider and trigger import
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+      await eventProvider.importGoogleCalendarEvents();
+      
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Calendar events imported successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+      
+      print('✅ [AccountSettings] Google Calendar import completed');
+    } catch (e) {
+      print('❌ [AccountSettings] Google Calendar import failed: $e');
+      
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to import Google Calendar events: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _fetchUserCalendars() async {
@@ -321,11 +357,25 @@ class _AccountSettingsState extends State<AccountSettings> {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 24, bottom: 16),
-            child: Text(
-              "Connected Accounts",
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Connected Accounts",
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _importGoogleCalendarEvents(),
+                  icon: Icon(Icons.sync, size: 18),
+                  label: Text('Import Google Events'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   ),
+                ),
+              ],
             ),
           ),
           ...groupedCalendars.entries.map((entry) {
