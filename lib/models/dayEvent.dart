@@ -80,7 +80,7 @@ class DayEvent {
       'is_AllDay': is_AllDay,
       'recurrenceRule': recurrence.isNotEmpty ? recurrence.first : '',
       'recurrenceId': recurrenceId,
-      'exceptionDates': exceptionDates,
+      'recurrenceExceptionDates': recurrenceExceptionDates,
       'day_EventInstance': dayEventInstance,
       'category': category,
       'event_body': eventBody,
