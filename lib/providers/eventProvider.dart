@@ -133,7 +133,7 @@ class EventProvider with ChangeNotifier {
         organizer: 'Test Organizer',
         recurrenceRule: 'RRULE:FREQ=WEEKLY;BYDAY=TH;COUNT=10', // Every Thursday for 10 weeks
         catTitle: 'test',
-        participants: [],
+        participants: 'test@example.com',
         recurrenceExceptionDates: null,
         userCalendars: ['test'],
         timeEventInstance: null,
