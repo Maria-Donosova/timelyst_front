@@ -32,7 +32,7 @@ class EventService {
             is_AllDay
             recurrenceId
             recurrenceRule
-            recurrenceExceptionDates
+            exceptionDates
             day_EventInstance
             category
             event_attendees
@@ -122,7 +122,7 @@ class EventService {
           is_AllDay
           recurrenceId
           recurrenceRule
-          recurrenceExceptionDates
+          exceptionDates
           time_EventInstance
           category
           event_attendees
@@ -327,7 +327,7 @@ class EventService {
           is_AllDay
           recurrenceId
           recurrenceRule
-          recurrenceExceptionDates
+          exceptionDates
           time_EventInstance
           category
           event_attendees
@@ -521,7 +521,7 @@ class EventService {
           is_AllDay
           recurrenceId
           recurrenceRule
-          recurrenceExceptionDates
+          exceptionDates
           day_EventInstance
           category
           event_attendees
@@ -839,7 +839,7 @@ class EventService {
           is_AllDay
           recurrenceId
           recurrenceRule
-          recurrenceExceptionDates
+          exceptionDates
           day_EventInstance
           category
           event_attendees
