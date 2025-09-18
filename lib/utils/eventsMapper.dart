@@ -132,6 +132,8 @@ class EventMapper {
   static String _formatRecurrenceRule(String rule) {
     if (rule.isEmpty) return '';
     
+    print('🔍 [EventMapper] Original recurrence rule: "$rule"');
+    
     // Clean up the rule - remove any extra RRULE: prefixes
     rule = rule.replaceAll(RegExp(r'RRULE:'), '').trim();
     
@@ -145,7 +147,18 @@ class EventMapper {
       return '';
     }
     
-    print('🔄 [EventMapper] Formatted recurrence rule: "$rule"');
+    // For recurring events without an end date, add a reasonable end date
+    // Google Calendar events without UNTIL or COUNT should repeat indefinitely
+    // But Syncfusion might need an explicit end date for proper rendering
+    if (!rule.contains('UNTIL=') && !rule.contains('COUNT=')) {
+      // Add a far future date (2 years from now) to ensure events show up
+      final futureDate = DateTime.now().add(Duration(days: 730));
+      final untilDate = futureDate.toIso8601String().substring(0, 8).replaceAll('-', '') + 'T000000Z';
+      rule = '$rule;UNTIL=$untilDate';
+      print('🔄 [EventMapper] Added UNTIL date for infinite recurrence: $untilDate');
+    }
+    
+    print('🔄 [EventMapper] Final formatted recurrence rule: "$rule"');
     return rule;
   }
 

@@ -82,24 +82,50 @@ class GoogleEventsImportService {
       timeMin ??= DateTime.now().subtract(const Duration(days: 90));
       timeMax ??= DateTime.now().add(const Duration(days: 180));
 
+      final requestBody = {
+        'userId': userId,
+        'email': email,
+        'syncToken': syncToken,
+        'timeMin': timeMin.toIso8601String(),
+        'timeMax': timeMax.toIso8601String(),
+        'includeRecurring': true, // Important for recurring events
+        'expandRecurring': false,  // Keep recurring events as rules instead of expanding into instances
+      };
+
+      print('🔍 [GoogleEventsImportService] Sending request with body: $requestBody');
+
       final response = await _apiClient.post(
         '${Config.backendURL}/google/events/import',
-        body: {
-          'userId': userId,
-          'email': email,
-          'syncToken': syncToken,
-          'timeMin': timeMin.toIso8601String(),
-          'timeMax': timeMax.toIso8601String(),
-          'includeRecurring': true, // Important for recurring events
-          'expandRecurring': false,  // Keep recurring events as rules instead of expanding into instances
-        },
+        body: requestBody,
         token: authToken,
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         print('✅ [GoogleEventsImportService] Import successful');
-        print('🔍 [GoogleEventsImportService] Response: ${data.keys.toList()}');
+        print('🔍 [GoogleEventsImportService] Response keys: ${data.keys.toList()}');
+        print('🔍 [GoogleEventsImportService] Full response: $data');
+        
+        // Debug recurring events in raw response
+        if (data['timeEvents'] != null) {
+          final timeEvents = data['timeEvents'] as List;
+          final recurringTimeEvents = timeEvents.where((event) => 
+            event['recurrenceRule'] != null && event['recurrenceRule'].toString().isNotEmpty).toList();
+          print('🔄 [GoogleEventsImportService] Found ${recurringTimeEvents.length} recurring time events in backend response');
+          for (final event in recurringTimeEvents) {
+            print('  - Time Event: "${event['event_title']}" has recurrenceRule: ${event['recurrenceRule']}');
+          }
+        }
+        
+        if (data['dayEvents'] != null) {
+          final dayEvents = data['dayEvents'] as List;
+          final recurringDayEvents = dayEvents.where((event) => 
+            event['recurrenceRule'] != null && event['recurrenceRule'].toString().isNotEmpty).toList();
+          print('🔄 [GoogleEventsImportService] Found ${recurringDayEvents.length} recurring day events in backend response');
+          for (final event in recurringDayEvents) {
+            print('  - Day Event: "${event['event_title']}" has recurrenceRule: ${event['recurrenceRule']}');
+          }
+        }
         
         return GoogleEventsImportResult.fromJson(data);
       } else {
