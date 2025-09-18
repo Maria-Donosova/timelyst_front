@@ -314,4 +314,17 @@ class EventProvider with ChangeNotifier {
     _events.add(event);
     notifyListeners();
   }
+
+  /// Updates an existing event in the local state (for immediate UI response)
+  /// This method is used for drag-and-drop operations and other local updates
+  void updateEvent(CustomAppointment oldEvent, CustomAppointment newEvent) {
+    final index = _events.indexWhere((event) => event.id == oldEvent.id);
+    if (index >= 0) {
+      _events[index] = newEvent;
+      print('🔄 [EventProvider] Updated event ${newEvent.id} in local state');
+      notifyListeners();
+    } else {
+      print('⚠️ [EventProvider] Event ${oldEvent.id} not found for update');
+    }
+  }
 }

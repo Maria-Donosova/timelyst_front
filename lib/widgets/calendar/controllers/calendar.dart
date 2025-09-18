@@ -138,6 +138,7 @@ class _CalendarWState extends State<CalendarW> {
                         DragAndDropSettings(showTimeIndicator: true),
                     dataSource: _EventDataSource(appointments),
                     onTap: _calendarTapped,
+                    onDragEnd: _handleDragEnd,
                     onViewChanged: (ViewChangedDetails viewChangedDetails) {
                       if (_controller.view == CalendarView.month) {
                         _headerText = DateFormat('yMMMM')
@@ -312,6 +313,86 @@ class _CalendarWState extends State<CalendarW> {
           });
   }
 
+  /// Handles drag-and-drop operations, especially for recurring events
+  void _handleDragEnd(AppointmentDragEndDetails details) {
+    if (details.appointment != null) {
+      final oldAppointment = details.appointment as CustomAppointment;
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+
+      print('🔄 [Calendar] Handling drag-and-drop for appointment: ${oldAppointment.title}');
+      print('🔄 [Calendar] Is recurring: ${oldAppointment.recurrenceRule != null}');
+      
+      // Calculate the duration of the event
+      final duration = oldAppointment.endTime.difference(oldAppointment.startTime);
+      
+      if (oldAppointment.recurrenceRule != null) {
+        // Handle recurring event drag-and-drop
+        print('🔄 [Calendar] Handling recurring event drag-and-drop');
+        
+        // Add the old appointment start date to recurrenceExceptionDates
+        final updatedExceptionDates = <DateTime>[
+          if (oldAppointment.recurrenceExceptionDates != null)
+            ...oldAppointment.recurrenceExceptionDates!,
+          oldAppointment.startTime
+        ];
+
+        // Create a new appointment at the new drop location with updated exceptions
+        final newAppointment = CustomAppointment(
+          id: oldAppointment.id,
+          title: oldAppointment.title,
+          description: oldAppointment.description,
+          startTime: details.droppingTime!,
+          endTime: details.droppingTime!.add(duration),
+          catTitle: oldAppointment.catTitle,
+          catColor: oldAppointment.catColor,
+          participants: oldAppointment.participants,
+          location: oldAppointment.location,
+          organizer: oldAppointment.organizer,
+          isAllDay: oldAppointment.isAllDay,
+          recurrenceRule: oldAppointment.recurrenceRule,
+          recurrenceExceptionDates: updatedExceptionDates,
+          exceptionDates: updatedExceptionDates.map((d) => d.toIso8601String()).join(';'),
+          userCalendars: oldAppointment.userCalendars,
+          timeEventInstance: oldAppointment.timeEventInstance,
+        );
+
+        // Update the event in the provider
+        eventProvider.updateEvent(oldAppointment, newAppointment);
+        print('✅ [Calendar] Updated recurring event with exception date');
+        
+      } else {
+        // Handle non-recurring event drag-and-drop
+        print('🔄 [Calendar] Handling non-recurring event drag-and-drop');
+        
+        final updatedAppointment = CustomAppointment(
+          id: oldAppointment.id,
+          title: oldAppointment.title,
+          description: oldAppointment.description,
+          startTime: details.droppingTime!,
+          endTime: details.droppingTime!.add(duration),
+          catTitle: oldAppointment.catTitle,
+          catColor: oldAppointment.catColor,
+          participants: oldAppointment.participants,
+          location: oldAppointment.location,
+          organizer: oldAppointment.organizer,
+          isAllDay: oldAppointment.isAllDay,
+          recurrenceRule: oldAppointment.recurrenceRule,
+          recurrenceExceptionDates: oldAppointment.recurrenceExceptionDates,
+          exceptionDates: oldAppointment.exceptionDates,
+          userCalendars: oldAppointment.userCalendars,
+          timeEventInstance: oldAppointment.timeEventInstance,
+        );
+
+        // Update the event in the provider
+        eventProvider.updateEvent(oldAppointment, updatedAppointment);
+        print('✅ [Calendar] Updated non-recurring event');
+      }
+      
+      // Refresh the calendar view
+      setState(() {});
+    }
+  }
+
   void addEventAndRefresh(CustomAppointment event) {
     if (mounted) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -359,6 +440,11 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   }
 
   @override
+  List<DateTime>? getRecurrenceExceptionDates(int index) {
+    return appointments![index].recurrenceExceptionDates;
+  }
+
+  @override
   String getNotes(int index) {
     return appointments![index].description;
   }
@@ -384,7 +470,8 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
         location: _customAppointment.location,
         participants: _customAppointment.participants,
         recurrenceRule: appointment.recurrenceRule,
-        exceptionDates: null, 
+        recurrenceExceptionDates: appointment.recurrenceExceptionDates,
+        exceptionDates: appointment.recurrenceExceptionDates?.map((d) => d.toIso8601String()).join(';'), 
         timeEventInstance: _customAppointment.timeEventInstance);
   }
 }
