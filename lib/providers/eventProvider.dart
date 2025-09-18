@@ -79,6 +79,7 @@ class EventProvider with ChangeNotifier {
     final authToken = await _authService!.getAuthToken();
     final userId = await _authService!.getUserId();
     final userEmail = await _authService!.getUserEmail();
+    print('📧 [EventProvider] Retrieved user email: $userEmail');
     if (authToken == null || userId == null) {
       print("AuthToken or UserId is null in EventProvider");
       _isLoading = false;
@@ -115,6 +116,9 @@ class EventProvider with ChangeNotifier {
           print('⚠️ [EventProvider] Google Calendar import failed: $e');
           // Don't fail the whole operation if Google import fails
         }
+      } else if (userEmail == null) {
+        print('⚠️ [EventProvider] No user email available - Google Calendar integration disabled');
+        print('💡 [EventProvider] To enable Google Calendar: sign out and sign in again with Google, or use the manual import button in Account Settings');
       }
 
       _events = [...dayEvents, ...timeEvents, ...googleEvents];

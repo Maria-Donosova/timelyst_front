@@ -91,7 +91,7 @@ class GoogleEventsImportService {
           'timeMin': timeMin.toIso8601String(),
           'timeMax': timeMax.toIso8601String(),
           'includeRecurring': true, // Important for recurring events
-          'expandRecurring': true,  // Expand recurring events into individual instances
+          'expandRecurring': false,  // Keep recurring events as rules instead of expanding into instances
         },
         token: authToken,
       );
@@ -145,7 +145,7 @@ class GoogleEventsImportService {
           'timeMin': timeMin.toIso8601String(),
           'timeMax': timeMax.toIso8601String(),
           'includeRecurring': true,
-          'expandRecurring': true,
+          'expandRecurring': false,
         },
         token: authToken,
       );
@@ -188,6 +188,7 @@ class GoogleEventsImportService {
           'email': email,
           'syncToken': syncToken,
           'includeRecurring': true,
+          'expandRecurring': false,
         },
         token: authToken,
       );
