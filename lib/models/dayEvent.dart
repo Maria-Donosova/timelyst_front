@@ -18,7 +18,7 @@ class DayEvent {
   final bool is_AllDay;
   final List<String> recurrence;
   final String recurrenceId;
-  final List<String> exceptionDates;
+  final List<String> recurrenceExceptionDates;
   final String dayEventInstance;
   final String category;
   final String eventBody;
@@ -47,7 +47,7 @@ class DayEvent {
     required this.is_AllDay,
     required this.recurrence,
     required this.recurrenceId,
-    required this.exceptionDates,
+    required this.recurrenceExceptionDates,
     required this.dayEventInstance,
     required this.category,
     required this.eventBody,
@@ -123,8 +123,9 @@ class DayEvent {
           ? [json['recurrenceRule']]
           : (json['recurrence'] as List<dynamic>?)?.cast<String>() ?? [],
       recurrenceId: json['recurrenceId'] ?? '',
-      exceptionDates:
-          (json['exceptionDates'] as List<dynamic>?)?.cast<String>() ?? [],
+      recurrenceExceptionDates:
+          (json['recurrenceExceptionDates'] as List<dynamic>?)?.cast<String>() ?? 
+          (json['exceptionDates'] as List<dynamic>?)?.cast<String>() ?? [], // fallback for migration
       dayEventInstance:
           json['day_EventInstance'] ?? json['day_eventInstance'] ?? '',
       category: json['category'] ?? '',

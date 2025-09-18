@@ -6,6 +6,7 @@ import 'package:timelyst_flutter/utils/apiClient.dart';
 class AuthService {
   static const String _authTokenKey = 'authToken';
   static const String _userIdKey = 'userId';
+  static const String _userEmailKey = 'userEmail';
   late final FlutterSecureStorage _storage;
   late final ApiClient _apiClient;
 
@@ -47,6 +48,7 @@ class AuthService {
       final loginData = data['data']['userLogin'];
       await saveAuthToken(loginData['token']);
       await saveUserId(loginData['userId']);
+      await saveUserEmail(email); // Store the email used for login
       return loginData;
     } else {
       throw Exception('Failed to login: ${response.statusCode}');
@@ -88,6 +90,7 @@ class AuthService {
       final registerData = data['data']['registerUser'];
       await saveAuthToken(registerData['token']);
       await saveUserId(registerData['userId']);
+      await saveUserEmail(email); // Store the email used for registration
       return registerData;
     } else {
       throw Exception('Failed to signup: ${response.statusCode}');
@@ -112,6 +115,15 @@ class AuthService {
     }
   }
 
+  Future<void> saveUserEmail(String email) async {
+    try {
+      await _storage.write(key: _userEmailKey, value: email);
+    } catch (e) {
+      print('Error saving user email: $e');
+      rethrow;
+    }
+  }
+
   Future<String?> getAuthToken() async {
     try {
       return await _storage.read(key: _authTokenKey);
@@ -130,6 +142,15 @@ class AuthService {
     }
   }
 
+  Future<String?> getUserEmail() async {
+    try {
+      return await _storage.read(key: _userEmailKey);
+    } catch (e) {
+      print('Error reading user email: $e');
+      return null;
+    }
+  }
+
   Future<void> clearAuthToken() async {
     try {
       await _storage.delete(key: _authTokenKey);
@@ -144,6 +165,26 @@ class AuthService {
       await _storage.delete(key: _userIdKey);
     } catch (e) {
       print('Error clearing userId: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> clearUserEmail() async {
+    try {
+      await _storage.delete(key: _userEmailKey);
+    } catch (e) {
+      print('Error clearing user email: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      await clearAuthToken();
+      await clearUserId();
+      await clearUserEmail();
+    } catch (e) {
+      print('Error during logout: $e');
       rethrow;
     }
   }
