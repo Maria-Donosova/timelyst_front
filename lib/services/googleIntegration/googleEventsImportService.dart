@@ -292,15 +292,24 @@ class GoogleEventsImportService {
   List<CustomAppointment> _convertImportResultToAppointments(GoogleEventsImportResult importResult) {
     final appointments = <CustomAppointment>[];
     
+    print('🔍 [GoogleEventsImportService] Converting import result - timeEvents: ${importResult.timeEvents?.length ?? 0}, dayEvents: ${importResult.dayEvents?.length ?? 0}');
+    
     // Convert imported time events to appointments
     if (importResult.timeEvents != null) {
       for (final timeEventData in importResult.timeEvents!) {
         try {
           final timeEvent = TimeEvent.fromJson(timeEventData);
           final appointment = EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+          
+          // Log recurring events specifically
+          if (appointment.recurrenceRule != null && appointment.recurrenceRule!.isNotEmpty) {
+            print('🔄 [GoogleEventsImportService] Found recurring time event: "${appointment.title}" with rule: ${appointment.recurrenceRule}');
+          }
+          
           appointments.add(appointment);
         } catch (e) {
           print('⚠️ [GoogleEventsImportService] Error mapping time event: $e');
+          print('⚠️ [GoogleEventsImportService] TimeEvent data: $timeEventData');
         }
       }
     }
@@ -311,14 +320,22 @@ class GoogleEventsImportService {
         try {
           final dayEvent = DayEvent.fromJson(dayEventData);
           final appointment = EventMapper.mapDayEventToCustomAppointment(dayEvent);
+          
+          // Log recurring events specifically
+          if (appointment.recurrenceRule != null && appointment.recurrenceRule!.isNotEmpty) {
+            print('🔄 [GoogleEventsImportService] Found recurring day event: "${appointment.title}" with rule: ${appointment.recurrenceRule}');
+          }
+          
           appointments.add(appointment);
         } catch (e) {
           print('⚠️ [GoogleEventsImportService] Error mapping day event: $e');
+          print('⚠️ [GoogleEventsImportService] DayEvent data: $dayEventData');
         }
       }
     }
 
-    print('✅ [GoogleEventsImportService] Mapped ${appointments.length} events to appointments');
+    final recurringCount = appointments.where((a) => a.recurrenceRule != null && a.recurrenceRule!.isNotEmpty).length;
+    print('✅ [GoogleEventsImportService] Mapped ${appointments.length} events to appointments (${recurringCount} recurring)');
     return appointments;
   }
   

@@ -61,6 +61,26 @@ class MockAuthService implements AuthService {
     _storage['userId'] = userId;
   }
 
+  @override
+  Future<String?> getUserEmail() async {
+    return _storage['userEmail'];
+  }
+
+  @override
+  Future<void> saveUserEmail(String email) async {
+    _storage['userEmail'] = email;
+  }
+
+  @override
+  Future<void> clearUserEmail() async {
+    _storage.remove('userEmail');
+  }
+
+  @override
+  Future<void> logout() async {
+    _storage.clear();
+  }
+
   // Helper method for testing
   void setLoginState(bool isLoggedIn, {String? userId, String? token}) {
     if (isLoggedIn) {

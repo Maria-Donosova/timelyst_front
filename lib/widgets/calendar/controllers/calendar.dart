@@ -404,6 +404,19 @@ class _CalendarWState extends State<CalendarW> {
 
 class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   _EventDataSource(List<CustomAppointment> source) {
+    print('🔍 [_EventDataSource] Creating data source with ${source.length} appointments');
+    
+    // Debug recurring events specifically
+    final recurringAppointments = source.where((a) => a.recurrenceRule != null && a.recurrenceRule!.isNotEmpty).toList();
+    print('🔄 [_EventDataSource] Found ${recurringAppointments.length} recurring appointments:');
+    for (final appointment in recurringAppointments) {
+      print('  - "${appointment.title}": ${appointment.recurrenceRule}');
+      print('    Start: ${appointment.startTime}, End: ${appointment.endTime}');
+      if (appointment.recurrenceExceptionDates != null) {
+        print('    Exception dates: ${appointment.recurrenceExceptionDates}');
+      }
+    }
+    
     appointments = source;
   }
 
@@ -434,7 +447,11 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
 
   @override
   String? getRecurrenceRule(int index) {
-    return appointments![index].recurrenceRule;
+    final rule = appointments![index].recurrenceRule;
+    if (rule != null && rule.isNotEmpty) {
+      print('📅 [_EventDataSource] getRecurrenceRule for "${appointments![index].title}": "$rule"');
+    }
+    return rule;
   }
 
   @override
