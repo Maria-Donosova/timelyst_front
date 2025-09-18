@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/foundation.dart';
+// Version: d1e4c10 - Fixed recurring events and GraphQL schema compatibility
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
@@ -12,9 +11,6 @@ import 'providers/calendarProvider.dart';
 import 'providers/eventProvider.dart';
 import 'providers/taskProvider.dart';
 
-import 'widgets/screens/common/logIn.dart';
-
-import 'package:timelyst_flutter/services/googleIntegration/googleSignInOut.dart';
 import 'package:timelyst_flutter/widgets/screens/common/wrapper.dart';
 
 Future main() async {
