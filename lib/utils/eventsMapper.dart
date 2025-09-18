@@ -43,7 +43,7 @@ class EventMapper {
           dayEvent.recurrence.isEmpty ? null : dayEvent.recurrence.join(';'),
       catTitle: dayEvent.category,
       participants: dayEvent.participants,
-      recurrenceExceptionDates: _parseExceptionDates(dayEvent.exceptionDates),
+      recurrenceExceptionDates: _parseExceptionDates(dayEvent.recurrenceExceptionDates),
       userCalendars:
           dayEvent.userCalendars.isEmpty ? [] : dayEvent.userCalendars,
       timeEventInstance:
@@ -98,7 +98,7 @@ class EventMapper {
           : '',
       recurrenceRule:
           timeEvent.recurrence.isEmpty ? null : timeEvent.recurrence.join(';'),
-      recurrenceExceptionDates: _parseExceptionDates(timeEvent.exceptionDates),
+      recurrenceExceptionDates: _parseExceptionDates(timeEvent.recurrenceExceptionDates),
       catTitle: timeEvent.category,
       participants: timeEvent.participants,
       userCalendars:
