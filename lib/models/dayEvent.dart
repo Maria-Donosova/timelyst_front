@@ -80,7 +80,7 @@ class DayEvent {
       'is_AllDay': is_AllDay,
       'recurrenceRule': recurrence.isNotEmpty ? recurrence.first : '',
       'recurrenceId': recurrenceId,
-      'recurrenceExceptionDates': recurrenceExceptionDates,
+      'exceptionDates': recurrenceExceptionDates, // backend expects exceptionDates
       'day_EventInstance': dayEventInstance,
       'category': category,
       'event_body': eventBody,
@@ -124,8 +124,7 @@ class DayEvent {
           : (json['recurrence'] as List<dynamic>?)?.cast<String>() ?? [],
       recurrenceId: json['recurrenceId'] ?? '',
       recurrenceExceptionDates:
-          (json['recurrenceExceptionDates'] as List<dynamic>?)?.cast<String>() ?? 
-          (json['exceptionDates'] as List<dynamic>?)?.cast<String>() ?? [], // fallback for migration
+          (json['exceptionDates'] as List<dynamic>?)?.cast<String>() ?? [], // backend uses exceptionDates
       dayEventInstance:
           json['day_EventInstance'] ?? json['day_eventInstance'] ?? '',
       category: json['category'] ?? '',
