@@ -102,23 +102,36 @@ class EventProvider with ChangeNotifier {
       final dayEvents = backendResults[0];
       final timeEvents = backendResults[1];
 
-      // Also fetch Google Calendar events if user email is available
+      // Note: Google Calendar events are already imported by the backend during Google Sign-In
+      // They appear in dayEvents and timeEvents with createdBy: GOOGLE
+      // The issue is the backend is not preserving recurrence rules during import
       List<CustomAppointment> googleEvents = [];
-      if (userEmail != null && _googleEventsImportService != null) {
-        try {
-          print('🔍 [EventProvider] Importing Google Calendar events for: $userEmail');
-          googleEvents = await _googleEventsImportService!.getImportedEventsAsAppointments(
-            userId: userId,
-            email: userEmail,
-          );
-          print('✅ [EventProvider] Imported ${googleEvents.length} Google Calendar events');
-        } catch (e) {
-          print('⚠️ [EventProvider] Google Calendar import failed: $e');
-          // Don't fail the whole operation if Google import fails
-        }
-      } else if (userEmail == null) {
-        print('⚠️ [EventProvider] No user email available - Google Calendar integration disabled');
-        print('💡 [EventProvider] To enable Google Calendar: sign out and sign in again with Google, or use the manual import button in Account Settings');
+      
+      print('🔍 [EventProvider] Checking existing events for Google Calendar events...');
+      final googleTimeEvents = timeEvents.where((event) => 
+        event.userCalendars.contains('google') || 
+        event.catTitle == 'imported' ||
+        event.organizer.contains('google')).toList();
+      final googleDayEvents = dayEvents.where((event) => 
+        event.userCalendars.contains('google') || 
+        event.catTitle == 'imported' ||
+        event.organizer.contains('google')).toList();
+        
+      print('📊 [EventProvider] Found ${googleTimeEvents.length} Google time events and ${googleDayEvents.length} Google day events in backend data');
+      
+      // Check if any existing events have recurrence rules
+      final recurringTimeEvents = timeEvents.where((event) => 
+        event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty).toList();
+      final recurringDayEvents = dayEvents.where((event) => 
+        event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty).toList();
+        
+      print('📊 [EventProvider] Found ${recurringTimeEvents.length} recurring time events and ${recurringDayEvents.length} recurring day events');
+      
+      // Log the "Test Recurrent" event specifically
+      final testRecurrentEvent = timeEvents.where((event) => 
+        event.title.toLowerCase().contains('recurrent')).toList();
+      for (final event in testRecurrentEvent) {
+        print('🎯 [EventProvider] Test Recurrent Event: "${event.title}" - recurrenceRule: ${event.recurrenceRule}');
       }
 
       // TEMPORARY: Add a test recurring event to verify Syncfusion works
@@ -379,13 +392,19 @@ class EventProvider with ChangeNotifier {
 
   /// Manually triggers Google Calendar import
   Future<void> importGoogleCalendarEvents() async {
-    if (_authService == null || _googleEventsImportService == null) return;
+    print('🔄 [EventProvider] importGoogleCalendarEvents() called directly');
+    if (_authService == null || _googleEventsImportService == null) {
+      print('⚠️ [EventProvider] Missing services: authService=${_authService != null}, googleEventsImportService=${_googleEventsImportService != null}');
+      return;
+    }
     
     final userId = await _authService!.getUserId();
     final userEmail = await _authService!.getUserEmail();
+    print('🔍 [EventProvider] Direct import - userId: $userId, userEmail: $userEmail');
     
     if (userId == null || userEmail == null) {
       print('⚠️ [EventProvider] Cannot import Google events: missing user info');
+      print('💡 [EventProvider] userId: $userId, userEmail: $userEmail');
       return;
     }
 
