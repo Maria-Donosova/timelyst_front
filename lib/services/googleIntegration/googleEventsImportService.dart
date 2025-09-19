@@ -106,25 +106,59 @@ class GoogleEventsImportService {
         print('🔍 [GoogleEventsImportService] Response keys: ${data.keys.toList()}');
         print('🔍 [GoogleEventsImportService] Full response: $data');
         
-        // Debug recurring events in raw response
+        // Debug ALL events in raw response first
+        print('🔍 [GoogleEventsImportService] Analyzing ALL events in backend response...');
+        
         if (data['timeEvents'] != null) {
           final timeEvents = data['timeEvents'] as List;
-          final recurringTimeEvents = timeEvents.where((event) => 
-            event['recurrenceRule'] != null && event['recurrenceRule'].toString().isNotEmpty).toList();
-          print('🔄 [GoogleEventsImportService] Found ${recurringTimeEvents.length} recurring time events in backend response');
-          for (final event in recurringTimeEvents) {
-            print('  - Time Event: "${event['event_title']}" has recurrenceRule: ${event['recurrenceRule']}');
+          print('🔍 [GoogleEventsImportService] Time Events (${timeEvents.length} total):');
+          for (int i = 0; i < timeEvents.length; i++) {
+            final event = timeEvents[i];
+            final title = event['event_title'] ?? 'No Title';
+            final recurrenceRule = event['recurrenceRule'];
+            final recurrence = event['recurrence'];
+            print('  [$i] "$title"');
+            print('      recurrenceRule: $recurrenceRule');
+            print('      recurrence: $recurrence');
+            print('      createdBy: ${event['createdBy']}');
+            
+            // Look for your specific recurring event
+            if (title.toLowerCase().contains('thursday') || title.toLowerCase().contains('recurring')) {
+              print('  🎯 FOUND POTENTIAL RECURRING EVENT: "$title"');
+              print('      Full event data: $event');
+            }
           }
+          
+          final recurringTimeEvents = timeEvents.where((event) => 
+            (event['recurrenceRule'] != null && event['recurrenceRule'].toString().isNotEmpty) ||
+            (event['recurrence'] != null && event['recurrence'].toString().isNotEmpty)).toList();
+          print('🔄 [GoogleEventsImportService] Found ${recurringTimeEvents.length} recurring time events in backend response');
         }
         
         if (data['dayEvents'] != null) {
           final dayEvents = data['dayEvents'] as List;
-          final recurringDayEvents = dayEvents.where((event) => 
-            event['recurrenceRule'] != null && event['recurrenceRule'].toString().isNotEmpty).toList();
-          print('🔄 [GoogleEventsImportService] Found ${recurringDayEvents.length} recurring day events in backend response');
-          for (final event in recurringDayEvents) {
-            print('  - Day Event: "${event['event_title']}" has recurrenceRule: ${event['recurrenceRule']}');
+          print('🔍 [GoogleEventsImportService] Day Events (${dayEvents.length} total):');
+          for (int i = 0; i < dayEvents.length; i++) {
+            final event = dayEvents[i];
+            final title = event['event_title'] ?? 'No Title';
+            final recurrenceRule = event['recurrenceRule'];
+            final recurrence = event['recurrence'];
+            print('  [$i] "$title"');
+            print('      recurrenceRule: $recurrenceRule');
+            print('      recurrence: $recurrence');
+            print('      createdBy: ${event['createdBy']}');
+            
+            // Look for your specific recurring event
+            if (title.toLowerCase().contains('thursday') || title.toLowerCase().contains('recurring')) {
+              print('  🎯 FOUND POTENTIAL RECURRING EVENT: "$title"');
+              print('      Full event data: $event');
+            }
           }
+          
+          final recurringDayEvents = dayEvents.where((event) => 
+            (event['recurrenceRule'] != null && event['recurrenceRule'].toString().isNotEmpty) ||
+            (event['recurrence'] != null && event['recurrence'].toString().isNotEmpty)).toList();
+          print('🔄 [GoogleEventsImportService] Found ${recurringDayEvents.length} recurring day events in backend response');
         }
         
         return GoogleEventsImportResult.fromJson(data);

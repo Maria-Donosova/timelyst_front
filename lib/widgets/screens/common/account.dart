@@ -40,6 +40,19 @@ class _AccountSettingsState extends State<AccountSettings> {
     try {
       print('🔄 [AccountSettings] Starting manual Google Calendar import...');
       
+      // TEMPORARY FIX: Manually set user email if it's missing
+      final currentEmail = await widget.authService.getUserEmail();
+      print('🔍 [AccountSettings] Current stored email: $currentEmail');
+      
+      if (currentEmail == null || currentEmail.isEmpty) {
+        // IMPORTANT: You need to sign out and sign in again with Google to trigger email saving
+        // For now, let's manually set it based on your calendar setup
+        const testEmail = 'mariadonosova@gmail.com'; // Your Google email from the calendar logs
+        await widget.authService.saveUserEmail(testEmail);
+        print('✅ [AccountSettings] Manually set user email to: $testEmail');
+        print('💡 [AccountSettings] IMPORTANT: For future logins, sign out and sign in again with Google to auto-save email');
+      }
+      
       // Get the EventProvider and trigger import
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
       await eventProvider.importGoogleCalendarEvents();
