@@ -134,26 +134,7 @@ class EventProvider with ChangeNotifier {
         print('🎯 [EventProvider] Test Recurrent Event: "${event.title}" - recurrenceRule: ${event.recurrenceRule}');
       }
 
-      // TEMPORARY: Add a test recurring event to verify Syncfusion works
-      final testRecurringEvent = CustomAppointment(
-        id: 'test-recurring-123',
-        title: 'TEST: Weekly Recurring Event',
-        description: 'Test event to verify Syncfusion recurring events work',
-        startTime: DateTime.now().add(Duration(hours: 1)),
-        endTime: DateTime.now().add(Duration(hours: 2)),
-        isAllDay: false,
-        location: 'Test Location',
-        organizer: 'Test Organizer',
-        recurrenceRule: 'RRULE:FREQ=WEEKLY;BYDAY=TH;COUNT=10', // Every Thursday for 10 weeks
-        catTitle: 'test',
-        participants: 'test@example.com',
-        recurrenceExceptionDates: null,
-        userCalendars: ['test'],
-        timeEventInstance: null,
-        catColor: Colors.blue,
-      );
-
-      _events = [...dayEvents, ...timeEvents, ...googleEvents, testRecurringEvent];
+      _events = [...dayEvents, ...timeEvents, ...googleEvents];
 
       print('📊 DEBUG: Fetched ${_events.length} total events');
       print('📊 DEBUG: - ${dayEvents.length} day events');
