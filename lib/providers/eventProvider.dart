@@ -8,6 +8,9 @@ class EventProvider with ChangeNotifier {
   AuthService? _authService;
   GoogleEventsImportService? _googleEventsImportService;
   List<CustomAppointment> _events = [];
+  
+  // Track previous events for change detection
+  List<CustomAppointment> _previousEvents = [];
 
   bool _isLoading = true;
   String _errorMessage = '';
@@ -69,7 +72,9 @@ class EventProvider with ChangeNotifier {
   }
 
   Future<void> fetchAllEvents() async {
-    print("Entered fetchAllEvents in EventProvider");
+    final timestamp = DateTime.now().toIso8601String();
+    print("🔄 [$timestamp] Entered fetchAllEvents in EventProvider");
+    
     if (_authService == null) {
       print("AuthService is null in EventProvider");
       _isLoading = false;
@@ -127,22 +132,97 @@ class EventProvider with ChangeNotifier {
         
       print('📊 [EventProvider] Found ${recurringTimeEvents.length} recurring time events and ${recurringDayEvents.length} recurring day events');
       
-      // Log the "Test Recurrent" event specifically
-      final testRecurrentEvent = timeEvents.where((event) => 
-        event.title.toLowerCase().contains('recurrent')).toList();
-      for (final event in testRecurrentEvent) {
-        print('🎯 [EventProvider] Test Recurrent Event: "${event.title}" - recurrenceRule: ${event.recurrenceRule}');
+      // Log all recurring events for debugging
+      print('🔍 [EventProvider] All recurring time events:');
+      for (final event in recurringTimeEvents) {
+        print('  📅 Time: "${event.title}" - recurrenceRule: ${event.recurrenceRule}');
+      }
+      
+      print('🔍 [EventProvider] All recurring day events:');
+      for (final event in recurringDayEvents) {
+        print('  📅 Day: "${event.title}" - recurrenceRule: ${event.recurrenceRule}');
+      }
+      
+      // Check for any events created recently (within last hour)
+      final recentEvents = [...timeEvents, ...dayEvents].where((event) {
+        try {
+          final eventTime = event.startTime;
+          final now = DateTime.now();
+          final oneHourAgo = now.subtract(Duration(hours: 1));
+          return eventTime.isAfter(oneHourAgo) || eventTime.isAfter(now.subtract(Duration(days: 1)));
+        } catch (e) {
+          return false;
+        }
+      }).toList();
+      
+      print('🕐 [EventProvider] Recent events (last 24 hours): ${recentEvents.length}');
+      for (final event in recentEvents) {
+        print('  ⏰ "${event.title}" at ${event.startTime} - recurring: ${event.recurrenceRule != null}');
       }
 
       _events = [...dayEvents, ...timeEvents, ...googleEvents];
 
-      print('📊 DEBUG: Fetched ${_events.length} total events');
+      print('📊 DEBUG: Fetched ${_events.length} total events at ${DateTime.now().toIso8601String()}');
       print('📊 DEBUG: - ${dayEvents.length} day events');
       print('📊 DEBUG: - ${timeEvents.length} time events');
       print('📊 DEBUG: - ${googleEvents.length} Google Calendar events');
       print('📊 DEBUG: User ID: $userId');
       print('📊 DEBUG: User Email: $userEmail');
       print('📊 DEBUG: Auth Token: ${authToken?.substring(0, 10)}...');
+      
+      // Log all event titles with IDs for debugging sync issues
+      print('📋 [EventProvider] Current event details:');
+      for (final event in _events) {
+        final isRecurring = event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty;
+        final isGoogle = event.userCalendars.contains('google') || event.catTitle == 'imported' || event.organizer.contains('google');
+        print('  📅 ID: "${event.id}" | "${event.title}" | ${event.startTime} | ${isRecurring ? '[RECURRING]' : '[SINGLE]'} | ${isGoogle ? '[GOOGLE]' : '[LOCAL]'}');
+      }
+      
+      // Track events that contain "Test Google recurring event" specifically
+      final testEvents = _events.where((event) => 
+        event.title.toLowerCase().contains('test google recurring') ||
+        event.title.toLowerCase().contains('test recurring')
+      ).toList();
+      
+      if (testEvents.isNotEmpty) {
+        print('🔍 [EventProvider] Found ${testEvents.length} test recurring events:');
+        for (final event in testEvents) {
+          print('  🧪 "${event.title}" (${event.id}) - recurring: ${event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty}');
+        }
+      } else {
+        print('⚠️ [EventProvider] No test recurring events found in current fetch');
+      }
+      
+      // Compare with previous events to track changes
+      if (_previousEvents.isNotEmpty) {
+        final previousIds = _previousEvents.map((e) => e.id).toSet();
+        final currentIds = _events.map((e) => e.id).toSet();
+        
+        final newEvents = _events.where((e) => !previousIds.contains(e.id)).toList();
+        final removedEventIds = previousIds.where((id) => !currentIds.contains(id)).toList();
+        
+        if (newEvents.isNotEmpty) {
+          print('🆕 [EventProvider] New events since last fetch:');
+          for (final event in newEvents) {
+            print('  ➕ "${event.title}" (${event.id})');
+          }
+        }
+        
+        if (removedEventIds.isNotEmpty) {
+          print('🗑️ [EventProvider] Events removed since last fetch:');
+          for (final id in removedEventIds) {
+            final removedEvent = _previousEvents.firstWhere((e) => e.id == id);
+            print('  ➖ "${removedEvent.title}" (${id})');
+          }
+        }
+        
+        if (newEvents.isEmpty && removedEventIds.isEmpty) {
+          print('🔄 [EventProvider] No event changes detected since last fetch');
+        }
+      }
+      
+      // Store current events as previous for next comparison
+      _previousEvents = List.from(_events);
 
       _errorMessage = '';
     } catch (e) {
