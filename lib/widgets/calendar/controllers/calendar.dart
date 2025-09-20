@@ -450,8 +450,35 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
     final rule = appointments![index].recurrenceRule;
     if (rule != null && rule.isNotEmpty) {
       print('📅 [_EventDataSource] getRecurrenceRule for "${appointments![index].title}": "$rule"');
+      
+      // Fix malformed RRULE dates from backend (temporary until backend is updated)
+      final fixedRule = _fixMalformedRRule(rule);
+      if (fixedRule != rule) {
+        print('🔧 [_EventDataSource] Fixed malformed RRULE: "$rule" -> "$fixedRule"');
+      }
+      return fixedRule;
     }
     return rule;
+  }
+
+  /// Fixes malformed RRULE dates from Google Calendar API
+  /// Converts UNTIL=202709T000000Z to UNTIL=20270901T000000Z
+  String _fixMalformedRRule(String rrule) {
+    // Handle malformed UNTIL dates (YYYYMM instead of YYYYMMDD)
+    final untilRegex = RegExp(r'UNTIL=(\d{6})T(\d{6}Z)');
+    
+    return rrule.replaceAllMapped(untilRegex, (match) {
+      final datepart = match.group(1)!;
+      final timepart = match.group(2)!;
+      
+      if (datepart.length == 6) {
+        // Add day "01" to make it a valid date
+        final fixedDate = datepart + '01';
+        return 'UNTIL=${fixedDate}T${timepart}';
+      }
+      
+      return match.group(0)!;
+    });
   }
 
   @override
