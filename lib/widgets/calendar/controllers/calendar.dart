@@ -451,14 +451,42 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
     if (rule != null && rule.isNotEmpty) {
       print('📅 [_EventDataSource] getRecurrenceRule for "${appointments![index].title}": "$rule"');
       
-      // Fix malformed RRULE dates from backend (temporary until backend is updated)
-      final fixedRule = _fixMalformedRRule(rule);
-      if (fixedRule != rule) {
-        print('🔧 [_EventDataSource] Fixed malformed RRULE: "$rule" -> "$fixedRule"');
+      try {
+        // Fix malformed RRULE dates from backend (temporary until backend is updated)
+        final fixedRule = _fixMalformedRRule(rule);
+        if (fixedRule != rule) {
+          print('🔧 [_EventDataSource] Fixed malformed RRULE: "$rule" -> "$fixedRule"');
+        }
+        
+        // Validate the RRULE format before returning
+        if (_isValidRRule(fixedRule)) {
+          return fixedRule;
+        } else {
+          print('⚠️ [_EventDataSource] Invalid RRULE format, skipping: "$fixedRule"');
+          return null;
+        }
+      } catch (e) {
+        print('❌ [_EventDataSource] Error processing RRULE "$rule": $e');
+        return null;
       }
-      return fixedRule;
     }
     return rule;
+  }
+
+  /// Validates RRULE format for Syncfusion
+  bool _isValidRRule(String rrule) {
+    // Basic validation - must start with RRULE: and contain FREQ=
+    if (!rrule.startsWith('RRULE:') || !rrule.contains('FREQ=')) {
+      return false;
+    }
+    
+    // Check if UNTIL date format is valid (8 digits for date part)
+    final untilMatch = RegExp(r'UNTIL=(\d{8})T').firstMatch(rrule);
+    if (rrule.contains('UNTIL=') && untilMatch == null) {
+      return false;
+    }
+    
+    return true;
   }
 
   /// Fixes malformed RRULE dates from Google Calendar API
@@ -472,9 +500,10 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
       final timepart = match.group(2)!;
       
       if (datepart.length == 6) {
-        // Add day "01" to make it a valid date
+        // Add day "01" to make it a valid date (YYYYMM01)
         final fixedDate = datepart + '01';
-        return 'UNTIL=${fixedDate}T${timepart}';
+        print('🔧 [_EventDataSource] Fixed malformed date: $datepart -> $fixedDate');
+        return 'UNTIL=${fixedDate}T$timepart';
       }
       
       return match.group(0)!;
