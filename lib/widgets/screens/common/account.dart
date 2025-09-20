@@ -43,7 +43,7 @@ class _AccountSettingsState extends State<AccountSettings> {
       // Instead of calling the non-existent Google import endpoint, 
       // just refresh all events to see what the backend already has
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
-      await eventProvider.fetchAllEvents();
+      await eventProvider.fetchAllEvents(forceFullRefresh: true);
       
       // Show success message
       if (mounted) {

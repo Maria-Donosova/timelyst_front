@@ -71,9 +71,9 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchAllEvents() async {
+  Future<void> fetchAllEvents({bool forceFullRefresh = false}) async {
     final timestamp = DateTime.now().toIso8601String();
-    print("🔄 [$timestamp] Entered fetchAllEvents in EventProvider");
+    print("🔄 [$timestamp] Entered fetchAllEvents in EventProvider (forceFullRefresh: $forceFullRefresh)");
     
     if (_authService == null) {
       print("AuthService is null in EventProvider");
@@ -96,7 +96,13 @@ class EventProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      _events = [];
+      // Only clear events on first load or forced refresh
+      if (_events.isEmpty || forceFullRefresh) {
+        print("🔄 [EventProvider] Performing full refresh (clearing existing events)");
+        _events = [];
+      } else {
+        print("🔄 [EventProvider] Performing incremental sync (keeping existing events)");
+      }
 
       // Fetch local events from backend
       final backendResults = await Future.wait([
@@ -160,7 +166,8 @@ class EventProvider with ChangeNotifier {
         print('  ⏰ "${event.title}" at ${event.startTime} - recurring: ${event.recurrenceRule != null}');
       }
 
-      _events = [...dayEvents, ...timeEvents, ...googleEvents];
+      // Perform incremental sync instead of replacing all events
+      _syncEventsIncremental([...dayEvents, ...timeEvents, ...googleEvents]);
 
       print('📊 DEBUG: Fetched ${_events.length} total events at ${DateTime.now().toIso8601String()}');
       print('📊 DEBUG: - ${dayEvents.length} day events');
@@ -422,6 +429,97 @@ class EventProvider with ChangeNotifier {
     final newEventIds = newEvents.map((e) => e.id).toSet();
     _events.removeWhere((event) => newEventIds.contains(event.id));
     _events.addAll(newEvents);
+  }
+
+  /// Performs incremental synchronization of events
+  /// Only adds new events, updates changed events, and removes deleted events
+  void _syncEventsIncremental(List<CustomAppointment> fetchedEvents) {
+    final fetchedEventMap = Map<String, CustomAppointment>.fromIterable(
+      fetchedEvents,
+      key: (e) => e.id,
+      value: (e) => e,
+    );
+    
+    final currentEventMap = Map<String, CustomAppointment>.fromIterable(
+      _events,
+      key: (e) => e.id,
+      value: (e) => e,
+    );
+
+    final fetchedIds = fetchedEventMap.keys.toSet();
+    final currentIds = currentEventMap.keys.toSet();
+
+    // Find new events (in fetched but not in current)
+    final newEventIds = fetchedIds.difference(currentIds);
+    final newEvents = newEventIds.map((id) => fetchedEventMap[id]!).toList();
+
+    // Find removed events (in current but not in fetched)
+    final removedEventIds = currentIds.difference(fetchedIds);
+
+    // Find potentially updated events (in both)
+    final commonEventIds = fetchedIds.intersection(currentIds);
+    final updatedEvents = <CustomAppointment>[];
+    
+    for (final id in commonEventIds) {
+      final currentEvent = currentEventMap[id]!;
+      final fetchedEvent = fetchedEventMap[id]!;
+      
+      // Simple comparison - in a real app you might want to compare specific fields
+      // or use a more sophisticated change detection mechanism
+      if (_hasEventChanged(currentEvent, fetchedEvent)) {
+        updatedEvents.add(fetchedEvent);
+      }
+    }
+
+    // Apply changes
+    int changes = 0;
+    
+    if (newEvents.isNotEmpty) {
+      print('🆕 [EventProvider] Adding ${newEvents.length} new events:');
+      for (final event in newEvents) {
+        print('  ➕ "${event.title}" (${event.id})');
+        _events.add(event);
+        changes++;
+      }
+    }
+
+    if (removedEventIds.isNotEmpty) {
+      print('🗑️ [EventProvider] Removing ${removedEventIds.length} deleted events:');
+      for (final id in removedEventIds) {
+        final removedEvent = currentEventMap[id]!;
+        print('  ➖ "${removedEvent.title}" (${id})');
+        _events.removeWhere((event) => event.id == id);
+        changes++;
+      }
+    }
+
+    if (updatedEvents.isNotEmpty) {
+      print('🔄 [EventProvider] Updating ${updatedEvents.length} changed events:');
+      for (final updatedEvent in updatedEvents) {
+        print('  🔄 "${updatedEvent.title}" (${updatedEvent.id})');
+        final index = _events.indexWhere((event) => event.id == updatedEvent.id);
+        if (index >= 0) {
+          _events[index] = updatedEvent;
+          changes++;
+        }
+      }
+    }
+
+    if (changes == 0) {
+      print('✅ [EventProvider] No changes detected - events are up to date');
+    } else {
+      print('✅ [EventProvider] Applied $changes changes to event list');
+    }
+  }
+
+  /// Simple event change detection
+  /// In a real app, you might want to compare timestamps, content hashes, or specific fields
+  bool _hasEventChanged(CustomAppointment current, CustomAppointment fetched) {
+    return current.title != fetched.title ||
+           current.startTime != fetched.startTime ||
+           current.endTime != fetched.endTime ||
+           current.recurrenceRule != fetched.recurrenceRule ||
+           current.subject != fetched.subject;
   }
 
   void _updateSingleEvent(CustomAppointment updatedEvent) {
