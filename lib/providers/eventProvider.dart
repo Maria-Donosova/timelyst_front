@@ -519,7 +519,9 @@ class EventProvider with ChangeNotifier {
            current.startTime != fetched.startTime ||
            current.endTime != fetched.endTime ||
            current.recurrenceRule != fetched.recurrenceRule ||
-           current.subject != fetched.subject;
+           current.description != fetched.description ||
+           current.location != fetched.location ||
+           current.isAllDay != fetched.isAllDay;
   }
 
   void _updateSingleEvent(CustomAppointment updatedEvent) {
