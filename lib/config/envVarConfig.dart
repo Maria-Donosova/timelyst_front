@@ -77,11 +77,11 @@ class Config {
   }
 
   static String get microsoftAuthUrl {
-    return 'https://login.microsoftonline.com/${microsoftTenantId}/oauth2/v2.0/authorize';
+    return 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
   }
 
   static String get microsoftTokenUrl {
-    return 'https://login.microsoftonline.com/${microsoftTenantId}/oauth2/v2.0/token';
+    return 'https://login.microsoftonline.com/common/oauth2/v2.0/token';
   }
 
   // Microsoft Backend Endpoints

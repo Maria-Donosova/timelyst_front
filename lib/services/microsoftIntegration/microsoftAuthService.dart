@@ -28,17 +28,12 @@ class MicrosoftAuthService {
 
   /// Generates Microsoft OAuth authorization URL
   String generateAuthUrl() {
-    _generatePKCECodes();
-    
+    // Temporarily simplify to match working URL
     final params = {
       'client_id': Config.microsoftClientId,
       'response_type': 'code',
-      'redirect_uri': Config.redirectUri ?? 'http://localhost:8080',
-      'scope': Config.microsoftScopes,
-      'response_mode': 'query',
-      'state': _generateState(),
-      'code_challenge': _codeChallenge!,
-      'code_challenge_method': 'S256',
+      'redirect_uri': 'https://timelyst-back.fly.dev/microsoft/callback',
+      'scope': 'openid profile email https://graph.microsoft.com/calendars.read https://graph.microsoft.com/calendars.readwrite offline_access',
     };
     
     final queryString = params.entries
@@ -47,7 +42,9 @@ class MicrosoftAuthService {
     
     final authUrl = '${Config.microsoftAuthUrl}?$queryString';
     
-    print('🔍 [MicrosoftAuthService] Generated auth URL: ${authUrl.substring(0, 100)}...');
+    print('🔍 [MicrosoftAuthService] Microsoft Tenant ID: ${Config.microsoftTenantId}');
+    print('🔍 [MicrosoftAuthService] Microsoft Auth URL: ${Config.microsoftAuthUrl}');
+    print('🔍 [MicrosoftAuthService] Full OAuth URL: $authUrl');
     return authUrl;
   }
 
@@ -71,7 +68,7 @@ class MicrosoftAuthService {
       final body = {
         'code': authCode,
         'codeVerifier': _codeVerifier, // Include PKCE code verifier
-        'redirectUri': Config.redirectUri ?? 'http://localhost:8080',
+        'redirectUri': 'https://timelyst-back.fly.dev/microsoft/callback',
       };
       print('🔍 [MicrosoftAuthService] Request body prepared with auth code');
 
