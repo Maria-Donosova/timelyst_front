@@ -58,7 +58,7 @@ class Config {
   // Microsoft OAuth Configuration
   static String get microsoftClientId {
     final value = _configService.get('MICROSOFT_CLIENT_ID');
-    return value ?? 'test_microsoft_client_id';
+    return value ?? '3193f9e8-2fa4-4fb2-b75b-70a1d65918af';
   }
 
   static String get microsoftClientSecret {
