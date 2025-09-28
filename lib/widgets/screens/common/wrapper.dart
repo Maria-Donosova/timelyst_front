@@ -14,7 +14,9 @@ class Wrapper extends StatelessWidget {
     // Check if this is a Microsoft OAuth callback
     final uri = Uri.parse(html.window.location.href);
     if (uri.queryParameters.containsKey('code')) {
-      print('🔍 [Wrapper] Detected Microsoft OAuth callback');
+      print('🔍 [Wrapper] Detected Microsoft OAuth callback at path: ${uri.path}');
+      // Clear the URL to prevent issues with Flutter routing
+      html.window.history.replaceState(null, '', '/');
       return MicrosoftOAuthCallback();
     }
 
