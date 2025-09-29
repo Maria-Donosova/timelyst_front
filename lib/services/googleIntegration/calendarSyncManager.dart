@@ -1,5 +1,6 @@
 import 'package:timelyst_flutter/models/calendars.dart';
 import './googleCalendarService.dart';
+import '../microsoftIntegration/microsoftCalendarService.dart';
 
 class CalendarSyncManager {
   final GoogleCalendarService _googleCalendarService;
@@ -36,15 +37,36 @@ class CalendarSyncManager {
   }) async {
     // logger.i('Saving selected calendars $userId $email in saveSelectedCalendars');
     try {
-      await _googleCalendarService.saveCalendarsBatch(
-        userId: userId,
-        email: email,
-        calendars: selectedCalendars,
-      );
+      // Group calendars by provider
+      final googleCalendars = selectedCalendars.where((cal) => cal.source == CalendarSource.google).toList();
+      final microsoftCalendars = selectedCalendars.where((cal) => cal.source == CalendarSource.outlook).toList();
+      
+      // Save Google calendars if any
+      if (googleCalendars.isNotEmpty) {
+        print('🔍 [CalendarSyncManager] Saving ${googleCalendars.length} Google calendars');
+        await _googleCalendarService.saveCalendarsBatch(
+          userId: userId,
+          email: email,
+          calendars: googleCalendars,
+        );
+      }
+      
+      // Save Microsoft calendars if any
+      if (microsoftCalendars.isNotEmpty) {
+        print('🔍 [CalendarSyncManager] Saving ${microsoftCalendars.length} Microsoft calendars');
+        final microsoftService = MicrosoftCalendarService();
+        await microsoftService.saveCalendarsBatch(
+          userId: userId,
+          email: email,
+          calendars: microsoftCalendars,
+        );
+      }
 
-      // Update sync token after changes
-      final syncResult = await syncCalendarChanges(userId, email);
-      _currentSyncToken = syncResult.syncToken;
+      // Update sync token after changes (only for Google for now)
+      if (googleCalendars.isNotEmpty) {
+        final syncResult = await syncCalendarChanges(userId, email);
+        _currentSyncToken = syncResult.syncToken;
+      }
 
       return CalendarSaveResult.success();
     } catch (e) {
