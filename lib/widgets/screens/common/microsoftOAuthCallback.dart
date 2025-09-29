@@ -22,12 +22,16 @@ class _MicrosoftOAuthCallbackState extends State<MicrosoftOAuthCallback> {
     try {
       print('🔍 [MicrosoftOAuthCallback] Processing OAuth callback');
       
-      // Extract auth code from URL
+      // Extract auth code from URL BEFORE any URL manipulation
       final uri = Uri.parse(html.window.location.href);
       final authCode = uri.queryParameters['code'];
       
-      if (authCode == null) {
-        throw Exception('No authorization code found in callback URL');
+      print('🔍 [MicrosoftOAuthCallback] Current URL: ${html.window.location.href}');
+      print('🔍 [MicrosoftOAuthCallback] Query parameters: ${uri.queryParameters}');
+      print('🔍 [MicrosoftOAuthCallback] Extracted auth code: ${authCode?.substring(0, 10) ?? 'NULL'}...');
+      
+      if (authCode == null || authCode.isEmpty) {
+        throw Exception('No authorization code found in callback URL. URL: ${html.window.location.href}');
       }
       
       print('🔍 [MicrosoftOAuthCallback] Auth code extracted: ${authCode.substring(0, 10)}...');
@@ -40,6 +44,9 @@ class _MicrosoftOAuthCallbackState extends State<MicrosoftOAuthCallback> {
         print('✅ [MicrosoftOAuthCallback] Microsoft sign-in successful');
         print('🔍 [MicrosoftOAuthCallback] User: ${result.email} (${result.userId})');
         print('🔍 [MicrosoftOAuthCallback] Found ${result.calendars!.length} calendars');
+        
+        // Clean up URL before navigation
+        html.window.history.replaceState(null, '', '/');
         
         // Navigate to calendar settings
         if (mounted) {
