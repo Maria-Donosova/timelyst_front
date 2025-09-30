@@ -95,6 +95,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                   importSettings.importAll,
                   (value) {
                     bool newValue = value ?? false;
+                    print('🔍 [CalendarSettings] "All" checkbox changed to: $newValue for calendar: ${calendar.metadata.title}');
                     setState(() {
                       final updatedCalendar = calendar.copyWith(
                         preferences: calendar.preferences.copyWith(
@@ -111,6 +112,10 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                         ),
                       );
                       widget.calendars[index] = updatedCalendar;
+                      print('🔍 [CalendarSettings] Updated calendar state:');
+                      print('  📋 Import All: ${updatedCalendar.preferences.importSettings.importAll}');
+                      print('  📋 Import Subject: ${updatedCalendar.preferences.importSettings.importSubject}');
+                      print('  📋 Import Body: ${updatedCalendar.preferences.importSettings.importBody}');
                     });
                   },
                 ),
@@ -293,6 +298,21 @@ class _CalendarSettingsState extends State<CalendarSettings> {
   }
 
   Future<void> _navigateToAgenda() async {
+    // Debug: Print current state of each calendar before saving
+    print('🔍 [CalendarSettings] Current state of all calendars before saving:');
+    for (int i = 0; i < widget.calendars.length; i++) {
+      final calendar = widget.calendars[i];
+      final importSettings = calendar.preferences.importSettings;
+      print('📅 Calendar $i: "${calendar.metadata.title}"');
+      print('  📋 Import All: ${importSettings.importAll}');
+      print('  📋 Import Subject: ${importSettings.importSubject}');
+      print('  📋 Import Body: ${importSettings.importBody}');
+      print('  📋 Import Conference: ${importSettings.importConferenceInfo}');
+      print('  📋 Import Organizer: ${importSettings.importOrganizer}');
+      print('  📋 Import Recipients: ${importSettings.importRecipients}');
+      print('  📋 Category: ${calendar.preferences.category}');
+    }
+
     // Filter out calendars that are not selected (no import options enabled)
     final _selectedCalendars = widget.calendars.where((calendar) {
       final importSettings = calendar.preferences.importSettings;
@@ -303,6 +323,8 @@ class _CalendarSettingsState extends State<CalendarSettings> {
           importSettings.importOrganizer ||
           importSettings.importRecipients;
     }).toList();
+
+    print('🔍 [CalendarSettings] Filtered ${_selectedCalendars.length} selected calendars out of ${widget.calendars.length} total');
 
     // Save selected calendars using the orchestrator
     try {

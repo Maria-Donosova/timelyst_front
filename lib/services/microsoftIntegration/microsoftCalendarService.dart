@@ -59,15 +59,32 @@ class MicrosoftCalendarService {
     print('🔍 [MicrosoftCalendarService] Saving ${calendars.length} selected calendars');
     print('🔍 [MicrosoftCalendarService] User: $userId, Email: $email');
 
+    // Debug: Print each calendar being sent
+    for (int i = 0; i < calendars.length; i++) {
+      final calendar = calendars[i];
+      print('📅 [MicrosoftCalendarService] Calendar $i: "${calendar.metadata.title}"');
+      print('  📋 Source: ${calendar.source}');
+      print('  📋 Provider ID: ${calendar.providerCalendarId}');
+      print('  📋 Import All: ${calendar.preferences.importSettings.importAll}');
+      print('  📋 Import Subject: ${calendar.preferences.importSettings.importSubject}');
+      print('  📋 Category: ${calendar.preferences.category}');
+    }
+
+    final requestBody = {
+      'user': userId,
+      'email': email,
+      'calendars': calendars.map((c) => c.toJson(email: email)).toList(),
+      'batchSize': calendars.length,
+    };
+
+    print('🔍 [MicrosoftCalendarService] Full request body:');
+    print('📋 URL: ${Config.backendMicrosoftCalendarsSave}');
+    print('📋 Body: ${jsonEncode(requestBody)}');
+
     try {
       final response = await _apiClient.post(
         Config.backendMicrosoftCalendarsSave,
-        body: {
-          'user': userId,
-          'email': email,
-          'calendars': calendars.map((c) => c.toJson(email: email)).toList(),
-          'batchSize': calendars.length,
-        },
+        body: requestBody,
         token: await _authService.getAuthToken(),
       );
 
@@ -127,8 +144,18 @@ class MicrosoftCalendarService {
       print('🔍 [MicrosoftCalendarService] Response: $data');
     } else {
       print('❌ [MicrosoftCalendarService] Batch operation failed: ${response.statusCode}');
-      print('🔍 [MicrosoftCalendarService] Error response: ${response.body}');
-      throw Exception('Failed to save Microsoft calendars: ${response.statusCode}');
+      print('🔍 [MicrosoftCalendarService] Error response body: ${response.body}');
+      print('🔍 [MicrosoftCalendarService] Error response headers: ${response.headers}');
+      
+      // Try to parse error details
+      try {
+        final errorData = jsonDecode(response.body);
+        print('🔍 [MicrosoftCalendarService] Parsed error: $errorData');
+      } catch (e) {
+        print('🔍 [MicrosoftCalendarService] Could not parse error response as JSON');
+      }
+      
+      throw Exception('Failed to save Microsoft calendars: ${response.statusCode} - ${response.body}');
     }
   }
 
