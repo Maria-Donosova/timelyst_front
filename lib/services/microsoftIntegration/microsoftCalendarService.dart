@@ -73,7 +73,20 @@ class MicrosoftCalendarService {
     final requestBody = {
       'user': userId,
       'email': email,
-      'calendars': calendars.map((c) => c.toJson(email: email)).toList(),
+      'calendars': calendars.map((c) {
+        final json = c.toJson(email: email);
+        // Flatten import settings for Microsoft backend compatibility
+        final importSettings = json['preferences']['importSettings'];
+        json.addAll({
+          'importAll': importSettings['importAll'],
+          'importSubject': importSettings['importSubject'],
+          'importBody': importSettings['importBody'],
+          'importConferenceInfo': importSettings['importConferenceInfo'],
+          'importOrganizer': importSettings['importOrganizer'],
+          'importRecipients': importSettings['importRecipients'],
+        });
+        return json;
+      }).toList(),
       'batchSize': calendars.length,
     };
 
