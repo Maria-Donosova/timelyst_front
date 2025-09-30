@@ -28,12 +28,13 @@ class MicrosoftAuthService {
 
   /// Generates Microsoft OAuth authorization URL
   String generateAuthUrl() {
-    // Temporarily simplify to match working URL
+    // Add prompt=select_account to always prompt for account selection
     final params = {
       'client_id': Config.microsoftClientId,
       'response_type': 'code',
       'redirect_uri': 'https://timelyst-back.fly.dev/microsoft/callback',
       'scope': 'openid profile email https://graph.microsoft.com/calendars.read https://graph.microsoft.com/calendars.readwrite offline_access',
+      'prompt': 'select_account', // Force account selection every time
     };
     
     final queryString = params.entries

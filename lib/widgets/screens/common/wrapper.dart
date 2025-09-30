@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/providers/authProvider.dart';
 import 'package:timelyst_flutter/widgets/screens/common/agenda.dart';
 import 'package:timelyst_flutter/widgets/screens/common/logIn.dart';
-import 'package:timelyst_flutter/widgets/screens/common/microsoftOAuthCallback.dart';
+import 'package:timelyst_flutter/widgets/screens/common/connectCalendars.dart';
 import 'dart:html' as html;
 
 class Wrapper extends StatelessWidget {
@@ -16,8 +16,8 @@ class Wrapper extends StatelessWidget {
     if (uri.queryParameters.containsKey('code')) {
       print('🔍 [Wrapper] Detected Microsoft OAuth callback at path: ${uri.path}');
       print('🔍 [Wrapper] Auth code present: ${uri.queryParameters['code']?.substring(0, 10)}...');
-      // Don't clear URL here - let the callback component handle it
-      return MicrosoftOAuthCallback();
+      // Return to ConnectCal screen which will handle the callback
+      return ConnectCal(microsoftAuthCode: uri.queryParameters['code']);
     }
 
     if (authProvider.isLoggedIn) {

@@ -1,28 +1,106 @@
 import 'package:flutter/material.dart';
+import 'dart:html' as html;
 
 import '../../shared/customAppbar.dart';
 
 import '../../../services/googleIntegration/googleSignInManager.dart';
 import '../../../services/microsoftIntegration/microsoftSignInManager.dart';
+import '../../../services/microsoftIntegration/microsoftAuthService.dart';
 import '../../../services/appleIntegration/appleSignInManager.dart';
 import './calendarSettings.dart';
 
 import 'agenda.dart';
 
 class ConnectCal extends StatelessWidget {
-  const ConnectCal({Key? key}) : super(key: key);
+  final String? microsoftAuthCode;
+  
+  const ConnectCal({Key? key, this.microsoftAuthCode}) : super(key: key);
   static const routeName = '/connectCalendars';
 
   @override
   Widget build(BuildContext context) {
     // Remove the ChangeNotifierProvider since it's no longer needed
-    return _ConnectCalBody();
+    return _ConnectCalBody(microsoftAuthCode: microsoftAuthCode);
   }
 }
 
-class _ConnectCalBody extends StatelessWidget {
+class _ConnectCalBody extends StatefulWidget {
+  final String? microsoftAuthCode;
+  
+  const _ConnectCalBody({this.microsoftAuthCode});
+  
+  @override
+  _ConnectCalBodyState createState() => _ConnectCalBodyState();
+}
+
+class _ConnectCalBodyState extends State<_ConnectCalBody> {
+  bool _processingMicrosoft = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Handle Microsoft OAuth callback if auth code is present
+    if (widget.microsoftAuthCode != null) {
+      _handleMicrosoftCallback();
+    }
+  }
+
   void startBlank(BuildContext ctx) {
     Navigator.of(ctx).pushNamed(Agenda.routeName);
+  }
+
+  Future<void> _handleMicrosoftCallback() async {
+    if (_processingMicrosoft) return; // Prevent duplicate processing
+    
+    setState(() {
+      _processingMicrosoft = true;
+    });
+
+    try {
+      print('🔍 [ConnectCalendars] Processing Microsoft OAuth callback');
+      
+      // Clean up URL immediately
+      html.window.history.replaceState(null, '', '/');
+      
+      final signInManager = MicrosoftSignInManager();
+      final result = await signInManager.handleAuthCallback(widget.microsoftAuthCode!);
+      
+      if (result.userId != null && result.calendars != null) {
+        print('✅ [ConnectCalendars] Microsoft sign-in successful with ${result.calendars!.length} calendars');
+        
+        if (mounted) {
+          // Navigate to calendar settings - same as other providers
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CalendarSettings(
+                userId: result.userId!,
+                email: result.email!,
+                calendars: result.calendars!,
+              ),
+            ),
+          );
+        }
+      } else {
+        throw Exception('Microsoft sign-in failed - no user data returned');
+      }
+    } catch (e) {
+      print('❌ [ConnectCalendars] Microsoft OAuth callback error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Microsoft sign-in failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _processingMicrosoft = false;
+        });
+      }
+    }
   }
 
   @override
@@ -32,12 +110,14 @@ class _ConnectCalBody extends StatelessWidget {
     return Scaffold(
       appBar: appBar,
       body: SafeArea(
-        child: Container(
-          child: Align(
-            alignment: Alignment.center,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 150.0, left: 10, right: 10),
-              child: Column(children: <Widget>[
+        child: Stack(
+          children: [
+            Container(
+              child: Align(
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 150.0, left: 10, right: 10),
+                  child: Column(children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.only(top: 90, bottom: 30.0),
                   child: Text(
@@ -94,49 +174,23 @@ class _ConnectCalBody extends StatelessWidget {
                   color: const Color.fromARGB(255, 6, 117, 208),
                   onPressed: () async {
                     print('🔍 [ConnectCalendars] Outlook button pressed by user');
-                    final signInManager = MicrosoftSignInManager();
-                    print('🔍 [ConnectCalendars] MicrosoftSignInManager created');
                     
                     try {
-                      final signInResult = await signInManager.signIn(context);
-                      print('🔍 [ConnectCalendars] Microsoft sign-in result received: ${signInResult.userId != null ? 'SUCCESS' : 'FAILED'}');
-
-                      if (signInResult.userId != null && signInResult.calendars != null) {
-                        print('✅ [ConnectCalendars] Microsoft sign-in successful with ${signInResult.calendars!.length} calendars');
-                        print('🔍 [ConnectCalendars] User: ${signInResult.email} (${signInResult.userId})');
-                        
-                        if (context.mounted) {
-                          print('🔍 [ConnectCalendars] Navigating to CalendarSettings...');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CalendarSettings(
-                                userId: signInResult.userId!,
-                                email: signInResult.email!,
-                                calendars: signInResult.calendars!,
-                              ),
-                            ),
-                          );
-                        } else {
-                          print('⚠️ [ConnectCalendars] Context not mounted - cannot navigate');
-                        }
-                      } else if (signInResult.userId != null && context.mounted) {
-                        print('⚠️ [ConnectCalendars] Microsoft sign-in successful but no calendars found');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'No calendars found. Please check your Microsoft Calendar settings.'),
-                          ),
-                        );
-                      } else {
-                        print('❌ [ConnectCalendars] Microsoft sign-in failed or was cancelled by user');
-                      }
+                      // Generate Microsoft OAuth URL and navigate in same tab
+                      final authService = MicrosoftAuthService();
+                      final authUrl = authService.generateAuthUrl();
+                      print('🔍 [ConnectCalendars] Generated Microsoft OAuth URL');
+                      
+                      // Navigate to OAuth URL in same tab (like Google flow)
+                      html.window.location.href = authUrl;
+                      
                     } catch (e) {
-                      print('❌ [ConnectCalendars] Exception during Microsoft sign-in: $e');
+                      print('❌ [ConnectCalendars] Exception during Microsoft OAuth: $e');
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Microsoft sign-in failed: ${e.toString()}'),
+                            backgroundColor: Colors.red,
                           ),
                         );
                       }
@@ -216,6 +270,41 @@ class _ConnectCalBody extends StatelessWidget {
               ]),
             ),
           ),
+        ),
+            ),
+            // Loading overlay for Microsoft callback processing
+            if (_processingMicrosoft)
+              Container(
+                color: Colors.black.withOpacity(0.5),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Processing Microsoft authorization...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Please wait while we connect your calendar',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

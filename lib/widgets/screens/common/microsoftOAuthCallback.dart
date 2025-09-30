@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/services/microsoftIntegration/microsoftSignInManager.dart';
 import 'package:timelyst_flutter/widgets/screens/common/calendarSettings.dart';
+import 'package:timelyst_flutter/widgets/screens/common/connectCalendars.dart';
 import 'dart:html' as html;
 
 class MicrosoftOAuthCallback extends StatefulWidget {
@@ -76,57 +77,47 @@ class _MicrosoftOAuthCallbackState extends State<MicrosoftOAuthCallback> {
 
   @override
   Widget build(BuildContext context) {
+    // This component is now deprecated - Microsoft OAuth is handled in ConnectCalendars
+    // If we somehow reach here, redirect to ConnectCalendars with snackbar error
+    if (!_isProcessing && _error != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ConnectCal()),
+        );
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Microsoft authorization failed: $_error'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      });
+    }
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('Microsoft Calendar'),
         backgroundColor: Color.fromARGB(255, 6, 117, 208),
       ),
       body: Center(
-        child: _isProcessing
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text(
-                    'Processing Microsoft authorization...',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Please wait while we connect your calendar',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red,
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Microsoft Authorization Failed',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    _error ?? 'Unknown error occurred',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('Go Back'),
-                  ),
-                ],
-              ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text(
+              'Processing Microsoft authorization...',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Redirecting to Connect Calendars...',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
       ),
     );
   }
