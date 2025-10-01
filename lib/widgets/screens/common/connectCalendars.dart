@@ -271,7 +271,6 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
             ),
           ),
         ),
-            ),
             // Loading overlay for Microsoft callback processing
             if (_processingMicrosoft)
               Container(
