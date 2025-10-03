@@ -49,6 +49,130 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
     Navigator.of(ctx).pushNamed(Agenda.routeName);
   }
 
+  void _showAppleInstructions(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.apple, color: Colors.grey[700]),
+              SizedBox(width: 8),
+              Text('iCloud Calendar Setup'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'To connect your iCloud calendar, you need to create an App-Specific Password:',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                SizedBox(height: 16),
+                _buildInstructionStep(
+                  '1.',
+                  'Go to appleid.apple.com and sign in',
+                ),
+                _buildInstructionStep(
+                  '2.',
+                  'Navigate to "Security" section',
+                ),
+                _buildInstructionStep(
+                  '3.',
+                  'Find "App-Specific Passwords"',
+                ),
+                _buildInstructionStep(
+                  '4.',
+                  'Click "Generate Password"',
+                ),
+                _buildInstructionStep(
+                  '5.',
+                  'Enter "Timelyst Calendar" as the label',
+                ),
+                _buildInstructionStep(
+                  '6.',
+                  'Copy the generated password (format: xxxx-xxxx-xxxx-xxxx)',
+                ),
+                _buildInstructionStep(
+                  '7.',
+                  'Use this password when prompted, NOT your regular Apple ID password',
+                ),
+                SizedBox(height: 16),
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.orange[200]!),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning_amber, color: Colors.orange[700], size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Important: You must use the App-Specific Password, not your regular Apple ID password.',
+                          style: TextStyle(
+                            color: Colors.orange[800],
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Open Apple ID website
+                html.window.open('https://appleid.apple.com', '_blank');
+              },
+              child: Text('Open Apple ID'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Got it'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildInstructionStep(String number, String instruction) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 20,
+            child: Text(
+              number,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.blue[700],
+              ),
+            ),
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              instruction,
+              style: TextStyle(fontSize: 14),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _handleMicrosoftCallback() async {
     if (_processingMicrosoft) return; // Prevent duplicate processing
     
@@ -197,59 +321,74 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                     }
                   },
                 ),
-                _ServiceButton(
-                  text: 'iCloud',
-                  color: const Color.fromARGB(255, 41, 41, 41),
-                  onPressed: () async {
-                    print('🔍 [ConnectCalendars] iCloud button pressed by user');
-                    final signInManager = AppleSignInManager();
-                    print('🔍 [ConnectCalendars] AppleSignInManager created');
-                    
-                    try {
-                      final signInResult = await signInManager.signIn(context);
-                      print('🔍 [ConnectCalendars] Apple sign-in result received: ${signInResult.userId != null ? 'SUCCESS' : 'FAILED'}');
-
-                      if (signInResult.userId != null && signInResult.calendars != null) {
-                        print('✅ [ConnectCalendars] Apple sign-in successful with ${signInResult.calendars!.length} calendars');
-                        print('🔍 [ConnectCalendars] User: ${signInResult.email} (${signInResult.userId})');
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _ServiceButton(
+                      text: 'iCloud',
+                      color: const Color.fromARGB(255, 41, 41, 41),
+                      onPressed: () async {
+                        print('🔍 [ConnectCalendars] iCloud button pressed by user');
+                        final signInManager = AppleSignInManager();
+                        print('🔍 [ConnectCalendars] AppleSignInManager created');
                         
-                        if (context.mounted) {
-                          print('🔍 [ConnectCalendars] Navigating to CalendarSettings...');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CalendarSettings(
-                                userId: signInResult.userId!,
-                                email: signInResult.email!,
-                                calendars: signInResult.calendars!,
+                        try {
+                          final signInResult = await signInManager.signIn(context);
+                          print('🔍 [ConnectCalendars] Apple sign-in result received: ${signInResult.userId != null ? 'SUCCESS' : 'FAILED'}');
+
+                          if (signInResult.userId != null && signInResult.calendars != null) {
+                            print('✅ [ConnectCalendars] Apple sign-in successful with ${signInResult.calendars!.length} calendars');
+                            print('🔍 [ConnectCalendars] User: ${signInResult.email} (${signInResult.userId})');
+                            
+                            if (context.mounted) {
+                              print('🔍 [ConnectCalendars] Navigating to CalendarSettings...');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CalendarSettings(
+                                    userId: signInResult.userId!,
+                                    email: signInResult.email!,
+                                    calendars: signInResult.calendars!,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              print('⚠️ [ConnectCalendars] Context not mounted - cannot navigate');
+                            }
+                          } else if (signInResult.userId != null && context.mounted) {
+                            print('⚠️ [ConnectCalendars] Apple sign-in successful but no calendars found');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'No calendars found. Please check your iCloud Calendar settings.'),
                               ),
-                            ),
-                          );
-                        } else {
-                          print('⚠️ [ConnectCalendars] Context not mounted - cannot navigate');
+                            );
+                          } else {
+                            print('❌ [ConnectCalendars] Apple sign-in failed or was cancelled by user');
+                          }
+                        } catch (e) {
+                          print('❌ [ConnectCalendars] Exception during Apple sign-in: $e');
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Apple sign-in failed: ${e.toString()}'),
+                              ),
+                            );
+                          }
                         }
-                      } else if (signInResult.userId != null && context.mounted) {
-                        print('⚠️ [ConnectCalendars] Apple sign-in successful but no calendars found');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'No calendars found. Please check your iCloud Calendar settings.'),
-                          ),
-                        );
-                      } else {
-                        print('❌ [ConnectCalendars] Apple sign-in failed or was cancelled by user');
-                      }
-                    } catch (e) {
-                      print('❌ [ConnectCalendars] Exception during Apple sign-in: $e');
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Apple sign-in failed: ${e.toString()}'),
-                          ),
-                        );
-                      }
-                    }
-                  },
+                      },
+                    ),
+                    SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(
+                        Icons.help_outline,
+                        color: Colors.grey[600],
+                        size: 20,
+                      ),
+                      onPressed: () => _showAppleInstructions(context),
+                      tooltip: 'How to set up iCloud calendar',
+                    ),
+                  ],
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 30.0),
