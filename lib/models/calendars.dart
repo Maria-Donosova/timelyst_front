@@ -196,9 +196,9 @@ class Calendar {
       providerCalendarId: json['id'] ?? json['calendarId'] ?? '',
       email: '', // This will be set by the backend
       isSelected: true,
-      isPrimary: json['isPrimary'] ?? json['isDefault'] ?? false,
+      isPrimary: json['isPrimary'] ?? json['isDefault'] ?? json['primary'] ?? false,
       metadata: CalendarMetadata(
-        title: json['title'] ?? json['name'] ?? json['displayName'] ?? 'Unknown Calendar',
+        title: json['summary'] ?? json['title'] ?? json['name'] ?? json['displayName'] ?? 'Unknown Calendar',
         description: json['description'],
         timeZone: json['timeZone'],
         color: _parseColor(json['color'] ?? json['hexColor']),
