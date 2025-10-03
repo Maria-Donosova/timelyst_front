@@ -85,9 +85,17 @@ class AppleCalDAVService {
       } else {
         final errorBody = response.body;
         print('❌ [AppleCalDAVService] Failed to fetch calendars: ${response.statusCode}');
+        print('🔍 [AppleCalDAVService] Full error response body: $errorBody');
+        print('🔍 [AppleCalDAVService] Response headers: ${response.headers}');
         
-        final errorData = jsonDecode(errorBody);
-        throw Exception(errorData['message'] ?? 'Failed to fetch Apple calendars');
+        try {
+          final errorData = jsonDecode(errorBody);
+          print('🔍 [AppleCalDAVService] Parsed error data: $errorData');
+          throw Exception(errorData['message'] ?? 'Error fetching calendars');
+        } catch (jsonError) {
+          print('🔍 [AppleCalDAVService] Could not parse error response as JSON: $jsonError');
+          throw Exception('Error fetching calendars');
+        }
       }
     } catch (e) {
       print('❌ [AppleCalDAVService] Exception fetching calendars: $e');
