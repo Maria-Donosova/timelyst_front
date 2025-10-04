@@ -169,6 +169,12 @@ class EventProvider with ChangeNotifier {
       // Perform incremental sync instead of replacing all events
       _syncEventsIncremental([...dayEvents, ...timeEvents, ...googleEvents]);
 
+      // Debug: Check total events counts (createdBy info available in EventService logs)
+      print('🔍 [EventProvider] === EVENT COUNT ANALYSIS ===');
+      print('📊 [EventProvider] Day events count: ${dayEvents.length}');
+      print('📊 [EventProvider] Time events count: ${timeEvents.length}');
+      print('📊 [EventProvider] Check EventService logs above for source breakdown');
+
       print('📊 DEBUG: Fetched ${_events.length} total events at ${DateTime.now().toIso8601String()}');
       print('📊 DEBUG: - ${dayEvents.length} day events');
       print('📊 DEBUG: - ${timeEvents.length} time events');

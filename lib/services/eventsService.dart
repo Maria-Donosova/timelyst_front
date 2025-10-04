@@ -77,8 +77,24 @@ class EventService {
           data['data']['dayEvents']['dayEvents'];
 
       print('📅 DEBUG: Received ${dayEventsJson.length} day events from backend');
+      
+      // Debug: Group events by createdBy source
+      final eventsBySource = <String, int>{};
+      for (final eventJson in dayEventsJson) {
+        final source = eventJson['createdBy'] ?? 'unknown';
+        eventsBySource[source] = (eventsBySource[source] ?? 0) + 1;
+      }
+      print('📊 [EventService] Day events by source: $eventsBySource');
+      
       if (dayEventsJson.isNotEmpty) {
         print('📅 DEBUG: First day event: ${dayEventsJson.first}');
+        
+        // Show Apple events specifically if any exist
+        final appleEvents = dayEventsJson.where((e) => e['createdBy'] == 'APPLE').toList();
+        if (appleEvents.isNotEmpty) {
+          print('🍎 [EventService] Found ${appleEvents.length} Apple day events!');
+          print('🍎 [EventService] First Apple event: ${appleEvents.first}');
+        }
       }
 
       // Parse the day events into a List<DayEvent>
@@ -246,8 +262,24 @@ class EventService {
       final List<dynamic> timeEventsJson = data['data']['timeEvents'];
       
       print('🕐 DEBUG: Received ${timeEventsJson.length} time events from backend');
+      
+      // Debug: Group events by createdBy source
+      final timeEventsBySource = <String, int>{};
+      for (final eventJson in timeEventsJson) {
+        final source = eventJson['createdBy'] ?? 'unknown';
+        timeEventsBySource[source] = (timeEventsBySource[source] ?? 0) + 1;
+      }
+      print('📊 [EventService] Time events by source: $timeEventsBySource');
+      
       if (timeEventsJson.isNotEmpty) {
         print('🕐 DEBUG: First time event: ${timeEventsJson.first}');
+        
+        // Show Apple events specifically if any exist
+        final appleTimeEvents = timeEventsJson.where((e) => e['createdBy'] == 'APPLE').toList();
+        if (appleTimeEvents.isNotEmpty) {
+          print('🍎 [EventService] Found ${appleTimeEvents.length} Apple time events!');
+          print('🍎 [EventService] First Apple time event: ${appleTimeEvents.first}');
+        }
       }
 
       // Parse the time events into a List<TimeEvent>
