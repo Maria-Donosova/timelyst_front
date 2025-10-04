@@ -110,8 +110,8 @@ class DayEvent {
           ? {'displayName': json['event_organizer']}
           : (json['organizer'] as Map<String, dynamic>?) ?? {},
       eventTitle: json['event_title'] ?? '',
-      start: json['start'] as String, // Directly assign the ISO string
-      end: json['end'] as String,
+      start: _parseStartEnd(json['start']),
+      end: _parseStartEnd(json['end']),
       // start: json['event_startDate'] != null
       //     ? {'dateTime': json['event_startDate']}
       //     : (json['start'] as Map<String, dynamic>?) ?? {},
@@ -141,6 +141,28 @@ class DayEvent {
       updatedAt:
           DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
     );
+  }
+
+  // Helper method to parse start/end that can be either timestamp or ISO string
+  static String _parseStartEnd(dynamic value) {
+    if (value == null) return '';
+    
+    // If it's already a string, return as-is
+    if (value is String) return value;
+    
+    // If it's a number (Unix timestamp in milliseconds), convert to ISO string
+    if (value is num) {
+      try {
+        final dateTime = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+        return dateTime.toIso8601String();
+      } catch (e) {
+        print('⚠️ Error parsing timestamp $value: $e');
+        return '';
+      }
+    }
+    
+    // Fallback: convert to string
+    return value.toString();
   }
 
   // Add these methods to parse date times
