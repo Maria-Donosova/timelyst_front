@@ -11,6 +11,7 @@ import '../views/monthlyAppointmentCellBuilder.dart';
 import '../views/eventDetails.dart';
 import '../../../models/customApp.dart';
 import '../../../providers/eventProvider.dart';
+import '../../../utils/logger.dart';
 
 enum _calView { day, week, month }
 
@@ -58,7 +59,7 @@ class _CalendarWState extends State<CalendarW> {
 
     final List<CustomAppointment> appointments = eventProvider.events;
 
-    print('Building calendar with ${appointments.length} events');
+    AppLogger.performance('Building calendar with ${appointments.length} events', 'Calendar');
 
     return Card(
       child: Column(
@@ -319,15 +320,15 @@ class _CalendarWState extends State<CalendarW> {
       final oldAppointment = details.appointment as CustomAppointment;
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
 
-      print('🔄 [Calendar] Handling drag-and-drop for appointment: ${oldAppointment.title}');
-      print('🔄 [Calendar] Is recurring: ${oldAppointment.recurrenceRule != null}');
+      AppLogger.debug('Handling drag-and-drop for appointment: ${oldAppointment.title}', 'Calendar');
+      AppLogger.debug('Is recurring: ${oldAppointment.recurrenceRule != null}', 'Calendar');
       
       // Calculate the duration of the event
       final duration = oldAppointment.endTime.difference(oldAppointment.startTime);
       
       if (oldAppointment.recurrenceRule != null) {
         // Handle recurring event drag-and-drop
-        print('🔄 [Calendar] Handling recurring event drag-and-drop');
+        AppLogger.debug('Handling recurring event drag-and-drop', 'Calendar');
         
         // Add the old appointment start date to recurrenceExceptionDates
         final updatedExceptionDates = <DateTime>[
@@ -357,11 +358,11 @@ class _CalendarWState extends State<CalendarW> {
 
         // Update the event in the provider
         eventProvider.updateEvent(oldAppointment, newAppointment);
-        print('✅ [Calendar] Updated recurring event with exception date');
+        AppLogger.debug('Updated recurring event with exception date', 'Calendar');
         
       } else {
         // Handle non-recurring event drag-and-drop
-        print('🔄 [Calendar] Handling non-recurring event drag-and-drop');
+        AppLogger.debug('Handling non-recurring event drag-and-drop', 'Calendar');
         
         final updatedAppointment = CustomAppointment(
           id: oldAppointment.id,
@@ -383,7 +384,7 @@ class _CalendarWState extends State<CalendarW> {
 
         // Update the event in the provider
         eventProvider.updateEvent(oldAppointment, updatedAppointment);
-        print('✅ [Calendar] Updated non-recurring event');
+        AppLogger.debug('Updated non-recurring event', 'Calendar');
       }
       
       // Refresh the calendar view
@@ -404,16 +405,16 @@ class _CalendarWState extends State<CalendarW> {
 
 class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   _EventDataSource(List<CustomAppointment> source) {
-    print('🔍 [_EventDataSource] Creating data source with ${source.length} appointments');
+    AppLogger.performance('Creating data source with ${source.length} appointments', '_EventDataSource');
     
     // Debug recurring events specifically
     final recurringAppointments = source.where((a) => a.recurrenceRule != null && a.recurrenceRule!.isNotEmpty).toList();
-    print('🔄 [_EventDataSource] Found ${recurringAppointments.length} recurring appointments:');
+    AppLogger.debug('Found ${recurringAppointments.length} recurring appointments:', '_EventDataSource');
     for (final appointment in recurringAppointments) {
-      print('  - "${appointment.title}": ${appointment.recurrenceRule}');
-      print('    Start: ${appointment.startTime}, End: ${appointment.endTime}');
+      AppLogger.verbose('  - "${appointment.title}": ${appointment.recurrenceRule}', '_EventDataSource');
+      AppLogger.verbose('    Start: ${appointment.startTime}, End: ${appointment.endTime}', '_EventDataSource');
       if (appointment.recurrenceExceptionDates != null) {
-        print('    Exception dates: ${appointment.recurrenceExceptionDates}');
+        AppLogger.verbose('    Exception dates: ${appointment.recurrenceExceptionDates}', '_EventDataSource');
       }
     }
     
@@ -449,24 +450,24 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   String? getRecurrenceRule(int index) {
     final rule = appointments![index].recurrenceRule;
     if (rule != null && rule.isNotEmpty) {
-      print('📅 [_EventDataSource] getRecurrenceRule for "${appointments![index].title}": "$rule"');
+      AppLogger.verbose('getRecurrenceRule for "${appointments![index].title}": "$rule"', '_EventDataSource');
       
       try {
         // Fix malformed RRULE dates from backend (temporary until backend is updated)
         final fixedRule = _fixMalformedRRule(rule);
         if (fixedRule != rule) {
-          print('🔧 [_EventDataSource] Fixed malformed RRULE: "$rule" -> "$fixedRule"');
+          AppLogger.debug('Fixed malformed RRULE: "$rule" -> "$fixedRule"', '_EventDataSource');
         }
         
         // Validate the RRULE format before returning
         if (_isValidRRule(fixedRule)) {
           return fixedRule;
         } else {
-          print('⚠️ [_EventDataSource] Invalid RRULE format, skipping: "$fixedRule"');
+          AppLogger.debug('Invalid RRULE format, skipping: "$fixedRule"', '_EventDataSource');
           return null;
         }
       } catch (e) {
-        print('❌ [_EventDataSource] Error processing RRULE "$rule": $e');
+        AppLogger.e('Error processing RRULE "$rule": $e', '_EventDataSource');
         return null;
       }
     }
@@ -502,7 +503,7 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
       if (datepart.length == 6) {
         // Add day "01" to make it a valid date (YYYYMM01)
         final fixedDate = datepart + '01';
-        print('🔧 [_EventDataSource] Fixed malformed date: $datepart -> $fixedDate');
+        AppLogger.debug('Fixed malformed date: $datepart -> $fixedDate', '_EventDataSource');
         return 'UNTIL=${fixedDate}T$timepart';
       }
       

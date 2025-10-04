@@ -8,6 +8,11 @@ class AppLogger {
   static final AppLogger _instance = AppLogger._internal();
   late logger.Logger _logger;
 
+  // Performance optimization flags
+  static const bool enableDebugLogs = false; // Set to false to disable debug logs
+  static const bool enableVerboseLogs = false; // Set to false to disable verbose logs
+  static const bool enablePerformanceLogs = false; // Set to false to disable performance logs
+
   factory AppLogger() {
     return _instance;
   }
@@ -27,19 +32,19 @@ class AppLogger {
   }
 
   static void v(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    if (kDebugMode) {
+    if (enableVerboseLogs && kDebugMode) {
       _instance._logger.t(message, error: error, stackTrace: stackTrace);
+      developer.log('🐛 VERBOSE: $message',
+          name: 'APP', level: 0, error: error, stackTrace: stackTrace);
     }
-    developer.log('🐛 VERBOSE: $message',
-        name: 'APP', level: 0, error: error, stackTrace: stackTrace);
   }
 
   static void d(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    if (kDebugMode) {
+    if (enableDebugLogs && kDebugMode) {
       _instance._logger.d(message, error: error, stackTrace: stackTrace);
+      developer.log('💙 DEBUG: $message',
+          name: 'APP', level: 1, error: error, stackTrace: stackTrace);
     }
-    developer.log('💙 DEBUG: $message',
-        name: 'APP', level: 1, error: error, stackTrace: stackTrace);
   }
 
   static void i(dynamic message, [dynamic error, StackTrace? stackTrace]) {
@@ -67,6 +72,30 @@ class AppLogger {
     _instance._logger.f(message, error: error, stackTrace: stackTrace);
     developer.log('🖤 WTF: $message',
         name: 'APP', level: 5, error: error, stackTrace: stackTrace);
+  }
+
+  /// Performance-specific logging that can be easily disabled
+  static void performance(dynamic message, [String? tag]) {
+    if (enablePerformanceLogs && kDebugMode) {
+      final tagPrefix = tag != null ? '[$tag] ' : '';
+      print('⚡ $tagPrefix$message');
+    }
+  }
+
+  /// Debug logging that can be easily disabled (for hot code paths)
+  static void debug(dynamic message, [String? tag]) {
+    if (enableDebugLogs && kDebugMode) {
+      final tagPrefix = tag != null ? '[$tag] ' : '';
+      print('🔍 $tagPrefix$message');
+    }
+  }
+
+  /// Verbose logging that can be easily disabled (most chatty logs)
+  static void verbose(dynamic message, [String? tag]) {
+    if (enableVerboseLogs && kDebugMode) {
+      final tagPrefix = tag != null ? '[$tag] ' : '';
+      print('📝 $tagPrefix$message');
+    }
   }
 }
 
