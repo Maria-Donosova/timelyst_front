@@ -325,14 +325,29 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     }).toList();
 
     print('🔍 [CalendarSettings] Filtered ${_selectedCalendars.length} selected calendars out of ${widget.calendars.length} total');
+    
+    // Enhanced logging: Show details of each selected calendar
+    for (int i = 0; i < _selectedCalendars.length; i++) {
+      final calendar = _selectedCalendars[i];
+      print('🔍 [CalendarSettings] Selected Calendar $i:');
+      print('  📅 Title: "${calendar.metadata.title}"');
+      print('  📅 Source: ${calendar.source}');
+      print('  📅 Provider ID: ${calendar.providerCalendarId}');
+      print('  📅 Import Settings: ${calendar.preferences.importSettings.importAll ? "All" : "Custom"}');
+    }
 
     // Save selected calendars using the orchestrator
     try {
+      print('🔍 [CalendarSettings] About to call CalendarSyncManager.saveSelectedCalendars');
+      print('🔍 [CalendarSettings] Parameters: userId=${widget.userId}, email=${widget.email}');
+      
       await CalendarSyncManager().saveSelectedCalendars(
         userId: widget.userId,
         email: widget.email,
         selectedCalendars: _selectedCalendars,
       );
+      
+      print('🔍 [CalendarSettings] CalendarSyncManager.saveSelectedCalendars completed successfully');
       print("Selected calendars saved successfully.");
 
       // Navigate to the Agenda screen only if saving is successful

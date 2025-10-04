@@ -98,26 +98,51 @@ class AppleCalDAVManager {
     required List<Map<String, dynamic>> selectedCalendars,
   }) async {
     try {
-      print('🔍 [AppleCalDAVManager] Saving ${selectedCalendars.length} selected calendars');
+      print('🔍 [AppleCalDAVManager] === STARTING saveSelectedCalendars ===');
+      print('🔍 [AppleCalDAVManager] email: $email');
+      print('🔍 [AppleCalDAVManager] selectedCalendars.length: ${selectedCalendars.length}');
       
+      // Enhanced logging: Show each calendar to be saved
+      for (int i = 0; i < selectedCalendars.length; i++) {
+        final calendar = selectedCalendars[i];
+        print('🔍 [AppleCalDAVManager] Calendar $i to save:');
+        print('  🍎 ID: ${calendar['id']}');
+        print('  🍎 Title: ${calendar['title']}');
+        print('  🍎 Import All: ${calendar['importAll']}');
+        print('  🍎 Import Subject: ${calendar['importSubject']}');
+        print('  🍎 Category: ${calendar['category']}');
+      }
+      
+      print('🔍 [AppleCalDAVManager] Filtering calendars with valid import options...');
       // Filter out calendars with no import options enabled
       final validCalendars = selectedCalendars.where((calendar) {
-        return calendar['importAll'] == true ||
+        final hasImportOptions = calendar['importAll'] == true ||
                calendar['importSubject'] == true ||
                calendar['importBody'] == true ||
                calendar['importConferenceInfo'] == true ||
                calendar['importOrganizer'] == true ||
                calendar['importRecipients'] == true;
+        
+        print('🔍 [AppleCalDAVManager] Calendar "${calendar['title']}" has import options: $hasImportOptions');
+        return hasImportOptions;
       }).toList();
 
+      print('🔍 [AppleCalDAVManager] Valid calendars after filtering: ${validCalendars.length}');
+
       if (validCalendars.isEmpty) {
+        print('❌ [AppleCalDAVManager] No valid calendars to save');
         throw Exception('No valid calendars to save. Please enable at least one import option.');
       }
+
+      print('🔍 [AppleCalDAVManager] About to call AppleCalDAVService.saveSelectedCalendars...');
+      print('🔍 [AppleCalDAVManager] Calling with email: $email and ${validCalendars.length} calendars');
 
       final response = await _calDAVService.saveSelectedCalendars(
         email: email,
         calendars: validCalendars,
       );
+
+      print('🔍 [AppleCalDAVManager] AppleCalDAVService.saveSelectedCalendars returned: $response');
 
       if (response['success'] != true) {
         throw Exception(response['message'] ?? 'Failed to save calendars');
