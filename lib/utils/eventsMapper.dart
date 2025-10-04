@@ -38,7 +38,7 @@ class EventMapper {
       isAllDay: dayEvent.is_AllDay,
       location: dayEvent.eventLocation,
       organizer:
-          dayEvent.organizer['displayName'] ?? dayEvent.organizer['email'],
+          dayEvent.organizer['displayName'] ?? dayEvent.organizer['email'] ?? '',
       recurrenceRule: dayEvent.recurrence.isEmpty 
           ? null 
           : _formatRecurrenceRule(dayEvent.recurrence.join(';')),
