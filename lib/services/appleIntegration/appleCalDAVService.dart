@@ -108,22 +108,37 @@ class AppleCalDAVService {
     required String email,
     required List<Map<String, dynamic>> calendars,
   }) async {
-    print('🔍 [AppleCalDAVService] Saving ${calendars.length} selected calendars');
+    print('🔍 [AppleCalDAVService] === STARTING saveSelectedCalendars ===');
+    print('🔍 [AppleCalDAVService] email: $email');
+    print('🔍 [AppleCalDAVService] calendars.length: ${calendars.length}');
+    print('🔍 [AppleCalDAVService] About to make HTTP POST request to ${Config.backendURL}/apple/calendars/save');
 
     try {
+      print('🔍 [AppleCalDAVService] Getting authentication token...');
       final authToken = await _authService.getAuthToken();
       if (authToken == null) {
+        print('❌ [AppleCalDAVService] No authentication token available');
         throw Exception('No authentication token available');
       }
+      print('🔍 [AppleCalDAVService] ✅ Authentication token obtained');
+
+      final requestBody = {
+        'email': email,
+        'calendars': calendars,
+      };
+      
+      print('🔍 [AppleCalDAVService] Making HTTP POST request...');
+      print('🔍 [AppleCalDAVService] URL: ${Config.backendURL}/apple/calendars/save');
+      print('🔍 [AppleCalDAVService] Request body keys: ${requestBody.keys}');
+      print('🔍 [AppleCalDAVService] Request body: $requestBody');
 
       final response = await _apiClient.post(
         '${Config.backendURL}/apple/calendars/save',
-        body: {
-          'email': email,
-          'calendars': calendars,
-        },
+        body: requestBody,
         token: authToken,
       );
+
+      print('🔍 [AppleCalDAVService] HTTP POST request completed');
 
       print('🔍 [AppleCalDAVService] Save calendars response: ${response.statusCode}');
 
