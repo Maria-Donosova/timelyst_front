@@ -105,19 +105,20 @@ class CalendarSyncManager {
         
         print('🔍 [CalendarSyncManager] Converting Calendar objects to Apple service format...');
         // Convert Calendar objects to format expected by Apple service
-        final appleCalendarData = appleCalendars.map((calendar) => {
-          'id': calendar.providerCalendarId,
-          'title': calendar.metadata.title,
-          'description': calendar.metadata.description,
-          'color': calendar.metadata.color.toString(), // Convert Color to string representation
-          'timeZone': calendar.metadata.timeZone,
-          'importAll': calendar.preferences.importSettings.importAll,
-          'importSubject': calendar.preferences.importSettings.importSubject,
-          'importBody': calendar.preferences.importSettings.importBody,
-          'importConferenceInfo': calendar.preferences.importSettings.importConferenceInfo,
-          'importOrganizer': calendar.preferences.importSettings.importOrganizer,
-          'importRecipients': calendar.preferences.importSettings.importRecipients,
-          'category': calendar.preferences.category,
+        // Use the same pattern as Microsoft calendars for backend compatibility
+        final appleCalendarData = appleCalendars.map((calendar) {
+          final json = calendar.toJson(email: email);
+          // Flatten import settings for Apple backend compatibility (same as Microsoft)
+          final importSettings = json['preferences']['importSettings'];
+          json.addAll({
+            'importAll': importSettings['importAll'],
+            'importSubject': importSettings['importSubject'],
+            'importBody': importSettings['importBody'],
+            'importConferenceInfo': importSettings['importConferenceInfo'],
+            'importOrganizer': importSettings['importOrganizer'],
+            'importRecipients': importSettings['importRecipients'],
+          });
+          return json;
         }).toList();
         
         print('🔍 [CalendarSyncManager] Converted ${appleCalendarData.length} calendars to Apple format');

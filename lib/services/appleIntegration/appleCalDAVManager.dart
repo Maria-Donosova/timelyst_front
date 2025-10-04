@@ -106,11 +106,11 @@ class AppleCalDAVManager {
       for (int i = 0; i < selectedCalendars.length; i++) {
         final calendar = selectedCalendars[i];
         print('🔍 [AppleCalDAVManager] Calendar $i to save:');
-        print('  🍎 ID: ${calendar['id']}');
-        print('  🍎 Title: ${calendar['title']}');
+        print('  🍎 ID: ${calendar['id'] ?? calendar['providerCalendarId']}');
+        print('  🍎 Title: ${calendar['metadata']?['title'] ?? calendar['title']}');
         print('  🍎 Import All: ${calendar['importAll']}');
         print('  🍎 Import Subject: ${calendar['importSubject']}');
-        print('  🍎 Category: ${calendar['category']}');
+        print('  🍎 Category: ${calendar['preferences']?['category'] ?? calendar['category']}');
       }
       
       print('🔍 [AppleCalDAVManager] Filtering calendars with valid import options...');
@@ -123,7 +123,8 @@ class AppleCalDAVManager {
                calendar['importOrganizer'] == true ||
                calendar['importRecipients'] == true;
         
-        print('🔍 [AppleCalDAVManager] Calendar "${calendar['title']}" has import options: $hasImportOptions');
+        final calendarTitle = calendar['metadata']?['title'] ?? calendar['title'] ?? 'Unknown';
+        print('🔍 [AppleCalDAVManager] Calendar "$calendarTitle" has import options: $hasImportOptions');
         return hasImportOptions;
       }).toList();
 
