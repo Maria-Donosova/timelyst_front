@@ -1,6 +1,7 @@
 import 'package:timelyst_flutter/models/calendars.dart';
 import './googleCalendarService.dart';
 import '../microsoftIntegration/microsoftCalendarService.dart';
+import '../appleIntegration/appleCalDAVManager.dart';
 
 class CalendarSyncManager {
   final GoogleCalendarService _googleCalendarService;
@@ -40,6 +41,7 @@ class CalendarSyncManager {
       // Group calendars by provider
       final googleCalendars = selectedCalendars.where((cal) => cal.source == CalendarSource.google).toList();
       final microsoftCalendars = selectedCalendars.where((cal) => cal.source == CalendarSource.outlook).toList();
+      final appleCalendars = selectedCalendars.where((cal) => cal.source == CalendarSource.apple).toList();
       
       // Save Google calendars if any
       if (googleCalendars.isNotEmpty) {
@@ -59,6 +61,33 @@ class CalendarSyncManager {
           userId: userId,
           email: email,
           calendars: microsoftCalendars,
+        );
+      }
+      
+      // Save Apple calendars if any
+      if (appleCalendars.isNotEmpty) {
+        print('🔍 [CalendarSyncManager] Saving ${appleCalendars.length} Apple calendars');
+        final appleManager = AppleCalDAVManager();
+        
+        // Convert Calendar objects to format expected by Apple service
+        final appleCalendarData = appleCalendars.map((calendar) => {
+          'id': calendar.providerCalendarId,
+          'title': calendar.metadata.title,
+          'description': calendar.metadata.description,
+          'color': calendar.metadata.color,
+          'timeZone': calendar.metadata.timeZone,
+          'importAll': calendar.preferences.importSettings.importAll,
+          'importSubject': calendar.preferences.importSettings.importSubject,
+          'importBody': calendar.preferences.importSettings.importBody,
+          'importConferenceInfo': calendar.preferences.importSettings.importConferenceInfo,
+          'importOrganizer': calendar.preferences.importSettings.importOrganizer,
+          'importRecipients': calendar.preferences.importSettings.importRecipients,
+          'category': calendar.preferences.category,
+        }).toList();
+        
+        await appleManager.saveSelectedCalendars(
+          email: email,
+          selectedCalendars: appleCalendarData,
         );
       }
 
