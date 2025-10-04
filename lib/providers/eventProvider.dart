@@ -96,6 +96,7 @@ class EventProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      print('🔍 [EventProvider] === Starting event processing ===');
       // Only clear events on first load or forced refresh
       if (_events.isEmpty || forceFullRefresh) {
         print("🔄 [EventProvider] Performing full refresh (clearing existing events)");
@@ -119,22 +120,68 @@ class EventProvider with ChangeNotifier {
       List<CustomAppointment> googleEvents = [];
       
       print('🔍 [EventProvider] Checking existing events for Google Calendar events...');
-      final googleTimeEvents = timeEvents.where((event) => 
-        event.userCalendars.contains('google') || 
-        event.catTitle == 'imported' ||
-        event.organizer.contains('google')).toList();
-      final googleDayEvents = dayEvents.where((event) => 
-        event.userCalendars.contains('google') || 
-        event.catTitle == 'imported' ||
-        event.organizer.contains('google')).toList();
+      
+      // Safely filter Google events with null checks
+      final googleTimeEvents = <CustomAppointment>[];
+      final googleDayEvents = <CustomAppointment>[];
+      
+      try {
+        for (final event in timeEvents) {
+          try {
+            if (event.userCalendars.contains('google') || 
+                event.catTitle == 'imported' ||
+                (event.organizer.isNotEmpty && event.organizer.contains('google'))) {
+              googleTimeEvents.add(event);
+            }
+          } catch (e) {
+            print('⚠️ [EventProvider] Error filtering time event "${event.title}": $e');
+          }
+        }
+        
+        for (final event in dayEvents) {
+          try {
+            if (event.userCalendars.contains('google') || 
+                event.catTitle == 'imported' ||
+                (event.organizer.isNotEmpty && event.organizer.contains('google'))) {
+              googleDayEvents.add(event);
+            }
+          } catch (e) {
+            print('⚠️ [EventProvider] Error filtering day event "${event.title}": $e');
+          }
+        }
+      } catch (e) {
+        print('❌ [EventProvider] Critical error in Google event filtering: $e');
+      }
         
       print('📊 [EventProvider] Found ${googleTimeEvents.length} Google time events and ${googleDayEvents.length} Google day events in backend data');
       
-      // Check if any existing events have recurrence rules
-      final recurringTimeEvents = timeEvents.where((event) => 
-        event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty).toList();
-      final recurringDayEvents = dayEvents.where((event) => 
-        event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty).toList();
+      // Check if any existing events have recurrence rules (safely)
+      final recurringTimeEvents = <CustomAppointment>[];
+      final recurringDayEvents = <CustomAppointment>[];
+      
+      try {
+        for (final event in timeEvents) {
+          try {
+            if (event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty) {
+              recurringTimeEvents.add(event);
+            }
+          } catch (e) {
+            print('⚠️ [EventProvider] Error checking recurrence for time event "${event.title}": $e');
+          }
+        }
+        
+        for (final event in dayEvents) {
+          try {
+            if (event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty) {
+              recurringDayEvents.add(event);
+            }
+          } catch (e) {
+            print('⚠️ [EventProvider] Error checking recurrence for day event "${event.title}": $e');
+          }
+        }
+      } catch (e) {
+        print('❌ [EventProvider] Critical error in recurrence checking: $e');
+      }
         
       print('📊 [EventProvider] Found ${recurringTimeEvents.length} recurring time events and ${recurringDayEvents.length} recurring day events');
       
@@ -167,7 +214,15 @@ class EventProvider with ChangeNotifier {
       }
 
       // Perform incremental sync instead of replacing all events
-      _syncEventsIncremental([...dayEvents, ...timeEvents, ...googleEvents]);
+      print('🔍 [EventProvider] About to call _syncEventsIncremental with ${dayEvents.length + timeEvents.length + googleEvents.length} events');
+      try {
+        _syncEventsIncremental([...dayEvents, ...timeEvents, ...googleEvents]);
+        print('✅ [EventProvider] _syncEventsIncremental completed successfully');
+      } catch (e) {
+        print('❌ [EventProvider] Error in _syncEventsIncremental: $e');
+        print('📊 [EventProvider] Stack trace: ${StackTrace.current}');
+        rethrow;
+      }
 
       // Debug: Check total events counts (createdBy info available in EventService logs)
       print('🔍 [EventProvider] === EVENT COUNT ANALYSIS ===');

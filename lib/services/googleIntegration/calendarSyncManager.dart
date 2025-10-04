@@ -122,6 +122,19 @@ class CalendarSyncManager {
         }).toList();
         
         print('🔍 [CalendarSyncManager] Converted ${appleCalendarData.length} calendars to Apple format');
+        
+        // Debug: Show what we're sending to the backend
+        for (int i = 0; i < appleCalendarData.length; i++) {
+          final cal = appleCalendarData[i];
+          print('🔍 [CalendarSyncManager] Apple Calendar $i data:');
+          print('  🍎 ID: ${cal['id']}');
+          print('  🍎 providerCalendarId: ${cal['providerCalendarId']}');
+          print('  🍎 summary: ${cal['summary']}');
+          print('  🍎 source: ${cal['source']}');
+          print('  🍎 user: ${cal['user']}');
+          print('  🍎 email: ${cal['email']}');
+        }
+        
         print('🔍 [CalendarSyncManager] About to call appleManager.saveSelectedCalendars with email: $email');
         
         await appleManager.saveSelectedCalendars(
