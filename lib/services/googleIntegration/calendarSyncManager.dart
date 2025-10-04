@@ -109,7 +109,7 @@ class CalendarSyncManager {
           'id': calendar.providerCalendarId,
           'title': calendar.metadata.title,
           'description': calendar.metadata.description,
-          'color': calendar.metadata.color,
+          'color': calendar.metadata.color.toString(), // Convert Color to string representation
           'timeZone': calendar.metadata.timeZone,
           'importAll': calendar.preferences.importSettings.importAll,
           'importSubject': calendar.preferences.importSettings.importSubject,
