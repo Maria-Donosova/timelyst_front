@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/widgets/screens/common/agenda.dart';
 import '../../../models/calendars.dart';
 import '../../../services/googleIntegration/calendarSyncManager.dart';
+import '../../../providers/authProvider.dart';
 import '../../shared/customAppbar.dart';
 import '../../shared/categories.dart';
 
@@ -349,6 +351,13 @@ class _CalendarSettingsState extends State<CalendarSettings> {
       
       print('🔍 [CalendarSettings] CalendarSyncManager.saveSelectedCalendars completed successfully');
       print("Selected calendars saved successfully.");
+
+      // Refresh authentication state before navigating to ensure UI shows correct auth status
+      if (mounted) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        await authProvider.refreshAuthState();
+        print('🔄 [CalendarSettings] Refreshed authentication state');
+      }
 
       // Navigate to the Agenda screen only if saving is successful
       Navigator.push(

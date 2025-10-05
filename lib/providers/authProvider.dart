@@ -26,6 +26,21 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  // Refresh authentication state (useful after external auth operations)
+  Future<void> refreshAuthState() async {
+    final token = await _authService.getAuthToken();
+    final userId = await _authService.getUserId();
+    
+    if (token != null && userId != null) {
+      _isLoggedIn = true;
+      _userId = userId;
+    } else {
+      _isLoggedIn = false;
+      _userId = null;
+    }
+    notifyListeners();
+  }
+
   Future<void> login(String email, String password) async {
     try {
       final result = await _authService.login(email, password);
