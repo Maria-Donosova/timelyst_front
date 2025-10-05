@@ -413,6 +413,13 @@ class _CalendarWState extends State<CalendarW> {
 
 class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   _EventDataSource(List<CustomAppointment> source) {
+    print('🗓️ [_EventDataSource] === CREATING DATA SOURCE ===');
+    print('🗓️ [_EventDataSource] Creating data source with ${source.length} appointments');
+    print('🗓️ [_EventDataSource] First 3 appointments:');
+    for (int i = 0; i < source.length && i < 3; i++) {
+      print('  📅 $i: "${source[i].title}" at ${source[i].startTime}');
+    }
+    
     AppLogger.performance('Creating data source with ${source.length} appointments', '_EventDataSource');
     
     // Debug recurring events specifically
@@ -426,7 +433,9 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
       }
     }
     
+    print('🗓️ [_EventDataSource] Setting appointments to ${source.length} events');
     appointments = source;
+    print('🗓️ [_EventDataSource] ✅ Data source setup complete with ${appointments?.length ?? 0} appointments');
   }
 
   @override
