@@ -62,9 +62,11 @@ class _CalendarWState extends State<CalendarW> {
     print('🗓️ [Calendar] === CALENDAR WIDGET BUILD ===');
     print('🗓️ [Calendar] Building calendar widget with ${appointments.length} events');
     print('🗓️ [Calendar] EventProvider.isLoading: ${eventProvider.isLoading}');
+    print('🗓️ [Calendar] Current calendar view: ${_controller.view}');
     print('🗓️ [Calendar] First 3 events:');
     for (int i = 0; i < appointments.length && i < 3; i++) {
-      print('  📅 $i: "${appointments[i].title}" at ${appointments[i].startTime}');
+      final event = appointments[i];
+      print('  📅 $i: "${event.title}" at ${event.startTime} (isAllDay: ${event.isAllDay}, endTime: ${event.endTime})');
     }
     
     AppLogger.performance('Building calendar with ${appointments.length} events', 'Calendar');
