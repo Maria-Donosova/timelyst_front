@@ -75,7 +75,7 @@ class MicrosoftCalendarService {
       'email': email,
       'calendars': calendars.map((c) {
         final json = c.toJson(email: email);
-        // Flatten import settings and category for Microsoft backend compatibility
+        // Flatten all preferences for consistent backend structure
         final importSettings = json['preferences']['importSettings'];
         final preferences = json['preferences'];
         json.addAll({
@@ -86,7 +86,10 @@ class MicrosoftCalendarService {
           'importOrganizer': importSettings['importOrganizer'],
           'importRecipients': importSettings['importRecipients'],
           'category': preferences['category'],
+          'color': preferences['color'],
         });
+        // Remove nested preferences object to avoid duplication
+        json.remove('preferences');
         return json;
       }).toList(),
       'batchSize': calendars.length,

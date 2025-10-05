@@ -108,7 +108,7 @@ class CalendarSyncManager {
         // Use the same pattern as Microsoft calendars for backend compatibility
         final appleCalendarData = appleCalendars.map((calendar) {
           final json = calendar.toJson(email: email);
-          // Flatten import settings and category for Apple backend compatibility
+          // Flatten all preferences for consistent backend structure
           final importSettings = json['preferences']['importSettings'];
           final preferences = json['preferences'];
           json.addAll({
@@ -119,7 +119,10 @@ class CalendarSyncManager {
             'importOrganizer': importSettings['importOrganizer'],
             'importRecipients': importSettings['importRecipients'],
             'category': preferences['category'],
+            'color': preferences['color'],
           });
+          // Remove nested preferences object to avoid duplication
+          json.remove('preferences');
           return json;
         }).toList();
         
@@ -135,6 +138,9 @@ class CalendarSyncManager {
           print('  🍎 source: ${cal['source']}');
           print('  🍎 user: ${cal['user']}');
           print('  🍎 email: ${cal['email']}');
+          print('  🍎 category: ${cal['category']}');
+          print('  🍎 color: ${cal['color']}');
+          print('  🍎 importAll: ${cal['importAll']}');
         }
         
         print('🔍 [CalendarSyncManager] About to call appleManager.saveSelectedCalendars with email: $email');
