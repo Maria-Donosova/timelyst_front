@@ -75,6 +75,12 @@ class EventProvider with ChangeNotifier {
     final timestamp = DateTime.now().toIso8601String();
     print("🔄 [$timestamp] Entered fetchAllEvents in EventProvider (forceFullRefresh: $forceFullRefresh)");
     
+    // Prevent concurrent fetches
+    if (_isLoading) {
+      print("⚠️ [EventProvider] Already loading, skipping concurrent fetch");
+      return;
+    }
+    
     if (_authService == null) {
       print("AuthService is null in EventProvider");
       _isLoading = false;
@@ -106,10 +112,20 @@ class EventProvider with ChangeNotifier {
       }
 
       // Fetch local events from backend
-      final backendResults = await Future.wait([
-        EventService.fetchDayEvents(userId, authToken),
-        EventService.fetchTimeEvents(userId, authToken),
-      ]);
+      print('🔍 [EventProvider] About to fetch events from backend...');
+      print('🔍 [EventProvider] Making GraphQL calls for day and time events');
+      
+      final List<List<dynamic>> backendResults;
+      try {
+        backendResults = await Future.wait([
+          EventService.fetchDayEvents(userId, authToken),
+          EventService.fetchTimeEvents(userId, authToken),
+        ]).timeout(Duration(seconds: 30));
+        print('✅ [EventProvider] Backend GraphQL calls completed successfully');
+      } catch (e) {
+        print('❌ [EventProvider] Error in backend GraphQL calls: $e');
+        rethrow;
+      }
 
       final dayEvents = backendResults[0];
       final timeEvents = backendResults[1];
