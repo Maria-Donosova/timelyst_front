@@ -14,7 +14,6 @@ class EventService {
   // Fetch DayEvents and map them to CustomAppointment
   static Future<List<CustomAppointment>> fetchDayEvents(
       String userId, String authToken) async {
-    print("🔍 [EventService] Entering fetchDayEvents");
 
     final String query = '''
       query DayEvents {
@@ -48,8 +47,6 @@ class EventService {
       }
     ''';
 
-    print('🔍 [EventService] Making fetchDayEvents GraphQL request to: ${Config.backendGraphqlURL}');
-    print('🔍 [EventService] Auth token length: ${authToken.length}');
 
     // Send the HTTP POST request
     final response = await _apiClient.post(
@@ -61,8 +58,6 @@ class EventService {
         'query': query,
       },
     );
-    
-    print('🔍 [EventService] fetchDayEvents response status: ${response.statusCode}');
 
     // Check the status code
     if (response.statusCode == 200) {
@@ -81,26 +76,7 @@ class EventService {
       final List<dynamic> dayEventsJson =
           data['data']['dayEvents']['dayEvents'];
 
-      print('📅 DEBUG: Received ${dayEventsJson.length} day events from backend');
-      
-      // Debug: Group events by createdBy source
-      final eventsBySource = <String, int>{};
-      for (final eventJson in dayEventsJson) {
-        final source = eventJson['createdBy'] ?? 'unknown';
-        eventsBySource[source] = (eventsBySource[source] ?? 0) + 1;
-      }
-      print('📊 [EventService] Day events by source: $eventsBySource');
-      
-      if (dayEventsJson.isNotEmpty) {
-        print('📅 DEBUG: First day event: ${dayEventsJson.first}');
-        
-        // Show Apple events specifically if any exist
-        final appleEvents = dayEventsJson.where((e) => e['createdBy'] == 'APPLE').toList();
-        if (appleEvents.isNotEmpty) {
-          print('🍎 [EventService] Found ${appleEvents.length} Apple day events!');
-          print('🍎 [EventService] First Apple event: ${appleEvents.first}');
-        }
-      }
+      print('📅 [EventService] Fetched ${dayEventsJson.length} day events');
 
       // Parse the day events into a List<DayEvent>
       final List<DayEvent> dayEvents = dayEventsJson.map((json) {
@@ -266,26 +242,7 @@ class EventService {
       // Extract the time events from the response
       final List<dynamic> timeEventsJson = data['data']['timeEvents'];
       
-      print('🕐 DEBUG: Received ${timeEventsJson.length} time events from backend');
-      
-      // Debug: Group events by createdBy source
-      final timeEventsBySource = <String, int>{};
-      for (final eventJson in timeEventsJson) {
-        final source = eventJson['createdBy'] ?? 'unknown';
-        timeEventsBySource[source] = (timeEventsBySource[source] ?? 0) + 1;
-      }
-      print('📊 [EventService] Time events by source: $timeEventsBySource');
-      
-      if (timeEventsJson.isNotEmpty) {
-        print('🕐 DEBUG: First time event: ${timeEventsJson.first}');
-        
-        // Show Apple events specifically if any exist
-        final appleTimeEvents = timeEventsJson.where((e) => e['createdBy'] == 'APPLE').toList();
-        if (appleTimeEvents.isNotEmpty) {
-          print('🍎 [EventService] Found ${appleTimeEvents.length} Apple time events!');
-          print('🍎 [EventService] First Apple time event: ${appleTimeEvents.first}');
-        }
-      }
+      print('🕐 [EventService] Fetched ${timeEventsJson.length} time events');
 
       // Parse the time events into a List<TimeEvent>
       final List<TimeEvent> timeEvents = timeEventsJson.map((json) {

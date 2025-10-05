@@ -79,8 +79,7 @@ class EventProvider with ChangeNotifier {
   }
 
   Future<void> fetchAllEvents({bool forceFullRefresh = false}) async {
-    final timestamp = DateTime.now().toIso8601String();
-    print("🔄 [$timestamp] Entered fetchAllEvents in EventProvider (forceFullRefresh: $forceFullRefresh)");
+    print("🔄 [EventProvider] Fetching events (forceFullRefresh: $forceFullRefresh)");
     
     // Prevent concurrent fetches (but allow forced refresh)
     if (_isLoading && !forceFullRefresh) {
@@ -97,222 +96,57 @@ class EventProvider with ChangeNotifier {
     final authToken = await _authService!.getAuthToken();
     final userId = await _authService!.getUserId();
     final userEmail = await _authService!.getUserEmail();
-    print('📧 [EventProvider] Retrieved user email: $userEmail');
     if (authToken == null || userId == null) {
-      print("AuthToken or UserId is null in EventProvider");
+      print("❌ [EventProvider] Missing authentication credentials");
       _isLoading = false;
       notifyListeners();
       return;
     }
 
-    print('🔄 [EventProvider] Setting _isLoading = true in fetchAllEvents');
     _isLoading = true;
     notifyListeners();
 
     try {
-      print('🔍 [EventProvider] === Starting event processing ===');
       // Only clear events on first load or forced refresh
       if (_events.isEmpty || forceFullRefresh) {
         print("🔄 [EventProvider] Performing full refresh (clearing existing events)");
         _events = [];
-      } else {
-        print("🔄 [EventProvider] Performing incremental sync (keeping existing events)");
       }
-
-      // Fetch local events from backend
-      print('🔍 [EventProvider] About to fetch events from backend...');
-      print('🔍 [EventProvider] Making GraphQL calls for day and time events');
       
-      final List<List<dynamic>> backendResults;
-      try {
-        backendResults = await Future.wait([
-          EventService.fetchDayEvents(userId, authToken),
-          EventService.fetchTimeEvents(userId, authToken),
-        ]).timeout(Duration(seconds: 30));
-        print('✅ [EventProvider] Backend GraphQL calls completed successfully');
-      } catch (e) {
-        print('❌ [EventProvider] Error in backend GraphQL calls: $e');
-        rethrow;
-      }
+      final backendResults = await Future.wait([
+        EventService.fetchDayEvents(userId, authToken),
+        EventService.fetchTimeEvents(userId, authToken),
+      ]).timeout(Duration(seconds: 30));
 
       final dayEvents = backendResults[0];
       final timeEvents = backendResults[1];
 
-      // Note: Google Calendar events are already imported by the backend during Google Sign-In
-      // They appear in dayEvents and timeEvents with createdBy: GOOGLE
-      // The issue is the backend is not preserving recurrence rules during import
+      // Filter Google events for compatibility
       List<CustomAppointment> googleEvents = [];
-      
-      print('🔍 [EventProvider] Checking existing events for Google Calendar events...');
-      
-      // Safely filter Google events with null checks
-      final googleTimeEvents = <CustomAppointment>[];
-      final googleDayEvents = <CustomAppointment>[];
-      
       try {
-        for (final event in timeEvents) {
-          try {
-            if (event.userCalendars.contains('google') || 
-                event.catTitle == 'imported' ||
-                (event.organizer.isNotEmpty && event.organizer.contains('google'))) {
-              googleTimeEvents.add(event);
-            }
-          } catch (e) {
-            print('⚠️ [EventProvider] Error filtering time event "${event.title}": $e');
-          }
-        }
+        final googleTimeEvents = timeEvents.where((event) => 
+          event.userCalendars.contains('google') || 
+          event.catTitle == 'imported' ||
+          (event.organizer.isNotEmpty && event.organizer.contains('google'))
+        ).toList();
         
-        for (final event in dayEvents) {
-          try {
-            if (event.userCalendars.contains('google') || 
-                event.catTitle == 'imported' ||
-                (event.organizer.isNotEmpty && event.organizer.contains('google'))) {
-              googleDayEvents.add(event);
-            }
-          } catch (e) {
-            print('⚠️ [EventProvider] Error filtering day event "${event.title}": $e');
-          }
-        }
+        final googleDayEvents = dayEvents.where((event) => 
+          event.userCalendars.contains('google') || 
+          event.catTitle == 'imported' ||
+          (event.organizer.isNotEmpty && event.organizer.contains('google'))
+        ).toList();
+        
+        googleEvents = [...googleTimeEvents, ...googleDayEvents];
       } catch (e) {
-        print('❌ [EventProvider] Critical error in Google event filtering: $e');
-      }
-        
-      print('📊 [EventProvider] Found ${googleTimeEvents.length} Google time events and ${googleDayEvents.length} Google day events in backend data');
-      
-      // Check if any existing events have recurrence rules (safely)
-      final recurringTimeEvents = <CustomAppointment>[];
-      final recurringDayEvents = <CustomAppointment>[];
-      
-      try {
-        for (final event in timeEvents) {
-          try {
-            if (event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty) {
-              recurringTimeEvents.add(event);
-            }
-          } catch (e) {
-            print('⚠️ [EventProvider] Error checking recurrence for time event "${event.title}": $e');
-          }
-        }
-        
-        for (final event in dayEvents) {
-          try {
-            if (event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty) {
-              recurringDayEvents.add(event);
-            }
-          } catch (e) {
-            print('⚠️ [EventProvider] Error checking recurrence for day event "${event.title}": $e');
-          }
-        }
-      } catch (e) {
-        print('❌ [EventProvider] Critical error in recurrence checking: $e');
-      }
-        
-      print('📊 [EventProvider] Found ${recurringTimeEvents.length} recurring time events and ${recurringDayEvents.length} recurring day events');
-      
-      // Log all recurring events for debugging
-      print('🔍 [EventProvider] All recurring time events:');
-      for (final event in recurringTimeEvents) {
-        print('  📅 Time: "${event.title}" - recurrenceRule: ${event.recurrenceRule}');
+        print('❌ [EventProvider] Error filtering Google events: $e');
+        googleEvents = [];
       }
       
-      print('🔍 [EventProvider] All recurring day events:');
-      for (final event in recurringDayEvents) {
-        print('  📅 Day: "${event.title}" - recurrenceRule: ${event.recurrenceRule}');
-      }
+      // Sync events
+      _syncEventsIncremental([...dayEvents, ...timeEvents, ...googleEvents]);
       
-      // Check for any events created recently (within last hour)
-      final recentEvents = [...timeEvents, ...dayEvents].where((event) {
-        try {
-          final eventTime = event.startTime;
-          final now = DateTime.now();
-          final oneHourAgo = now.subtract(Duration(hours: 1));
-          return eventTime.isAfter(oneHourAgo) || eventTime.isAfter(now.subtract(Duration(days: 1)));
-        } catch (e) {
-          return false;
-        }
-      }).toList();
-      
-      print('🕐 [EventProvider] Recent events (last 24 hours): ${recentEvents.length}');
-      for (final event in recentEvents) {
-        print('  ⏰ "${event.title}" at ${event.startTime} - recurring: ${event.recurrenceRule != null}');
-      }
+      print('✅ [EventProvider] Synced ${_events.length} total events');
 
-      // Perform incremental sync instead of replacing all events
-      print('🔍 [EventProvider] About to call _syncEventsIncremental with ${dayEvents.length + timeEvents.length + googleEvents.length} events');
-      try {
-        _syncEventsIncremental([...dayEvents, ...timeEvents, ...googleEvents]);
-        print('✅ [EventProvider] _syncEventsIncremental completed successfully');
-      } catch (e) {
-        print('❌ [EventProvider] Error in _syncEventsIncremental: $e');
-        print('📊 [EventProvider] Stack trace: ${StackTrace.current}');
-        rethrow;
-      }
-
-      // Debug: Check total events counts (createdBy info available in EventService logs)
-      print('🔍 [EventProvider] === EVENT COUNT ANALYSIS ===');
-      print('📊 [EventProvider] Day events count: ${dayEvents.length}');
-      print('📊 [EventProvider] Time events count: ${timeEvents.length}');
-      print('📊 [EventProvider] Check EventService logs above for source breakdown');
-
-      print('📊 DEBUG: Fetched ${_events.length} total events at ${DateTime.now().toIso8601String()}');
-      print('📊 DEBUG: - ${dayEvents.length} day events');
-      print('📊 DEBUG: - ${timeEvents.length} time events');
-      print('📊 DEBUG: - ${googleEvents.length} Google Calendar events');
-      print('📊 DEBUG: User ID: $userId');
-      print('📊 DEBUG: User Email: $userEmail');
-      print('📊 DEBUG: Auth Token: ${authToken?.substring(0, 10)}...');
-      
-      // Log all event titles with IDs for debugging sync issues
-      print('📋 [EventProvider] Current event details:');
-      for (final event in _events) {
-        final isRecurring = event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty;
-        final isGoogle = event.userCalendars.contains('google') || event.catTitle == 'imported' || event.organizer.contains('google');
-        print('  📅 ID: "${event.id}" | "${event.title}" | ${event.startTime} | ${isRecurring ? '[RECURRING]' : '[SINGLE]'} | ${isGoogle ? '[GOOGLE]' : '[LOCAL]'}');
-      }
-      
-      // Track events that contain "Test Google recurring event" specifically
-      final testEvents = _events.where((event) => 
-        event.title.toLowerCase().contains('test google recurring') ||
-        event.title.toLowerCase().contains('test recurring')
-      ).toList();
-      
-      if (testEvents.isNotEmpty) {
-        print('🔍 [EventProvider] Found ${testEvents.length} test recurring events:');
-        for (final event in testEvents) {
-          print('  🧪 "${event.title}" (${event.id}) - recurring: ${event.recurrenceRule != null && event.recurrenceRule!.isNotEmpty}');
-        }
-      } else {
-        print('⚠️ [EventProvider] No test recurring events found in current fetch');
-      }
-      
-      // Compare with previous events to track changes
-      if (_previousEvents.isNotEmpty) {
-        final previousIds = _previousEvents.map((e) => e.id).toSet();
-        final currentIds = _events.map((e) => e.id).toSet();
-        
-        final newEvents = _events.where((e) => !previousIds.contains(e.id)).toList();
-        final removedEventIds = previousIds.where((id) => !currentIds.contains(id)).toList();
-        
-        if (newEvents.isNotEmpty) {
-          print('🆕 [EventProvider] New events since last fetch:');
-          for (final event in newEvents) {
-            print('  ➕ "${event.title}" (${event.id})');
-          }
-        }
-        
-        if (removedEventIds.isNotEmpty) {
-          print('🗑️ [EventProvider] Events removed since last fetch:');
-          for (final id in removedEventIds) {
-            final removedEvent = _previousEvents.firstWhere((e) => e.id == id);
-            print('  ➖ "${removedEvent.title}" (${id})');
-          }
-        }
-        
-        if (newEvents.isEmpty && removedEventIds.isEmpty) {
-          print('🔄 [EventProvider] No event changes detected since last fetch');
-        }
-      }
-      
       // Store current events as previous for next comparison
       _previousEvents = List.from(_events);
 
@@ -321,7 +155,6 @@ class EventProvider with ChangeNotifier {
       _errorMessage = 'Failed to fetch events: $e';
       print(_errorMessage);
     } finally {
-      print('🔄 [EventProvider] Setting _isLoading = false in fetchAllEvents finally block');
       _isLoading = false;
       notifyListeners();
     }
@@ -561,28 +394,21 @@ class EventProvider with ChangeNotifier {
     int changes = 0;
     
     if (newEvents.isNotEmpty) {
-      print('🆕 [EventProvider] Adding ${newEvents.length} new events:');
       for (final event in newEvents) {
-        print('  ➕ "${event.title}" (${event.id})');
         _events.add(event);
         changes++;
       }
     }
 
     if (removedEventIds.isNotEmpty) {
-      print('🗑️ [EventProvider] Removing ${removedEventIds.length} deleted events:');
       for (final id in removedEventIds) {
-        final removedEvent = currentEventMap[id]!;
-        print('  ➖ "${removedEvent.title}" (${id})');
         _events.removeWhere((event) => event.id == id);
         changes++;
       }
     }
 
     if (updatedEvents.isNotEmpty) {
-      print('🔄 [EventProvider] Updating ${updatedEvents.length} changed events:');
       for (final updatedEvent in updatedEvents) {
-        print('  🔄 "${updatedEvent.title}" (${updatedEvent.id})');
         final index = _events.indexWhere((event) => event.id == updatedEvent.id);
         if (index >= 0) {
           _events[index] = updatedEvent;
@@ -591,11 +417,7 @@ class EventProvider with ChangeNotifier {
       }
     }
 
-    if (changes == 0) {
-      print('✅ [EventProvider] No changes detected - events are up to date');
-    } else {
-      print('✅ [EventProvider] Applied $changes changes to event list');
-      print('🔔 [EventProvider] Calling notifyListeners() to update UI');
+    if (changes > 0) {
       notifyListeners();
     }
   }

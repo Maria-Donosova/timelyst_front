@@ -59,14 +59,9 @@ class _CalendarWState extends State<CalendarW> {
 
     final List<CustomAppointment> appointments = eventProvider.events;
 
-    print('🗓️ [Calendar] === CALENDAR WIDGET BUILD ===');
-    print('🗓️ [Calendar] Building calendar widget with ${appointments.length} events');
-    print('🗓️ [Calendar] EventProvider.isLoading: ${eventProvider.isLoading}');
-    print('🗓️ [Calendar] Current calendar view: ${_controller.view}');
-    print('🗓️ [Calendar] First 3 events:');
-    for (int i = 0; i < appointments.length && i < 3; i++) {
-      final event = appointments[i];
-      print('  📅 $i: "${event.title}" at ${event.startTime} (isAllDay: ${event.isAllDay}, endTime: ${event.endTime})');
+    // Essential logging only
+    if (appointments.length > 0) {
+      print('📅 [Calendar] Building calendar with ${appointments.length} events');
     }
     
     AppLogger.performance('Building calendar with ${appointments.length} events', 'Calendar');
@@ -415,13 +410,6 @@ class _CalendarWState extends State<CalendarW> {
 
 class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   _EventDataSource(List<CustomAppointment> source) {
-    print('🗓️ [_EventDataSource] === CREATING DATA SOURCE ===');
-    print('🗓️ [_EventDataSource] Creating data source with ${source.length} appointments');
-    print('🗓️ [_EventDataSource] First 3 appointments:');
-    for (int i = 0; i < source.length && i < 3; i++) {
-      print('  📅 $i: "${source[i].title}" at ${source[i].startTime}');
-    }
-    
     AppLogger.performance('Creating data source with ${source.length} appointments', '_EventDataSource');
     
     // Debug recurring events specifically
@@ -435,9 +423,7 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
       }
     }
     
-    print('🗓️ [_EventDataSource] Setting appointments to ${source.length} events');
     appointments = source;
-    print('🗓️ [_EventDataSource] ✅ Data source setup complete with ${appointments?.length ?? 0} appointments');
   }
 
   @override
