@@ -108,8 +108,9 @@ class CalendarSyncManager {
         // Use the same pattern as Microsoft calendars for backend compatibility
         final appleCalendarData = appleCalendars.map((calendar) {
           final json = calendar.toJson(email: email);
-          // Flatten import settings for Apple backend compatibility (same as Microsoft)
+          // Flatten import settings and category for Apple backend compatibility
           final importSettings = json['preferences']['importSettings'];
+          final preferences = json['preferences'];
           json.addAll({
             'importAll': importSettings['importAll'],
             'importSubject': importSettings['importSubject'],
@@ -117,6 +118,7 @@ class CalendarSyncManager {
             'importConferenceInfo': importSettings['importConferenceInfo'],
             'importOrganizer': importSettings['importOrganizer'],
             'importRecipients': importSettings['importRecipients'],
+            'category': preferences['category'],
           });
           return json;
         }).toList();

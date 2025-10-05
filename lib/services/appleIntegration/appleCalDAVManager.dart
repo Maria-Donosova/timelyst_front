@@ -110,7 +110,7 @@ class AppleCalDAVManager {
         print('  🍎 Title: ${calendar['metadata']?['title'] ?? calendar['title']}');
         print('  🍎 Import All: ${calendar['importAll']}');
         print('  🍎 Import Subject: ${calendar['importSubject']}');
-        print('  🍎 Category: ${calendar['preferences']?['category'] ?? calendar['category']}');
+        print('  🍎 Category: ${calendar['category'] ?? calendar['preferences']?['category']}');
       }
       
       print('🔍 [AppleCalDAVManager] Filtering calendars with valid import options...');
