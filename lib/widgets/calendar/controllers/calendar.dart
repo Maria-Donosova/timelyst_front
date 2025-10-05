@@ -59,6 +59,14 @@ class _CalendarWState extends State<CalendarW> {
 
     final List<CustomAppointment> appointments = eventProvider.events;
 
+    print('🗓️ [Calendar] === CALENDAR WIDGET BUILD ===');
+    print('🗓️ [Calendar] Building calendar widget with ${appointments.length} events');
+    print('🗓️ [Calendar] EventProvider.isLoading: ${eventProvider.isLoading}');
+    print('🗓️ [Calendar] First 3 events:');
+    for (int i = 0; i < appointments.length && i < 3; i++) {
+      print('  📅 $i: "${appointments[i].title}" at ${appointments[i].startTime}');
+    }
+    
     AppLogger.performance('Building calendar with ${appointments.length} events', 'Calendar');
 
     return Card(
