@@ -12,7 +12,7 @@ class EventProvider with ChangeNotifier {
   // Track previous events for change detection
   List<CustomAppointment> _previousEvents = [];
 
-  bool _isLoading = true;
+  bool _isLoading = false;
   String _errorMessage = '';
 
   List<CustomAppointment> get events => _events;
@@ -105,6 +105,7 @@ class EventProvider with ChangeNotifier {
       return;
     }
 
+    print('🔄 [EventProvider] Setting _isLoading = true in fetchAllEvents');
     _isLoading = true;
     notifyListeners();
 
@@ -320,6 +321,7 @@ class EventProvider with ChangeNotifier {
       _errorMessage = 'Failed to fetch events: $e';
       print(_errorMessage);
     } finally {
+      print('🔄 [EventProvider] Setting _isLoading = false in fetchAllEvents finally block');
       _isLoading = false;
       notifyListeners();
     }
