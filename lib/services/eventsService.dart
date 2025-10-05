@@ -14,7 +14,7 @@ class EventService {
   // Fetch DayEvents and map them to CustomAppointment
   static Future<List<CustomAppointment>> fetchDayEvents(
       String userId, String authToken) async {
-    // print("Entering fetchDayEvents in EventService");
+    print("🔍 [EventService] Entering fetchDayEvents");
 
     final String query = '''
       query DayEvents {
@@ -48,6 +48,9 @@ class EventService {
       }
     ''';
 
+    print('🔍 [EventService] Making fetchDayEvents GraphQL request to: ${Config.backendGraphqlURL}');
+    print('🔍 [EventService] Auth token length: ${authToken.length}');
+
     // Send the HTTP POST request
     final response = await _apiClient.post(
       Config.backendGraphqlURL,
@@ -58,6 +61,8 @@ class EventService {
         'query': query,
       },
     );
+    
+    print('🔍 [EventService] fetchDayEvents response status: ${response.statusCode}');
 
     // Check the status code
     if (response.statusCode == 200) {
