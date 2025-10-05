@@ -27,6 +27,13 @@ class EventProvider with ChangeNotifier {
     _authService = authService;
   }
 
+  // Emergency reset for stuck loading state
+  void forceResetLoadingState() {
+    print("🔧 [EventProvider] Force resetting loading state");
+    _isLoading = false;
+    notifyListeners();
+  }
+
   
 
   Future<void> fetchDayEvents() async {
@@ -75,9 +82,9 @@ class EventProvider with ChangeNotifier {
     final timestamp = DateTime.now().toIso8601String();
     print("🔄 [$timestamp] Entered fetchAllEvents in EventProvider (forceFullRefresh: $forceFullRefresh)");
     
-    // Prevent concurrent fetches
-    if (_isLoading) {
-      print("⚠️ [EventProvider] Already loading, skipping concurrent fetch");
+    // Prevent concurrent fetches (but allow forced refresh)
+    if (_isLoading && !forceFullRefresh) {
+      print("⚠️ [EventProvider] Already loading, skipping concurrent fetch (use forceFullRefresh to override)");
       return;
     }
     
