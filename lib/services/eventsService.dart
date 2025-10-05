@@ -15,9 +15,14 @@ class EventService {
   static Future<List<CustomAppointment>> fetchDayEvents(
       String userId, String authToken) async {
 
+    // Calculate date range (current month ± 3 months for safety)
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month - 3, 1).toIso8601String();
+    final endDate = DateTime(now.year, now.month + 4, 0).toIso8601String();
+
     final String query = '''
-      query DayEvents {
-        dayEvents {
+      query DayEvents(\$startDate: String, \$endDate: String) {
+        dayEvents(startDate: \$startDate, endDate: \$endDate) {
           dayEvents {
             id
             user_id
@@ -56,6 +61,10 @@ class EventService {
       },
       body: {
         'query': query,
+        'variables': {
+          'startDate': startDate,
+          'endDate': endDate,
+        },
       },
     );
 
@@ -184,9 +193,14 @@ class EventService {
       String userId, String authToken) async {
     // print("Entering fetchTimeEvents in EventService");
 
+    // Calculate date range (current month ± 3 months for safety)
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month - 3, 1).toIso8601String();
+    final endDate = DateTime(now.year, now.month + 4, 0).toIso8601String();
+
     final String query = '''
-      query GetTimeEvents {
-        timeEvents {
+      query GetTimeEvents(\$startDate: String, \$endDate: String) {
+        timeEvents(startDate: \$startDate, endDate: \$endDate) {
             id
             user_id
             createdBy
@@ -223,6 +237,10 @@ class EventService {
       },
       body: {
         'query': query,
+        'variables': {
+          'startDate': startDate,
+          'endDate': endDate,
+        },
       },
     );
 
