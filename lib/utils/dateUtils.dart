@@ -7,13 +7,25 @@ class DateTimeUtils {
 
     try {
       // Check if it's a numeric timestamp (milliseconds since epoch)
+      if (dateValue is num) {
+        print('🕐 [DateTimeUtils] Parsing numeric timestamp: $dateValue');
+        final result = DateTime.fromMillisecondsSinceEpoch(dateValue.toInt());
+        print('🕐 [DateTimeUtils] Parsed to: $result');
+        return result;
+      }
       if (dateValue is String && dateValue.contains(RegExp(r'^\d+$'))) {
-        return DateTime.fromMillisecondsSinceEpoch(int.parse(dateValue));
+        print('🕐 [DateTimeUtils] Parsing string timestamp: $dateValue');
+        final result = DateTime.fromMillisecondsSinceEpoch(int.parse(dateValue));
+        print('🕐 [DateTimeUtils] Parsed to: $result');
+        return result;
       }
       // Otherwise try parsing as ISO string
-      return DateTime.parse(dateValue.toString());
+      print('🕐 [DateTimeUtils] Parsing ISO string: $dateValue');
+      final result = DateTime.parse(dateValue.toString());
+      print('🕐 [DateTimeUtils] Parsed to: $result');
+      return result;
     } catch (e) {
-      print('Error parsing date: $e');
+      print('❌ [DateTimeUtils] Error parsing date: $e');
       return DateTime.now(); // Fallback
     }
   }
