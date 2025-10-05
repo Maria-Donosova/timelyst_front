@@ -595,6 +595,8 @@ class EventProvider with ChangeNotifier {
       print('✅ [EventProvider] No changes detected - events are up to date');
     } else {
       print('✅ [EventProvider] Applied $changes changes to event list');
+      print('🔔 [EventProvider] Calling notifyListeners() to update UI');
+      notifyListeners();
     }
   }
 
