@@ -28,7 +28,6 @@ class GoogleEventsImportService {
       if (lastSyncTimeString != null) {
         _lastSyncTime = DateTime.parse(lastSyncTimeString);
       }
-      print('🔍 [GoogleEventsImportService] Loaded sync state - token: ${_currentSyncToken != null ? '${_currentSyncToken!.substring(0, 10)}...' : 'null'}, lastSync: $_lastSyncTime');
     } catch (e) {
       print('⚠️ [GoogleEventsImportService] Error loading sync state: $e');
     }
@@ -43,7 +42,6 @@ class GoogleEventsImportService {
       if (_lastSyncTime != null) {
         await _storage.write(key: _lastSyncTimeKey, value: _lastSyncTime!.toIso8601String());
       }
-      print('✅ [GoogleEventsImportService] Saved sync state');
     } catch (e) {
       print('⚠️ [GoogleEventsImportService] Error saving sync state: $e');
     }
@@ -56,7 +54,6 @@ class GoogleEventsImportService {
       await _storage.delete(key: _lastSyncTimeKey);
       _currentSyncToken = null;
       _lastSyncTime = null;
-      print('🔄 [GoogleEventsImportService] Cleared sync state');
     } catch (e) {
       print('⚠️ [GoogleEventsImportService] Error clearing sync state: $e');
     }
@@ -70,7 +67,6 @@ class GoogleEventsImportService {
     DateTime? timeMin,
     DateTime? timeMax,
   }) async {
-    print('🔄 [GoogleEventsImportService] Starting import for user: $userId, email: $email');
     
     try {
       final authToken = await _authService.getAuthToken();
@@ -92,7 +88,6 @@ class GoogleEventsImportService {
         'expandRecurring': false,  // Keep recurring events as rules instead of expanding into instances
       };
 
-      print('🔍 [GoogleEventsImportService] Sending request with body: $requestBody');
 
       final response = await _apiClient.post(
         '${Config.backendURL}/google/events/import',
@@ -102,16 +97,11 @@ class GoogleEventsImportService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [GoogleEventsImportService] Import successful');
-        print('🔍 [GoogleEventsImportService] Response keys: ${data.keys.toList()}');
-        print('🔍 [GoogleEventsImportService] Full response: $data');
         
         // Debug ALL events in raw response first
-        print('🔍 [GoogleEventsImportService] Analyzing ALL events in backend response...');
         
         if (data['timeEvents'] != null) {
           final timeEvents = data['timeEvents'] as List;
-          print('🔍 [GoogleEventsImportService] Time Events (${timeEvents.length} total):');
           for (int i = 0; i < timeEvents.length; i++) {
             final event = timeEvents[i];
             final title = event['event_title'] ?? 'No Title';
@@ -132,12 +122,10 @@ class GoogleEventsImportService {
           final recurringTimeEvents = timeEvents.where((event) => 
             (event['recurrenceRule'] != null && event['recurrenceRule'].toString().isNotEmpty) ||
             (event['recurrence'] != null && event['recurrence'].toString().isNotEmpty)).toList();
-          print('🔄 [GoogleEventsImportService] Found ${recurringTimeEvents.length} recurring time events in backend response');
         }
         
         if (data['dayEvents'] != null) {
           final dayEvents = data['dayEvents'] as List;
-          print('🔍 [GoogleEventsImportService] Day Events (${dayEvents.length} total):');
           for (int i = 0; i < dayEvents.length; i++) {
             final event = dayEvents[i];
             final title = event['event_title'] ?? 'No Title';
@@ -158,7 +146,6 @@ class GoogleEventsImportService {
           final recurringDayEvents = dayEvents.where((event) => 
             (event['recurrenceRule'] != null && event['recurrenceRule'].toString().isNotEmpty) ||
             (event['recurrence'] != null && event['recurrence'].toString().isNotEmpty)).toList();
-          print('🔄 [GoogleEventsImportService] Found ${recurringDayEvents.length} recurring day events in backend response');
         }
         
         return GoogleEventsImportResult.fromJson(data);
@@ -183,7 +170,6 @@ class GoogleEventsImportService {
     DateTime? timeMin,
     DateTime? timeMax,
   }) async {
-    print('🔄 [GoogleEventsImportService] Importing events from calendar: $calendarId');
     
     try {
       final authToken = await _authService.getAuthToken();
@@ -212,7 +198,6 @@ class GoogleEventsImportService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [GoogleEventsImportService] Calendar import successful');
         
         return GoogleEventsImportResult.fromJson(data);
       } else {
@@ -233,7 +218,6 @@ class GoogleEventsImportService {
     required String email,
     required String syncToken,
   }) async {
-    print('🔄 [GoogleEventsImportService] Syncing events with token: ${syncToken.substring(0, 10)}...');
     
     try {
       final authToken = await _authService.getAuthToken();
@@ -255,7 +239,6 @@ class GoogleEventsImportService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [GoogleEventsImportService] Sync successful');
         
         return GoogleEventsImportResult.fromJson(data);
       } else if (response.statusCode == 410) {
@@ -283,7 +266,6 @@ class GoogleEventsImportService {
     required String email,
     bool forceFullSync = false,
   }) async {
-    print('🔄 [GoogleEventsImportService] Starting smart sync for events');
     
     try {
       // Load sync state from storage first
@@ -298,7 +280,6 @@ class GoogleEventsImportService {
           DateTime.now().difference(_lastSyncTime!).inMinutes < 5; // Sync within last 5 minutes
           
       if (shouldDoIncrementalSync) {
-        print('🔄 [GoogleEventsImportService] Performing incremental sync with token: ${_currentSyncToken!.substring(0, 10)}...');
         try {
           importResult = await syncCalendarEvents(
             userId: userId,
@@ -319,7 +300,6 @@ class GoogleEventsImportService {
           importResult = await _performFullSync(userId, email);
         }
       } else {
-        print('🔄 [GoogleEventsImportService] Performing full sync (reason: ${forceFullSync ? 'forced' : 'no valid sync token or stale'})');
         importResult = await _performFullSync(userId, email);
       }
 
@@ -343,7 +323,6 @@ class GoogleEventsImportService {
       _currentSyncToken = result.nextSyncToken;
       _lastSyncTime = DateTime.now();
       await _saveSyncState();
-      print('✅ [GoogleEventsImportService] Stored sync token for future incremental syncs');
     }
     
     return result;
@@ -353,7 +332,6 @@ class GoogleEventsImportService {
   List<CustomAppointment> _convertImportResultToAppointments(GoogleEventsImportResult importResult) {
     final appointments = <CustomAppointment>[];
     
-    print('🔍 [GoogleEventsImportService] Converting import result - timeEvents: ${importResult.timeEvents?.length ?? 0}, dayEvents: ${importResult.dayEvents?.length ?? 0}');
     
     // Convert imported time events to appointments
     if (importResult.timeEvents != null) {
@@ -364,7 +342,6 @@ class GoogleEventsImportService {
           
           // Log recurring events specifically
           if (appointment.recurrenceRule != null && appointment.recurrenceRule!.isNotEmpty) {
-            print('🔄 [GoogleEventsImportService] Found recurring time event: "${appointment.title}" with rule: ${appointment.recurrenceRule}');
           }
           
           appointments.add(appointment);
@@ -384,7 +361,6 @@ class GoogleEventsImportService {
           
           // Log recurring events specifically
           if (appointment.recurrenceRule != null && appointment.recurrenceRule!.isNotEmpty) {
-            print('🔄 [GoogleEventsImportService] Found recurring day event: "${appointment.title}" with rule: ${appointment.recurrenceRule}');
           }
           
           appointments.add(appointment);
@@ -396,13 +372,11 @@ class GoogleEventsImportService {
     }
 
     final recurringCount = appointments.where((a) => a.recurrenceRule != null && a.recurrenceRule!.isNotEmpty).length;
-    print('✅ [GoogleEventsImportService] Mapped ${appointments.length} events to appointments (${recurringCount} recurring)');
     return appointments;
   }
   
   /// Forces a full sync (useful for manual refresh)
   Future<void> forceFullSync(String userId, String email) async {
-    print('🔄 [GoogleEventsImportService] Forcing full sync...');
     await _clearSyncState();
     await getImportedEventsAsAppointments(
       userId: userId, 

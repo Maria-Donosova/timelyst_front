@@ -9,7 +9,6 @@ class RightPanel extends StatelessWidget {
   const RightPanel({Key? key}) : super(key: key);
 
   Future<void> _refreshData(BuildContext context) async {
-    print('🔄 [RightPanel] Pull-to-refresh triggered - forcing full refresh');
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     
@@ -18,7 +17,6 @@ class RightPanel extends StatelessWidget {
       taskProvider.fetchTasks(),
     ]);
     
-    print('✅ [RightPanel] Pull-to-refresh completed');
   }
 
   @override

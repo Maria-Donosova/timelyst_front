@@ -14,9 +14,6 @@ class AppleCalDAVService {
     required String appleId,
     required String appPassword,
   }) async {
-    print('🔍 [AppleCalDAVService] Connecting to Apple Calendar');
-    print('🔍 [AppleCalDAVService] Apple ID: $appleId');
-    print('🔍 [AppleCalDAVService] App Password length: ${appPassword.length}');
 
     try {
       final authToken = await _authService.getAuthToken();
@@ -33,18 +30,14 @@ class AppleCalDAVService {
         token: authToken,
       );
 
-      print('🔍 [AppleCalDAVService] Backend response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [AppleCalDAVService] Apple Calendar connected successfully');
-        print('🔍 [AppleCalDAVService] Calendars available: ${data['calendarsCount'] ?? 0}');
         
         return data;
       } else {
         final errorBody = response.body;
         print('❌ [AppleCalDAVService] Connection failed: ${response.statusCode}');
-        print('🔍 [AppleCalDAVService] Error response: $errorBody');
         
         final errorData = jsonDecode(errorBody);
         throw Exception(errorData['message'] ?? 'Failed to connect Apple Calendar');
@@ -57,7 +50,6 @@ class AppleCalDAVService {
 
   /// Fetches Apple calendars for the connected account
   Future<Map<String, dynamic>> fetchAppleCalendars(String email) async {
-    print('🔍 [AppleCalDAVService] Fetching Apple calendars for: $email');
 
     try {
       final authToken = await _authService.getAuthToken();
@@ -73,27 +65,21 @@ class AppleCalDAVService {
         token: authToken,
       );
 
-      print('🔍 [AppleCalDAVService] Fetch calendars response: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final calendars = data['data'] as List?;
         
-        print('✅ [AppleCalDAVService] Fetched ${calendars?.length ?? 0} Apple calendars');
         
         return data;
       } else {
         final errorBody = response.body;
         print('❌ [AppleCalDAVService] Failed to fetch calendars: ${response.statusCode}');
-        print('🔍 [AppleCalDAVService] Full error response body: $errorBody');
-        print('🔍 [AppleCalDAVService] Response headers: ${response.headers}');
         
         try {
           final errorData = jsonDecode(errorBody);
-          print('🔍 [AppleCalDAVService] Parsed error data: $errorData');
           throw Exception(errorData['message'] ?? 'Error fetching calendars');
         } catch (jsonError) {
-          print('🔍 [AppleCalDAVService] Could not parse error response as JSON: $jsonError');
           throw Exception('Error fetching calendars');
         }
       }
@@ -108,29 +94,19 @@ class AppleCalDAVService {
     required String email,
     required List<Map<String, dynamic>> calendars,
   }) async {
-    print('🔍 [AppleCalDAVService] === STARTING saveSelectedCalendars ===');
-    print('🔍 [AppleCalDAVService] email: $email');
-    print('🔍 [AppleCalDAVService] calendars.length: ${calendars.length}');
-    print('🔍 [AppleCalDAVService] About to make HTTP POST request to ${Config.backendURL}/apple/calendars/save');
 
     try {
-      print('🔍 [AppleCalDAVService] Getting authentication token...');
       final authToken = await _authService.getAuthToken();
       if (authToken == null) {
         print('❌ [AppleCalDAVService] No authentication token available');
         throw Exception('No authentication token available');
       }
-      print('🔍 [AppleCalDAVService] ✅ Authentication token obtained');
 
       final requestBody = {
         'email': email,
         'calendars': calendars,
       };
       
-      print('🔍 [AppleCalDAVService] Making HTTP POST request...');
-      print('🔍 [AppleCalDAVService] URL: ${Config.backendURL}/apple/calendars/save');
-      print('🔍 [AppleCalDAVService] Request body keys: ${requestBody.keys}');
-      print('🔍 [AppleCalDAVService] Request body: $requestBody');
 
       final response = await _apiClient.post(
         '${Config.backendURL}/apple/calendars/save',
@@ -138,13 +114,10 @@ class AppleCalDAVService {
         token: authToken,
       );
 
-      print('🔍 [AppleCalDAVService] HTTP POST request completed');
 
-      print('🔍 [AppleCalDAVService] Save calendars response: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [AppleCalDAVService] Apple calendars and events saved successfully');
         
         return data;
       } else {
@@ -162,7 +135,6 @@ class AppleCalDAVService {
 
   /// Deletes Apple calendars for the user
   Future<Map<String, dynamic>> deleteAppleCalendars() async {
-    print('🔍 [AppleCalDAVService] Deleting Apple calendars');
 
     try {
       final authToken = await _authService.getAuthToken();
@@ -175,11 +147,9 @@ class AppleCalDAVService {
         token: authToken,
       );
 
-      print('🔍 [AppleCalDAVService] Delete calendars response: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [AppleCalDAVService] Apple calendars deleted successfully');
         
         return data;
       } else {
@@ -197,7 +167,6 @@ class AppleCalDAVService {
 
   /// Disconnects Apple account
   Future<Map<String, dynamic>> disconnectAppleAccount(String email) async {
-    print('🔍 [AppleCalDAVService] Disconnecting Apple account: $email');
 
     try {
       final authToken = await _authService.getAuthToken();
@@ -213,11 +182,9 @@ class AppleCalDAVService {
         token: authToken,
       );
 
-      print('🔍 [AppleCalDAVService] Disconnect account response: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [AppleCalDAVService] Apple account disconnected successfully');
         
         return data;
       } else {

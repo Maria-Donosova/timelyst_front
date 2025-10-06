@@ -29,7 +29,6 @@ class EventProvider with ChangeNotifier {
 
   // Emergency reset for stuck loading state
   void forceResetLoadingState() {
-    print("🔧 [EventProvider] Force resetting loading state");
     _isLoading = false;
     notifyListeners();
   }
@@ -79,11 +78,9 @@ class EventProvider with ChangeNotifier {
   }
 
   Future<void> fetchAllEvents({bool forceFullRefresh = false}) async {
-    print("🔄 [EventProvider] Fetching events (forceFullRefresh: $forceFullRefresh)");
     
     // Prevent concurrent fetches (but allow forced refresh)
     if (_isLoading && !forceFullRefresh) {
-      print("⚠️ [EventProvider] Already loading, skipping concurrent fetch (use forceFullRefresh to override)");
       return;
     }
     
@@ -109,7 +106,6 @@ class EventProvider with ChangeNotifier {
     try {
       // Only clear events on first load or forced refresh
       if (_events.isEmpty || forceFullRefresh) {
-        print("🔄 [EventProvider] Performing full refresh (clearing existing events)");
         _events = [];
       }
       
@@ -145,7 +141,6 @@ class EventProvider with ChangeNotifier {
       // Sync events
       _syncEventsIncremental([...dayEvents, ...timeEvents, ...googleEvents]);
       
-      print('✅ [EventProvider] Synced ${_events.length} total events');
 
       // Store current events as previous for next comparison
       _previousEvents = List.from(_events);
@@ -454,28 +449,21 @@ class EventProvider with ChangeNotifier {
     final index = _events.indexWhere((event) => event.id == oldEvent.id);
     if (index >= 0) {
       _events[index] = newEvent;
-      print('🔄 [EventProvider] Updated event ${newEvent.id} in local state');
       notifyListeners();
     } else {
-      print('⚠️ [EventProvider] Event ${oldEvent.id} not found for update');
     }
   }
 
   /// Manually triggers Google Calendar import
   Future<void> importGoogleCalendarEvents() async {
-    print('🔄 [EventProvider] importGoogleCalendarEvents() called directly');
     if (_authService == null || _googleEventsImportService == null) {
-      print('⚠️ [EventProvider] Missing services: authService=${_authService != null}, googleEventsImportService=${_googleEventsImportService != null}');
       return;
     }
     
     final userId = await _authService!.getUserId();
     final userEmail = await _authService!.getUserEmail();
-    print('🔍 [EventProvider] Direct import - userId: $userId, userEmail: $userEmail');
     
     if (userId == null || userEmail == null) {
-      print('⚠️ [EventProvider] Cannot import Google events: missing user info');
-      print('💡 [EventProvider] userId: $userId, userEmail: $userEmail');
       return;
     }
 
@@ -483,7 +471,6 @@ class EventProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      print('🔄 [EventProvider] Starting manual Google Calendar import');
       
       final googleEvents = await _googleEventsImportService!.getImportedEventsAsAppointments(
         userId: userId,
@@ -494,7 +481,6 @@ class EventProvider with ChangeNotifier {
       _events.removeWhere((event) => event.userCalendars.contains('google'));
       _events.addAll(googleEvents);
 
-      print('✅ [EventProvider] Imported ${googleEvents.length} Google Calendar events');
       _errorMessage = '';
     } catch (e) {
       _errorMessage = 'Failed to import Google Calendar events: $e';

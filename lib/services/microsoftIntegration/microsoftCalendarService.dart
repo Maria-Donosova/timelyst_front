@@ -14,8 +14,6 @@ class MicrosoftCalendarService {
     int pageSize = 20,
     String? pageToken,
   }) async {
-    print('🔍 [MicrosoftCalendarService] Fetching calendars page for email: $email');
-    print('🔍 [MicrosoftCalendarService] Page size: $pageSize, Page token: $pageToken');
 
     try {
       final authToken = await _authService.getAuthToken();
@@ -35,8 +33,6 @@ class MicrosoftCalendarService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [MicrosoftCalendarService] Successfully fetched calendars page');
-        print('🔍 [MicrosoftCalendarService] Calendars count: ${(data['calendars'] as List?)?.length ?? 0}');
         return data;
       } else {
         print('❌ [MicrosoftCalendarService] Failed to fetch calendars: ${response.statusCode}');
@@ -56,8 +52,6 @@ class MicrosoftCalendarService {
     required String email,
     required List<Calendar> calendars,
   }) async {
-    print('🔍 [MicrosoftCalendarService] Saving ${calendars.length} selected calendars');
-    print('🔍 [MicrosoftCalendarService] User: $userId, Email: $email');
 
     // Debug: Print each calendar being sent
     for (int i = 0; i < calendars.length; i++) {
@@ -95,7 +89,6 @@ class MicrosoftCalendarService {
       'batchSize': calendars.length,
     };
 
-    print('🔍 [MicrosoftCalendarService] Full request body:');
     print('📋 URL: ${Config.backendMicrosoftCalendarsSave}');
     print('📋 Body: ${jsonEncode(requestBody)}');
 
@@ -107,7 +100,6 @@ class MicrosoftCalendarService {
       );
 
       _handleBatchResponse(response);
-      print('✅ [MicrosoftCalendarService] Successfully saved calendars batch');
     } catch (e) {
       print('❌ [MicrosoftCalendarService] Error saving calendars: $e');
       throw _handleError('saving calendars', e);
@@ -119,8 +111,6 @@ class MicrosoftCalendarService {
     required String email,
     String? syncToken,
   }) async {
-    print('🔍 [MicrosoftCalendarService] Fetching calendar changes for email: $email');
-    print('🔍 [MicrosoftCalendarService] Sync token: $syncToken');
 
     try {
       final authToken = await _authService.getAuthToken();
@@ -140,7 +130,6 @@ class MicrosoftCalendarService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [MicrosoftCalendarService] Successfully fetched calendar changes');
         return data;
       } else {
         print('❌ [MicrosoftCalendarService] Failed to fetch changes: ${response.statusCode}');
@@ -158,19 +147,13 @@ class MicrosoftCalendarService {
   void _handleBatchResponse(response) {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      print('✅ [MicrosoftCalendarService] Batch operation successful');
-      print('🔍 [MicrosoftCalendarService] Response: $data');
     } else {
       print('❌ [MicrosoftCalendarService] Batch operation failed: ${response.statusCode}');
-      print('🔍 [MicrosoftCalendarService] Error response body: ${response.body}');
-      print('🔍 [MicrosoftCalendarService] Error response headers: ${response.headers}');
       
       // Try to parse error details
       try {
         final errorData = jsonDecode(response.body);
-        print('🔍 [MicrosoftCalendarService] Parsed error: $errorData');
       } catch (e) {
-        print('🔍 [MicrosoftCalendarService] Could not parse error response as JSON');
       }
       
       throw Exception('Failed to save Microsoft calendars: ${response.statusCode} - ${response.body}');
@@ -189,7 +172,6 @@ class MicrosoftCalendarService {
     required String email,
     int maxPages = 10,
   }) async {
-    print('🔍 [MicrosoftCalendarService] Getting all calendars for email: $email');
     
     List<Calendar> allCalendars = [];
     String? nextPageToken;
@@ -213,11 +195,9 @@ class MicrosoftCalendarService {
         nextPageToken = pageData['nextPageToken'];
         pageCount++;
         
-        print('🔍 [MicrosoftCalendarService] Fetched page $pageCount with ${calendarsData?.length ?? 0} calendars');
         
       } while (nextPageToken != null && pageCount < maxPages);
 
-      print('✅ [MicrosoftCalendarService] Successfully fetched ${allCalendars.length} total calendars');
       return allCalendars;
       
     } catch (e) {

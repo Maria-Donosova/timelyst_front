@@ -38,7 +38,6 @@ class _AccountSettingsState extends State<AccountSettings> {
 
   Future<void> _importGoogleCalendarEvents() async {
     try {
-      print('🔄 [AccountSettings] Refreshing events data to check Google Calendar imports...');
       
       // Instead of calling the non-existent Google import endpoint, 
       // just refresh all events to see what the backend already has
@@ -55,7 +54,6 @@ class _AccountSettingsState extends State<AccountSettings> {
         );
       }
       
-      print('✅ [AccountSettings] Google Calendar import completed');
     } catch (e) {
       print('❌ [AccountSettings] Google Calendar import failed: $e');
       
@@ -72,7 +70,6 @@ class _AccountSettingsState extends State<AccountSettings> {
   }
 
   Future<void> _fetchUserCalendars() async {
-    print('🔍 [AccountSettings] Calling CalendarsService.fetchUserCalendars for userId: ${widget.userId}');
     try {
       final token = await widget.authService.getAuthToken();
       if (token == null) throw Exception('No authentication token available');
@@ -82,7 +79,6 @@ class _AccountSettingsState extends State<AccountSettings> {
         authToken: token,
       );
 
-      print('✅ [AccountSettings] Successfully fetched ${paginatedCalendars.calendars.length} calendars');
       
       setState(() {
         _calendars = paginatedCalendars.calendars;
@@ -105,11 +101,9 @@ class _AccountSettingsState extends State<AccountSettings> {
       List<Calendar> calendars) {
     final Map<CalendarSource, List<Calendar>> grouped = {};
 
-    print('🔍 [AccountSettings] Grouping ${calendars.length} calendars by source');
     
     for (final cal in calendars) {
       try {
-        print('🔍 [AccountSettings] Processing calendar: ${cal.metadata.title} (source: ${cal.source})');
         grouped.putIfAbsent(cal.source, () => []).add(cal);
       } catch (e) {
         print('❌ [AccountSettings] Error processing calendar ${cal.id}: $e');
@@ -118,7 +112,6 @@ class _AccountSettingsState extends State<AccountSettings> {
       }
     }
 
-    print('✅ [AccountSettings] Grouped calendars by ${grouped.keys.length} sources');
 
     // Sort by source type (Google first, then Outlook, then Apple)
     return Map.fromEntries(

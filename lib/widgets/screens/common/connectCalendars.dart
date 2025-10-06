@@ -181,7 +181,6 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
     });
 
     try {
-      print('🔍 [ConnectCalendars] Processing Microsoft OAuth callback');
       
       // Clean up URL immediately
       html.window.history.replaceState(null, '', '/');
@@ -190,7 +189,6 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
       final result = await signInManager.handleAuthCallback(widget.microsoftAuthCode!);
       
       if (result.userId != null && result.calendars != null) {
-        print('✅ [ConnectCalendars] Microsoft sign-in successful with ${result.calendars!.length} calendars');
         
         if (mounted) {
           // Navigate to calendar settings - same as other providers
@@ -254,19 +252,13 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                   text: 'Gmail',
                   color: const Color.fromARGB(255, 198, 23, 10),
                   onPressed: () async {
-                    print('🔍 [ConnectCalendars] Gmail button pressed by user');
                     final signInManager = GoogleSignInManager();
-                    print('🔍 [ConnectCalendars] GoogleSignInManager created');
                     
                     final signInResult = await signInManager.signIn(context);
-                    print('🔍 [ConnectCalendars] Sign-in result received: ${signInResult != null ? 'SUCCESS' : 'FAILED'}');
 
                     if (signInResult != null && signInResult.calendars != null) {
-                      print('✅ [ConnectCalendars] Sign-in successful with ${signInResult.calendars!.length} calendars');
-                      print('🔍 [ConnectCalendars] User: ${signInResult.email} (${signInResult.userId})');
                       
                       if (context.mounted) {
-                        print('🔍 [ConnectCalendars] Navigating to CalendarSettings...');
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -297,13 +289,11 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                   text: 'Outlook',
                   color: const Color.fromARGB(255, 6, 117, 208),
                   onPressed: () async {
-                    print('🔍 [ConnectCalendars] Outlook button pressed by user');
                     
                     try {
                       // Generate Microsoft OAuth URL and navigate in same tab
                       final authService = MicrosoftAuthService();
                       final authUrl = authService.generateAuthUrl();
-                      print('🔍 [ConnectCalendars] Generated Microsoft OAuth URL');
                       
                       // Navigate to OAuth URL in same tab (like Google flow)
                       html.window.location.href = authUrl;
@@ -325,20 +315,14 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                   text: 'iCloud',
                   color: const Color.fromARGB(255, 41, 41, 41),
                   onPressed: () async {
-                    print('🔍 [ConnectCalendars] iCloud button pressed by user');
                     final signInManager = AppleSignInManager();
-                    print('🔍 [ConnectCalendars] AppleSignInManager created');
                     
                     try {
                       final signInResult = await signInManager.signIn(context);
-                      print('🔍 [ConnectCalendars] Apple sign-in result received: ${signInResult.userId != null ? 'SUCCESS' : 'FAILED'}');
 
                       if (signInResult.userId != null && signInResult.calendars != null) {
-                        print('✅ [ConnectCalendars] Apple sign-in successful with ${signInResult.calendars!.length} calendars');
-                        print('🔍 [ConnectCalendars] User: ${signInResult.email} (${signInResult.userId})');
                         
                         if (context.mounted) {
-                          print('🔍 [ConnectCalendars] Navigating to CalendarSettings...');
                           Navigator.push(
                             context,
                             MaterialPageRoute(

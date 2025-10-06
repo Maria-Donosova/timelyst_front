@@ -36,15 +36,10 @@ class CalendarSyncManager {
     required String email,
     required List<Calendar> selectedCalendars,
   }) async {
-    print('🔍 [CalendarSyncManager] === STARTING saveSelectedCalendars ===');
-    print('🔍 [CalendarSyncManager] userId: $userId');
-    print('🔍 [CalendarSyncManager] email: $email');
-    print('🔍 [CalendarSyncManager] selectedCalendars.length: ${selectedCalendars.length}');
     
     // Enhanced logging: Show all input calendars
     for (int i = 0; i < selectedCalendars.length; i++) {
       final calendar = selectedCalendars[i];
-      print('🔍 [CalendarSyncManager] Input Calendar $i:');
       print('  📅 Title: "${calendar.metadata.title}"');
       print('  📅 Source: ${calendar.source}');
       print('  📅 Provider ID: ${calendar.providerCalendarId}');
@@ -52,19 +47,16 @@ class CalendarSyncManager {
     
     try {
       // Group calendars by provider
-      print('🔍 [CalendarSyncManager] Grouping calendars by provider...');
       final googleCalendars = selectedCalendars.where((cal) => cal.source == CalendarSource.google).toList();
       final microsoftCalendars = selectedCalendars.where((cal) => cal.source == CalendarSource.outlook).toList();
       final appleCalendars = selectedCalendars.where((cal) => cal.source == CalendarSource.apple).toList();
       
-      print('🔍 [CalendarSyncManager] Grouped results:');
       print('  📱 Google calendars: ${googleCalendars.length}');
       print('  📱 Microsoft calendars: ${microsoftCalendars.length}');
       print('  📱 Apple calendars: ${appleCalendars.length}');
       
       // Save Google calendars if any
       if (googleCalendars.isNotEmpty) {
-        print('🔍 [CalendarSyncManager] Saving ${googleCalendars.length} Google calendars');
         await _googleCalendarService.saveCalendarsBatch(
           userId: userId,
           email: email,
@@ -74,7 +66,6 @@ class CalendarSyncManager {
       
       // Save Microsoft calendars if any
       if (microsoftCalendars.isNotEmpty) {
-        print('🔍 [CalendarSyncManager] Saving ${microsoftCalendars.length} Microsoft calendars');
         final microsoftService = MicrosoftCalendarService();
         await microsoftService.saveCalendarsBatch(
           userId: userId,
@@ -85,13 +76,10 @@ class CalendarSyncManager {
       
       // Save Apple calendars if any
       if (appleCalendars.isNotEmpty) {
-        print('🔍 [CalendarSyncManager] === APPLE CALENDAR SAVE SECTION ===');
-        print('🔍 [CalendarSyncManager] Processing ${appleCalendars.length} Apple calendars');
         
         // Log each Apple calendar before conversion
         for (int i = 0; i < appleCalendars.length; i++) {
           final calendar = appleCalendars[i];
-          print('🔍 [CalendarSyncManager] Apple Calendar $i Details:');
           print('  🍎 Title: "${calendar.metadata.title}"');
           print('  🍎 Provider ID: ${calendar.providerCalendarId}');
           print('  🍎 Source: ${calendar.source}');
@@ -100,10 +88,8 @@ class CalendarSyncManager {
           print('  🍎 Category: ${calendar.preferences.category}');
         }
         
-        print('🔍 [CalendarSyncManager] Creating AppleCalDAVManager...');
         final appleManager = AppleCalDAVManager();
         
-        print('🔍 [CalendarSyncManager] Converting Calendar objects to Apple service format...');
         // Convert Calendar objects to format expected by Apple service
         // Use the same pattern as Microsoft calendars for backend compatibility
         final appleCalendarData = appleCalendars.map((calendar) {
@@ -126,12 +112,10 @@ class CalendarSyncManager {
           return json;
         }).toList();
         
-        print('🔍 [CalendarSyncManager] Converted ${appleCalendarData.length} calendars to Apple format');
         
         // Debug: Show what we're sending to the backend
         for (int i = 0; i < appleCalendarData.length; i++) {
           final cal = appleCalendarData[i];
-          print('🔍 [CalendarSyncManager] Apple Calendar $i data:');
           print('  🍎 ID: ${cal['id']}');
           print('  🍎 providerCalendarId: ${cal['providerCalendarId']}');
           print('  🍎 summary: ${cal['summary']}');
@@ -143,16 +127,13 @@ class CalendarSyncManager {
           print('  🍎 importAll: ${cal['importAll']}');
         }
         
-        print('🔍 [CalendarSyncManager] About to call appleManager.saveSelectedCalendars with email: $email');
         
         await appleManager.saveSelectedCalendars(
           email: email,
           selectedCalendars: appleCalendarData,
         );
         
-        print('🔍 [CalendarSyncManager] ✅ Apple calendar save completed successfully');
       } else {
-        print('🔍 [CalendarSyncManager] ⚠️ No Apple calendars found to save');
       }
 
       // Update sync token after changes (only for Google for now)

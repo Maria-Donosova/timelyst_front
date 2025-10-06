@@ -73,7 +73,6 @@ class EventMapper {
         print('⚠️ WARNING: Time event "${timeEvent.eventTitle}" has unusual date: ${timeEvent.start}');
       }
       
-      print('✅ Successfully parsed time event: "${timeEvent.eventTitle}" at $startTime');
       
     } catch (e) {
       print('❌ ERROR: Failed to parse time event dates for "${timeEvent.eventTitle}": $e');
@@ -132,7 +131,6 @@ class EventMapper {
   static String _formatRecurrenceRule(String rule) {
     if (rule.isEmpty) return '';
     
-    print('🔍 [EventMapper] Original recurrence rule: "$rule"');
     
     // Clean up the rule - remove any extra RRULE: prefixes
     rule = rule.replaceAll(RegExp(r'RRULE:'), '').trim();
@@ -143,7 +141,6 @@ class EventMapper {
     // Ensure the rule is properly formatted for Syncfusion
     // Common formats: RRULE:FREQ=DAILY;COUNT=5 or RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR
     if (!rule.contains('FREQ=')) {
-      print('⚠️ [EventMapper] Invalid recurrence rule format: "$rule" - missing FREQ parameter');
       return '';
     }
     
@@ -155,10 +152,8 @@ class EventMapper {
       final futureDate = DateTime.now().add(Duration(days: 730));
       final untilDate = futureDate.toIso8601String().substring(0, 8).replaceAll('-', '') + 'T000000Z';
       rule = '$rule;UNTIL=$untilDate';
-      print('🔄 [EventMapper] Added UNTIL date for infinite recurrence: $untilDate');
     }
     
-    print('🔄 [EventMapper] Final formatted recurrence rule: "$rule"');
     return rule;
   }
 

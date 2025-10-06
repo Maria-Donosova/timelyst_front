@@ -14,8 +14,6 @@ class Wrapper extends StatelessWidget {
     // Check if this is a Microsoft OAuth callback
     final uri = Uri.parse(html.window.location.href);
     if (uri.queryParameters.containsKey('code')) {
-      print('🔍 [Wrapper] Detected Microsoft OAuth callback at path: ${uri.path}');
-      print('🔍 [Wrapper] Auth code present: ${uri.queryParameters['code']?.substring(0, 10)}...');
       // Return to ConnectCal screen which will handle the callback
       return ConnectCal(microsoftAuthCode: uri.queryParameters['code']);
     }

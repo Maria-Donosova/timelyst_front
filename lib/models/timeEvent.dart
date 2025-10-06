@@ -158,7 +158,6 @@ class TimeEvent {
         final dateTime = DateTime.fromMillisecondsSinceEpoch(value.toInt());
         return dateTime.toIso8601String();
       } catch (e) {
-        print('⚠️ Error parsing timestamp $value: $e');
         return '';
       }
     }
