@@ -29,16 +29,12 @@ class AppleAuthService {
 
   /// Generates Apple OAuth authorization URL with PKCE
   String generateAuthUrl() {
-    print('🔍 [AppleAuthService] Generating Apple OAuth URL');
     
     // Generate PKCE parameters
     _codeVerifier = _generateRandomString(128);
     final codeChallenge = _generateCodeChallenge(_codeVerifier!);
     _state = _generateRandomString(32);
     
-    print('🔍 [AppleAuthService] Generated PKCE parameters');
-    print('🔍 [AppleAuthService] Code challenge: ${codeChallenge.substring(0, 10)}...');
-    print('🔍 [AppleAuthService] State: ${_state!.substring(0, 10)}...');
 
     final params = {
       'client_id': Config.appleClientId,
@@ -57,17 +53,12 @@ class AppleAuthService {
 
     final authUrl = '${Config.appleAuthUrl}?$queryString';
     
-    print('🔍 [AppleAuthService] Generated Apple OAuth URL successfully');
-    print('🔍 [AppleAuthService] Auth URL: ${authUrl.substring(0, 50)}...');
     
     return authUrl;
   }
 
   /// Sends authorization code to backend for token exchange
   Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode) async {
-    print('🔍 [AppleAuthService] Sending auth code to backend');
-    print('🔍 [AppleAuthService] Auth code length: ${authCode.length}');
-    print('🔍 [AppleAuthService] Code verifier length: ${_codeVerifier?.length ?? 0}');
 
     try {
       final authToken = await _authService.getAuthToken();
@@ -86,18 +77,14 @@ class AppleAuthService {
         token: authToken,
       );
 
-      print('🔍 [AppleAuthService] Backend response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [AppleAuthService] Successfully exchanged auth code for tokens');
-        print('🔍 [AppleAuthService] Response keys: ${data.keys.toList()}');
         
         return data;
       } else {
         final errorBody = response.body;
         print('❌ [AppleAuthService] Backend error: ${response.statusCode}');
-        print('🔍 [AppleAuthService] Error response: $errorBody');
         
         throw Exception(
           'Failed to exchange authorization code: ${response.statusCode} - $errorBody',
@@ -111,7 +98,6 @@ class AppleAuthService {
 
   /// Clears stored PKCE parameters (call after successful auth)
   void clearAuthState() {
-    print('🔍 [AppleAuthService] Clearing auth state');
     _codeVerifier = null;
     _state = null;
   }
@@ -122,7 +108,6 @@ class AppleAuthService {
   /// Validates the state parameter from callback
   bool validateState(String receivedState) {
     final isValid = _state != null && _state == receivedState;
-    print('🔍 [AppleAuthService] State validation: ${isValid ? 'VALID' : 'INVALID'}');
     return isValid;
   }
 }

@@ -13,7 +13,6 @@ class CalendarsService {
     int limit = 20,
     int offset = 0,
   }) async {
-    print('🔍 [CalendarsService] Starting fetchUserCalendars for userId: $userId');
     //logger.i('Fetching user calendars with limit $limit and offset $offset');
 
     // Define the optimized GraphQL query
@@ -63,25 +62,21 @@ class CalendarsService {
           );
         }
 
-        print('🔍 [CalendarsService] Raw response body: ${response.body}');
         final responseData = data['data']?['calendars'];
         if (responseData == null) {
           print('❌ [CalendarsService] "calendars" key not found in data object.');
           return PaginatedCalendars(calendars: [], totalCount: 0, hasMore: false);
         }
-        print('🔍 [CalendarsService] Found paginated data object: $responseData');
 
         final calendarsData = responseData['calendars'];
         if (calendarsData == null || calendarsData is! List) {
           print('❌ [CalendarsService] "calendars" list not found or not a list within paginated data.');
           return PaginatedCalendars(calendars: [], totalCount: 0, hasMore: false);
         }
-        print('🔍 [CalendarsService] Found ${calendarsData.length} calendar items in raw list.');
 
         final parsedCalendars = calendarsData
             .map((json) => Calendar.fromJson(json as Map<String, dynamic>))
             .toList();
-        print('🔍 [CalendarsService] Parsed ${parsedCalendars.length} calendar objects.');
 
         return PaginatedCalendars(
           calendars: parsedCalendars,

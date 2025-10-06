@@ -98,14 +98,12 @@ class _AppleCalendarConnectionFormState extends State<AppleCalendarConnectionFor
     });
 
     try {
-      print('🔍 [AppleCalendarConnectionForm] Attempting to connect Apple Calendar');
       
       final result = await _appleCalDAVManager.connectAppleCalendar(
         appleId: _appleIdController.text.trim(),
         appPassword: _appPasswordController.text.trim(),
       );
 
-      print('✅ [AppleCalendarConnectionForm] Apple Calendar connected successfully');
       widget.onSuccess(result);
       
     } catch (e) {

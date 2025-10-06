@@ -39,21 +39,17 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('🔄 [Agenda] App lifecycle state changed to: $state');
     if (state == AppLifecycleState.resumed) {
       final now = DateTime.now();
       if (_lastFetchTime == null || now.difference(_lastFetchTime!).inMinutes >= 5) {
-        print('🔄 [Agenda] App resumed - refreshing data (last fetch: $_lastFetchTime)');
         _refreshData();
       } else {
-        print('🔄 [Agenda] App resumed but data is recent, skipping refresh');
       }
     }
   }
 
   void _refreshData() {
     final timestamp = DateTime.now();
-    print('🔄 [Agenda] Refreshing data at ${timestamp.toIso8601String()}');
     
     _lastFetchTime = timestamp;
     Provider.of<TaskProvider>(context, listen: false).fetchTasks();

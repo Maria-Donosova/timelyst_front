@@ -14,8 +14,6 @@ class AppleCalendarService {
     int pageSize = 20,
     String? pageToken,
   }) async {
-    print('🔍 [AppleCalendarService] Fetching calendars page for email: $email');
-    print('🔍 [AppleCalendarService] Page size: $pageSize, Page token: $pageToken');
 
     try {
       final authToken = await _authService.getAuthToken();
@@ -35,8 +33,6 @@ class AppleCalendarService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [AppleCalendarService] Successfully fetched calendars page');
-        print('🔍 [AppleCalendarService] Calendars count: ${(data['calendars'] as List?)?.length ?? 0}');
         return data;
       } else {
         print('❌ [AppleCalendarService] Failed to fetch calendars: ${response.statusCode}');
@@ -56,8 +52,6 @@ class AppleCalendarService {
     required String email,
     required List<Calendar> calendars,
   }) async {
-    print('🔍 [AppleCalendarService] Saving ${calendars.length} selected calendars');
-    print('🔍 [AppleCalendarService] User: $userId, Email: $email');
 
     try {
       final response = await _apiClient.post(
@@ -72,7 +66,6 @@ class AppleCalendarService {
       );
 
       _handleBatchResponse(response);
-      print('✅ [AppleCalendarService] Successfully saved calendars batch');
     } catch (e) {
       print('❌ [AppleCalendarService] Error saving calendars: $e');
       throw _handleError('saving calendars', e);
@@ -84,8 +77,6 @@ class AppleCalendarService {
     required String email,
     String? syncToken,
   }) async {
-    print('🔍 [AppleCalendarService] Fetching calendar changes for email: $email');
-    print('🔍 [AppleCalendarService] Sync token: $syncToken');
 
     try {
       final authToken = await _authService.getAuthToken();
@@ -105,7 +96,6 @@ class AppleCalendarService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('✅ [AppleCalendarService] Successfully fetched calendar changes');
         return data;
       } else {
         print('❌ [AppleCalendarService] Failed to fetch changes: ${response.statusCode}');
@@ -123,11 +113,8 @@ class AppleCalendarService {
   void _handleBatchResponse(response) {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      print('✅ [AppleCalendarService] Batch operation successful');
-      print('🔍 [AppleCalendarService] Response: $data');
     } else {
       print('❌ [AppleCalendarService] Batch operation failed: ${response.statusCode}');
-      print('🔍 [AppleCalendarService] Error response: ${response.body}');
       throw Exception('Failed to save Apple calendars: ${response.statusCode}');
     }
   }
@@ -144,7 +131,6 @@ class AppleCalendarService {
     required String email,
     int maxPages = 10,
   }) async {
-    print('🔍 [AppleCalendarService] Getting all calendars for email: $email');
     
     List<Calendar> allCalendars = [];
     String? nextPageToken;
@@ -168,11 +154,9 @@ class AppleCalendarService {
         nextPageToken = pageData['nextPageToken'];
         pageCount++;
         
-        print('🔍 [AppleCalendarService] Fetched page $pageCount with ${calendarsData?.length ?? 0} calendars');
         
       } while (nextPageToken != null && pageCount < maxPages);
 
-      print('✅ [AppleCalendarService] Successfully fetched ${allCalendars.length} total calendars');
       return allCalendars;
       
     } catch (e) {

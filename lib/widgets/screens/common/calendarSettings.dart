@@ -97,7 +97,6 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                   importSettings.importAll,
                   (value) {
                     bool newValue = value ?? false;
-                    print('🔍 [CalendarSettings] "All" checkbox changed to: $newValue for calendar: ${calendar.metadata.title}');
                     setState(() {
                       final updatedCalendar = calendar.copyWith(
                         preferences: calendar.preferences.copyWith(
@@ -114,7 +113,6 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                         ),
                       );
                       widget.calendars[index] = updatedCalendar;
-                      print('🔍 [CalendarSettings] Updated calendar state:');
                       print('  📋 Import All: ${updatedCalendar.preferences.importSettings.importAll}');
                       print('  📋 Import Subject: ${updatedCalendar.preferences.importSettings.importSubject}');
                       print('  📋 Import Body: ${updatedCalendar.preferences.importSettings.importBody}');
@@ -301,7 +299,6 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
   Future<void> _navigateToAgenda() async {
     // Debug: Print current state of each calendar before saving
-    print('🔍 [CalendarSettings] Current state of all calendars before saving:');
     for (int i = 0; i < widget.calendars.length; i++) {
       final calendar = widget.calendars[i];
       final importSettings = calendar.preferences.importSettings;
@@ -326,12 +323,10 @@ class _CalendarSettingsState extends State<CalendarSettings> {
           importSettings.importRecipients;
     }).toList();
 
-    print('🔍 [CalendarSettings] Filtered ${_selectedCalendars.length} selected calendars out of ${widget.calendars.length} total');
     
     // Enhanced logging: Show details of each selected calendar
     for (int i = 0; i < _selectedCalendars.length; i++) {
       final calendar = _selectedCalendars[i];
-      print('🔍 [CalendarSettings] Selected Calendar $i:');
       print('  📅 Title: "${calendar.metadata.title}"');
       print('  📅 Source: ${calendar.source}');
       print('  📅 Provider ID: ${calendar.providerCalendarId}');
@@ -340,8 +335,6 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
     // Save selected calendars using the orchestrator
     try {
-      print('🔍 [CalendarSettings] About to call CalendarSyncManager.saveSelectedCalendars');
-      print('🔍 [CalendarSettings] Parameters: userId=${widget.userId}, email=${widget.email}');
       
       await CalendarSyncManager().saveSelectedCalendars(
         userId: widget.userId,
@@ -349,14 +342,12 @@ class _CalendarSettingsState extends State<CalendarSettings> {
         selectedCalendars: _selectedCalendars,
       );
       
-      print('🔍 [CalendarSettings] CalendarSyncManager.saveSelectedCalendars completed successfully');
       print("Selected calendars saved successfully.");
 
       // Refresh authentication state before navigating to ensure UI shows correct auth status
       if (mounted) {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         await authProvider.refreshAuthState();
-        print('🔄 [CalendarSettings] Refreshed authentication state');
       }
 
       // Navigate to the Agenda screen only if saving is successful

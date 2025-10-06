@@ -20,14 +20,10 @@ class GoogleSignInOutService {
 
   Future<GoogleSignInResult> googleSignIn(String serverAuthCode) async {
     try {
-      print('🔍 [GoogleSignInOutService] Starting Google Sign-In process...');
-      print('🔍 [GoogleSignInOutService] Server auth code provided: ${serverAuthCode.length > 10 ? serverAuthCode.substring(0, 10) + '...' : serverAuthCode}');
       
       final response =
           await _googleAuthService.sendAuthCodeToBackend(serverAuthCode);
 
-      print('🔍 [GoogleSignInOutService] Received response from GoogleAuthService');
-      print('🔍 [GoogleSignInOutService] Response success: ${response['success']}');
       
       if (response['success']) {
         // Get userId from stored auth token instead of backend response  
@@ -39,18 +35,10 @@ class GoogleSignInOutService {
                      response['data']?['googleEmail'];
         final calendars = response['calendars'];
         
-        print('✅ [GoogleSignInOutService] Google Sign-In successful');
-        print('🔍 [GoogleSignInOutService] User ID: $userId');
-        print('🔍 [GoogleSignInOutService] User email: $email');
-        print('🔍 [GoogleSignInOutService] Email from response["email"]: ${response['email']}');
-        print('🔍 [GoogleSignInOutService] Email from response["data"]["email"]: ${response['data']?['email']}');
-        print('🔍 [GoogleSignInOutService] Email from response["data"]["googleEmail"]: ${response['data']?['googleEmail']}');
-        print('🔍 [GoogleSignInOutService] Number of calendars: ${calendars?.length ?? 0}');
         
         // CRITICAL FIX: Save the email to secure storage for Google Calendar integration
         if (email != null && email.isNotEmpty) {
           await _authService.saveUserEmail(email);
-          print('✅ [GoogleSignInOutService] Saved user email to secure storage: $email');
         } else {
           print('⚠️ [GoogleSignInOutService] No email found in Google Sign-In response - Google Calendar integration will not work');
         }
@@ -63,8 +51,6 @@ class GoogleSignInOutService {
         );
       } else {
         print('❌ [GoogleSignInOutService] Backend response unsuccessful');
-        print('🔍 [GoogleSignInOutService] Error message: ${response['message']}');
-        print('🔍 [GoogleSignInOutService] Error details: ${response['error']}');
         throw GoogleSignInException(
             'Error from backend: ${response['message']}');
       }
@@ -73,8 +59,6 @@ class GoogleSignInOutService {
       throw GoogleSignInException('Google Sign-In timed out');
     } catch (error, stackTrace) {
       print('❌ [GoogleSignInOutService] Exception during Google Sign-In: $error');
-      print('🔍 [GoogleSignInOutService] Exception type: ${error.runtimeType}');
-      print('🔍 [GoogleSignInOutService] Stack trace: $stackTrace');
       if (error is GoogleSignInException) {
         rethrow;
       }
@@ -84,24 +68,18 @@ class GoogleSignInOutService {
 
   Future<void> googleDisconnect() async {
     try {
-      print('🔍 [GoogleSignInOutService] Starting Google account disconnect...');
       await _googleSignIn.disconnect();
-      print('✅ [GoogleSignInOutService] Google account disconnected successfully');
     } catch (e, stackTrace) {
       print('❌ [GoogleSignInOutService] Error disconnecting Google account: $e');
-      print('🔍 [GoogleSignInOutService] Stack trace: $stackTrace');
       throw GoogleSignInException('Error disconnecting Google account: $e');
     }
   }
 
   Future<void> googleSignOut() async {
     try {
-      print('🔍 [GoogleSignInOutService] Starting Google sign-out...');
       await _googleSignIn.signOut();
-      print('✅ [GoogleSignInOutService] Google sign-out completed successfully');
     } catch (e, stackTrace) {
       print('❌ [GoogleSignInOutService] Google sign-out failed: $e');
-      print('🔍 [GoogleSignInOutService] Stack trace: $stackTrace');
       throw GoogleSignInException('Google sign-out failed: $e');
     }
   }

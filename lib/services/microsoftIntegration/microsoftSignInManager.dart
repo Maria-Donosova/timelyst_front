@@ -18,17 +18,14 @@ class MicrosoftSignInManager {
   /// Initiates Microsoft OAuth sign-in flow
   Future<MicrosoftSignInResult> signIn(BuildContext context) async {
     try {
-      print('🔍 [MicrosoftSignInManager] Starting Microsoft sign-in process');
 
       // Generate and launch Microsoft OAuth URL
       final authUrl = _authService.generateAuthUrl();
-      print('🔍 [MicrosoftSignInManager] Generated auth URL');
 
       // Launch the OAuth URL in browser
       final uri = Uri.parse(authUrl);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
-        print('🔍 [MicrosoftSignInManager] Launched OAuth URL in browser');
       } else {
         throw Exception('Could not launch Microsoft OAuth URL');
       }
@@ -38,7 +35,6 @@ class MicrosoftSignInManager {
       // You might want to use a WebView or implement a custom URL scheme.
       
       print('⚠️ [MicrosoftSignInManager] OAuth redirect handling not implemented');
-      print('🔍 [MicrosoftSignInManager] User needs to copy authorization code manually');
       
       // For now, return an empty result - this will need to be completed
       // when you implement the redirect handling
@@ -58,11 +54,9 @@ class MicrosoftSignInManager {
   /// Handles the OAuth callback with authorization code
   Future<MicrosoftSignInResult> handleAuthCallback(String authCode) async {
     try {
-      print('🔍 [MicrosoftSignInManager] Handling auth callback with code');
       
       final result = await _signInOutService.microsoftSignIn(authCode);
       
-      print('✅ [MicrosoftSignInManager] Microsoft Sign-In process completed successfully');
       return result;
       
     } catch (e) {
@@ -74,9 +68,7 @@ class MicrosoftSignInManager {
   /// Signs out from Microsoft
   Future<void> signOut() async {
     try {
-      print('🔍 [MicrosoftSignInManager] Starting Microsoft sign-out process');
       // Implement Microsoft sign-out logic if needed
-      print('✅ [MicrosoftSignInManager] Microsoft sign-out completed');
     } catch (e) {
       print('❌ [MicrosoftSignInManager] Error during sign-out: $e');
       rethrow;

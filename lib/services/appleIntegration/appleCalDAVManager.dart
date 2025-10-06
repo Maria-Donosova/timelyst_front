@@ -19,8 +19,6 @@ class AppleCalDAVManager {
     required String appPassword,
   }) async {
     try {
-      print('🔍 [AppleCalDAVManager] Starting Apple Calendar connection');
-      print('🔍 [AppleCalDAVManager] Apple ID: $appleId');
 
       // Validate inputs
       if (!_calDAVService.isValidAppleId(appleId)) {
@@ -41,7 +39,6 @@ class AppleCalDAVManager {
       );
 
       if (response['success'] == true) {
-        print('✅ [AppleCalDAVManager] Apple Calendar connected successfully');
         
         // Fetch initial calendars
         final calendarsResponse = await _calDAVService.fetchAppleCalendars(appleId);
@@ -69,7 +66,6 @@ class AppleCalDAVManager {
   /// Fetches Apple calendars for a connected account
   Future<List<Calendar>> fetchCalendars(String email) async {
     try {
-      print('🔍 [AppleCalDAVManager] Fetching Apple calendars for: $email');
       
       final response = await _calDAVService.fetchAppleCalendars(email);
       
@@ -80,7 +76,6 @@ class AppleCalDAVManager {
           ? calendars.map((cal) => Calendar.fromAppleJson(cal as Map<String, dynamic>)).toList()
           : <Calendar>[];
         
-        print('✅ [AppleCalDAVManager] Fetched ${calendarsList.length} calendars');
         
         return calendarsList;
       } else {
@@ -98,14 +93,10 @@ class AppleCalDAVManager {
     required List<Map<String, dynamic>> selectedCalendars,
   }) async {
     try {
-      print('🔍 [AppleCalDAVManager] === STARTING saveSelectedCalendars ===');
-      print('🔍 [AppleCalDAVManager] email: $email');
-      print('🔍 [AppleCalDAVManager] selectedCalendars.length: ${selectedCalendars.length}');
       
       // Enhanced logging: Show each calendar to be saved
       for (int i = 0; i < selectedCalendars.length; i++) {
         final calendar = selectedCalendars[i];
-        print('🔍 [AppleCalDAVManager] Calendar $i to save:');
         print('  🍎 ID: ${calendar['id'] ?? calendar['providerCalendarId']}');
         print('  🍎 Title: ${calendar['metadata']?['title'] ?? calendar['title']}');
         print('  🍎 Import All: ${calendar['importAll']}');
@@ -114,7 +105,6 @@ class AppleCalDAVManager {
         print('  🍎 Color: ${calendar['color']}');
       }
       
-      print('🔍 [AppleCalDAVManager] Filtering calendars with valid import options...');
       // Filter out calendars with no import options enabled
       final validCalendars = selectedCalendars.where((calendar) {
         final hasImportOptions = calendar['importAll'] == true ||
@@ -125,32 +115,26 @@ class AppleCalDAVManager {
                calendar['importRecipients'] == true;
         
         final calendarTitle = calendar['metadata']?['title'] ?? calendar['title'] ?? 'Unknown';
-        print('🔍 [AppleCalDAVManager] Calendar "$calendarTitle" has import options: $hasImportOptions');
         return hasImportOptions;
       }).toList();
 
-      print('🔍 [AppleCalDAVManager] Valid calendars after filtering: ${validCalendars.length}');
 
       if (validCalendars.isEmpty) {
         print('❌ [AppleCalDAVManager] No valid calendars to save');
         throw Exception('No valid calendars to save. Please enable at least one import option.');
       }
 
-      print('🔍 [AppleCalDAVManager] About to call AppleCalDAVService.saveSelectedCalendars...');
-      print('🔍 [AppleCalDAVManager] Calling with email: $email and ${validCalendars.length} calendars');
 
       final response = await _calDAVService.saveSelectedCalendars(
         email: email,
         calendars: validCalendars,
       );
 
-      print('🔍 [AppleCalDAVManager] AppleCalDAVService.saveSelectedCalendars returned: $response');
 
       if (response['success'] != true) {
         throw Exception(response['message'] ?? 'Failed to save calendars');
       }
 
-      print('✅ [AppleCalDAVManager] Apple calendars and events saved successfully');
     } catch (e) {
       print('❌ [AppleCalDAVManager] Error saving calendars: $e');
       rethrow;
@@ -160,7 +144,6 @@ class AppleCalDAVManager {
   /// Deletes all Apple calendars for the user
   Future<void> deleteCalendars() async {
     try {
-      print('🔍 [AppleCalDAVManager] Deleting Apple calendars');
       
       final response = await _calDAVService.deleteAppleCalendars();
       
@@ -168,7 +151,6 @@ class AppleCalDAVManager {
         throw Exception(response['message'] ?? 'Failed to delete calendars');
       }
 
-      print('✅ [AppleCalDAVManager] Apple calendars deleted successfully');
     } catch (e) {
       print('❌ [AppleCalDAVManager] Error deleting calendars: $e');
       rethrow;
@@ -178,7 +160,6 @@ class AppleCalDAVManager {
   /// Disconnects an Apple account
   Future<void> disconnectAccount(String email) async {
     try {
-      print('🔍 [AppleCalDAVManager] Disconnecting Apple account: $email');
       
       final response = await _calDAVService.disconnectAppleAccount(email);
       
@@ -186,7 +167,6 @@ class AppleCalDAVManager {
         throw Exception(response['message'] ?? 'Failed to disconnect account');
       }
 
-      print('✅ [AppleCalDAVManager] Apple account disconnected successfully');
     } catch (e) {
       print('❌ [AppleCalDAVManager] Error disconnecting account: $e');
       rethrow;
