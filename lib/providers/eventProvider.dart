@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/services/authService.dart';
 import 'package:timelyst_flutter/services/eventsService.dart';
-import 'package:timelyst_flutter/services/googleIntegration/googleEventsImportService.dart';
 import 'package:timelyst_flutter/models/customApp.dart';
 
 class EventProvider with ChangeNotifier {
   AuthService? _authService;
-  GoogleEventsImportService? _googleEventsImportService;
   List<CustomAppointment> _events = [];
   
   // Track previous events for change detection
@@ -19,9 +17,8 @@ class EventProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  EventProvider({AuthService? authService, GoogleEventsImportService? googleEventsImportService}) 
-    : _authService = authService,
-      _googleEventsImportService = googleEventsImportService ?? GoogleEventsImportService();
+  EventProvider({AuthService? authService}) 
+    : _authService = authService;
 
   void setAuth(AuthService authService) {
     _authService = authService;
@@ -92,7 +89,6 @@ class EventProvider with ChangeNotifier {
     }
     final authToken = await _authService!.getAuthToken();
     final userId = await _authService!.getUserId();
-    final userEmail = await _authService!.getUserEmail();
     if (authToken == null || userId == null) {
       print("❌ [EventProvider] Missing authentication credentials");
       _isLoading = false;
@@ -117,30 +113,9 @@ class EventProvider with ChangeNotifier {
       final dayEvents = backendResults[0];
       final timeEvents = backendResults[1];
 
-      // Filter Google events for compatibility
-      List<CustomAppointment> googleEvents = [];
-      try {
-        final googleTimeEvents = timeEvents.where((event) => 
-          event.userCalendars.contains('google') || 
-          event.catTitle == 'imported' ||
-          (event.organizer.isNotEmpty && event.organizer.contains('google'))
-        ).toList();
-        
-        final googleDayEvents = dayEvents.where((event) => 
-          event.userCalendars.contains('google') || 
-          event.catTitle == 'imported' ||
-          (event.organizer.isNotEmpty && event.organizer.contains('google'))
-        ).toList();
-        
-        googleEvents = [...googleTimeEvents, ...googleDayEvents];
-      } catch (e) {
-        print('❌ [EventProvider] Error filtering Google events: $e');
-        googleEvents = [];
-      }
-      
-      // Sync events
-      _syncEventsIncremental([...dayEvents, ...timeEvents, ...googleEvents]);
-      
+      // Directly sync all events from backend (no filtering/re-merging needed)
+      final allEvents = [...dayEvents, ...timeEvents];
+      _syncEventsIncremental(allEvents);
 
       // Store current events as previous for next comparison
       _previousEvents = List.from(_events);
@@ -454,40 +429,4 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  /// Manually triggers Google Calendar import
-  Future<void> importGoogleCalendarEvents() async {
-    if (_authService == null || _googleEventsImportService == null) {
-      return;
-    }
-    
-    final userId = await _authService!.getUserId();
-    final userEmail = await _authService!.getUserEmail();
-    
-    if (userId == null || userEmail == null) {
-      return;
-    }
-
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      
-      final googleEvents = await _googleEventsImportService!.getImportedEventsAsAppointments(
-        userId: userId,
-        email: userEmail,
-      );
-
-      // Remove existing Google events and add new ones
-      _events.removeWhere((event) => event.userCalendars.contains('google'));
-      _events.addAll(googleEvents);
-
-      _errorMessage = '';
-    } catch (e) {
-      _errorMessage = 'Failed to import Google Calendar events: $e';
-      print('❌ [EventProvider] $_errorMessage');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
 }
