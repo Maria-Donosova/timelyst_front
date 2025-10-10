@@ -75,9 +75,12 @@ class EventProvider with ChangeNotifier {
   }
 
   Future<void> fetchAllEvents({bool forceFullRefresh = false}) async {
+    final startTime = DateTime.now();
+    print('⏱️ [EventProvider] Starting fetchAllEvents at ${startTime}');
     
     // Prevent concurrent fetches (but allow forced refresh)
     if (_isLoading && !forceFullRefresh) {
+      print('⚠️ [EventProvider] Already loading, skipping fetch');
       return;
     }
     
@@ -105,25 +108,85 @@ class EventProvider with ChangeNotifier {
         _events = [];
       }
       
+      print('🔄 [EventProvider] Starting backend API calls...');
+      final apiStartTime = DateTime.now();
+      
       final backendResults = await Future.wait([
         EventService.fetchDayEvents(userId, authToken),
         EventService.fetchTimeEvents(userId, authToken),
       ]).timeout(Duration(seconds: 30));
+      
+      final apiEndTime = DateTime.now();
+      final apiDuration = apiEndTime.difference(apiStartTime);
+      print('🔄 [EventProvider] Backend API calls completed in ${apiDuration.inMilliseconds}ms');
 
       final dayEvents = backendResults[0];
       final timeEvents = backendResults[1];
 
-      // Directly sync all events from backend (no filtering/re-merging needed)
+      print('🔍 [EventProvider] Fetched ${dayEvents.length} day events and ${timeEvents.length} time events');
+      
+      // Debug: Log events by source and time
+      final now = DateTime.now();
+      final todayStart = DateTime(now.year, now.month, now.day);
+      final todayEnd = todayStart.add(Duration(days: 1));
+      final tomorrowEnd = todayStart.add(Duration(days: 2));
+      
       final allEvents = [...dayEvents, ...timeEvents];
+      final todayEvents = allEvents.where((event) {
+        return event.startTime.isAfter(todayStart) && event.startTime.isBefore(todayEnd);
+      }).toList();
+      
+      final tomorrowEvents = allEvents.where((event) {
+        return event.startTime.isAfter(todayEnd) && event.startTime.isBefore(tomorrowEnd);
+      }).toList();
+      
+      print('📅 [EventProvider] Today\'s events (${todayEvents.length}):');
+      for (int i = 0; i < todayEvents.length; i++) {
+        final event = todayEvents[i];
+        final timeStr = event.isAllDay ? 'All Day' : '${event.startTime.hour.toString().padLeft(2, '0')}:${event.startTime.minute.toString().padLeft(2, '0')}';
+        print('  [$i] $timeStr - "${event.title}" (source: ${event.userCalendars}, id: ${event.id})');
+      }
+      
+      print('📅 [EventProvider] Tomorrow\'s events (${tomorrowEvents.length}):');
+      for (int i = 0; i < tomorrowEvents.length; i++) {
+        final event = tomorrowEvents[i];
+        final timeStr = event.isAllDay ? 'All Day' : '${event.startTime.hour.toString().padLeft(2, '0')}:${event.startTime.minute.toString().padLeft(2, '0')}';
+        print('  [$i] $timeStr - "${event.title}" (source: ${event.userCalendars}, id: ${event.id})');
+      }
+      
+      // Also check for events with missing Google Calendar identifiers
+      final googleEvents = allEvents.where((event) => 
+        event.userCalendars.any((cal) => cal.toLowerCase().contains('google')) ||
+        event.organizer.toLowerCase().contains('google') ||
+        event.catTitle == 'imported'
+      ).toList();
+      
+      print('📅 [EventProvider] Google Calendar events (${googleEvents.length}):');
+      for (int i = 0; i < googleEvents.length; i++) {
+        final event = googleEvents[i];
+        final timeStr = event.isAllDay ? 'All Day' : '${event.startTime.hour.toString().padLeft(2, '0')}:${event.startTime.minute.toString().padLeft(2, '0')}';
+        print('  [$i] ${event.startTime.toIso8601String().substring(0, 10)} $timeStr - "${event.title}" (${event.userCalendars})');
+      }
+
+      // Directly sync all events from backend (no filtering/re-merging needed)
       _syncEventsIncremental(allEvents);
 
       // Store current events as previous for next comparison
       _previousEvents = List.from(_events);
 
       _errorMessage = '';
+      
+      final endTime = DateTime.now();
+      final duration = endTime.difference(startTime);
+      print('⏱️ [EventProvider] fetchAllEvents completed in ${duration.inMilliseconds}ms');
+      
     } catch (e) {
       _errorMessage = 'Failed to fetch events: $e';
-      print(_errorMessage);
+      print('❌ [EventProvider] Error: $_errorMessage');
+      
+      final endTime = DateTime.now();
+      final duration = endTime.difference(startTime);
+      print('⏱️ [EventProvider] fetchAllEvents failed after ${duration.inMilliseconds}ms');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -323,6 +386,8 @@ class EventProvider with ChangeNotifier {
   /// Performs incremental synchronization of events
   /// Only adds new events, updates changed events, and removes deleted events
   void _syncEventsIncremental(List<CustomAppointment> fetchedEvents) {
+    final syncStartTime = DateTime.now();
+    print('🔄 [EventProvider] Starting incremental sync of ${fetchedEvents.length} fetched events with ${_events.length} existing events');
     final fetchedEventMap = Map<String, CustomAppointment>.fromIterable(
       fetchedEvents,
       key: (e) => e.id,
@@ -387,6 +452,10 @@ class EventProvider with ChangeNotifier {
       }
     }
 
+    final syncEndTime = DateTime.now();
+    final syncDuration = syncEndTime.difference(syncStartTime);
+    print('🔄 [EventProvider] Incremental sync completed: $changes changes made in ${syncDuration.inMilliseconds}ms');
+    
     if (changes > 0) {
       notifyListeners();
     }
