@@ -12,6 +12,11 @@ class EventProvider with ChangeNotifier {
 
   bool _isLoading = false;
   String _errorMessage = '';
+  
+  // Cache management
+  final Map<String, List<CustomAppointment>> _eventCache = {};
+  final Map<String, DateTime> _cacheTimestamps = {};
+  static const Duration _cacheValidDuration = Duration(minutes: 5);
 
   List<CustomAppointment> get events => _events;
   bool get isLoading => _isLoading;
@@ -24,10 +29,95 @@ class EventProvider with ChangeNotifier {
     _authService = authService;
   }
 
+  /// Generate cache key based on date range
+  String _generateCacheKey(DateTime startDate, DateTime endDate) {
+    return '${startDate.toIso8601String().substring(0, 10)}_${endDate.toIso8601String().substring(0, 10)}';
+  }
+
+  /// Check if cached data is still valid
+  bool _isCacheValid(String cacheKey) {
+    final timestamp = _cacheTimestamps[cacheKey];
+    if (timestamp == null) return false;
+    
+    final now = DateTime.now();
+    final isValid = now.difference(timestamp) < _cacheValidDuration;
+    
+    if (!isValid) {
+      print('🗄️ [EventProvider] Cache expired for key: $cacheKey');
+      _eventCache.remove(cacheKey);
+      _cacheTimestamps.remove(cacheKey);
+    }
+    
+    return isValid;
+  }
+
+  /// Store events in cache
+  void _cacheEvents(String cacheKey, List<CustomAppointment> events) {
+    _eventCache[cacheKey] = List.from(events);
+    _cacheTimestamps[cacheKey] = DateTime.now();
+    print('🗄️ [EventProvider] Cached ${events.length} events for key: $cacheKey');
+  }
+
+  /// Get events from cache
+  List<CustomAppointment>? _getCachedEvents(String cacheKey) {
+    if (_isCacheValid(cacheKey)) {
+      final cached = _eventCache[cacheKey];
+      if (cached != null) {
+        print('🗄️ [EventProvider] Retrieved ${cached.length} events from cache for key: $cacheKey');
+        return List.from(cached);
+      }
+    }
+    return null;
+  }
+
   // Emergency reset for stuck loading state
   void forceResetLoadingState() {
     _isLoading = false;
     notifyListeners();
+  }
+
+  /// Fetch events for day view (current day only)
+  Future<void> fetchDayViewEvents({DateTime? date}) async {
+    final targetDate = date ?? DateTime.now();
+    final startOfDay = DateTime(targetDate.year, targetDate.month, targetDate.day);
+    final endOfDay = startOfDay.add(Duration(days: 1));
+    
+    return fetchAllEvents(
+      startDate: startOfDay,
+      endDate: endOfDay,
+      viewType: 'day',
+      forceFullRefresh: true,
+    );
+  }
+
+  /// Fetch events for week view (current week)
+  Future<void> fetchWeekViewEvents({DateTime? weekStart}) async {
+    final targetDate = weekStart ?? DateTime.now();
+    // Find the start of the week (Monday)
+    final daysSinceMonday = (targetDate.weekday - 1) % 7;
+    final startOfWeek = DateTime(targetDate.year, targetDate.month, targetDate.day).subtract(Duration(days: daysSinceMonday));
+    final endOfWeek = startOfWeek.add(Duration(days: 7));
+    
+    return fetchAllEvents(
+      startDate: startOfWeek,
+      endDate: endOfWeek,
+      viewType: 'week',
+      forceFullRefresh: true,
+    );
+  }
+
+  /// Fetch events for month view (current month)
+  Future<void> fetchMonthViewEvents({DateTime? month}) async {
+    final targetDate = month ?? DateTime.now();
+    final startOfMonth = DateTime(targetDate.year, targetDate.month, 1);
+    final endOfMonth = DateTime(targetDate.year, targetDate.month + 1, 0).add(Duration(days: 1));
+    
+    return fetchAllEvents(
+      startDate: startOfMonth,
+      endDate: endOfMonth,
+      viewType: 'month',
+      forceFullRefresh: true,
+    );
   }
 
   
@@ -74,9 +164,32 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchAllEvents({bool forceFullRefresh = false}) async {
+  Future<void> fetchAllEvents({
+    bool forceFullRefresh = false,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? viewType,
+  }) async {
     final startTime = DateTime.now();
-    print('⏱️ [EventProvider] Starting fetchAllEvents at ${startTime}');
+    final viewTypeStr = viewType ?? 'default';
+    print('⏱️ [EventProvider] Starting fetchAllEvents at ${startTime} for view: $viewTypeStr');
+    
+    if (startDate != null && endDate != null) {
+      print('📅 [EventProvider] Using custom date range: ${startDate.toIso8601String().substring(0, 10)} to ${endDate.toIso8601String().substring(0, 10)}');
+      
+      // Check cache first (unless forcing refresh)
+      if (!forceFullRefresh) {
+        final cacheKey = _generateCacheKey(startDate, endDate);
+        final cachedEvents = _getCachedEvents(cacheKey);
+        if (cachedEvents != null) {
+          _events = cachedEvents;
+          _previousEvents = List.from(_events);
+          notifyListeners();
+          print('⚡ [EventProvider] Returned cached events, skipping API call');
+          return;
+        }
+      }
+    }
     
     // Prevent concurrent fetches (but allow forced refresh)
     if (_isLoading && !forceFullRefresh) {
@@ -112,8 +225,8 @@ class EventProvider with ChangeNotifier {
       final apiStartTime = DateTime.now();
       
       final backendResults = await Future.wait([
-        EventService.fetchDayEvents(userId, authToken),
-        EventService.fetchTimeEvents(userId, authToken),
+        EventService.fetchDayEvents(userId, authToken, startDate: startDate, endDate: endDate),
+        EventService.fetchTimeEvents(userId, authToken, startDate: startDate, endDate: endDate),
       ]).timeout(Duration(seconds: 30));
       
       final apiEndTime = DateTime.now();
@@ -173,6 +286,12 @@ class EventProvider with ChangeNotifier {
 
       // Store current events as previous for next comparison
       _previousEvents = List.from(_events);
+
+      // Cache the results if we have a specific date range
+      if (startDate != null && endDate != null) {
+        final cacheKey = _generateCacheKey(startDate, endDate);
+        _cacheEvents(cacheKey, allEvents);
+      }
 
       _errorMessage = '';
       
