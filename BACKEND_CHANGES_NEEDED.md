@@ -165,9 +165,60 @@ function getDateRange(startDate, endDate) {
 4. **Monitor** database performance with new query patterns
 5. **Validate** backward compatibility with existing clients
 
+## Critical Issue: Missing Microsoft and Apple Events
+
+### **URGENT: Microsoft/Apple Events Not Appearing**
+
+**Problem**: Only Google events are displaying, Microsoft and Apple events are missing entirely.
+
+**Observed Behavior**:
+- Google events appear quickly and correctly
+- Microsoft and Apple events don't show up at all
+- All events show empty `source: []` and `userCalendars: []` fields
+
+**Root Cause Investigation Needed**:
+
+**1. Event Import Verification**
+Check if Microsoft and Apple events are being imported into the database:
+```sql
+-- Verify events exist in database
+SELECT COUNT(*), calendar_source 
+FROM events 
+WHERE user_id = 'USER_ID' 
+GROUP BY calendar_source;
+
+-- Check if events have proper source tagging
+SELECT id, event_title, calendar_source, created_at 
+FROM events 
+WHERE user_id = 'USER_ID' 
+AND created_at > NOW() - INTERVAL '7 days'
+ORDER BY calendar_source;
+```
+
+**2. Calendar Integration Status**
+Verify Microsoft and Apple calendar integrations are working:
+- Are OAuth tokens valid and not expired?
+- Are calendar sync jobs running successfully?
+- Are there any errors in calendar import logs?
+
+**3. GraphQL Query Issues**
+Check if events are being filtered out in the GraphQL resolvers:
+- Verify dayEvents/timeEvents queries return ALL calendar sources
+- Check for any source-based filtering that might exclude Microsoft/Apple
+- Ensure no authentication issues preventing access to specific calendar types
+
+**Required Investigation Steps**:
+1. **Database Check**: Verify Microsoft/Apple events exist in the database
+2. **Integration Health**: Check OAuth token status and sync job logs
+3. **API Testing**: Test GraphQL queries directly for Microsoft/Apple events
+4. **Error Logs**: Review backend logs for calendar import failures
+
+**Priority**: **CRITICAL** - Core calendar functionality broken for non-Google calendars
+
 ## Notes
 
 - Frontend is backward compatible - will work with current backend
 - Performance improvements will be immediately visible once backend is optimized
 - Consider implementing backend caching to complement frontend caching
 - Monitor external API rate limits more closely with frequent smaller requests
+- **Calendar source tagging must be fixed for Microsoft/Apple events to display**

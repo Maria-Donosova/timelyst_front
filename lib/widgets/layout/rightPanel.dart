@@ -9,14 +9,12 @@ class RightPanel extends StatelessWidget {
   const RightPanel({Key? key}) : super(key: key);
 
   Future<void> _refreshData(BuildContext context) async {
-    final eventProvider = Provider.of<EventProvider>(context, listen: false);
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     
-    await Future.wait([
-      eventProvider.fetchAllEvents(forceFullRefresh: true),
-      taskProvider.fetchTasks(),
-    ]);
+    await taskProvider.fetchTasks();
     
+    // Note: Event refreshing is handled by the calendar component
+    // based on the current view to avoid duplicate API calls
   }
 
   @override

@@ -53,7 +53,8 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
     
     _lastFetchTime = timestamp;
     Provider.of<TaskProvider>(context, listen: false).fetchTasks();
-    Provider.of<EventProvider>(context, listen: false).fetchAllEvents();
+    // Calendar component will handle event fetching based on current view
+    // No need to fetch events here to avoid duplicate calls
   }
 
   @override
