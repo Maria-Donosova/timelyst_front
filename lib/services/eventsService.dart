@@ -13,12 +13,19 @@ class EventService {
   static final ApiClient _apiClient = ApiClient();
   // Fetch DayEvents and map them to CustomAppointment
   static Future<List<CustomAppointment>> fetchDayEvents(
-      String userId, String authToken) async {
+      String userId, String authToken, {
+      DateTime? startDate,
+      DateTime? endDate,
+    }) async {
 
-    // Calculate date range (current month ± 3 months for safety)
-    final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month - 3, 1).toIso8601String();
-    final endDate = DateTime(now.year, now.month + 4, 0).toIso8601String();
+    // Use provided date range or default to broader range for backward compatibility
+    final start = startDate ?? DateTime.now().subtract(Duration(days: 90));
+    final end = endDate ?? DateTime.now().add(Duration(days: 120));
+    
+    final startDateStr = start.toIso8601String();
+    final endDateStr = end.toIso8601String();
+    
+    print('📅 [EventService] Fetching day events from ${start.toIso8601String().substring(0, 10)} to ${end.toIso8601String().substring(0, 10)}');
 
     final String query = '''
       query DayEvents(\$startDate: String, \$endDate: String) {
@@ -62,8 +69,8 @@ class EventService {
       body: {
         'query': query,
         'variables': {
-          'startDate': startDate,
-          'endDate': endDate,
+          'startDate': startDateStr,
+          'endDate': endDateStr,
         },
       },
     );
@@ -85,7 +92,7 @@ class EventService {
       final List<dynamic> dayEventsJson =
           data['data']['dayEvents']['dayEvents'];
 
-      print('📅 [EventService] Fetched ${dayEventsJson.length} day events');
+      print('📅 [EventService] Fetched ${dayEventsJson.length} day events for date range');
 
       // Parse the day events into a List<DayEvent>
       final List<DayEvent> dayEvents = dayEventsJson.map((json) {
@@ -190,13 +197,20 @@ class EventService {
 
   // Fetch TimeEvents and map them to CustomAppointment
   static Future<List<CustomAppointment>> fetchTimeEvents(
-      String userId, String authToken) async {
+      String userId, String authToken, {
+      DateTime? startDate,
+      DateTime? endDate,
+    }) async {
     // print("Entering fetchTimeEvents in EventService");
 
-    // Calculate date range (current month ± 3 months for safety)
-    final now = DateTime.now();
-    final startDate = DateTime(now.year, now.month - 3, 1).toIso8601String();
-    final endDate = DateTime(now.year, now.month + 4, 0).toIso8601String();
+    // Use provided date range or default to broader range for backward compatibility
+    final start = startDate ?? DateTime.now().subtract(Duration(days: 90));
+    final end = endDate ?? DateTime.now().add(Duration(days: 120));
+    
+    final startDateStr = start.toIso8601String();
+    final endDateStr = end.toIso8601String();
+    
+    print('🕐 [EventService] Fetching time events from ${start.toIso8601String().substring(0, 10)} to ${end.toIso8601String().substring(0, 10)}');
 
     final String query = '''
       query GetTimeEvents(\$startDate: String, \$endDate: String) {
@@ -238,8 +252,8 @@ class EventService {
       body: {
         'query': query,
         'variables': {
-          'startDate': startDate,
-          'endDate': endDate,
+          'startDate': startDateStr,
+          'endDate': endDateStr,
         },
       },
     );
@@ -260,7 +274,7 @@ class EventService {
       // Extract the time events from the response
       final List<dynamic> timeEventsJson = data['data']['timeEvents'];
       
-      print('🕐 [EventService] Fetched ${timeEventsJson.length} time events');
+      print('🕐 [EventService] Fetched ${timeEventsJson.length} time events for date range');
 
       // Parse the time events into a List<TimeEvent>
       final List<TimeEvent> timeEvents = timeEventsJson.map((json) {

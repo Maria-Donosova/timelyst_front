@@ -45,6 +45,30 @@ class _CalendarWState extends State<CalendarW> {
     width = 0.0;
     cellWidth = 0.0;
     super.initState();
+    
+    // Load initial events based on default view after frame is built
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+      
+      // Default to day view initially
+      switch (_controller.view) {
+        case CalendarView.day:
+          print('📅 [Calendar] Initial load: Day view');
+          eventProvider.fetchDayViewEvents();
+          break;
+        case CalendarView.week:
+          print('📅 [Calendar] Initial load: Week view');
+          eventProvider.fetchWeekViewEvents();
+          break;
+        case CalendarView.month:
+          print('📅 [Calendar] Initial load: Month view');
+          eventProvider.fetchMonthViewEvents();
+          break;
+        default:
+          print('📅 [Calendar] Initial load: Default view');
+          eventProvider.fetchDayViewEvents();
+      }
+    });
   }
 
   @override
@@ -146,11 +170,18 @@ class _CalendarWState extends State<CalendarW> {
                     onTap: _calendarTapped,
                     onDragEnd: _handleDragEnd,
                     onViewChanged: (ViewChangedDetails viewChangedDetails) {
+                      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+                      
                       if (_controller.view == CalendarView.month) {
                         _headerText = DateFormat('yMMMM')
                             .format(viewChangedDetails.visibleDates[
                                 viewChangedDetails.visibleDates.length ~/ 2])
                             .toString();
+                        
+                        // Fetch events for the visible month
+                        final visibleMonth = viewChangedDetails.visibleDates[viewChangedDetails.visibleDates.length ~/ 2];
+                        print('📅 [Calendar] Month view changed to: ${visibleMonth.year}-${visibleMonth.month}');
+                        eventProvider.fetchMonthViewEvents(month: visibleMonth);
                       }
                       if (_controller.view == CalendarView.week) {
                         final visibleDatesLength =
@@ -169,12 +200,22 @@ class _CalendarWState extends State<CalendarW> {
                             .toString();
                         _headerText =
                             _month! + ' ' + _weekStart! + ' - ' + _weekEnd!;
+                        
+                        // Fetch events for the visible week
+                        final weekStart = viewChangedDetails.visibleDates[0];
+                        print('📅 [Calendar] Week view changed to: ${weekStart.toIso8601String().substring(0, 10)}');
+                        eventProvider.fetchWeekViewEvents(weekStart: weekStart);
                       }
                       if (_controller.view == CalendarView.day) {
                         _headerText = DateFormat('MMMMEEEEd')
                             .format(viewChangedDetails.visibleDates[
                                 viewChangedDetails.visibleDates.length ~/ 2])
                             .toString();
+                        
+                        // Fetch events for the visible day
+                        final visibleDay = viewChangedDetails.visibleDates[viewChangedDetails.visibleDates.length ~/ 2];
+                        print('📅 [Calendar] Day view changed to: ${visibleDay.toIso8601String().substring(0, 10)}');
+                        eventProvider.fetchDayViewEvents(date: visibleDay);
                       }
                       SchedulerBinding.instance.addPostFrameCallback((duration) {
                         setState(() {});
