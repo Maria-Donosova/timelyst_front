@@ -20,6 +20,15 @@ class CustomAppointment {
   final String? timeEventInstance;
   final String? createdAt;
   final String? updatedAt;
+  
+  // Enhanced calendar source information
+  final String? createdBy;
+  final String? sourceCalendar;
+  final String? calendarId;
+  final Map<String, dynamic>? source;
+  final String? microsoftEventId;
+  final String? googleEventId;
+  final String? appleEventId;
 
   CustomAppointment({
     required this.id,
@@ -41,6 +50,14 @@ class CustomAppointment {
     this.timeEventInstance,
     String? createdAt,
     String? updatedAt,
+    // Enhanced calendar source information
+    this.createdBy,
+    this.sourceCalendar,
+    this.calendarId,
+    this.source,
+    this.microsoftEventId,
+    this.googleEventId,
+    this.appleEventId,
   })  : createdAt = _parseDate(createdAt),
         updatedAt = _parseDate(updatedAt);
 
@@ -76,6 +93,13 @@ class CustomAppointment {
       'recurrenceExceptionDates': recurrenceExceptionDates?.map((d) => d.toIso8601String()).toList(),
       'userCalendars': userCalendars,
       'timeEventInstance': timeEventInstance,
+      'createdBy': createdBy,
+      'sourceCalendar': sourceCalendar,
+      'calendarId': calendarId,
+      'source': source,
+      'microsoftEventId': microsoftEventId,
+      'googleEventId': googleEventId,
+      'appleEventId': appleEventId,
     };
   }
 }

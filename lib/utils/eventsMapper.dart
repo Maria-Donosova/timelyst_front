@@ -51,6 +51,14 @@ class EventMapper {
           dayEvent.dayEventInstance.isEmpty ? null : dayEvent.dayEventInstance,
       catColor:
           _getColorFromCategory(dayEvent.category), // Map category to color
+      // Enhanced calendar source information
+      createdBy: dayEvent.createdBy.isEmpty ? null : dayEvent.createdBy,
+      sourceCalendar: dayEvent.calendarId.isEmpty ? null : dayEvent.calendarId,
+      calendarId: dayEvent.calendarId.isEmpty ? null : dayEvent.calendarId,
+      source: dayEvent.source,
+      googleEventId: dayEvent.googleEventId.isEmpty ? null : dayEvent.googleEventId,
+      microsoftEventId: dayEvent.microsoftEventId,
+      appleEventId: dayEvent.appleEventId,
     );
   }
 
@@ -110,6 +118,14 @@ class EventMapper {
           : timeEvent.timeEventInstances[0],
       catColor:
           _getColorFromCategory(timeEvent.category), // Map category to color
+      // Enhanced calendar source information
+      createdBy: timeEvent.createdBy.isEmpty ? null : timeEvent.createdBy,
+      sourceCalendar: timeEvent.calendarId.isEmpty ? null : timeEvent.calendarId,
+      calendarId: timeEvent.calendarId.isEmpty ? null : timeEvent.calendarId,
+      source: timeEvent.source,
+      googleEventId: timeEvent.googleEventId.isEmpty ? null : timeEvent.googleEventId,
+      microsoftEventId: timeEvent.microsoftEventId,
+      appleEventId: timeEvent.appleEventId,
     );
   }
 
