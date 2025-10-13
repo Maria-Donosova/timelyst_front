@@ -80,60 +80,6 @@ class EventProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sync events for a specific date range without replacing all events
-  void _syncEventsForDateRange(List<CustomAppointment> fetchedEvents, DateTime startDate, DateTime endDate) {
-    if (_debugLogging) {
-      print('🔄 [EventProvider] Syncing ${fetchedEvents.length} events for range: ${startDate.toIso8601String().substring(0, 10)} to ${endDate.toIso8601String().substring(0, 10)}');
-    }
-
-    // Remove all existing events that fall within this date range
-    _events.removeWhere((existingEvent) {
-      final eventStart = existingEvent.startTime;
-      final eventEnd = existingEvent.endTime;
-      
-      // Check if event overlaps with the date range
-      final overlapsRange = eventStart.isBefore(endDate) && eventEnd.isAfter(startDate);
-      
-      if (overlapsRange && _debugLogging) {
-        print('🗑️ [EventProvider] Removing existing event in range: "${existingEvent.title}" (${eventStart.toIso8601String().substring(0, 10)})');
-      }
-      
-      return overlapsRange;
-    });
-
-    // Add all fetched events
-    for (final fetchedEvent in fetchedEvents) {
-      // Check for duplicates based on ID
-      final existingIndex = _events.indexWhere((e) => e.id == fetchedEvent.id);
-      if (existingIndex >= 0) {
-        // Update existing event
-        _events[existingIndex] = fetchedEvent;
-        if (_debugLogging) print('🔄 [EventProvider] Updated existing event: "${fetchedEvent.title}"');
-      } else {
-        // Add new event
-        _events.add(fetchedEvent);
-        if (_debugLogging) print('➕ [EventProvider] Added new event: "${fetchedEvent.title}"');
-      }
-    }
-
-    if (_debugLogging) {
-      print('✅ [EventProvider] Sync complete. Total events: ${_events.length}');
-    }
-  }
-
-  /// Incremental sync for events (for backward compatibility)
-  void _syncEventsIncremental(List<CustomAppointment> fetchedEvents) {
-    if (_debugLogging) {
-      print('🔄 [EventProvider] Incremental sync with ${fetchedEvents.length} events');
-    }
-
-    // For full refresh, replace all events
-    _events = List.from(fetchedEvents);
-    
-    if (_debugLogging) {
-      print('✅ [EventProvider] Incremental sync complete. Total events: ${_events.length}');
-    }
-  }
 
   /// Fetch events for day view (current day only)
   Future<void> fetchDayViewEvents({DateTime? date}) async {
