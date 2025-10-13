@@ -176,6 +176,41 @@ function getDateRange(startDate, endDate) {
 - Microsoft and Apple events don't show up at all
 - All events show empty `source: []` and `userCalendars: []` fields
 
+**Expected Backend Structure** (from backend team):
+```json
+{
+  "id": "event123",
+  "createdBy": "MICROSOFT", // or "GOOGLE", "APPLE"
+  "source_calendar": "microsoft", // or "google", "apple"
+  "user_calendars": ["microsoft"], // Array for multi-source events
+  "calendar_id": "cal_abc123", // Always string format
+  "microsoftEventId": "outlook_event_456", // Provider-specific ID
+  "source": {
+    "url": "microsoft://outlook/cal_abc123/event/outlook_event_456",
+    "title": "Microsoft Outlook"
+  },
+  "event_title": "Meeting with Team"
+  // ... other fields
+}
+```
+
+**Current Frontend Receives**:
+```json
+{
+  "id": "event123",
+  "source": [], // Should be source object above
+  "userCalendars": [], // Should be user_calendars array above
+  "event_title": "Meeting with Team"
+  // ... other fields, but missing all source identification
+}
+```
+
+**Frontend Ready**: The frontend has been updated to handle the new backend structure:
+- ✅ **CustomAppointment model** updated with all new source fields
+- ✅ **DayEvent & TimeEvent models** updated to receive new fields from backend
+- ✅ **EventMapper** updated to map all source information to the UI
+- ✅ **Ready to display** calendar source information once backend provides it
+
 **Root Cause Investigation Needed**:
 
 **1. Event Import Verification**

@@ -9,6 +9,9 @@ class TimeEvent {
   final String googleEventId;
   final String googleKind;
   final String googleEtag;
+  final String? microsoftEventId;
+  final String? appleEventId;
+  final Map<String, dynamic>? source;
   final Map<String, dynamic> creator;
   final Map<String, dynamic> organizer;
   final String eventTitle;
@@ -40,6 +43,9 @@ class TimeEvent {
     required this.googleEventId,
     required this.googleKind,
     required this.googleEtag,
+    this.microsoftEventId,
+    this.appleEventId,
+    this.source,
     required this.creator,
     required this.organizer,
     required this.eventTitle,
@@ -107,6 +113,9 @@ class TimeEvent {
       googleEventId: json['googleEventId'] ?? '',
       googleKind: json['googleKind'] ?? '',
       googleEtag: json['googleEtag'] ?? '',
+      microsoftEventId: json['microsoftEventId'],
+      appleEventId: json['appleEventId'],
+      source: json['source'] as Map<String, dynamic>?,
       creator: (json['creator'] as Map<String, dynamic>?) ?? {},
       organizer: json['event_organizer'] != null
           ? {'displayName': json['event_organizer']}
