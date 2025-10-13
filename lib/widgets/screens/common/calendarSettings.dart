@@ -351,7 +351,8 @@ class _CalendarSettingsState extends State<CalendarSettings> {
       }
 
       // Navigate to the Agenda screen only if saving is successful
-      Navigator.push(
+      // Use pushReplacement to prevent going back to calendar settings
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => Agenda(

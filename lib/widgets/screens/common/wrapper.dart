@@ -14,8 +14,12 @@ class Wrapper extends StatelessWidget {
     // Check if this is a Microsoft OAuth callback
     final uri = Uri.parse(html.window.location.href);
     if (uri.queryParameters.containsKey('code')) {
+      // Clean up URL after getting the auth code to prevent issues
+      final authCode = uri.queryParameters['code'];
+      // Remove query params from URL immediately to clean up browser history
+      html.window.history.replaceState(null, '', '/');
       // Return to ConnectCal screen which will handle the callback
-      return ConnectCal(microsoftAuthCode: uri.queryParameters['code']);
+      return ConnectCal(microsoftAuthCode: authCode);
     }
 
     if (authProvider.isLoggedIn) {
