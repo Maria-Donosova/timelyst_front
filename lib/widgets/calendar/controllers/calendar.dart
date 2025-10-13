@@ -46,25 +46,8 @@ class _CalendarWState extends State<CalendarW> {
     cellWidth = 0.0;
     super.initState();
     
-    // Load initial events based on default view after frame is built
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      final eventProvider = Provider.of<EventProvider>(context, listen: false);
-      
-      // Default to day view initially
-      switch (_controller.view) {
-        case CalendarView.day:
-          eventProvider.fetchDayViewEvents();
-          break;
-        case CalendarView.week:
-          eventProvider.fetchWeekViewEvents();
-          break;
-        case CalendarView.month:
-          eventProvider.fetchMonthViewEvents();
-          break;
-        default:
-          eventProvider.fetchDayViewEvents();
-      }
-    });
+    // Note: Initial event loading will be handled by the onViewChanged callback
+    // when the calendar first loads, so we don't need duplicate loading here
   }
 
   @override

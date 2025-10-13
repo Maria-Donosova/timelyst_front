@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/services/authService.dart';
 import 'package:timelyst_flutter/services/eventsService.dart';
@@ -18,8 +19,8 @@ class EventProvider with ChangeNotifier {
   final Map<String, DateTime> _cacheTimestamps = {};
   static const Duration _cacheValidDuration = Duration(minutes: 5);
   
-  // Debug flag - set to false in production
-  static const bool _debugLogging = false;
+  // Debug flag - set to true temporarily for debugging API issues
+  static const bool _debugLogging = true;
 
   List<CustomAppointment> get events => _events;
   bool get isLoading => _isLoading;
@@ -208,11 +209,15 @@ class EventProvider with ChangeNotifier {
     final authToken = await _authService!.getAuthToken();
     final userId = await _authService!.getUserId();
     if (authToken == null || userId == null) {
-      print("❌ [EventProvider] Missing authentication credentials");
+      final msg = "❌ [EventProvider] Missing authentication - Token: ${authToken != null ? 'Present' : 'NULL'}, UserId: ${userId != null ? 'Present' : 'NULL'}";
+      print(msg);
+      _errorMessage = 'Authentication required. Please log in again.';
       _isLoading = false;
       notifyListeners();
       return;
     }
+    
+    print("✅ [EventProvider] Auth credentials valid - UserID: ${userId.length > 10 ? '${userId.substring(0, 10)}...' : userId}");
 
     _isLoading = true;
     notifyListeners();
@@ -223,17 +228,24 @@ class EventProvider with ChangeNotifier {
         _events = [];
       }
       
-      if (_debugLogging) print('🔄 [EventProvider] Starting backend API calls...');
+      print('🔄 [EventProvider] Starting backend API calls...');
+      print('🔄 [EventProvider] Fetching events for date range: ${startDate?.toIso8601String().substring(0, 10)} to ${endDate?.toIso8601String().substring(0, 10)}');
       final apiStartTime = DateTime.now();
       
       final backendResults = await Future.wait([
         EventService.fetchDayEvents(userId, authToken, startDate: startDate, endDate: endDate),
         EventService.fetchTimeEvents(userId, authToken, startDate: startDate, endDate: endDate),
-      ]).timeout(Duration(seconds: 30));
+      ]).timeout(
+        Duration(seconds: 30),
+        onTimeout: () {
+          print('⏰ [EventProvider] API calls timed out after 30 seconds');
+          throw TimeoutException('Event fetching timed out', Duration(seconds: 30));
+        }
+      );
       
       final apiEndTime = DateTime.now();
       final apiDuration = apiEndTime.difference(apiStartTime);
-      if (_debugLogging) print('🔄 [EventProvider] Backend API calls completed in ${apiDuration.inMilliseconds}ms');
+      print('✅ [EventProvider] Backend API calls completed in ${apiDuration.inMilliseconds}ms');
 
       final dayEvents = backendResults[0];
       final timeEvents = backendResults[1];

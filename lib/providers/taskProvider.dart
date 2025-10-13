@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/services/tasksService.dart';
 import 'package:timelyst_flutter/models/task.dart';
@@ -37,12 +38,19 @@ class TaskProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      _tasks = await TasksService.fetchUserTasks(authToken);
-      print("Fetched ${_tasks.length} tasks in TaskProvider");
+      print("🔄 [TaskProvider] Starting API call to fetch tasks...");
+      _tasks = await TasksService.fetchUserTasks(authToken).timeout(
+        Duration(seconds: 30),
+        onTimeout: () {
+          print('⏰ [TaskProvider] Task fetching timed out after 30 seconds');
+          throw TimeoutException('Task fetching timed out', Duration(seconds: 30));
+        }
+      );
+      print("✅ [TaskProvider] Fetched ${_tasks.length} tasks successfully");
       _errorMessage = '';
     } catch (e) {
       _errorMessage = 'Failed to fetch tasks: $e';
-      print(_errorMessage);
+      print("❌ [TaskProvider] Error: $_errorMessage");
     } finally {
       _isLoading = false;
       notifyListeners();
