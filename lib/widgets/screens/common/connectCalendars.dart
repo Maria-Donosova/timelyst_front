@@ -191,8 +191,8 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
       if (result.userId != null && result.calendars != null) {
         
         if (mounted) {
-          // Navigate to calendar settings - same as other providers
-          Navigator.push(
+          // Navigate to calendar settings - use pushReplacement to prevent going back
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => CalendarSettings(
@@ -259,7 +259,7 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                     if (signInResult != null && signInResult.calendars != null) {
                       
                       if (context.mounted) {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (context) => CalendarSettings(
@@ -295,8 +295,9 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                       final authService = MicrosoftAuthService();
                       final authUrl = authService.generateAuthUrl();
                       
-                      // Navigate to OAuth URL in same tab (like Google flow)
-                      html.window.location.href = authUrl;
+                      // Ensure redirect happens in same window, not new tab
+                      // Use location.replace to avoid back button issues
+                      html.window.location.replace(authUrl);
                       
                     } catch (e) {
                       print('❌ [ConnectCalendars] Exception during Microsoft OAuth: $e');
@@ -323,7 +324,7 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                       if (signInResult.userId != null && signInResult.calendars != null) {
                         
                         if (context.mounted) {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => CalendarSettings(
@@ -364,7 +365,7 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                   child: TextButton(
                     onPressed: () {
                       print('Start Blank button pressed');
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => const Agenda()),
                       );

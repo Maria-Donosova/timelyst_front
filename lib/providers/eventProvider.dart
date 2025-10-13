@@ -95,10 +95,9 @@ class EventProvider with ChangeNotifier {
 
   /// Fetch events for week view (current week)
   Future<void> fetchWeekViewEvents({DateTime? weekStart}) async {
-    final targetDate = weekStart ?? DateTime.now();
-    // Find the start of the week (Monday)
-    final daysSinceMonday = (targetDate.weekday - 1) % 7;
-    final startOfWeek = DateTime(targetDate.year, targetDate.month, targetDate.day).subtract(Duration(days: daysSinceMonday));
+    final startOfWeek = weekStart ?? DateTime.now();
+    // weekStart is already the start of the visible week from the calendar
+    // Just add 7 days to get the end of the week
     final endOfWeek = startOfWeek.add(Duration(days: 7));
     
     return fetchAllEvents(
