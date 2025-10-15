@@ -21,6 +21,10 @@ class EventProvider with ChangeNotifier {
   
   // Debug flag - set to true temporarily for debugging API issues
   static const bool _debugLogging = true;
+  
+  // Timeout configurations for different scenarios
+  static const Duration _defaultEventTimeout = Duration(seconds: 30); // Standard timeout
+  static const Duration _parallelEventTimeout = Duration(seconds: 20); // Faster timeout when loading with tasks
 
   List<CustomAppointment> get events => _events;
   bool get isLoading => _isLoading;
@@ -82,7 +86,7 @@ class EventProvider with ChangeNotifier {
 
 
   /// Fetch events for day view (current day only)
-  Future<void> fetchDayViewEvents({DateTime? date}) async {
+  Future<void> fetchDayViewEvents({DateTime? date, bool isParallelLoad = false}) async {
     final targetDate = date ?? DateTime.now();
     final startOfDay = DateTime(targetDate.year, targetDate.month, targetDate.day);
     final endOfDay = startOfDay.add(Duration(days: 1));
@@ -90,7 +94,7 @@ class EventProvider with ChangeNotifier {
     return fetchAllEvents(
       startDate: startOfDay,
       endDate: endOfDay,
-      viewType: 'day',
+      viewType: isParallelLoad ? 'parallel' : 'day',
       forceFullRefresh: false, // Don't replace all events, sync instead
     );
   }
@@ -173,6 +177,7 @@ class EventProvider with ChangeNotifier {
     DateTime? startDate,
     DateTime? endDate,
     String? viewType,
+    Duration? customTimeout,
   }) async {
     final startTime = DateTime.now();
     final viewTypeStr = viewType ?? 'default';
@@ -233,14 +238,18 @@ class EventProvider with ChangeNotifier {
       print('🔄 [EventProvider] Fetching events for date range: ${startDate?.toIso8601String().substring(0, 10)} to ${endDate?.toIso8601String().substring(0, 10)}');
       final apiStartTime = DateTime.now();
       
+      // Choose timeout based on context
+      final timeout = customTimeout ?? 
+                     (viewType == 'parallel' ? _parallelEventTimeout : _defaultEventTimeout);
+      
       final backendResults = await Future.wait([
         EventService.fetchDayEvents(userId, authToken, startDate: startDate, endDate: endDate),
         EventService.fetchTimeEvents(userId, authToken, startDate: startDate, endDate: endDate),
       ]).timeout(
-        Duration(seconds: 30),
+        timeout,
         onTimeout: () {
-          print('⏰ [EventProvider] API calls timed out after 30 seconds');
-          throw TimeoutException('Event fetching timed out', Duration(seconds: 30));
+          print('⏰ [EventProvider] API calls timed out after ${timeout.inSeconds} seconds');
+          throw TimeoutException('Event fetching timed out', timeout);
         }
       );
       
@@ -508,23 +517,70 @@ class EventProvider with ChangeNotifier {
     final syncStartTime = DateTime.now();
     if (_debugLogging) print('🔄 [EventProvider] Starting date range sync for ${startDate.toIso8601String().substring(0, 10)} to ${endDate.toIso8601String().substring(0, 10)}');
     
-    // Remove existing events within this date range
-    final eventsOutsideRange = _events.where((event) {
-      return event.startTime.isBefore(startDate) || event.startTime.isAfter(endDate);
+    // Create a buffer to prevent boundary issues - extend range by 1 day on each side
+    final bufferStart = startDate.subtract(Duration(days: 1));
+    final bufferEnd = endDate.add(Duration(days: 1));
+    
+    // Only remove events that are completely outside the buffered range AND being replaced
+    final fetchedEventIds = fetchedEvents.map((e) => e.id).toSet();
+    final eventsToKeep = _events.where((event) {
+      // Keep events outside the core range (not the buffer)
+      final outsideCoreRange = event.startTime.isBefore(startDate) || 
+                              event.startTime.isAfter(endDate) ||
+                              event.startTime.isAtSameMomentAs(endDate);
+      
+      // Keep events that aren't being replaced by new data
+      final notBeingReplaced = !fetchedEventIds.contains(event.id);
+      
+      // For all-day events, be more lenient with date boundaries
+      final isAllDayWithinBuffer = event.isAllDay && 
+                                  event.startTime.isAfter(bufferStart) && 
+                                  event.startTime.isBefore(bufferEnd);
+      
+      final shouldKeep = outsideCoreRange || notBeingReplaced || isAllDayWithinBuffer;
+      
+      if (_debugLogging && !shouldKeep) {
+        print('🗑️ [EventProvider] Removing/replacing: "${event.title}" (${event.startTime.toIso8601String().substring(0, 10)})');
+      }
+      
+      return shouldKeep;
     }).toList();
     
-    // Add new events for this date range
-    final updatedEvents = [...eventsOutsideRange, ...fetchedEvents];
+    // Add all fetched events (they will replace any with same ID)
+    final updatedEvents = [...eventsToKeep, ...fetchedEvents];
+    
+    // Remove exact duplicates by ID (keep the fetched version)
+    final finalEvents = <CustomAppointment>[];
+    final seenIds = <String>{};
+    
+    // Add fetched events first (priority)
+    for (final event in fetchedEvents) {
+      if (!seenIds.contains(event.id)) {
+        finalEvents.add(event);
+        seenIds.add(event.id);
+      }
+    }
+    
+    // Add kept events (if not already seen)
+    for (final event in eventsToKeep) {
+      if (!seenIds.contains(event.id)) {
+        finalEvents.add(event);
+        seenIds.add(event.id);
+      }
+    }
     
     final oldCount = _events.length;
-    _events = updatedEvents;
+    _events = finalEvents;
     
     final syncEndTime = DateTime.now();
     final syncDuration = syncEndTime.difference(syncStartTime);
     final newCount = _events.length;
-    final changesMade = (newCount - oldCount + fetchedEvents.length);
+    final changesMade = (newCount - oldCount).abs();
     
-    if (_debugLogging) print('🔄 [EventProvider] Date range sync completed: ${changesMade} changes, now ${newCount} total events (${syncDuration.inMilliseconds}ms)');
+    if (_debugLogging) {
+      print('🔄 [EventProvider] Date range sync completed: ${changesMade} changes, now ${newCount} total events (${syncDuration.inMilliseconds}ms)');
+      print('📊 [EventProvider] Kept ${eventsToKeep.length} existing, added ${fetchedEvents.length} new');
+    }
     
     notifyListeners();
   }
