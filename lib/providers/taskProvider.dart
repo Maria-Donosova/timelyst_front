@@ -40,10 +40,10 @@ class TaskProvider with ChangeNotifier {
     try {
       print("🔄 [TaskProvider] Starting API call to fetch tasks...");
       _tasks = await TasksService.fetchUserTasks(authToken).timeout(
-        Duration(seconds: 15), // Shorter timeout for tasks - they're typically faster
+        Duration(seconds: 45), // Allow more time for backend processing
         onTimeout: () {
-          print('⏰ [TaskProvider] Task fetching timed out after 15 seconds');
-          throw TimeoutException('Task fetching timed out', Duration(seconds: 15));
+          print('⏰ [TaskProvider] Task fetching timed out after 45 seconds');
+          throw TimeoutException('Task fetching timed out', Duration(seconds: 45));
         }
       );
       print("✅ [TaskProvider] Fetched ${_tasks.length} tasks successfully");

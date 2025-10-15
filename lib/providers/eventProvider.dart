@@ -23,8 +23,8 @@ class EventProvider with ChangeNotifier {
   static const bool _debugLogging = true;
   
   // Timeout configurations for different scenarios
-  static const Duration _defaultEventTimeout = Duration(seconds: 30); // Standard timeout
-  static const Duration _parallelEventTimeout = Duration(seconds: 20); // Faster timeout when loading with tasks
+  static const Duration _defaultEventTimeout = Duration(seconds: 60); // Longer timeout for CalDAV operations
+  static const Duration _parallelEventTimeout = Duration(seconds: 45); // Still reasonable timeout when loading with tasks
 
   List<CustomAppointment> get events => _events;
   bool get isLoading => _isLoading;

@@ -58,14 +58,16 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
     
-    // Start both operations concurrently with faster timeout for events
+    // Start both operations concurrently - give them time for CalDAV operations
+    print('📊 [Agenda] Starting tasks and events loading - this may take up to 60 seconds for Apple CalDAV sync...');
     Future.wait([
       taskProvider.fetchTasks(),
       eventProvider.fetchDayViewEvents(isParallelLoad: true), // Load today's events with parallel timeout
     ]).then((_) {
-      print('✅ [Agenda] Parallel data refresh completed');
+      print('✅ [Agenda] Parallel data refresh completed successfully');
     }).catchError((error) {
       print('❌ [Agenda] Parallel data refresh failed: $error');
+      // Don't prevent the UI from working even if initial load fails
     });
     
     // Calendar component will still handle additional event fetching for view changes
