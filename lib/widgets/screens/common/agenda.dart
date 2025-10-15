@@ -50,11 +50,25 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
 
   void _refreshData() {
     final timestamp = DateTime.now();
+    print('🔄 [Agenda] Starting parallel data refresh at ${timestamp}');
     
     _lastFetchTime = timestamp;
-    Provider.of<TaskProvider>(context, listen: false).fetchTasks();
-    // Calendar component will handle event fetching based on current view
-    // No need to fetch events here to avoid duplicate calls
+    
+    // Load tasks and initial events in parallel for better UX
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+    
+    // Start both operations concurrently with faster timeout for events
+    Future.wait([
+      taskProvider.fetchTasks(),
+      eventProvider.fetchDayViewEvents(isParallelLoad: true), // Load today's events with parallel timeout
+    ]).then((_) {
+      print('✅ [Agenda] Parallel data refresh completed');
+    }).catchError((error) {
+      print('❌ [Agenda] Parallel data refresh failed: $error');
+    });
+    
+    // Calendar component will still handle additional event fetching for view changes
   }
 
   @override
