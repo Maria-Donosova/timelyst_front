@@ -97,7 +97,9 @@ class _MicrosoftOAuthCallbackState extends State<MicrosoftOAuthCallback> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+            ),
             SizedBox(height: 16),
             Text(
               'Processing Microsoft authorization...',

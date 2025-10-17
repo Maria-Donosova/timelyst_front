@@ -237,7 +237,11 @@ class _CalendarSelectionWidgetState extends State<CalendarSelectionWidget> {
   Widget build(BuildContext context) {
     print("Entering calendar selection build");
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+        ),
+      );
     }
 
     if (_errorMessage.isNotEmpty) {

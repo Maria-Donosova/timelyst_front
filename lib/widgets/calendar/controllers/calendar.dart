@@ -199,7 +199,9 @@ class _CalendarWState extends State<CalendarW> {
                     }),
                 if (eventProvider.isLoading)
                   const Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                    ),
                   ),
               ],
             ),

@@ -13,7 +13,11 @@ class TaskListW extends StatelessWidget {
     final taskProvider = Provider.of<TaskProvider>(context);
 
     if (taskProvider.isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+        ),
+      );
     }
 
     if (taskProvider.errorMessage.isNotEmpty) {
