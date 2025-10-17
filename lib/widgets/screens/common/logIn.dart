@@ -75,7 +75,7 @@ class _LogInScreenState extends State<LogInScreen> {
     final mediaQuery = MediaQuery.of(context);
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: CustomAppBar(),
       body: SafeArea(
         child: Stack(
           children: [
@@ -183,7 +183,9 @@ class _LogInScreenState extends State<LogInScreen> {
                                   Theme.of(context).colorScheme.secondary,
                             ),
                             child: _isLoading
-                                ? const CircularProgressIndicator()
+                                ? const CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                                  )
                                 : Text(
                                     'Log In',
                                     style: TextStyle(

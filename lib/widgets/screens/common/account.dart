@@ -398,7 +398,11 @@ class _AccountSettingsState extends State<AccountSettings> {
     return Scaffold(
       appBar: CustomAppBar(),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+              ),
+            )
           : _hasError
               ? _buildErrorState()
               : groupedCalendars.isEmpty

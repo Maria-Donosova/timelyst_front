@@ -195,6 +195,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 3,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
                             ),
                           )
                         : Padding(
