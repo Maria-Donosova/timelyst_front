@@ -17,7 +17,7 @@ class EventProvider with ChangeNotifier {
   // Cache management
   final Map<String, List<CustomAppointment>> _eventCache = {};
   final Map<String, DateTime> _cacheTimestamps = {};
-  static const Duration _cacheValidDuration = Duration(minutes: 5);
+  static const Duration _cacheValidDuration = Duration(minutes: 1);
   
   // Debug flag - set to true temporarily for debugging API issues
   static const bool _debugLogging = true;
@@ -76,6 +76,31 @@ class EventProvider with ChangeNotifier {
       }
     }
     return null;
+  }
+
+  /// Clear all cached events and force fresh fetch on next request
+  void invalidateCache() {
+    _eventCache.clear();
+    _cacheTimestamps.clear();
+    if (_debugLogging) print('🗄️ [EventProvider] Cache invalidated - forcing fresh fetch on next request');
+  }
+
+  /// Clear expired cache entries (for cleanup)
+  void _clearExpiredCache() {
+    final now = DateTime.now();
+    final keysToRemove = <String>[];
+    
+    for (final entry in _cacheTimestamps.entries) {
+      if (now.difference(entry.value) >= _cacheValidDuration) {
+        keysToRemove.add(entry.key);
+      }
+    }
+    
+    for (final key in keysToRemove) {
+      _eventCache.remove(key);
+      _cacheTimestamps.remove(key);
+      if (_debugLogging) print('🗄️ [EventProvider] Removed expired cache entry: $key');
+    }
   }
 
   // Emergency reset for stuck loading state

@@ -41,9 +41,16 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       final now = DateTime.now();
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+      
+      // Always invalidate cache when app resumes to catch external changes
+      eventProvider.invalidateCache();
+      print('📱 [Agenda] App resumed - cache invalidated for fresh data');
+      
       if (_lastFetchTime == null || now.difference(_lastFetchTime!).inMinutes >= 5) {
         _refreshData();
       } else {
+        print('📱 [Agenda] Recent fetch detected, cache invalidated but not forcing immediate refresh');
       }
     }
   }

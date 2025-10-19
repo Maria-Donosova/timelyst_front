@@ -151,6 +151,10 @@ class _CalendarWState extends State<CalendarW> {
                     onViewChanged: (ViewChangedDetails viewChangedDetails) {
                       final eventProvider = Provider.of<EventProvider>(context, listen: false);
                       
+                      // Invalidate cache when view changes to ensure fresh data
+                      eventProvider.invalidateCache();
+                      print('📅 [Calendar] View changed - cache invalidated for fresh event data');
+                      
                       if (_controller.view == CalendarView.month) {
                         _headerText = DateFormat('yMMMM')
                             .format(viewChangedDetails.visibleDates[
@@ -251,8 +255,14 @@ class _CalendarWState extends State<CalendarW> {
                 ),
               ],
               onSelected: (value) {
+                final eventProvider = Provider.of<EventProvider>(context, listen: false);
+                
                 setState(
                   () {
+                    // Invalidate cache when user manually switches views
+                    eventProvider.invalidateCache();
+                    print('📅 [Calendar] Manual view switch - cache invalidated for fresh event data');
+                    
                     if (value == _calView.day) {
                       _controller.view = CalendarView.day;
                     } else if (value == _calView.week) {
