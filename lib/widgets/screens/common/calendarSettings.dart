@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/widgets/screens/common/agenda.dart';
 import '../../../models/calendars.dart';
 import '../../../services/googleIntegration/calendarSyncManager.dart';
-import '../../../providers/authProvider.dart';
 import '../../shared/customAppbar.dart';
 import '../../shared/categories.dart';
 

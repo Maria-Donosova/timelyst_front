@@ -60,6 +60,7 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
     if (!_isSyncInProgress) return;
     
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
+    int eventCountBefore = eventProvider.events.length;
     
     // Poll for events on current day to detect sync completion
     Timer.periodic(Duration(seconds: 5), (timer) {
@@ -70,13 +71,14 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
       
       print('📡 [Agenda] Checking for new events from sync...');
       
-      // Check if we have events for today that weren't there before
-      eventProvider.fetchDayViewEvents(forceRefresh: true).then((_) {
-        final today = DateTime.now();
-        final todayEvents = eventProvider.getEventsForDay(today);
+      // Force cache invalidation and fetch today's events
+      eventProvider.invalidateCache();
+      eventProvider.fetchDayViewEvents(date: DateTime.now()).then((_) {
+        final currentEventCount = eventProvider.events.length;
         
-        if (todayEvents.isNotEmpty && _isSyncInProgress) {
-          print('✅ [Agenda] Events detected - sync appears complete');
+        // Check if new events have been added
+        if (currentEventCount > eventCountBefore && _isSyncInProgress) {
+          print('✅ [Agenda] Events detected - sync appears complete (${currentEventCount} vs ${eventCountBefore} events)');
           _completeSyncProgress();
           timer.cancel();
         } else if (_syncStartTime != null && 
