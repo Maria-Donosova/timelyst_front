@@ -181,6 +181,7 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
     });
 
     try {
+      print("🔄 [ConnectCalendars] Processing Microsoft OAuth callback");
       
       // Clean up URL immediately
       html.window.history.replaceState(null, '', '/');
@@ -189,8 +190,24 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
       final result = await signInManager.handleAuthCallback(widget.microsoftAuthCode!);
       
       if (result.userId != null && result.calendars != null) {
+        print("✅ [ConnectCalendars] Microsoft authentication successful");
         
         if (mounted) {
+          // Show success feedback before navigation
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white, size: 16),
+                  SizedBox(width: 12),
+                  Text('Microsoft calendar connected successfully!'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+          
           // Navigate to calendar settings - use pushReplacement to prevent going back
           Navigator.pushReplacement(
             context,
@@ -213,6 +230,7 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
           SnackBar(
             content: Text('Microsoft sign-in failed: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
           ),
         );
       }
@@ -252,36 +270,71 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                   text: 'Gmail',
                   color: const Color.fromARGB(255, 198, 23, 10),
                   onPressed: () async {
-                    final signInManager = GoogleSignInManager();
-                    
-                    final signInResult = await signInManager.signIn(context);
+                    try {
+                      // Show initial loading feedback
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Text('Connecting to Google Calendar...'),
+                            ],
+                          ),
+                          backgroundColor: Colors.blue,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
 
-                    if (signInResult != null && signInResult.calendars != null) {
-                      
-                      if (context.mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CalendarSettings(
-                              userId: signInResult.userId,
-                              email: signInResult.email,
-                              calendars: signInResult.calendars!,
+                      final signInManager = GoogleSignInManager();
+                      final signInResult = await signInManager.signIn(context);
+
+                      if (signInResult != null && signInResult.calendars != null) {
+                        print("✅ [ConnectCalendars] Google authentication successful");
+                        
+                        if (context.mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CalendarSettings(
+                                userId: signInResult.userId,
+                                email: signInResult.email,
+                                calendars: signInResult.calendars!,
+                              ),
                             ),
+                          );
+                        } else {
+                          print('⚠️ [ConnectCalendars] Context not mounted - cannot navigate');
+                        }
+                      } else if (signInResult != null && context.mounted) {
+                        print('⚠️ [ConnectCalendars] Sign-in successful but no calendars found');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('No calendars found. Please check your Google Calendar settings.'),
+                            backgroundColor: Colors.orange,
                           ),
                         );
                       } else {
-                        print('⚠️ [ConnectCalendars] Context not mounted - cannot navigate');
+                        print('❌ [ConnectCalendars] Sign-in failed or was cancelled by user');
                       }
-                    } else if (signInResult != null && context.mounted) {
-                      print('⚠️ [ConnectCalendars] Sign-in successful but no calendars found');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'No calendars found. Please check your Google Calendar settings.'),
-                        ),
-                      );
-                    } else {
-                      print('❌ [ConnectCalendars] Sign-in failed or was cancelled by user');
+                    } catch (e) {
+                      print('❌ [ConnectCalendars] Exception during Google sign-in: $e');
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Google sign-in failed: ${e.toString()}'),
+                            backgroundColor: Colors.red,
+                            duration: Duration(seconds: 5),
+                          ),
+                        );
+                      }
                     }
                   },
                 ),
@@ -289,8 +342,31 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                   text: 'Outlook',
                   color: const Color.fromARGB(255, 6, 117, 208),
                   onPressed: () async {
-                    
                     try {
+                      // Show initial loading feedback
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Text('Redirecting to Microsoft login...'),
+                            ],
+                          ),
+                          backgroundColor: Colors.blue,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+
+                      print("🔄 [ConnectCalendars] Starting Microsoft OAuth flow");
+                      
                       // Generate Microsoft OAuth URL and navigate in same tab
                       final authService = MicrosoftAuthService();
                       final authUrl = authService.generateAuthUrl();
@@ -306,6 +382,7 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                           SnackBar(
                             content: Text('Microsoft sign-in failed: ${e.toString()}'),
                             backgroundColor: Colors.red,
+                            duration: Duration(seconds: 5),
                           ),
                         );
                       }
@@ -316,12 +393,34 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                   text: 'iCloud',
                   color: const Color.fromARGB(255, 41, 41, 41),
                   onPressed: () async {
-                    final signInManager = AppleSignInManager();
-                    
                     try {
+                      // Show initial loading feedback
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Text('Connecting to iCloud Calendar...'),
+                            ],
+                          ),
+                          backgroundColor: Colors.blue,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+
+                      final signInManager = AppleSignInManager();
                       final signInResult = await signInManager.signIn(context);
 
                       if (signInResult.userId != null && signInResult.calendars != null) {
+                        print("✅ [ConnectCalendars] Apple authentication successful");
                         
                         if (context.mounted) {
                           Navigator.pushReplacement(
@@ -341,8 +440,8 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                         print('⚠️ [ConnectCalendars] Apple sign-in successful but no calendars found');
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text(
-                                'No calendars found. Please check your iCloud Calendar settings.'),
+                            content: Text('No calendars found. Please check your iCloud Calendar settings.'),
+                            backgroundColor: Colors.orange,
                           ),
                         );
                       } else {
@@ -354,6 +453,8 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Apple sign-in failed: ${e.toString()}'),
+                            backgroundColor: Colors.red,
+                            duration: Duration(seconds: 5),
                           ),
                         );
                       }

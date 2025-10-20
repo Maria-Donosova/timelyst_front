@@ -297,7 +297,15 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     }).toList();
   }
 
+  bool _isSaving = false;
+
   Future<void> _navigateToAgenda() async {
+    if (_isSaving) return; // Prevent duplicate operations
+    
+    setState(() {
+      _isSaving = true;
+    });
+
     // Debug: Print current state of each calendar before saving
     for (int i = 0; i < widget.calendars.length; i++) {
       final calendar = widget.calendars[i];
@@ -333,55 +341,111 @@ class _CalendarSettingsState extends State<CalendarSettings> {
       print('  📅 Import Settings: ${calendar.preferences.importSettings.importAll ? "All" : "Custom"}');
     }
 
-    // Save selected calendars using the orchestrator
+    // Determine integration type for user feedback
+    final integrationTypes = _selectedCalendars.map((cal) => cal.source).toSet();
+    final integrationType = integrationTypes.length == 1 
+        ? integrationTypes.first.toString().split('.').last.toUpperCase()
+        : 'Multiple';
+
+    // Save selected calendars and wait for backend confirmation
     try {
       
-      // Start calendar saving but don't await (fire and forget for better UX)
-      final saveOperation = CalendarSyncManager().saveSelectedCalendars(
+      print("🔄 [CalendarSettings] Starting calendar integration...");
+      
+      final saveResult = await CalendarSyncManager().saveSelectedCalendars(
         userId: widget.userId,
         email: widget.email,
         selectedCalendars: _selectedCalendars,
       );
       
-      // Navigate immediately to provide better user experience
-      // Apple CalDAV sync will continue in background
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Agenda(
-            calendars: _selectedCalendars,
-            userId: widget.userId,
-            email: widget.email,
+      if (saveResult.success) {
+        print("✅ [CalendarSettings] Backend confirmed successful connection");
+        
+        // Show sync started notification
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Text('$integrationType calendar sync in progress...'),
+                ],
+              ),
+              backgroundColor: Colors.blue,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        
+        // Navigate to agenda after backend confirmation
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Agenda(
+              calendars: _selectedCalendars,
+              userId: widget.userId,
+              email: widget.email,
+              syncInProgress: true,
+              syncIntegrationType: integrationType,
+            ),
           ),
-        ),
-      );
-      
-      // Refresh auth state in background (non-blocking)
-      if (mounted) {
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        authProvider.refreshAuthState().catchError((error) {
-          print('⚠️ [CalendarSettings] Auth refresh error (non-critical): $error');
-        });
+        );
+        
+        // Start monitoring sync progress in background
+        _monitorSyncProgress(integrationType);
+        
+      } else {
+        throw Exception(saveResult.error ?? 'Unknown error during calendar save');
       }
       
-      // Log save completion in background
-      saveOperation.then((_) {
-        print("✅ [CalendarSettings] Selected calendars saved successfully in background");
-      }).catchError((error) {
-        print("❌ [CalendarSettings] Background calendar save failed: $error");
-        // Note: Error handling could be improved with user notification
-      });
     } catch (e) {
-      print("Failed to save selected calendars: $e");
+      print("❌ [CalendarSettings] Failed to save selected calendars: $e");
+      
+      setState(() {
+        _isSaving = false;
+      });
 
-      // Show an error message to the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to save calendars: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // Show error message to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to connect $integrationType calendar: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
     }
+  }
+
+  void _monitorSyncProgress(String integrationType) {
+    // TODO: Implement progress monitoring via polling or websockets
+    // For now, show completion message after estimated time
+    Future.delayed(Duration(seconds: 20), () {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white, size: 16),
+                SizedBox(width: 12),
+                Text('$integrationType calendar sync completed!'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+    });
   }
 
   @override

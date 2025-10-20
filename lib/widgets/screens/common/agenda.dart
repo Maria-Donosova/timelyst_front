@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/providers/eventProvider.dart';
@@ -7,11 +8,16 @@ import '../../layout/leftPanel.dart';
 import '../../layout/rightPanel.dart';
 
 class Agenda extends StatefulWidget {
+  final bool? syncInProgress;
+  final String? syncIntegrationType;
+  
   const Agenda({
     Key? key,
     calendars,
     userId,
     email,
+    this.syncInProgress,
+    this.syncIntegrationType,
   }) : super(key: key);
   static const routeName = '/tasks-month-calendar';
 
@@ -21,14 +27,109 @@ class Agenda extends StatefulWidget {
 
 class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
   DateTime? _lastFetchTime;
+  bool _isSyncInProgress = false;
+  String? _syncIntegrationType;
+  DateTime? _syncStartTime;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForSyncInProgress();
       _refreshData();
     });
+  }
+
+  void _checkForSyncInProgress() {
+    // Check if sync was explicitly passed from calendar settings
+    if (widget.syncInProgress == true) {
+      final now = DateTime.now();
+      setState(() {
+        _isSyncInProgress = true;
+        _syncStartTime = now;
+        _syncIntegrationType = widget.syncIntegrationType ?? 'Calendar';
+      });
+      
+      print('🔄 [Agenda] Sync in progress detected - monitoring for completion (${_syncIntegrationType})');
+      _monitorSyncProgress();
+    }
+  }
+
+  void _monitorSyncProgress() {
+    if (!_isSyncInProgress) return;
+    
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+    
+    // Poll for events on current day to detect sync completion
+    Timer.periodic(Duration(seconds: 5), (timer) {
+      if (!_isSyncInProgress || !mounted) {
+        timer.cancel();
+        return;
+      }
+      
+      print('📡 [Agenda] Checking for new events from sync...');
+      
+      // Check if we have events for today that weren't there before
+      eventProvider.fetchDayViewEvents(forceRefresh: true).then((_) {
+        final today = DateTime.now();
+        final todayEvents = eventProvider.getEventsForDay(today);
+        
+        if (todayEvents.isNotEmpty && _isSyncInProgress) {
+          print('✅ [Agenda] Events detected - sync appears complete');
+          _completeSyncProgress();
+          timer.cancel();
+        } else if (_syncStartTime != null && 
+                   DateTime.now().difference(_syncStartTime!).inMinutes > 3) {
+          // Timeout after 3 minutes
+          print('⏰ [Agenda] Sync monitoring timeout');
+          _completeSyncProgress(timeout: true);
+          timer.cancel();
+        }
+      }).catchError((error) {
+        print('❌ [Agenda] Error checking sync progress: $error');
+      });
+    });
+  }
+
+  void _completeSyncProgress({bool timeout = false}) {
+    if (!mounted) return;
+    
+    setState(() {
+      _isSyncInProgress = false;
+      _syncIntegrationType = null;
+      _syncStartTime = null;
+    });
+    
+    if (timeout) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.info, color: Colors.white, size: 16),
+              SizedBox(width: 12),
+              Text('Calendar sync is taking longer than expected'),
+            ],
+          ),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 4),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white, size: 16),
+              SizedBox(width: 12),
+              Text('${_syncIntegrationType ?? 'Calendar'} sync completed successfully!'),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 4),
+        ),
+      );
+    }
   }
 
   @override
@@ -89,20 +190,73 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
     return Scaffold(
       appBar: appBar,
       body: SafeArea(
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          !isLandscape
-              ? Expanded(flex: 1, child: LeftPanel())
-              : Expanded(flex: 1, child: LeftPanel()),
-          !isLandscape
-              ? Expanded(
-                  flex: 2,
-                  child: RightPanel(),
-                )
-              : Expanded(
-                  flex: 2,
-                  child: RightPanel(),
+        child: Stack(
+          children: [
+            // Main content
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              !isLandscape
+                  ? Expanded(flex: 1, child: LeftPanel())
+                  : Expanded(flex: 1, child: LeftPanel()),
+              !isLandscape
+                  ? Expanded(
+                      flex: 2,
+                      child: RightPanel(),
+                    )
+                  : Expanded(
+                      flex: 2,
+                      child: RightPanel(),
+                    ),
+            ]),
+            
+            // Sync progress indicator
+            if (_isSyncInProgress)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[100],
+                    border: Border(
+                      bottom: BorderSide(color: Colors.blue[300]!, width: 1),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          '${_syncIntegrationType ?? 'Calendar'} sync in progress...',
+                          style: TextStyle(
+                            color: Colors.blue[800],
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      if (_syncStartTime != null)
+                        Text(
+                          '${DateTime.now().difference(_syncStartTime!).inSeconds}s',
+                          style: TextStyle(
+                            color: Colors.blue[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-        ]),
+              ),
+          ],
+        ),
       ),
     );
   }
