@@ -336,22 +336,15 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     // Save selected calendars using the orchestrator
     try {
       
-      await CalendarSyncManager().saveSelectedCalendars(
+      // Start calendar saving but don't await (fire and forget for better UX)
+      final saveOperation = CalendarSyncManager().saveSelectedCalendars(
         userId: widget.userId,
         email: widget.email,
         selectedCalendars: _selectedCalendars,
       );
       
-      print("Selected calendars saved successfully.");
-
-      // Refresh authentication state before navigating to ensure UI shows correct auth status
-      if (mounted) {
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        await authProvider.refreshAuthState();
-      }
-
-      // Navigate to the Agenda screen only if saving is successful
-      // Use pushReplacement to prevent going back to calendar settings
+      // Navigate immediately to provide better user experience
+      // Apple CalDAV sync will continue in background
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -362,6 +355,22 @@ class _CalendarSettingsState extends State<CalendarSettings> {
           ),
         ),
       );
+      
+      // Refresh auth state in background (non-blocking)
+      if (mounted) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        authProvider.refreshAuthState().catchError((error) {
+          print('⚠️ [CalendarSettings] Auth refresh error (non-critical): $error');
+        });
+      }
+      
+      // Log save completion in background
+      saveOperation.then((_) {
+        print("✅ [CalendarSettings] Selected calendars saved successfully in background");
+      }).catchError((error) {
+        print("❌ [CalendarSettings] Background calendar save failed: $error");
+        // Note: Error handling could be improved with user notification
+      });
     } catch (e) {
       print("Failed to save selected calendars: $e");
 
