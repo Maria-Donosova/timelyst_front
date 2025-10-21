@@ -25,6 +25,7 @@ class CalendarSettings extends StatefulWidget {
 
 class _CalendarSettingsState extends State<CalendarSettings> {
   late List<String> _selectedCategories;
+  final Duration _fadeDuration = const Duration(milliseconds: 250);
 
   @override
   void initState() {
@@ -121,22 +122,26 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                 ),
 
                 Expanded(
-                  child: Text(
-                    calendar.metadata.title,
+                  child: AnimatedDefaultTextStyle(
+                    duration: _fadeDuration,
+                    curve: Curves.easeInOut,
                     style: TextStyle(
                       fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
                       color: isSelected
                           ? Theme.of(context).textTheme.titleMedium?.color
                           : Theme.of(context).disabledColor,
                     ),
+                    child: Text(calendar.metadata.title),
                   ),
                 ),
               ],
             ),
           ),
-          // Fade and disable import settings & category when calendar not selected
-          Opacity(
+          // Animated fade and disable import settings & category when calendar not selected
+          AnimatedOpacity(
             opacity: isSelected ? 1.0 : 0.45,
+            duration: _fadeDuration,
+            curve: Curves.easeInOut,
             child: AbsorbPointer(
               absorbing: !isSelected,
               child: Column(
