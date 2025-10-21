@@ -52,6 +52,13 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
   Widget _buildCalendarSection(int index) {
     final calendar = widget.calendars[index];
+    final importSettings = calendar.preferences.importSettings;
+    final isSelected = importSettings.importAll ||
+        importSettings.importSubject ||
+        importSettings.importBody ||
+        importSettings.importConferenceInfo ||
+        importSettings.importOrganizer ||
+        importSettings.importRecipients;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
       child: Column(
@@ -118,15 +125,29 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                     calendar.metadata.title,
                     style: TextStyle(
                       fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+                      color: isSelected
+                          ? Theme.of(context).textTheme.titleMedium?.color
+                          : Theme.of(context).disabledColor,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          _buildCalendarImportSettings(index),
-          const SizedBox(height: 12),
-          _buildCategorySelection(index),
+          // Fade and disable import settings & category when calendar not selected
+          Opacity(
+            opacity: isSelected ? 1.0 : 0.45,
+            child: AbsorbPointer(
+              absorbing: !isSelected,
+              child: Column(
+                children: [
+                  _buildCalendarImportSettings(index),
+                  const SizedBox(height: 12),
+                  _buildCategorySelection(index),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
