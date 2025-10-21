@@ -61,11 +61,67 @@ class _CalendarSettingsState extends State<CalendarSettings> {
           // Calendar title header
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              calendar.metadata.title,
-              style: TextStyle(
-                fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
-              ),
+            child: Row(
+              children: [
+                // Leading checkbox to select calendar for import
+                Checkbox(
+                  value: calendar.preferences.importSettings.importAll ||
+                      calendar.preferences.importSettings.importSubject ||
+                      calendar.preferences.importSettings.importBody ||
+                      calendar.preferences.importSettings.importConferenceInfo ||
+                      calendar.preferences.importSettings.importOrganizer ||
+                      calendar.preferences.importSettings.importRecipients,
+                  onChanged: (checked) {
+                    final isChecked = checked ?? false;
+                    setState(() {
+                      if (isChecked) {
+                        // mark calendar as selected: default to Subject import
+                        final updated = calendar.copyWith(
+                          preferences: calendar.preferences.copyWith(
+                            importSettings: calendar.preferences.importSettings.copyWith(
+                              importAll: false,
+                              importSubject: true,
+                              importBody: false,
+                              importConferenceInfo: false,
+                              importOrganizer: false,
+                              importRecipients: false,
+                            ),
+                            category: calendar.preferences.category ?? 'Work',
+                          ),
+                        );
+                        widget.calendars[index] = updated;
+                        _selectedCategories[index] = updated.preferences.category ?? 'Work';
+                      } else {
+                        // unselect: clear all import flags and category
+                        final updated = calendar.copyWith(
+                          preferences: calendar.preferences.copyWith(
+                            importSettings: calendar.preferences.importSettings.copyWith(
+                              importAll: false,
+                              importSubject: false,
+                              importBody: false,
+                              importConferenceInfo: false,
+                              importOrganizer: false,
+                              importRecipients: false,
+                            ),
+                            category: null,
+                          ),
+                        );
+                        widget.calendars[index] = updated;
+                        _selectedCategories[index] = '';
+                      }
+                    });
+                  },
+                ),
+
+                Expanded(
+                  child: Text(
+                    calendar.metadata.title,
+                    style: TextStyle(
+                      fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           _buildCalendarImportSettings(index),
