@@ -79,6 +79,12 @@ class _CalendarSettingsState extends State<CalendarSettings> {
   Widget _buildCalendarImportSettings(int index) {
     final calendar = widget.calendars[index];
     final importSettings = calendar.preferences.importSettings;
+  final noneSelected = !importSettings.importAll &&
+    !(importSettings.importSubject ||
+      importSettings.importBody ||
+      importSettings.importConferenceInfo ||
+      importSettings.importOrganizer ||
+      importSettings.importRecipients);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Column(
@@ -118,11 +124,54 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                   },
                 ),
 
+                // 'None' Checkbox - explicit choice to import nothing
+                _buildCheckbox(
+                  'None',
+                  noneSelected,
+                  importSettings.importAll
+                      ? null
+                      : (value) {
+                          if (value == null || value == false) return;
+                          // When None is checked, clear all individual options
+                          setState(() {
+                            final updatedCalendar = calendar.copyWith(
+                              preferences: calendar.preferences.copyWith(
+                                importSettings:
+                                    calendar.preferences.importSettings.copyWith(
+                                  importAll: false,
+                                  importSubject: false,
+                                  importBody: false,
+                                  importConferenceInfo: false,
+                                  importOrganizer: false,
+                                  importRecipients: false,
+                                ),
+                              ),
+                            );
+                            widget.calendars[index] = updatedCalendar;
+                          });
+                        },
+                ),
+                // Hint explaining 'None' semantics
+                if (noneSelected || !importSettings.importAll)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    child: Text(
+                      "None: only start and end times will be imported",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
+                    ),
+                  ),
+
                 // Individual Checkboxes
                 _buildCheckbox(
                   'Subject',
-                  importSettings.importSubject,
-                  importSettings.importAll ? null : (value) => setState(() {
+          importSettings.importSubject,
+          // disable individual checkboxes if "All" is selected or "None" is selected
+          (importSettings.importAll || noneSelected)
+            ? null
+            : (value) => setState(() {
                     final updatedCalendar = calendar.copyWith(
                       preferences: calendar.preferences.copyWith(
                         importSettings: calendar.preferences.importSettings.copyWith(
@@ -136,8 +185,10 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                 ),
                 _buildCheckbox(
                   'Description',
-                  importSettings.importBody,
-                  importSettings.importAll ? null : (value) => setState(() {
+          importSettings.importBody,
+          (importSettings.importAll || noneSelected)
+            ? null
+            : (value) => setState(() {
                     final updatedCalendar = calendar.copyWith(
                       preferences: calendar.preferences.copyWith(
                         importSettings: calendar.preferences.importSettings.copyWith(
@@ -151,8 +202,10 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                 ),
                 _buildCheckbox(
                   'Conference Info',
-                  importSettings.importConferenceInfo,
-                  importSettings.importAll ? null : (value) => setState(() {
+          importSettings.importConferenceInfo,
+          (importSettings.importAll || noneSelected)
+            ? null
+            : (value) => setState(() {
                     final updatedCalendar = calendar.copyWith(
                       preferences: calendar.preferences.copyWith(
                         importSettings: calendar.preferences.importSettings.copyWith(
@@ -166,8 +219,10 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                 ),
                 _buildCheckbox(
                   'Organizer',
-                  importSettings.importOrganizer,
-                  importSettings.importAll ? null : (value) => setState(() {
+          importSettings.importOrganizer,
+          (importSettings.importAll || noneSelected)
+            ? null
+            : (value) => setState(() {
                     final updatedCalendar = calendar.copyWith(
                       preferences: calendar.preferences.copyWith(
                         importSettings: calendar.preferences.importSettings.copyWith(
@@ -181,8 +236,10 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                 ),
                 _buildCheckbox(
                   'Recipients',
-                  importSettings.importRecipients,
-                  importSettings.importAll ? null : (value) => setState(() {
+          importSettings.importRecipients,
+          (importSettings.importAll || noneSelected)
+            ? null
+            : (value) => setState(() {
                     final updatedCalendar = calendar.copyWith(
                       preferences: calendar.preferences.copyWith(
                         importSettings: calendar.preferences.importSettings.copyWith(
