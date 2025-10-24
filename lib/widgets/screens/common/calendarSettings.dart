@@ -83,7 +83,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                     final isChecked = checked ?? false;
                     setState(() {
                       if (isChecked) {
-                        // mark calendar as selected: default to Subject import
+                        // mark calendar as selected: default to Subject import only
                         final updated = calendar.copyWith(
                           preferences: calendar.preferences.copyWith(
                             importSettings: calendar.preferences.importSettings.copyWith(
@@ -137,20 +137,26 @@ class _CalendarSettingsState extends State<CalendarSettings> {
               ],
             ),
           ),
-          // Animated fade and disable import settings & category when calendar not selected
+          // Animated fade and disable import settings when calendar not selected
+          // Category selection should work independently of import settings when calendar is selected
           AnimatedOpacity(
             opacity: isSelected ? 1.0 : 0.45,
             duration: _fadeDuration,
             curve: Curves.easeInOut,
-            child: AbsorbPointer(
-              absorbing: !isSelected,
-              child: Column(
-                children: [
-                  _buildCalendarImportSettings(index),
-                  const SizedBox(height: 12),
-                  _buildCategorySelection(index),
-                ],
-              ),
+            child: Column(
+              children: [
+                // Import settings are disabled when calendar is not selected
+                AbsorbPointer(
+                  absorbing: !isSelected,
+                  child: _buildCalendarImportSettings(index),
+                ),
+                const SizedBox(height: 12),
+                // Category selection is disabled when calendar is not selected
+                AbsorbPointer(
+                  absorbing: !isSelected,
+                  child: _buildCategorySelection(index),
+                ),
+              ],
             ),
           ),
         ],
@@ -214,7 +220,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                       ? null
                       : (value) {
                           if (value == null || value == false) return;
-                          // When None is checked, clear all individual options
+                          // When None is checked, clear all individual options but keep category
                           setState(() {
                             final updatedCalendar = calendar.copyWith(
                               preferences: calendar.preferences.copyWith(
@@ -227,9 +233,13 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                                   importOrganizer: false,
                                   importRecipients: false,
                                 ),
+                                // Keep the existing category when None is selected
+                                category: calendar.preferences.category ?? 'Work',
                               ),
                             );
                             widget.calendars[index] = updatedCalendar;
+                            // Ensure the selected category is maintained
+                            _selectedCategories[index] = updatedCalendar.preferences.category ?? 'Work';
                           });
                         },
                 ),
@@ -238,7 +248,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
                     child: Text(
-                      "None: only start and end times will be imported",
+                      "None: only start and end times and category will be imported",
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(context).textTheme.bodySmall?.color,
@@ -457,15 +467,21 @@ class _CalendarSettingsState extends State<CalendarSettings> {
       print('  📋 Category: ${calendar.preferences.category}');
     }
 
-    // Filter out calendars that are not selected (no import options enabled)
+    // Filter out calendars that are not selected
+    // A calendar is considered selected if it has any import option enabled OR if it has a category set
+    // This handles both cases: when specific metadata is selected AND when "None" is selected (but category is set)
     final _selectedCalendars = widget.calendars.where((calendar) {
       final importSettings = calendar.preferences.importSettings;
-      return importSettings.importAll ||
+      final hasAnyImportOption = importSettings.importAll ||
           importSettings.importSubject ||
           importSettings.importBody ||
           importSettings.importConferenceInfo ||
           importSettings.importOrganizer ||
           importSettings.importRecipients;
+      
+      // A calendar is selected if it has any import option OR if it has a category set
+      // This ensures calendars with "None" selected but with a category are still included
+      return hasAnyImportOption || calendar.preferences.category != null;
     }).toList();
 
     
