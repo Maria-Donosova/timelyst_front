@@ -32,7 +32,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     super.initState();
     _selectedCategories = List.generate(
       widget.calendars.length,
-      (index) => widget.calendars[index].preferences.category ?? 'Work',
+      (index) => widget.calendars[index].preferences.category ?? '',
     );
   }
 
@@ -83,22 +83,22 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                     final isChecked = checked ?? false;
                     setState(() {
                       if (isChecked) {
-                        // mark calendar as selected: default to Subject import only
+                        // mark calendar as selected: default to no import options selected
                         final updated = calendar.copyWith(
                           preferences: calendar.preferences.copyWith(
                             importSettings: calendar.preferences.importSettings.copyWith(
                               importAll: false,
-                              importSubject: true,
+                              importSubject: false,
                               importBody: false,
                               importConferenceInfo: false,
                               importOrganizer: false,
                               importRecipients: false,
                             ),
-                            category: calendar.preferences.category ?? 'Work',
+                            category: calendar.preferences.category ?? '',
                           ),
                         );
                         widget.calendars[index] = updated;
-                        _selectedCategories[index] = updated.preferences.category ?? 'Work';
+                        _selectedCategories[index] = updated.preferences.category ?? '';
                       } else {
                         // unselect: clear all import flags and category
                         final updated = calendar.copyWith(
@@ -234,7 +234,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                                   importRecipients: false,
                                 ),
                                 // Keep the existing category when None is selected
-                                category: calendar.preferences.category ?? 'Work',
+                                category: calendar.preferences.category ?? '',
                               ),
                             );
                             widget.calendars[index] = updatedCalendar;
