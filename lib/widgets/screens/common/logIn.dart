@@ -92,98 +92,100 @@ class _LogInScreenState extends State<LogInScreen> {
     return SafeArea(
       child: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Welcome Friend',
-                  style: Theme.of(context).textTheme.displayLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 30),
-                Form(
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          errorStyle: TextStyle(color: Colors.redAccent),
-                        ),
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.emailAddress,
-                        focusNode: _emailFocusNode,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Please provide a value.';
-                          }
-                          const pattern = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
-                          final regExp = RegExp(pattern);
-                          if (!regExp.hasMatch(value)) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                        onFieldSubmitted: (_) {
-                          FocusScope.of(context).requestFocus(_passFocusNode);
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
-                          errorStyle: TextStyle(color: Colors.redAccent),
-                        ),
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textInputAction: TextInputAction.done,
-                        keyboardType: TextInputType.visiblePassword,
-                        obscureText: true,
-                        focusNode: _passFocusNode,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Please provide a value.';
-                          }
-                          return null;
-                        },
-                        onFieldSubmitted: (_) => _submitForm(),
-                      ),
-                      const SizedBox(height: 10),
-                      TextButton(
-                        child: Text(
-                          'Forgot password?',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        ),
-                        onPressed: () {},
-                      ),
-                    ],
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Welcome Friend',
+                    style: Theme.of(context).textTheme.displayLarge,
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
-                        )
-                      : Text(
-                          'Log In',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSecondary,
+                  const SizedBox(height: 30),
+                  Form(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: const InputDecoration(
+                            labelText: 'Email',
+                            errorStyle: TextStyle(color: Colors.redAccent),
                           ),
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textInputAction: TextInputAction.next,
+                          keyboardType: TextInputType.emailAddress,
+                          focusNode: _emailFocusNode,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please provide a value.';
+                            }
+                            const pattern = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+                            final regExp = RegExp(pattern);
+                            if (!regExp.hasMatch(value)) {
+                              return 'Please enter a valid email';
+                            }
+                            return null;
+                          },
+                          onFieldSubmitted: (_) {
+                            FocusScope.of(context).requestFocus(_passFocusNode);
+                          },
                         ),
-                ),
-              ],
+                        const SizedBox(height: 20),
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: const InputDecoration(
+                            labelText: 'Password',
+                            errorStyle: TextStyle(color: Colors.redAccent),
+                          ),
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textInputAction: TextInputAction.done,
+                          keyboardType: TextInputType.visiblePassword,
+                          obscureText: true,
+                          focusNode: _passFocusNode,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please provide a value.';
+                            }
+                            return null;
+                          },
+                          onFieldSubmitted: (_) => _submitForm(),
+                        ),
+                        const SizedBox(height: 10),
+                        TextButton(
+                          child: Text(
+                            'Forgot password?',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                          )
+                        : Text(
+                            'Log In',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSecondary,
+                            ),
+                          ),
+                  ),
+                ],
+              ),
             ),
           ),
           if (_isLoading)

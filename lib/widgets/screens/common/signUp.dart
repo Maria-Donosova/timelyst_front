@@ -56,7 +56,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       formKey: _form,
       child: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ResponsiveHeadline(
               'Tell us more about yourself',
