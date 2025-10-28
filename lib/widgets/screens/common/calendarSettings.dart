@@ -83,12 +83,12 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                     final isChecked = checked ?? false;
                     setState(() {
                       if (isChecked) {
-                        // mark calendar as selected: default to no import options selected
+                        // mark calendar as selected: default to Subject import only
                         final updated = calendar.copyWith(
                           preferences: calendar.preferences.copyWith(
                             importSettings: calendar.preferences.importSettings.copyWith(
                               importAll: false,
-                              importSubject: false,
+                              importSubject: true,
                               importBody: false,
                               importConferenceInfo: false,
                               importOrganizer: false,
