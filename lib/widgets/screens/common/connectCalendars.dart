@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:html' as html;
 
 import '../../shared/customAppbar.dart';
+import '../../responsive/responsive_helper.dart';
+import '../../responsive/responsive_button.dart';
 
 import '../../../services/googleIntegration/googleSignInManager.dart';
 import '../../../services/microsoftIntegration/microsoftSignInManager.dart';
@@ -246,29 +248,101 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
   @override
   Widget build(BuildContext context) {
     final appBar = CustomAppBar();
+    final mediaQuery = MediaQuery.of(context);
+    
+    // Use existing responsive system
+    final horizontalPadding = ResponsiveHelper.getValue(
+      context,
+      mobile: 24.0,
+      tablet: 32.0,
+      desktop: 64.0,
+    );
+    
+    final verticalPadding = ResponsiveHelper.getValue(
+      context,
+      mobile: 32.0,
+      tablet: 32.0,
+      desktop: 48.0,
+    );
+    
+    final titleFontSize = ResponsiveHelper.getValue(
+      context,
+      mobile: 24.0,
+      tablet: 28.0,
+      desktop: 32.0,
+    );
+    
+    final spacingAfterTitle = ResponsiveHelper.getValue(
+      context,
+      mobile: 24.0,
+      tablet: 36.0,
+      desktop: 48.0,
+    );
+    
+    final spacingBeforeButton = ResponsiveHelper.getValue(
+      context,
+      mobile: 24.0,
+      tablet: 36.0,
+      desktop: 48.0,
+    );
 
     return Scaffold(
       appBar: appBar,
       body: SafeArea(
         child: Stack(
           children: [
-            Container(
-              child: Align(
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 150.0, left: 10, right: 10),
-                  child: Column(children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(top: 90, bottom: 30.0),
-                  child: Text(
-                    'Add your external accounts to get a 360 view on your schedules and ToDos.',
-                    style: Theme.of(context).textTheme.displaySmall,
-                    textAlign: TextAlign.center,
-                  ),
+            SingleChildScrollView(
+              child: Container(
+                constraints: BoxConstraints(
+                  minHeight: mediaQuery.size.height - 
+                    (appBar.preferredSize.height + mediaQuery.padding.top),
                 ),
-                _ServiceButton(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding,
+                    vertical: verticalPadding,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Header section with responsive spacing
+                      Container(
+                        constraints: BoxConstraints(maxWidth: 800),
+                        child: Column(
+                          children: [
+                            SizedBox(height: ResponsiveHelper.getValue(
+                              context,
+                              mobile: 20.0,
+                              tablet: 40.0,
+                              desktop: 60.0,
+                            )),
+                            Text(
+                              'Add your external accounts to get a 360 view on your schedules and ToDos.',
+                              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                                fontSize: titleFontSize,
+                                height: 1.3,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: spacingAfterTitle),
+                          ],
+                        ),
+                      ),
+
+                      // Service buttons with responsive layout
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: ResponsiveHelper.getValue(
+                            context,
+                            mobile: 400.0,
+                            tablet: 400.0,
+                            desktop: 600.0,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                ResponsiveButton(
                   text: 'Gmail',
-                  color: const Color.fromARGB(255, 198, 23, 10),
                   onPressed: () async {
                     try {
                       // Show initial loading feedback
@@ -338,9 +412,8 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                     }
                   },
                 ),
-                _ServiceButton(
+                ResponsiveButton(
                   text: 'Outlook',
-                  color: const Color.fromARGB(255, 6, 117, 208),
                   onPressed: () async {
                     try {
                       // Show initial loading feedback
@@ -389,9 +462,8 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                     }
                   },
                 ),
-                _ServiceButton(
+                ResponsiveButton(
                   text: 'iCloud',
-                  color: const Color.fromARGB(255, 41, 41, 41),
                   onPressed: () async {
                     try {
                       // Show initial loading feedback
@@ -460,27 +532,40 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                       }
                     }
                   },
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 30.0),
-                  child: TextButton(
-                    onPressed: () {
-                      print('Start Blank button pressed');
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const Agenda()),
-                      );
-                    },
-                    child: Text(
-                      'Start Blank',
-                      style: Theme.of(context).textTheme.displayMedium,
-                    ),
+                            ),
+                            
+                            // Start blank button with responsive spacing
+                            Padding(
+                              padding: EdgeInsets.only(top: spacingBeforeButton),
+                              child: TextButton(
+                                onPressed: () {
+                                  print('Start Blank button pressed');
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const Agenda()),
+                                  );
+                                },
+                                child: Text(
+                                  'Start Blank',
+                                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                    fontSize: ResponsiveHelper.getValue(
+                                      context,
+                                      mobile: 16.0,
+                                      tablet: 18.0,
+                                      desktop: 20.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ]),
+              ),
             ),
-          ),
-        ),
             // Loading overlay for Microsoft callback processing
             if (_processingMicrosoft)
               Container(
@@ -533,15 +618,39 @@ class _ServiceButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final isTablet = screenWidth > 768;
+    final isDesktop = screenWidth > 1024;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          textStyle: const TextStyle(fontSize: 16),
+      padding: EdgeInsets.only(
+        bottom: isDesktop ? 16.0 : isTablet ? 14.0 : 12.0,
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(
+              vertical: isDesktop ? 20.0 : isTablet ? 18.0 : 16.0,
+              horizontal: 24.0,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            elevation: 2,
+          ),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: isDesktop ? 18 : isTablet ? 17 : 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-        child: Text(text),
       ),
     );
   }

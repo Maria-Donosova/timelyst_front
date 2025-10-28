@@ -4,6 +4,8 @@ import '../../../models/calendars.dart';
 import '../../../services/googleIntegration/calendarSyncManager.dart';
 import '../../shared/customAppbar.dart';
 import '../../shared/categories.dart';
+import '../../responsive/responsive_helper.dart';
+import '../../responsive/responsive_button.dart';
 
 class CalendarSettings extends StatefulWidget {
   final List<Calendar> calendars;
@@ -608,7 +610,44 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     print("- User ID: ${widget.userId}");
     print("- Email: ${widget.email}");
 
-    final mediaQuery = MediaQuery.of(context);
+    // Use existing responsive system
+    final screenSize = ResponsiveHelper.getScreenSize(context);
+    
+    // Responsive calendar grid configuration using your system
+    final crossAxisCount = ResponsiveHelper.getValue(
+      context,
+      mobile: 1,
+      tablet: 3,
+      desktop: 4,
+    );
+    
+    final maxCardWidth = ResponsiveHelper.getValue(
+      context,
+      mobile: double.infinity,
+      tablet: 280.0,
+      desktop: 300.0,
+    );
+    
+    final horizontalPadding = ResponsiveHelper.getValue(
+      context,
+      mobile: 16.0,
+      tablet: 24.0,
+      desktop: 32.0,
+    );
+    
+    final titleFontSize = ResponsiveHelper.getValue(
+      context,
+      mobile: 20.0,
+      tablet: 24.0,
+      desktop: 28.0,
+    );
+    
+    final bodyFontSize = ResponsiveHelper.getValue(
+      context,
+      mobile: 14.0,
+      tablet: 15.0,
+      desktop: 16.0,
+    );
 
     return Scaffold(
       appBar: CustomAppBar(),
@@ -616,57 +655,103 @@ class _CalendarSettingsState extends State<CalendarSettings> {
           ? Center(child: Text("No calendars found"))
           : SafeArea(
               child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 10.0, right: 10.0, top: 50.0),
-                      child: Text(
-                        "Choose what you'd like to import",
-                        style: Theme.of(context).textTheme.titleMedium,
-                        textAlign: TextAlign.center,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding,
+                    vertical: 24.0,
+                  ),
+                  child: Column(
+                    children: [
+                      // Header section
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 24.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              "Choose what you'd like to import",
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontSize: titleFontSize,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 16),
+                            Container(
+                              constraints: BoxConstraints(maxWidth: 600),
+                              child: Text(
+                                "Start and end time, identificators and timezone always get imported for the selected calendars",
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  fontSize: bodyFontSize,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 40.0),
-                      child: Text(
-                        "Start and end time, identificators and timezone always get imported for the selected calendars",
-                        style: Theme.of(context).textTheme.titleSmall,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Wrap(
-                        children: [
-                          Row(
-                            children: List.generate(
-                              widget.calendars.length,
-                              (index) => Container(
-                                width: mediaQuery.size.width * 0.25,
+                      
+                      // Responsive calendar grid using your system
+                      if (ResponsiveHelper.isDesktop(context) || ResponsiveHelper.isTablet(context))
+                        // Grid layout for larger screens
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final maxWidth = constraints.maxWidth;
+                            final itemWidth = (maxWidth / crossAxisCount) - 16;
+                            final finalItemWidth = itemWidth > maxCardWidth ? maxCardWidth : itemWidth;
+                            
+                            return Wrap(
+                              spacing: 16,
+                              runSpacing: 16,
+                              alignment: WrapAlignment.center,
+                              children: List.generate(
+                                widget.calendars.length,
+                                (index) => Container(
+                                  width: finalItemWidth,
+                                  child: _buildCalendarSection(index),
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      else
+                        // Single column layout for mobile
+                        Column(
+                          children: List.generate(
+                            widget.calendars.length,
+                            (index) => Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Container(
+                                constraints: BoxConstraints(maxWidth: 500),
                                 child: _buildCalendarSection(index),
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        onPressed: _navigateToAgenda,
-                        child: Text('Save',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSecondary,
-                            )),
+                      
+                      // Save button using ResponsiveButton
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: 32.0,
+                          bottom: 16.0,
+                        ),
+                        child: Container(
+                          constraints: BoxConstraints(
+                            maxWidth: ResponsiveHelper.getValue(
+                              context,
+                              mobile: double.infinity,
+                              tablet: 400.0,
+                              desktop: 300.0,
+                            ),
+                          ),
+                          width: double.infinity,
+                          child: ResponsiveButton(
+                            text: 'Save',
+                            onPressed: _navigateToAgenda,
+                            type: ButtonType.primary,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
