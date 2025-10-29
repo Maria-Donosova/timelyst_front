@@ -12,6 +12,7 @@ import '../views/eventDetails.dart';
 import '../../../models/customApp.dart';
 import '../../../providers/eventProvider.dart';
 import '../../../utils/logger.dart';
+import '../../responsive/responsive_widgets.dart';
 
 enum _calView { day, week, month }
 
@@ -76,7 +77,9 @@ class _CalendarWState extends State<CalendarW> {
             calendarHeader(mediaQuery, context),
             isMonth
                 ? Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    padding: EdgeInsets.symmetric(
+                      vertical: ResponsiveHelper.getValue(context, mobile: 8.0, tablet: 10.0, desktop: 12.0)
+                    ),
                     child: WeekDaysW(
                         cellWidth: cellWidth,
                         viewHeaderText6: 'Sun',
@@ -89,7 +92,9 @@ class _CalendarWState extends State<CalendarW> {
                   )
                 : isWeek
                     ? Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        padding: EdgeInsets.symmetric(
+                          vertical: ResponsiveHelper.getValue(context, mobile: 8.0, tablet: 10.0, desktop: 12.0)
+                        ),
                         child: WeekDaysW(
                             cellWidth: cellWidth,
                             viewHeaderText6: 'Sun',
@@ -223,7 +228,10 @@ class _CalendarWState extends State<CalendarW> {
         SizedBox(
           width: mediaQuery.size.width * 0.38,
           child: Padding(
-            padding: const EdgeInsets.only(left: 10.0, right: 20),
+            padding: EdgeInsets.only(
+              left: ResponsiveHelper.getValue(context, mobile: 10.0, tablet: 12.0, desktop: 15.0),
+              right: ResponsiveHelper.getValue(context, mobile: 20.0, tablet: 24.0, desktop: 30.0),
+            ),
             child: Text(
               _headerText!,
               style: Theme.of(context).textTheme.displayMedium,
