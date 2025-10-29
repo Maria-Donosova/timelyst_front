@@ -4,6 +4,7 @@ import 'package:timelyst_flutter/providers/eventProvider.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
 
 import '../calendar/controllers/calendar.dart';
+import '../responsive/responsive_widgets.dart';
 
 class RightPanel extends StatelessWidget {
   const RightPanel({Key? key}) : super(key: key);
@@ -22,36 +23,35 @@ class RightPanel extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
     
-    return LayoutBuilder(
-      builder: (ctx, constraints) {
-        return Padding(
-          padding: const EdgeInsets.only(left: 4.0, top: 15),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              !isLandscape
-                  ? Flexible(flex: 0, child: Container())
-                  : Flexible(
-                      flex: 0,
-                      child: Container(),
-                    ),
-              !isLandscape
-                  ? Flexible(
-                      child: RefreshIndicator(
-                        onRefresh: () => _refreshData(context),
-                        child: CalendarW(),
-                      ),
-                    )
-                  : Flexible(
-                      child: RefreshIndicator(
-                        onRefresh: () => _refreshData(context),
-                        child: CalendarW(),
-                      ),
-                    ),
-            ],
-          ),
-        );
-      },
+    return Padding(
+      padding: EdgeInsets.only(
+        left: ResponsiveHelper.getValue(context, mobile: 4.0, tablet: 6.0, desktop: 8.0),
+        top: ResponsiveHelper.getValue(context, mobile: 15.0, tablet: 20.0, desktop: 25.0),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          !isLandscape
+              ? Flexible(flex: 0, child: Container())
+              : Flexible(
+                  flex: 0,
+                  child: Container(),
+                ),
+          !isLandscape
+              ? Flexible(
+                  child: RefreshIndicator(
+                    onRefresh: () => _refreshData(context),
+                    child: CalendarW(),
+                  ),
+                )
+              : Flexible(
+                  child: RefreshIndicator(
+                    onRefresh: () => _refreshData(context),
+                    child: CalendarW(),
+                  ),
+                ),
+        ],
+      ),
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:timelyst_flutter/providers/taskProvider.dart';
 import '../../shared/customAppbar.dart';
 import '../../layout/leftPanel.dart';
 import '../../layout/rightPanel.dart';
+import '../../responsive/responsive_widgets.dart';
 
 class Agenda extends StatefulWidget {
   final bool? syncInProgress;
