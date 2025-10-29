@@ -341,9 +341,17 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                         ),
                         child: Column(
                           children: [
-                ResponsiveButton(
-                  text: 'Gmail',
-                  onPressed: () async {
+               // Gmail button with Google red color
+               Container(
+                 width: double.infinity,
+                 margin: EdgeInsets.only(bottom: ResponsiveHelper.getValue(
+                   context,
+                   mobile: 12.0,
+                   tablet: 14.0,
+                   desktop: 16.0,
+                 )),
+                 child: ElevatedButton(
+                   onPressed: () async {
                     try {
                       // Show initial loading feedback
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -410,11 +418,49 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                         );
                       }
                     }
-                  },
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFEA4335), // Google red
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(
+                        vertical: ResponsiveHelper.getValue(
+                          context,
+                          mobile: 16.0,
+                          tablet: 18.0,
+                          desktop: 20.0,
+                        ),
+                        horizontal: 24.0,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: Text(
+                      'Gmail',
+                      style: TextStyle(
+                        fontSize: ResponsiveHelper.getValue(
+                          context,
+                          mobile: 16.0,
+                          tablet: 17.0,
+                          desktop: 18.0,
+                        ),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
-                ResponsiveButton(
-                  text: 'Outlook',
-                  onPressed: () async {
+                // Outlook button with Microsoft blue color
+                Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(bottom: ResponsiveHelper.getValue(
+                    context,
+                    mobile: 12.0,
+                    tablet: 14.0,
+                    desktop: 16.0,
+                  )),
+                  child: ElevatedButton(
+                    onPressed: () async {
                     try {
                       // Show initial loading feedback
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -460,11 +506,49 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                         );
                       }
                     }
-                  },
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF0078D4), // Microsoft blue
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(
+                        vertical: ResponsiveHelper.getValue(
+                          context,
+                          mobile: 16.0,
+                          tablet: 18.0,
+                          desktop: 20.0,
+                        ),
+                        horizontal: 24.0,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: Text(
+                      'Outlook',
+                      style: TextStyle(
+                        fontSize: ResponsiveHelper.getValue(
+                          context,
+                          mobile: 16.0,
+                          tablet: 17.0,
+                          desktop: 18.0,
+                        ),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
-                ResponsiveButton(
-                  text: 'iCloud',
-                  onPressed: () async {
+                // iCloud button with steel grey color
+                Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(bottom: ResponsiveHelper.getValue(
+                    context,
+                    mobile: 12.0,
+                    tablet: 14.0,
+                    desktop: 16.0,
+                  )),
+                  child: ElevatedButton(
+                    onPressed: () async {
                     try {
                       // Show initial loading feedback
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -531,8 +615,38 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                         );
                       }
                     }
-                  },
-                            ),
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF6C757D), // Steel grey
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(
+                        vertical: ResponsiveHelper.getValue(
+                          context,
+                          mobile: 16.0,
+                          tablet: 18.0,
+                          desktop: 20.0,
+                        ),
+                        horizontal: 24.0,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: Text(
+                      'iCloud',
+                      style: TextStyle(
+                        fontSize: ResponsiveHelper.getValue(
+                          context,
+                          mobile: 16.0,
+                          tablet: 17.0,
+                          desktop: 18.0,
+                        ),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
                             
                             // Start blank button with responsive spacing
                             Padding(
@@ -605,53 +719,3 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
   }
 }
 
-class _ServiceButton extends StatelessWidget {
-  final String text;
-  final Color color;
-  final VoidCallback onPressed;
-
-  const _ServiceButton({
-    required this.text,
-    required this.color,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenWidth = mediaQuery.size.width;
-    final isTablet = screenWidth > 768;
-    final isDesktop = screenWidth > 1024;
-
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: isDesktop ? 16.0 : isTablet ? 14.0 : 12.0,
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color,
-            foregroundColor: Colors.white,
-            padding: EdgeInsets.symmetric(
-              vertical: isDesktop ? 20.0 : isTablet ? 18.0 : 16.0,
-              horizontal: 24.0,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            elevation: 2,
-          ),
-          child: Text(
-            text,
-            style: TextStyle(
-              fontSize: isDesktop ? 18 : isTablet ? 17 : 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
