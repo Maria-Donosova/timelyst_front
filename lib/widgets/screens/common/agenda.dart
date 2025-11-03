@@ -11,7 +11,7 @@ import '../../responsive/responsive_widgets.dart';
 class Agenda extends StatefulWidget {
   final bool? syncInProgress;
   final String? syncIntegrationType;
-  
+
   const Agenda({
     Key? key,
     calendars,
@@ -51,39 +51,42 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
         _syncStartTime = now;
         _syncIntegrationType = widget.syncIntegrationType ?? 'Calendar';
       });
-      
-      print('🔄 [Agenda] Sync in progress detected - monitoring for completion (${_syncIntegrationType})');
+
+      print(
+          '🔄 [Agenda] Sync in progress detected - monitoring for completion (${_syncIntegrationType})');
+      print('🔍 [Agenda] SYNC START TIME: ${_syncStartTime}');
       _monitorSyncProgress();
     }
   }
 
   void _monitorSyncProgress() {
     if (!_isSyncInProgress) return;
-    
+
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
     int eventCountBefore = eventProvider.events.length;
-    
+
     // Poll for events on current day to detect sync completion
     Timer.periodic(Duration(seconds: 5), (timer) {
       if (!_isSyncInProgress || !mounted) {
         timer.cancel();
         return;
       }
-      
+
       print('📡 [Agenda] Checking for new events from sync...');
-      
+
       // Force cache invalidation and fetch today's events
       eventProvider.invalidateCache();
       eventProvider.fetchDayViewEvents(date: DateTime.now()).then((_) {
         final currentEventCount = eventProvider.events.length;
-        
+
         // Check if new events have been added
         if (currentEventCount > eventCountBefore && _isSyncInProgress) {
-          print('✅ [Agenda] Events detected - sync appears complete (${currentEventCount} vs ${eventCountBefore} events)');
+          print(
+              '✅ [Agenda] Events detected - sync appears complete (${currentEventCount} vs ${eventCountBefore} events)');
           _completeSyncProgress();
           timer.cancel();
-        } else if (_syncStartTime != null && 
-                   DateTime.now().difference(_syncStartTime!).inMinutes > 3) {
+        } else if (_syncStartTime != null &&
+            DateTime.now().difference(_syncStartTime!).inMinutes > 3) {
           // Timeout after 3 minutes
           print('⏰ [Agenda] Sync monitoring timeout');
           _completeSyncProgress(timeout: true);
@@ -97,14 +100,17 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
 
   void _completeSyncProgress({bool timeout = false}) {
     if (!mounted) return;
-    
+
     setState(() {
       _isSyncInProgress = false;
       _syncIntegrationType = null;
       _syncStartTime = null;
     });
-    
+
     if (timeout) {
+      print('🔍 [Agenda] SHOWING TIMEOUT SNACKBAR');
+      // Clear any existing snackbars before showing new one
+      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -119,13 +125,17 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
         ),
       );
     } else {
+      print('🔍 [Agenda] SHOWING SUCCESS COMPLETION SNACKBAR');
+      // Clear any existing snackbars before showing new one
+      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
             children: [
               Icon(Icons.check_circle, color: Colors.white, size: 16),
               SizedBox(width: 12),
-              Text('${_syncIntegrationType ?? 'Calendar'} sync completed successfully!'),
+              Text(
+                  '${_syncIntegrationType ?? 'Calendar'} sync completed successfully!'),
             ],
           ),
           backgroundColor: Colors.green,
@@ -146,15 +156,17 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       final now = DateTime.now();
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
-      
+
       // Always invalidate cache when app resumes to catch external changes
       eventProvider.invalidateCache();
       print('📱 [Agenda] App resumed - cache invalidated for fresh data');
-      
-      if (_lastFetchTime == null || now.difference(_lastFetchTime!).inMinutes >= 5) {
+
+      if (_lastFetchTime == null ||
+          now.difference(_lastFetchTime!).inMinutes >= 5) {
         _refreshData();
       } else {
-        print('📱 [Agenda] Recent fetch detected, cache invalidated but not forcing immediate refresh');
+        print(
+            '📱 [Agenda] Recent fetch detected, cache invalidated but not forcing immediate refresh');
       }
     }
   }
@@ -162,25 +174,27 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
   void _refreshData() {
     final timestamp = DateTime.now();
     print('🔄 [Agenda] Starting parallel data refresh at ${timestamp}');
-    
+
     _lastFetchTime = timestamp;
-    
+
     // Load tasks and initial events in parallel for better UX
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
-    
+
     // Start both operations concurrently - give them time for CalDAV operations
-    print('📊 [Agenda] Starting tasks and events loading - this may take up to 60 seconds for Apple CalDAV sync...');
+    print(
+        '📊 [Agenda] Starting tasks and events loading - this may take up to 60 seconds for Apple CalDAV sync...');
     Future.wait([
       taskProvider.fetchTasks(),
-      eventProvider.fetchDayViewEvents(isParallelLoad: true), // Load today's events with parallel timeout
+      eventProvider.fetchDayViewEvents(
+          isParallelLoad: true), // Load today's events with parallel timeout
     ]).then((_) {
       print('✅ [Agenda] Parallel data refresh completed successfully');
     }).catchError((error) {
       print('❌ [Agenda] Parallel data refresh failed: $error');
       // Don't prevent the UI from working even if initial load fails
     });
-    
+
     // Calendar component will still handle additional event fetching for view changes
   }
 
@@ -210,7 +224,7 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
                       child: RightPanel(),
                     ),
             ]),
-            
+
             // Sync progress indicator
             if (_isSyncInProgress)
               Positioned(
@@ -232,7 +246,8 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.blue[700]!),
                         ),
                       ),
                       SizedBox(width: 12),

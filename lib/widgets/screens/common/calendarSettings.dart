@@ -78,7 +78,8 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                   value: calendar.preferences.importSettings.importAll ||
                       calendar.preferences.importSettings.importSubject ||
                       calendar.preferences.importSettings.importBody ||
-                      calendar.preferences.importSettings.importConferenceInfo ||
+                      calendar
+                          .preferences.importSettings.importConferenceInfo ||
                       calendar.preferences.importSettings.importOrganizer ||
                       calendar.preferences.importSettings.importRecipients,
                   onChanged: (checked) {
@@ -88,7 +89,8 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                         // mark calendar as selected: default to Subject import only
                         final updated = calendar.copyWith(
                           preferences: calendar.preferences.copyWith(
-                            importSettings: calendar.preferences.importSettings.copyWith(
+                            importSettings:
+                                calendar.preferences.importSettings.copyWith(
                               importAll: false,
                               importSubject: true,
                               importBody: false,
@@ -100,12 +102,14 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                           ),
                         );
                         widget.calendars[index] = updated;
-                        _selectedCategories[index] = updated.preferences.category ?? '';
+                        _selectedCategories[index] =
+                            updated.preferences.category ?? '';
                       } else {
                         // unselect: clear all import flags and category
                         final updated = calendar.copyWith(
                           preferences: calendar.preferences.copyWith(
-                            importSettings: calendar.preferences.importSettings.copyWith(
+                            importSettings:
+                                calendar.preferences.importSettings.copyWith(
                               importAll: false,
                               importSubject: false,
                               importBody: false,
@@ -128,7 +132,8 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                     duration: _fadeDuration,
                     curve: Curves.easeInOut,
                     style: TextStyle(
-                      fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+                      fontSize:
+                          Theme.of(context).textTheme.titleMedium?.fontSize,
                       color: isSelected
                           ? Theme.of(context).textTheme.titleMedium?.color
                           : Theme.of(context).disabledColor,
@@ -169,12 +174,12 @@ class _CalendarSettingsState extends State<CalendarSettings> {
   Widget _buildCalendarImportSettings(int index) {
     final calendar = widget.calendars[index];
     final importSettings = calendar.preferences.importSettings;
-  final noneSelected = !importSettings.importAll &&
-    !(importSettings.importSubject ||
-      importSettings.importBody ||
-      importSettings.importConferenceInfo ||
-      importSettings.importOrganizer ||
-      importSettings.importRecipients);
+    final noneSelected = !importSettings.importAll &&
+        !(importSettings.importSubject ||
+            importSettings.importBody ||
+            importSettings.importConferenceInfo ||
+            importSettings.importOrganizer ||
+            importSettings.importRecipients);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Column(
@@ -194,7 +199,8 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                     setState(() {
                       final updatedCalendar = calendar.copyWith(
                         preferences: calendar.preferences.copyWith(
-                          importSettings: calendar.preferences.importSettings.copyWith(
+                          importSettings:
+                              calendar.preferences.importSettings.copyWith(
                             importAll: newValue,
                             // When "All" is checked, set all to true
                             // When "All" is unchecked, reset all to false so user can choose individually
@@ -207,9 +213,12 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                         ),
                       );
                       widget.calendars[index] = updatedCalendar;
-                      print('  📋 Import All: ${updatedCalendar.preferences.importSettings.importAll}');
-                      print('  📋 Import Subject: ${updatedCalendar.preferences.importSettings.importSubject}');
-                      print('  📋 Import Body: ${updatedCalendar.preferences.importSettings.importBody}');
+                      print(
+                          '  📋 Import All: ${updatedCalendar.preferences.importSettings.importAll}');
+                      print(
+                          '  📋 Import Subject: ${updatedCalendar.preferences.importSettings.importSubject}');
+                      print(
+                          '  📋 Import Body: ${updatedCalendar.preferences.importSettings.importBody}');
                     });
                   },
                 ),
@@ -226,8 +235,9 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                           setState(() {
                             final updatedCalendar = calendar.copyWith(
                               preferences: calendar.preferences.copyWith(
-                                importSettings:
-                                    calendar.preferences.importSettings.copyWith(
+                                importSettings: calendar
+                                    .preferences.importSettings
+                                    .copyWith(
                                   importAll: false,
                                   importSubject: false,
                                   importBody: false,
@@ -241,7 +251,8 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                             );
                             widget.calendars[index] = updatedCalendar;
                             // Ensure the selected category is maintained
-                            _selectedCategories[index] = updatedCalendar.preferences.category ?? 'Work';
+                            _selectedCategories[index] =
+                                updatedCalendar.preferences.category ?? 'Work';
                           });
                         },
                 ),
@@ -261,89 +272,99 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                 // Individual Checkboxes
                 _buildCheckbox(
                   'Subject',
-          importSettings.importSubject,
-          // disable individual checkboxes if "All" is selected or "None" is selected
-          (importSettings.importAll || noneSelected)
-            ? null
-            : (value) => setState(() {
-                    final updatedCalendar = calendar.copyWith(
-                      preferences: calendar.preferences.copyWith(
-                        importSettings: calendar.preferences.importSettings.copyWith(
-                          importSubject: value ?? false,
-                        ),
-                      ),
-                    );
-                    widget.calendars[index] = updatedCalendar;
-                    _updateAllCheckboxState(widget.calendars[index]);
-                  }),
+                  importSettings.importSubject,
+                  // disable individual checkboxes if "All" is selected or "None" is selected
+                  (importSettings.importAll || noneSelected)
+                      ? null
+                      : (value) => setState(() {
+                            final updatedCalendar = calendar.copyWith(
+                              preferences: calendar.preferences.copyWith(
+                                importSettings: calendar
+                                    .preferences.importSettings
+                                    .copyWith(
+                                  importSubject: value ?? false,
+                                ),
+                              ),
+                            );
+                            widget.calendars[index] = updatedCalendar;
+                            _updateAllCheckboxState(widget.calendars[index]);
+                          }),
                 ),
                 _buildCheckbox(
                   'Description',
-          importSettings.importBody,
-          (importSettings.importAll || noneSelected)
-            ? null
-            : (value) => setState(() {
-                    final updatedCalendar = calendar.copyWith(
-                      preferences: calendar.preferences.copyWith(
-                        importSettings: calendar.preferences.importSettings.copyWith(
-                          importBody: value ?? false,
-                        ),
-                      ),
-                    );
-                    widget.calendars[index] = updatedCalendar;
-                    _updateAllCheckboxState(widget.calendars[index]);
-                  }),
+                  importSettings.importBody,
+                  (importSettings.importAll || noneSelected)
+                      ? null
+                      : (value) => setState(() {
+                            final updatedCalendar = calendar.copyWith(
+                              preferences: calendar.preferences.copyWith(
+                                importSettings: calendar
+                                    .preferences.importSettings
+                                    .copyWith(
+                                  importBody: value ?? false,
+                                ),
+                              ),
+                            );
+                            widget.calendars[index] = updatedCalendar;
+                            _updateAllCheckboxState(widget.calendars[index]);
+                          }),
                 ),
                 _buildCheckbox(
                   'Conference Info',
-          importSettings.importConferenceInfo,
-          (importSettings.importAll || noneSelected)
-            ? null
-            : (value) => setState(() {
-                    final updatedCalendar = calendar.copyWith(
-                      preferences: calendar.preferences.copyWith(
-                        importSettings: calendar.preferences.importSettings.copyWith(
-                          importConferenceInfo: value ?? false,
-                        ),
-                      ),
-                    );
-                    widget.calendars[index] = updatedCalendar;
-                    _updateAllCheckboxState(widget.calendars[index]);
-                  }),
+                  importSettings.importConferenceInfo,
+                  (importSettings.importAll || noneSelected)
+                      ? null
+                      : (value) => setState(() {
+                            final updatedCalendar = calendar.copyWith(
+                              preferences: calendar.preferences.copyWith(
+                                importSettings: calendar
+                                    .preferences.importSettings
+                                    .copyWith(
+                                  importConferenceInfo: value ?? false,
+                                ),
+                              ),
+                            );
+                            widget.calendars[index] = updatedCalendar;
+                            _updateAllCheckboxState(widget.calendars[index]);
+                          }),
                 ),
                 _buildCheckbox(
                   'Organizer',
-          importSettings.importOrganizer,
-          (importSettings.importAll || noneSelected)
-            ? null
-            : (value) => setState(() {
-                    final updatedCalendar = calendar.copyWith(
-                      preferences: calendar.preferences.copyWith(
-                        importSettings: calendar.preferences.importSettings.copyWith(
-                          importOrganizer: value ?? false,
-                        ),
-                      ),
-                    );
-                    widget.calendars[index] = updatedCalendar;
-                    _updateAllCheckboxState(widget.calendars[index]);
-                  }),
+                  importSettings.importOrganizer,
+                  (importSettings.importAll || noneSelected)
+                      ? null
+                      : (value) => setState(() {
+                            final updatedCalendar = calendar.copyWith(
+                              preferences: calendar.preferences.copyWith(
+                                importSettings: calendar
+                                    .preferences.importSettings
+                                    .copyWith(
+                                  importOrganizer: value ?? false,
+                                ),
+                              ),
+                            );
+                            widget.calendars[index] = updatedCalendar;
+                            _updateAllCheckboxState(widget.calendars[index]);
+                          }),
                 ),
                 _buildCheckbox(
                   'Recipients',
-          importSettings.importRecipients,
-          (importSettings.importAll || noneSelected)
-            ? null
-            : (value) => setState(() {
-                    final updatedCalendar = calendar.copyWith(
-                      preferences: calendar.preferences.copyWith(
-                        importSettings: calendar.preferences.importSettings.copyWith(
-                          importRecipients: value ?? false,
-                        ),
-                      ),
-                    );
-                    widget.calendars[index] = updatedCalendar;
-                    _updateAllCheckboxState(widget.calendars[index]);
-                  }),
+                  importSettings.importRecipients,
+                  (importSettings.importAll || noneSelected)
+                      ? null
+                      : (value) => setState(() {
+                            final updatedCalendar = calendar.copyWith(
+                              preferences: calendar.preferences.copyWith(
+                                importSettings: calendar
+                                    .preferences.importSettings
+                                    .copyWith(
+                                  importRecipients: value ?? false,
+                                ),
+                              ),
+                            );
+                            widget.calendars[index] = updatedCalendar;
+                            _updateAllCheckboxState(widget.calendars[index]);
+                          }),
                 ),
               ],
             ),
@@ -362,7 +383,8 @@ class _CalendarSettingsState extends State<CalendarSettings> {
         importSettings.importRecipients;
 
     // Find the index of this calendar and update it properly
-    final calendarIndex = widget.calendars.indexWhere((c) => c.providerCalendarId == calendar.providerCalendarId);
+    final calendarIndex = widget.calendars
+        .indexWhere((c) => c.providerCalendarId == calendar.providerCalendarId);
     if (calendarIndex != -1) {
       setState(() {
         final updatedCalendar = calendar.copyWith(
@@ -450,7 +472,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
   Future<void> _navigateToAgenda() async {
     if (_isSaving) return; // Prevent duplicate operations
-    
+
     setState(() {
       _isSaving = true;
     });
@@ -480,44 +502,47 @@ class _CalendarSettingsState extends State<CalendarSettings> {
           importSettings.importConferenceInfo ||
           importSettings.importOrganizer ||
           importSettings.importRecipients;
-      
+
       // A calendar is selected if it has any import option OR if it has a category set
       // This ensures calendars with "None" selected but with a category are still included
       return hasAnyImportOption || calendar.preferences.category != null;
     }).toList();
 
-    
     // Enhanced logging: Show details of each selected calendar
     for (int i = 0; i < _selectedCalendars.length; i++) {
       final calendar = _selectedCalendars[i];
       print('  📅 Title: "${calendar.metadata.title}"');
       print('  📅 Source: ${calendar.source}');
       print('  📅 Provider ID: ${calendar.providerCalendarId}');
-      print('  📅 Import Settings: ${calendar.preferences.importSettings.importAll ? "All" : "Custom"}');
+      print(
+          '  📅 Import Settings: ${calendar.preferences.importSettings.importAll ? "All" : "Custom"}');
     }
 
     // Determine integration type for user feedback
-    final integrationTypes = _selectedCalendars.map((cal) => cal.source).toSet();
-    final integrationType = integrationTypes.length == 1 
+    final integrationTypes =
+        _selectedCalendars.map((cal) => cal.source).toSet();
+    final integrationType = integrationTypes.length == 1
         ? integrationTypes.first.toString().split('.').last.toUpperCase()
         : 'Multiple';
 
     // Save selected calendars and wait for backend confirmation
     try {
-      
       print("🔄 [CalendarSettings] Starting calendar integration...");
-      
+
       final saveResult = await CalendarSyncManager().saveSelectedCalendars(
         userId: widget.userId,
         email: widget.email,
         selectedCalendars: _selectedCalendars,
       );
-      
+
       if (saveResult.success) {
         print("✅ [CalendarSettings] Backend confirmed successful connection");
-        
+
         // Show sync started notification
         if (mounted) {
+          print('🔍 [CalendarSettings] SHOWING SYNC IN PROGRESS SNACKBAR');
+          // Clear any existing snackbars before showing new one
+          ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
@@ -539,7 +564,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
             ),
           );
         }
-        
+
         // Navigate to agenda after backend confirmation
         Navigator.pushReplacement(
           context,
@@ -553,17 +578,16 @@ class _CalendarSettingsState extends State<CalendarSettings> {
             ),
           ),
         );
-        
+
         // Start monitoring sync progress in background
         _monitorSyncProgress(integrationType);
-        
       } else {
-        throw Exception(saveResult.error ?? 'Unknown error during calendar save');
+        throw Exception(
+            saveResult.error ?? 'Unknown error during calendar save');
       }
-      
     } catch (e) {
       print("❌ [CalendarSettings] Failed to save selected calendars: $e");
-      
+
       setState(() {
         _isSaving = false;
       });
@@ -572,7 +596,8 @@ class _CalendarSettingsState extends State<CalendarSettings> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to connect $integrationType calendar: ${e.toString()}'),
+            content: Text(
+                'Failed to connect $integrationType calendar: ${e.toString()}'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 5),
           ),
@@ -582,25 +607,10 @@ class _CalendarSettingsState extends State<CalendarSettings> {
   }
 
   void _monitorSyncProgress(String integrationType) {
-    // TODO: Implement progress monitoring via polling or websockets
-    // For now, show completion message after estimated time
-    Future.delayed(Duration(seconds: 20), () {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white, size: 16),
-                SizedBox(width: 12),
-                Text('$integrationType calendar sync completed!'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 4),
-          ),
-        );
-      }
-    });
+    // NOTE: Removed delayed completion snackbar since Agenda screen handles sync completion
+    // The Agenda screen will show the appropriate completion message based on actual sync progress
+    print(
+        '🔍 [CalendarSettings] SKIPPING DELAYED COMPLETION SNACKBAR - Agenda will handle completion');
   }
 
   @override
@@ -612,7 +622,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
 
     // Use existing responsive system
     final screenSize = ResponsiveHelper.getScreenSize(context);
-    
+
     // Responsive calendar grid configuration using your system
     final crossAxisCount = ResponsiveHelper.getValue(
       context,
@@ -620,28 +630,28 @@ class _CalendarSettingsState extends State<CalendarSettings> {
       tablet: 3,
       desktop: 4,
     );
-    
+
     final maxCardWidth = ResponsiveHelper.getValue(
       context,
       mobile: double.infinity,
       tablet: 280.0,
       desktop: 300.0,
     );
-    
+
     final horizontalPadding = ResponsiveHelper.getValue(
       context,
       mobile: 16.0,
       tablet: 24.0,
       desktop: 32.0,
     );
-    
+
     final titleFontSize = ResponsiveHelper.getValue(
       context,
       mobile: 20.0,
       tablet: 24.0,
       desktop: 28.0,
     );
-    
+
     final bodyFontSize = ResponsiveHelper.getValue(
       context,
       mobile: 14.0,
@@ -669,9 +679,12 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                           children: [
                             Text(
                               "Choose what you'd like to import",
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontSize: titleFontSize,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    fontSize: titleFontSize,
+                                  ),
                               textAlign: TextAlign.center,
                             ),
                             SizedBox(height: 16),
@@ -679,25 +692,31 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                               constraints: BoxConstraints(maxWidth: 600),
                               child: Text(
                                 "Start and end time, identificators and timezone always get imported for the selected calendars",
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  fontSize: bodyFontSize,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      fontSize: bodyFontSize,
+                                    ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      
+
                       // Responsive calendar grid using your system
-                      if (ResponsiveHelper.isDesktop(context) || ResponsiveHelper.isTablet(context))
+                      if (ResponsiveHelper.isDesktop(context) ||
+                          ResponsiveHelper.isTablet(context))
                         // Grid layout for larger screens
                         LayoutBuilder(
                           builder: (context, constraints) {
                             final maxWidth = constraints.maxWidth;
                             final itemWidth = (maxWidth / crossAxisCount) - 16;
-                            final finalItemWidth = itemWidth > maxCardWidth ? maxCardWidth : itemWidth;
-                            
+                            final finalItemWidth = itemWidth > maxCardWidth
+                                ? maxCardWidth
+                                : itemWidth;
+
                             return Wrap(
                               spacing: 16,
                               runSpacing: 16,
@@ -726,7 +745,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                             ),
                           ),
                         ),
-                      
+
                       // Save button using ResponsiveButton
                       Padding(
                         padding: EdgeInsets.only(
