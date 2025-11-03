@@ -6,7 +6,9 @@ import '../screens/common/connectCalendars.dart';
 import '../screens/common/account.dart';
 import '../screens/common/signUp.dart';
 import '../screens/common/logIn.dart';
+import '../screens/common/about.dart';
 import '../../providers/authProvider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum _timelystMenu { about, contact_us }
 
@@ -43,6 +45,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       icon: Image.asset("assets/images/logos/timelyst_logo.png"),
       iconSize: 20,
       elevation: 8,
+      onSelected: (_timelystMenu value) {
+        switch (value) {
+          case _timelystMenu.about:
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AboutScreen()),
+            );
+            break;
+          case _timelystMenu.contact_us:
+            _launchContactEmail(context);
+            break;
+        }
+      },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<_timelystMenu>>[
         const PopupMenuItem<_timelystMenu>(
           value: _timelystMenu.about,
@@ -54,6 +69,38 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _launchContactEmail(BuildContext context) async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'support@timelyst.app',
+      query: 'subject=Timelyst%20App%20Inquiry',
+    );
+
+    try {
+      if (await canLaunchUrl(emailLaunchUri)) {
+        await launchUrl(emailLaunchUri);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not launch email app. Please contact us at support@timelyst.app'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   List<Widget> _buildActions(BuildContext context, AuthProvider authProvider) {
