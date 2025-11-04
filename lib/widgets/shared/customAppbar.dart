@@ -43,28 +43,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildLeading(BuildContext context) {
     print('🔍 [CustomAppBar] Building leading widget with Timelyst logo');
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Timelyst logo that navigates to agenda screen
-        IconButton(
-          tooltip: 'Timelyst - Go to Agenda',
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          // Direct click on the icon will navigate to agenda
+          print(
+              '🔍 [CustomAppBar] Timelyst logo clicked - navigating to Agenda screen');
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const Agenda()),
+            (Route<dynamic> route) => false,
+          );
+        },
+        child: PopupMenuButton<_timelystMenu>(
+          tooltip: 'Timelyst - Click to go to Agenda, Hover for menu',
           icon: Image.asset("assets/images/logos/timelyst_logo.png"),
-          iconSize: 20,
-          onPressed: () {
-            print(
-                '🔍 [CustomAppBar] Timelyst logo clicked - navigating to Agenda screen');
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const Agenda()),
-              (Route<dynamic> route) => false,
-            );
-          },
-        ),
-        // Menu button for additional options
-        PopupMenuButton(
-          tooltip: 'Menu',
-          icon: Icon(Icons.more_vert),
           iconSize: 20,
           elevation: 8,
           onSelected: (_timelystMenu value) {
@@ -87,6 +81,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 break;
             }
           },
+          onCanceled: () {
+            // When the popup is canceled (user clicks outside), navigate to agenda
+            print(
+                '🔍 [CustomAppBar] Popup canceled - navigating to Agenda screen');
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const Agenda()),
+              (Route<dynamic> route) => false,
+            );
+          },
           itemBuilder: (BuildContext context) =>
               <PopupMenuEntry<_timelystMenu>>[
             const PopupMenuItem<_timelystMenu>(
@@ -99,7 +103,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ],
         ),
-      ],
+      ),
     );
   }
 
@@ -142,9 +146,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return [
       if (authProvider.isLoggedIn) ...[
+        // Account menu button without the menu icon
         PopupMenuButton(
           tooltip: 'Account',
-          icon: Icon(Icons.menu_outlined),
           elevation: 8,
           itemBuilder: (BuildContext context) => <PopupMenuEntry<_profileView>>[
             PopupMenuItem<_profileView>(
@@ -201,6 +205,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               },
             ),
           ],
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Icon(Icons.account_circle, size: 24),
+          ),
         ),
       ] else ...[
         TextButton(
