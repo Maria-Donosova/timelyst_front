@@ -1013,30 +1013,21 @@ class EventDetailsScreenState extends State<EventDetails> {
                                   ),
                                 ),
                               ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: TextButton(
-                                style: TextButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.secondary,
+                            // Only show Delete button for existing events
+                            if (widget._id != null && widget._id!.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: TextButton(
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Colors.red.shade400,
+                                  ),
+                                  child: Text('Delete',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      )),
+                                  onPressed: _isLoading ? null : _deleteEvent,
                                 ),
-                                child: Text('Delete',
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary,
-                                    )),
-                                onPressed: _isLoading
-                                    ? null
-                                    : () {
-                                        if (_isEditing) {
-                                          _deleteEvent();
-                                        } else {
-                                          Navigator.of(context).pop();
-                                        }
-                                      },
                               ),
-                            ),
                             TextButton(
                               style: TextButton.styleFrom(
                                 backgroundColor:
