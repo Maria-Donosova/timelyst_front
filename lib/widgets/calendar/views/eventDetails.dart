@@ -122,6 +122,11 @@ class EventDetailsScreenState extends State<EventDetails> {
         final calendarProvider =
             Provider.of<CalendarProvider>(context, listen: false);
         final calendar = calendarProvider.getCalendarById(_selectedCalendarId!);
+        print(
+            '🔍 [EventDetails] Looking for calendar with ID: $_selectedCalendarId');
+        print(
+            '🔍 [EventDetails] Found calendar: ${calendar != null ? calendar.metadata.title : 'null'}');
+        print('🔍 [EventDetails] Calendar source: ${calendar?.source.name}');
         if (calendar != null) {
           setState(() {
             _eventCalendar.text = calendar.metadata.title;
@@ -962,6 +967,19 @@ class EventDetailsScreenState extends State<EventDetails> {
                                     size: 20,
                                     color:
                                         Theme.of(context).colorScheme.tertiary,
+                                  ),
+                                ),
+                              ),
+                            // Debug info to check if calendar info is available
+                            if (_eventCalendarInfo == null)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 16.0),
+                                child: Tooltip(
+                                  message: 'No calendar info available',
+                                  child: Icon(
+                                    Icons.help_outline,
+                                    size: 20,
+                                    color: Colors.red,
                                   ),
                                 ),
                               ),
