@@ -10,23 +10,18 @@ class CalendarSyncManager {
   CalendarSyncManager({GoogleCalendarService? calendarService})
       : _googleCalendarService = calendarService ?? GoogleCalendarService();
 
-  Future<CalendarSyncResult> syncCalendars(
-      String userId, String email) async {
+  Future<CalendarSyncResult> syncCalendars(String userId, String email) async {
     try {
-      // logger.i('Syncing calendars');
-
       final calendarPage = await _googleCalendarService.fetchCalendarsPage(
         userId: userId,
         email: email,
       );
-      // logger.i('Calendars: ${calendarPage.calendars}');
-
       return CalendarSyncResult.success(
         calendars: calendarPage.calendars,
         syncToken: calendarPage.syncToken,
       );
     } catch (e) {
-      print('CalendarSyncManager: ERROR syncing calendars: $e');
+      print('CalendarSyncManager: ERROR syncing calendars: $e, $userId');
       return CalendarSyncResult.error(e.toString());
     }
   }
@@ -36,7 +31,6 @@ class CalendarSyncManager {
     required String email,
     required List<Calendar> selectedCalendars,
   }) async {
-    
     // Enhanced logging: Show all input calendars
     for (int i = 0; i < selectedCalendars.length; i++) {
       final calendar = selectedCalendars[i];
@@ -44,17 +38,23 @@ class CalendarSyncManager {
       print('  📅 Source: ${calendar.source}');
       print('  📅 Provider ID: ${calendar.providerCalendarId}');
     }
-    
+
     try {
       // Group calendars by provider
-      final googleCalendars = selectedCalendars.where((cal) => cal.source == CalendarSource.google).toList();
-      final microsoftCalendars = selectedCalendars.where((cal) => cal.source == CalendarSource.outlook).toList();
-      final appleCalendars = selectedCalendars.where((cal) => cal.source == CalendarSource.apple).toList();
-      
+      final googleCalendars = selectedCalendars
+          .where((cal) => cal.source == CalendarSource.google)
+          .toList();
+      final microsoftCalendars = selectedCalendars
+          .where((cal) => cal.source == CalendarSource.outlook)
+          .toList();
+      final appleCalendars = selectedCalendars
+          .where((cal) => cal.source == CalendarSource.apple)
+          .toList();
+
       print('  📱 Google calendars: ${googleCalendars.length}');
       print('  📱 Microsoft calendars: ${microsoftCalendars.length}');
       print('  📱 Apple calendars: ${appleCalendars.length}');
-      
+
       // Save Google calendars if any
       if (googleCalendars.isNotEmpty) {
         await _googleCalendarService.saveCalendarsBatch(
@@ -63,7 +63,7 @@ class CalendarSyncManager {
           calendars: googleCalendars,
         );
       }
-      
+
       // Save Microsoft calendars if any
       if (microsoftCalendars.isNotEmpty) {
         final microsoftService = MicrosoftCalendarService();
@@ -73,27 +73,44 @@ class CalendarSyncManager {
           calendars: microsoftCalendars,
         );
       }
-      
+
       // Save Apple calendars if any
       if (appleCalendars.isNotEmpty) {
-        
+        print(
+            '📤 [CalendarSyncManager] Preparing to save ${appleCalendars.length} Apple calendars');
+
         // Log each Apple calendar before conversion
         for (int i = 0; i < appleCalendars.length; i++) {
           final calendar = appleCalendars[i];
-          print('  🍎 Title: "${calendar.metadata.title}"');
-          print('  🍎 Provider ID: ${calendar.providerCalendarId}');
-          print('  🍎 Source: ${calendar.source}');
-          print('  🍎 Import All: ${calendar.preferences.importSettings.importAll}');
-          print('  🍎 Import Subject: ${calendar.preferences.importSettings.importSubject}');
-          print('  🍎 Category: ${calendar.preferences.category}');
+          print(
+              '📋 [APPLE] Calendar $i BEFORE flattening: "${calendar.metadata.title}"');
+          print('  📊 Source: ${calendar.source}');
+          print('  🔗 Provider ID: ${calendar.providerCalendarId}');
+          print('  🏷️ Original Category: "${calendar.preferences.category}"');
+          print(
+              '  ✅ Import All: ${calendar.preferences.importSettings.importAll}');
+          print(
+              '  📝 Import Subject: ${calendar.preferences.importSettings.importSubject}');
         }
-        
+
         final appleManager = AppleCalDAVManager();
-        
+
         // Convert Calendar objects to format expected by Apple service
         // Use the same pattern as Microsoft calendars for backend compatibility
         final appleCalendarData = appleCalendars.map((calendar) {
           final json = calendar.toJson(email: email);
+
+          // Log the original JSON structure before flattening
+          print(
+              '📋 [APPLE] Original toJson() structure for "${calendar.metadata.title}":');
+          print('  📁 preferences exists: ${json.containsKey('preferences')}');
+          if (json.containsKey('preferences')) {
+            final prefs = json['preferences'];
+            print('  📁 preferences.category: "${prefs['category']}"');
+            print(
+                '  📁 preferences.importSettings exists: ${prefs.containsKey('importSettings')}');
+          }
+
           // Flatten all preferences for consistent backend structure
           final importSettings = json['preferences']['importSettings'];
           final preferences = json['preferences'];
@@ -111,30 +128,36 @@ class CalendarSyncManager {
           json.remove('preferences');
           return json;
         }).toList();
-        
-        
-        // Debug: Show what we're sending to the backend
+
+        // Log each Apple calendar being sent (FLATTENED structure)
         for (int i = 0; i < appleCalendarData.length; i++) {
           final cal = appleCalendarData[i];
-          print('  🍎 ID: ${cal['id']}');
-          print('  🍎 providerCalendarId: ${cal['providerCalendarId']}');
-          print('  🍎 summary: ${cal['summary']}');
-          print('  🍎 source: ${cal['source']}');
-          print('  🍎 user: ${cal['user']}');
-          print('  🍎 email: ${cal['email']}');
-          print('  🍎 category: ${cal['category']}');
-          print('  🍎 color: ${cal['color']}');
-          print('  🍎 importAll: ${cal['importAll']}');
+          print('📋 [APPLE] Calendar $i AFTER flattening: "${cal['summary']}"');
+          print('  🆔 ID: ${cal['id']}');
+          print('  🔗 Provider ID: ${cal['providerCalendarId']}');
+          print('  📊 Source: ${cal['source']}');
+          print('  👤 User: ${cal['user']}');
+          print('  📧 Email: ${cal['email']}');
+          print(
+              '  🔄 Structure: FLATTENED (preferences removed, fields moved to root)');
+          print('  ✅ importAll: ${cal['importAll']}');
+          print('  📝 importSubject: ${cal['importSubject']}');
+          print('  📄 importBody: ${cal['importBody']}');
+          print('  📞 importConferenceInfo: ${cal['importConferenceInfo']}');
+          print('  👥 importOrganizer: ${cal['importOrganizer']}');
+          print('  📮 importRecipients: ${cal['importRecipients']}');
+          print('  🏷️ category: "${cal['category']}"');
+          print('  🎨 color: "${cal['color']}"');
+          print(
+              '  ❌ preferences: ${cal.containsKey('preferences') ? 'EXISTS (ERROR!)' : 'REMOVED (correct)'}');
+          print('  ─────────────────────────────────');
         }
-        
-        
+
         await appleManager.saveSelectedCalendars(
           email: email,
           selectedCalendars: appleCalendarData,
         );
-        
-      } else {
-      }
+      } else {}
 
       // Update sync token after changes (only for Google for now)
       if (googleCalendars.isNotEmpty) {
@@ -152,7 +175,6 @@ class CalendarSyncManager {
     String userId,
     String email,
   ) async {
-    // logger.i('Performing incremental sync $userId $email in syncCalendarChanges');
     if (_currentSyncToken == null) {
       return await _performInitialSync(userId, email);
     }
@@ -186,8 +208,6 @@ class CalendarSyncManager {
     String email,
   ) async {
     final allCalendars = <Calendar>[];
-    // logger.i(
-    //     'Performing initial calendar sync $userId $email in _performInitialSync');
     bool hasMore = true;
 
     while (hasMore) {
