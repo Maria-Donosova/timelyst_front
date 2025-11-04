@@ -8,6 +8,7 @@ import '../screens/common/signUp.dart';
 import '../screens/common/logIn.dart';
 import '../screens/common/about.dart';
 import '../screens/common/contact.dart';
+import '../screens/common/agenda.dart';
 import '../../providers/authProvider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -41,35 +42,62 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildLeading(BuildContext context) {
-    return PopupMenuButton(
-      tooltip: 'About',
-      icon: Image.asset("assets/images/logos/timelyst_logo.png"),
-      iconSize: 20,
-      elevation: 8,
-      onSelected: (_timelystMenu value) {
-        switch (value) {
-          case _timelystMenu.about:
-            Navigator.push(
+    print('🔍 [CustomAppBar] Building leading widget with Timelyst logo');
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Timelyst logo that navigates to agenda screen
+        IconButton(
+          tooltip: 'Timelyst - Go to Agenda',
+          icon: Image.asset("assets/images/logos/timelyst_logo.png"),
+          iconSize: 20,
+          onPressed: () {
+            print(
+                '🔍 [CustomAppBar] Timelyst logo clicked - navigating to Agenda screen');
+            Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const AboutScreen()),
+              MaterialPageRoute(builder: (context) => const Agenda()),
+              (Route<dynamic> route) => false,
             );
-            break;
-          case _timelystMenu.contact_us:
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ContactScreen()),
-            );
-            break;
-        }
-      },
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<_timelystMenu>>[
-        const PopupMenuItem<_timelystMenu>(
-          value: _timelystMenu.about,
-          child: Text('About Us'),
+          },
         ),
-        const PopupMenuItem<_timelystMenu>(
-          value: _timelystMenu.contact_us,
-          child: Text('Contact'),
+        // Menu button for additional options
+        PopupMenuButton(
+          tooltip: 'Menu',
+          icon: Icon(Icons.more_vert),
+          iconSize: 20,
+          elevation: 8,
+          onSelected: (_timelystMenu value) {
+            print('🔍 [CustomAppBar] Menu selected: $value');
+            switch (value) {
+              case _timelystMenu.about:
+                print('🔍 [CustomAppBar] Navigating to About screen');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AboutScreen()),
+                );
+                break;
+              case _timelystMenu.contact_us:
+                print('🔍 [CustomAppBar] Navigating to Contact screen');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ContactScreen()),
+                );
+                break;
+            }
+          },
+          itemBuilder: (BuildContext context) =>
+              <PopupMenuEntry<_timelystMenu>>[
+            const PopupMenuItem<_timelystMenu>(
+              value: _timelystMenu.about,
+              child: Text('About Us'),
+            ),
+            const PopupMenuItem<_timelystMenu>(
+              value: _timelystMenu.contact_us,
+              child: Text('Contact'),
+            ),
+          ],
         ),
       ],
     );
