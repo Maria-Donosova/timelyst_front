@@ -107,6 +107,21 @@ class AppleCalDAVService {
         'calendars': calendars,
       };
       
+      print('📤 [AppleCalDAVService] Final request body being sent to backend:');
+      print('  📧 Email: $email');
+      print('  📊 Calendars count: ${calendars.length}');
+      for (int i = 0; i < calendars.length; i++) {
+        final cal = calendars[i];
+        print('  📋 [FINAL APPLE] Calendar $i: "${cal['summary'] ?? cal['title']}"');
+        print('    🆔 ID: ${cal['id']}');
+        print('    🔗 Provider ID: ${cal['providerCalendarId']}');
+        print('    📊 Source: ${cal['source']}');
+        print('    🏷️ FINAL category: "${cal['category']}"');
+        print('    ✅ importAll: ${cal['importAll']}');
+        print('    📝 importSubject: ${cal['importSubject']}');
+        print('    🔄 Structure: ${cal.containsKey('preferences') ? 'NESTED (has preferences)' : 'FLATTENED (no preferences)'}');
+      }
+      print('📤 [AppleCalDAVService] Sending to: ${Config.backendURL}/apple/calendars/save');
 
       final response = await _apiClient.post(
         '${Config.backendURL}/apple/calendars/save',

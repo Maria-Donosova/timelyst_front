@@ -53,15 +53,17 @@ class MicrosoftCalendarService {
     required List<Calendar> calendars,
   }) async {
 
-    // Debug: Print each calendar being sent
+    print('📤 [MicrosoftCalendarService] Preparing to save ${calendars.length} Microsoft calendars');
+    
+    // Log original calendar data before transformation
     for (int i = 0; i < calendars.length; i++) {
       final calendar = calendars[i];
-      print('📅 [MicrosoftCalendarService] Calendar $i: "${calendar.metadata.title}"');
-      print('  📋 Source: ${calendar.source}');
-      print('  📋 Provider ID: ${calendar.providerCalendarId}');
-      print('  📋 Import All: ${calendar.preferences.importSettings.importAll}');
-      print('  📋 Import Subject: ${calendar.preferences.importSettings.importSubject}');
-      print('  📋 Category: ${calendar.preferences.category}');
+      print('📋 [MICROSOFT] Calendar $i BEFORE flattening: "${calendar.metadata.title}"');
+      print('  📊 Source: ${calendar.source}');
+      print('  🔗 Provider ID: ${calendar.providerCalendarId}');
+      print('  🏷️ Original Category: "${calendar.preferences.category}"');
+      print('  ✅ Import All: ${calendar.preferences.importSettings.importAll}');
+      print('  📝 Import Subject: ${calendar.preferences.importSettings.importSubject}');
     }
 
     final requestBody = {
@@ -88,9 +90,31 @@ class MicrosoftCalendarService {
       }).toList(),
       'batchSize': calendars.length,
     };
+    
+    // Log each Microsoft calendar being sent (FLATTENED structure)
+    final flattenedCalendars = requestBody['calendars'] as List;
+    for (int i = 0; i < flattenedCalendars.length; i++) {
+      final cal = flattenedCalendars[i];
+      print('📋 [MICROSOFT] Calendar $i AFTER flattening: "${cal['summary']}"');
+      print('  🆔 ID: ${cal['id']}');
+      print('  🔗 Provider ID: ${cal['providerCalendarId']}');
+      print('  📊 Source: ${cal['source']}');
+      print('  👤 User: ${cal['user']}');
+      print('  📧 Email: ${cal['email']}');
+      print('  🔄 Structure: FLATTENED (preferences removed, fields moved to root)');
+      print('  ✅ importAll: ${cal['importAll']}');
+      print('  📝 importSubject: ${cal['importSubject']}');
+      print('  📄 importBody: ${cal['importBody']}');
+      print('  📞 importConferenceInfo: ${cal['importConferenceInfo']}');
+      print('  👥 importOrganizer: ${cal['importOrganizer']}');
+      print('  📮 importRecipients: ${cal['importRecipients']}');
+      print('  🏷️ category: "${cal['category']}"');
+      print('  🎨 color: "${cal['color']}"');
+      print('  ❌ preferences: ${cal.containsKey('preferences') ? 'EXISTS (ERROR!)' : 'REMOVED (correct)'}');
+      print('  ─────────────────────────────────');
+    }
 
-    print('📋 URL: ${Config.backendMicrosoftCalendarsSave}');
-    print('📋 Body: ${jsonEncode(requestBody)}');
+    print('📤 [MicrosoftCalendarService] Sending FLATTENED structure to: ${Config.backendMicrosoftCalendarsSave}');
 
     try {
       final response = await _apiClient.post(
