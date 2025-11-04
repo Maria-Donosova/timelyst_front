@@ -46,7 +46,7 @@ class _CalendarWState extends State<CalendarW> {
     width = 0.0;
     cellWidth = 0.0;
     super.initState();
-    
+
     // Note: Initial event loading will be handled by the onViewChanged callback
     // when the calendar first loads, so we don't need duplicate loading here
   }
@@ -65,10 +65,12 @@ class _CalendarWState extends State<CalendarW> {
 
     // Essential logging only
     if (appointments.length > 0) {
-      print('📅 [Calendar] Building calendar with ${appointments.length} events');
+      print(
+          '📅 [Calendar] Building calendar with ${appointments.length} events');
     }
-    
-    AppLogger.performance('Building calendar with ${appointments.length} events', 'Calendar');
+
+    AppLogger.performance(
+        'Building calendar with ${appointments.length} events', 'Calendar');
 
     return Card(
       child: Column(
@@ -78,8 +80,8 @@ class _CalendarWState extends State<CalendarW> {
             isMonth
                 ? Padding(
                     padding: EdgeInsets.symmetric(
-                      vertical: ResponsiveHelper.getValue(context, mobile: 8.0, tablet: 10.0, desktop: 12.0)
-                    ),
+                        vertical: ResponsiveHelper.getValue(context,
+                            mobile: 8.0, tablet: 10.0, desktop: 12.0)),
                     child: WeekDaysW(
                         cellWidth: cellWidth,
                         viewHeaderText6: 'Sun',
@@ -93,8 +95,8 @@ class _CalendarWState extends State<CalendarW> {
                 : isWeek
                     ? Padding(
                         padding: EdgeInsets.symmetric(
-                          vertical: ResponsiveHelper.getValue(context, mobile: 8.0, tablet: 10.0, desktop: 12.0)
-                        ),
+                            vertical: ResponsiveHelper.getValue(context,
+                                mobile: 8.0, tablet: 10.0, desktop: 12.0)),
                         child: WeekDaysW(
                             cellWidth: cellWidth,
                             viewHeaderText6: 'Sun',
@@ -134,7 +136,8 @@ class _CalendarWState extends State<CalendarW> {
                     showWeekNumber: true,
                     weekNumberStyle: WeekNumberStyle(
                       backgroundColor: Colors.white,
-                      textStyle: TextStyle(fontSize: 8, color: Colors.grey[600]),
+                      textStyle:
+                          TextStyle(fontSize: 8, color: Colors.grey[600]),
                     ),
                     todayHighlightColor: Color.fromRGBO(171, 178, 183, 1),
                     todayTextStyle: TextStyle(color: Colors.grey[800]),
@@ -142,7 +145,8 @@ class _CalendarWState extends State<CalendarW> {
                     showCurrentTimeIndicator: true,
                     monthCellBuilder: monthCellBuilder,
                     monthViewSettings: MonthViewSettings(
-                      appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
+                      appointmentDisplayMode:
+                          MonthAppointmentDisplayMode.appointment,
                       showTrailingAndLeadingDates: false,
                     ),
                     appointmentBuilder: appointmentBuilder,
@@ -154,20 +158,23 @@ class _CalendarWState extends State<CalendarW> {
                     onTap: _calendarTapped,
                     onDragEnd: _handleDragEnd,
                     onViewChanged: (ViewChangedDetails viewChangedDetails) {
-                      final eventProvider = Provider.of<EventProvider>(context, listen: false);
-                      
+                      final eventProvider =
+                          Provider.of<EventProvider>(context, listen: false);
+
                       // Invalidate cache when view changes to ensure fresh data
                       eventProvider.invalidateCache();
-                      print('📅 [Calendar] View changed - cache invalidated for fresh event data');
-                      
+                      print(
+                          '📅 [Calendar] View changed - cache invalidated for fresh event data');
+
                       if (_controller.view == CalendarView.month) {
                         _headerText = DateFormat('yMMMM')
                             .format(viewChangedDetails.visibleDates[
                                 viewChangedDetails.visibleDates.length ~/ 2])
                             .toString();
-                        
+
                         // Fetch events for the visible month
-                        final visibleMonth = viewChangedDetails.visibleDates[viewChangedDetails.visibleDates.length ~/ 2];
+                        final visibleMonth = viewChangedDetails.visibleDates[
+                            viewChangedDetails.visibleDates.length ~/ 2];
                         eventProvider.fetchMonthViewEvents(month: visibleMonth);
                       }
                       if (_controller.view == CalendarView.week) {
@@ -187,7 +194,7 @@ class _CalendarWState extends State<CalendarW> {
                             .toString();
                         _headerText =
                             _month! + ' ' + _weekStart! + ' - ' + _weekEnd!;
-                        
+
                         // Fetch events for the visible week
                         final weekStart = viewChangedDetails.visibleDates[0];
                         eventProvider.fetchWeekViewEvents(weekStart: weekStart);
@@ -197,12 +204,14 @@ class _CalendarWState extends State<CalendarW> {
                             .format(viewChangedDetails.visibleDates[
                                 viewChangedDetails.visibleDates.length ~/ 2])
                             .toString();
-                        
+
                         // Fetch events for the visible day
-                        final visibleDay = viewChangedDetails.visibleDates[viewChangedDetails.visibleDates.length ~/ 2];
+                        final visibleDay = viewChangedDetails.visibleDates[
+                            viewChangedDetails.visibleDates.length ~/ 2];
                         eventProvider.fetchDayViewEvents(date: visibleDay);
                       }
-                      SchedulerBinding.instance.addPostFrameCallback((duration) {
+                      SchedulerBinding.instance
+                          .addPostFrameCallback((duration) {
                         setState(() {});
                       });
                     }),
@@ -229,8 +238,10 @@ class _CalendarWState extends State<CalendarW> {
           width: mediaQuery.size.width * 0.38,
           child: Padding(
             padding: EdgeInsets.only(
-              left: ResponsiveHelper.getValue(context, mobile: 10.0, tablet: 12.0, desktop: 15.0),
-              right: ResponsiveHelper.getValue(context, mobile: 20.0, tablet: 24.0, desktop: 30.0),
+              left: ResponsiveHelper.getValue(context,
+                  mobile: 10.0, tablet: 12.0, desktop: 15.0),
+              right: ResponsiveHelper.getValue(context,
+                  mobile: 20.0, tablet: 24.0, desktop: 30.0),
             ),
             child: Text(
               _headerText!,
@@ -263,14 +274,16 @@ class _CalendarWState extends State<CalendarW> {
                 ),
               ],
               onSelected: (value) {
-                final eventProvider = Provider.of<EventProvider>(context, listen: false);
-                
+                final eventProvider =
+                    Provider.of<EventProvider>(context, listen: false);
+
                 setState(
                   () {
                     // Invalidate cache when user manually switches views
                     eventProvider.invalidateCache();
-                    print('📅 [Calendar] Manual view switch - cache invalidated for fresh event data');
-                    
+                    print(
+                        '📅 [Calendar] Manual view switch - cache invalidated for fresh event data');
+
                     if (value == _calView.day) {
                       _controller.view = CalendarView.day;
                     } else if (value == _calView.week) {
@@ -329,6 +342,7 @@ class _CalendarWState extends State<CalendarW> {
                   location: _customAppointment.location,
                   isAllDay: _customAppointment.isAllDay,
                   recurrenceRule: _customAppointment.recurrenceRule,
+                  calendarId: _customAppointment.calendarId,
                 ),
               );
             });
@@ -362,16 +376,20 @@ class _CalendarWState extends State<CalendarW> {
       final oldAppointment = details.appointment as CustomAppointment;
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
 
-      AppLogger.debug('Handling drag-and-drop for appointment: ${oldAppointment.title}', 'Calendar');
-      AppLogger.debug('Is recurring: ${oldAppointment.recurrenceRule != null}', 'Calendar');
-      
+      AppLogger.debug(
+          'Handling drag-and-drop for appointment: ${oldAppointment.title}',
+          'Calendar');
+      AppLogger.debug(
+          'Is recurring: ${oldAppointment.recurrenceRule != null}', 'Calendar');
+
       // Calculate the duration of the event
-      final duration = oldAppointment.endTime.difference(oldAppointment.startTime);
-      
+      final duration =
+          oldAppointment.endTime.difference(oldAppointment.startTime);
+
       if (oldAppointment.recurrenceRule != null) {
         // Handle recurring event drag-and-drop
         AppLogger.debug('Handling recurring event drag-and-drop', 'Calendar');
-        
+
         // Add the old appointment start date to recurrenceExceptionDates
         final updatedExceptionDates = <DateTime>[
           if (oldAppointment.recurrenceExceptionDates != null)
@@ -400,12 +418,13 @@ class _CalendarWState extends State<CalendarW> {
 
         // Update the event in the provider
         eventProvider.updateEvent(oldAppointment, newAppointment);
-        AppLogger.debug('Updated recurring event with exception date', 'Calendar');
-        
+        AppLogger.debug(
+            'Updated recurring event with exception date', 'Calendar');
       } else {
         // Handle non-recurring event drag-and-drop
-        AppLogger.debug('Handling non-recurring event drag-and-drop', 'Calendar');
-        
+        AppLogger.debug(
+            'Handling non-recurring event drag-and-drop', 'Calendar');
+
         final updatedAppointment = CustomAppointment(
           id: oldAppointment.id,
           title: oldAppointment.title,
@@ -428,7 +447,7 @@ class _CalendarWState extends State<CalendarW> {
         eventProvider.updateEvent(oldAppointment, updatedAppointment);
         AppLogger.debug('Updated non-recurring event', 'Calendar');
       }
-      
+
       // Refresh the calendar view
       setState(() {});
     }
@@ -437,7 +456,8 @@ class _CalendarWState extends State<CalendarW> {
   void addEventAndRefresh(CustomAppointment event) {
     if (mounted) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        final eventProvider = Provider.of<EventProvider>(context, listen: false);
+        final eventProvider =
+            Provider.of<EventProvider>(context, listen: false);
         eventProvider.addSingleEvent(event);
         setState(() {});
       });
@@ -447,19 +467,31 @@ class _CalendarWState extends State<CalendarW> {
 
 class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   _EventDataSource(List<CustomAppointment> source) {
-    AppLogger.performance('Creating data source with ${source.length} appointments', '_EventDataSource');
-    
+    AppLogger.performance(
+        'Creating data source with ${source.length} appointments',
+        '_EventDataSource');
+
     // Debug recurring events specifically
-    final recurringAppointments = source.where((a) => a.recurrenceRule != null && a.recurrenceRule!.isNotEmpty).toList();
-    AppLogger.debug('Found ${recurringAppointments.length} recurring appointments:', '_EventDataSource');
+    final recurringAppointments = source
+        .where((a) => a.recurrenceRule != null && a.recurrenceRule!.isNotEmpty)
+        .toList();
+    AppLogger.debug(
+        'Found ${recurringAppointments.length} recurring appointments:',
+        '_EventDataSource');
     for (final appointment in recurringAppointments) {
-      AppLogger.verbose('  - "${appointment.title}": ${appointment.recurrenceRule}', '_EventDataSource');
-      AppLogger.verbose('    Start: ${appointment.startTime}, End: ${appointment.endTime}', '_EventDataSource');
+      AppLogger.verbose(
+          '  - "${appointment.title}": ${appointment.recurrenceRule}',
+          '_EventDataSource');
+      AppLogger.verbose(
+          '    Start: ${appointment.startTime}, End: ${appointment.endTime}',
+          '_EventDataSource');
       if (appointment.recurrenceExceptionDates != null) {
-        AppLogger.verbose('    Exception dates: ${appointment.recurrenceExceptionDates}', '_EventDataSource');
+        AppLogger.verbose(
+            '    Exception dates: ${appointment.recurrenceExceptionDates}',
+            '_EventDataSource');
       }
     }
-    
+
     appointments = source;
   }
 
@@ -492,20 +524,24 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   String? getRecurrenceRule(int index) {
     final rule = appointments![index].recurrenceRule;
     if (rule != null && rule.isNotEmpty) {
-      AppLogger.verbose('getRecurrenceRule for "${appointments![index].title}": "$rule"', '_EventDataSource');
-      
+      AppLogger.verbose(
+          'getRecurrenceRule for "${appointments![index].title}": "$rule"',
+          '_EventDataSource');
+
       try {
         // Fix malformed RRULE dates from backend (temporary until backend is updated)
         final fixedRule = _fixMalformedRRule(rule);
         if (fixedRule != rule) {
-          AppLogger.debug('Fixed malformed RRULE: "$rule" -> "$fixedRule"', '_EventDataSource');
+          AppLogger.debug('Fixed malformed RRULE: "$rule" -> "$fixedRule"',
+              '_EventDataSource');
         }
-        
+
         // Validate the RRULE format before returning
         if (_isValidRRule(fixedRule)) {
           return fixedRule;
         } else {
-          AppLogger.debug('Invalid RRULE format, skipping: "$fixedRule"', '_EventDataSource');
+          AppLogger.debug('Invalid RRULE format, skipping: "$fixedRule"',
+              '_EventDataSource');
           return null;
         }
       } catch (e) {
@@ -522,13 +558,13 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
     if (!rrule.startsWith('RRULE:') || !rrule.contains('FREQ=')) {
       return false;
     }
-    
+
     // Check if UNTIL date format is valid (8 digits for date part)
     final untilMatch = RegExp(r'UNTIL=(\d{8})T').firstMatch(rrule);
     if (rrule.contains('UNTIL=') && untilMatch == null) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -537,18 +573,19 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   String _fixMalformedRRule(String rrule) {
     // Handle malformed UNTIL dates (YYYYMM instead of YYYYMMDD)
     final untilRegex = RegExp(r'UNTIL=(\d{6})T(\d{6}Z)');
-    
+
     return rrule.replaceAllMapped(untilRegex, (match) {
       final datepart = match.group(1)!;
       final timepart = match.group(2)!;
-      
+
       if (datepart.length == 6) {
         // Add day "01" to make it a valid date (YYYYMM01)
         final fixedDate = datepart + '01';
-        AppLogger.debug('Fixed malformed date: $datepart -> $fixedDate', '_EventDataSource');
+        AppLogger.debug('Fixed malformed date: $datepart -> $fixedDate',
+            '_EventDataSource');
         return 'UNTIL=${fixedDate}T$timepart';
       }
-      
+
       return match.group(0)!;
     });
   }
