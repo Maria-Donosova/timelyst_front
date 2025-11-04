@@ -478,17 +478,22 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     });
 
     // Debug: Print current state of each calendar before saving
+    print('📋 [CalendarSettings] STATE CHECK - All calendars before filtering:');
     for (int i = 0; i < widget.calendars.length; i++) {
       final calendar = widget.calendars[i];
       final importSettings = calendar.preferences.importSettings;
-      print('📅 Calendar $i: "${calendar.metadata.title}"');
-      print('  📋 Import All: ${importSettings.importAll}');
-      print('  📋 Import Subject: ${importSettings.importSubject}');
-      print('  📋 Import Body: ${importSettings.importBody}');
-      print('  📋 Import Conference: ${importSettings.importConferenceInfo}');
-      print('  📋 Import Organizer: ${importSettings.importOrganizer}');
-      print('  📋 Import Recipients: ${importSettings.importRecipients}');
-      print('  📋 Category: ${calendar.preferences.category}');
+      print('📅 [UI STATE] Calendar $i: "${calendar.metadata.title}"');
+      print('  📊 Source: ${calendar.source}');
+      print('  🔗 Provider ID: ${calendar.providerCalendarId}');
+      print('  🏷️ UI Category (_selectedCategories[$i]): "${_selectedCategories[i]}"');
+      print('  🏷️ Model Category (calendar.preferences.category): "${calendar.preferences.category}"');
+      print('  ✅ Import All: ${importSettings.importAll}');
+      print('  📝 Import Subject: ${importSettings.importSubject}');
+      print('  📄 Import Body: ${importSettings.importBody}');
+      print('  📞 Import Conference: ${importSettings.importConferenceInfo}');
+      print('  👥 Import Organizer: ${importSettings.importOrganizer}');
+      print('  📮 Import Recipients: ${importSettings.importRecipients}');
+      print('  ─────────────────────────────────');
     }
 
     // Filter out calendars that are not selected
@@ -509,13 +514,17 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     }).toList();
 
     // Enhanced logging: Show details of each selected calendar
+    print('📋 [CalendarSettings] SELECTED CALENDARS - After filtering ${_selectedCalendars.length} calendars:');
     for (int i = 0; i < _selectedCalendars.length; i++) {
       final calendar = _selectedCalendars[i];
-      print('  📅 Title: "${calendar.metadata.title}"');
-      print('  📅 Source: ${calendar.source}');
-      print('  📅 Provider ID: ${calendar.providerCalendarId}');
-      print(
-          '  📅 Import Settings: ${calendar.preferences.importSettings.importAll ? "All" : "Custom"}');
+      print('📅 [SELECTED] Calendar $i: "${calendar.metadata.title}"');
+      print('  📊 Source: ${calendar.source}');
+      print('  🔗 Provider ID: ${calendar.providerCalendarId}');
+      print('  🏷️ Final Category: "${calendar.preferences.category}"');
+      print('  ✅ Import All: ${calendar.preferences.importSettings.importAll}');
+      print('  📝 Import Subject: ${calendar.preferences.importSettings.importSubject}');
+      print('  🔄 Will be sent to: ${calendar.source.name.toUpperCase()} service');
+      print('  ─────────────────────────────────');
     }
 
     // Determine integration type for user feedback
