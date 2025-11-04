@@ -587,9 +587,7 @@ class EventDetailsScreenState extends State<EventDetails> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(Icons.info_outline,
-                    color: Colors.orange.shade700,
-                    size: 20
-                  ),
+                      color: Colors.orange.shade700, size: 20),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -1025,9 +1023,9 @@ class EventDetailsScreenState extends State<EventDetails> {
                                 child: Tooltip(
                                   message: 'No calendar info available',
                                   child: Icon(
-                                    Icons.help_outline,
+                                    Icons.error_outline,
                                     size: 20,
-                                    color: Colors.red,
+                                    color: Theme.of(context).colorScheme.error,
                                   ),
                                 ),
                               ),
