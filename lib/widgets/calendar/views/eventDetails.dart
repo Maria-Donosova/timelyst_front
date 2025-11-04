@@ -78,12 +78,27 @@ class EventDetailsScreenState extends State<EventDetails> {
   List<Calendar> _selectedCalendars = [];
   String?
       _selectedCalendarId; // To store the ID of the single selected calendar
+  Calendar? _eventCalendarInfo; // To store the calendar object for the event
 
   bool _allDay = false;
   bool _isRecurring = false;
   String _recurrence = 'None';
   List<String> _selectedDays = [];
   String _selectedCategory = '';
+
+  // Helper function to get the appropriate icon based on calendar source
+  IconData _getCalendarSourceIcon(CalendarSource source) {
+    switch (source) {
+      case CalendarSource.google:
+        return Icons.mail_outline;
+      case CalendarSource.outlook:
+        return Icons.window_outlined;
+      case CalendarSource.apple:
+        return Icons.apple;
+      default:
+        return Icons.calendar_today;
+    }
+  }
 
   @override
   void initState() {
@@ -110,6 +125,7 @@ class EventDetailsScreenState extends State<EventDetails> {
         if (calendar != null) {
           setState(() {
             _eventCalendar.text = calendar.metadata.title;
+            _eventCalendarInfo = calendar; // Store the calendar object
           });
         }
       }
@@ -263,9 +279,11 @@ class EventDetailsScreenState extends State<EventDetails> {
           final firstCalendar = result.first;
           _selectedCalendarId = firstCalendar.id;
           _eventCalendar.text = firstCalendar.metadata.title;
+          _eventCalendarInfo = firstCalendar; // Update the calendar info
         } else {
           _selectedCalendarId = null;
           _eventCalendar.text = 'No calendar selected';
+          _eventCalendarInfo = null; // Clear the calendar info
         }
       });
     }
@@ -931,6 +949,22 @@ class EventDetailsScreenState extends State<EventDetails> {
                         ),
                         Row(
                           children: [
+                            // Calendar source icon in bottom right corner
+                            if (_eventCalendarInfo != null)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 16.0),
+                                child: Tooltip(
+                                  message:
+                                      'Source: ${_eventCalendarInfo!.source.name}',
+                                  child: Icon(
+                                    _getCalendarSourceIcon(
+                                        _eventCalendarInfo!.source),
+                                    size: 20,
+                                    color:
+                                        Theme.of(context).colorScheme.tertiary,
+                                  ),
+                                ),
+                              ),
                             Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: TextButton(
