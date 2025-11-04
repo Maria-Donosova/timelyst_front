@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:timelyst_flutter/widgets/shared/categories.dart';
 import '../../../models/customApp.dart';
+import '../../../models/calendars.dart';
 
 /**
  * Method to build the UI for a single appointment.
@@ -28,6 +29,37 @@ Widget appointmentBuilder(BuildContext context,
         customAppointment.startTime.month == customAppointment.endTime.month;
 
     final width = MediaQuery.of(context).size.width;
+
+    // Helper function to get the appropriate icon based on calendar source
+    IconData _getCalendarSourceIcon(CustomAppointment appointment) {
+      // Check for specific calendar source IDs first
+      if (appointment.googleEventId != null &&
+          appointment.googleEventId!.isNotEmpty) {
+        return Icons.mail_outline;
+      } else if (appointment.microsoftEventId != null &&
+          appointment.microsoftEventId!.isNotEmpty) {
+        return Icons.window_outlined;
+      } else if (appointment.appleEventId != null &&
+          appointment.appleEventId!.isNotEmpty) {
+        return Icons.apple;
+      }
+
+      // Fallback to sourceCalendar field if available
+      if (appointment.sourceCalendar != null &&
+          appointment.sourceCalendar!.toLowerCase().contains('google')) {
+        return Icons.mail_outline;
+      } else if (appointment.sourceCalendar != null &&
+          (appointment.sourceCalendar!.toLowerCase().contains('microsoft') ||
+              appointment.sourceCalendar!.toLowerCase().contains('outlook'))) {
+        return Icons.window_outlined;
+      } else if (appointment.sourceCalendar != null &&
+          appointment.sourceCalendar!.toLowerCase().contains('apple')) {
+        return Icons.apple;
+      }
+
+      // Default icon
+      return Icons.calendar_today;
+    }
 
     /**
      * If the appointment has a single day duration, return a Card with the appointment details
@@ -72,6 +104,17 @@ Widget appointmentBuilder(BuildContext context,
                   shape: BoxShape.rectangle,
                 ),
               ),
+              // Calendar source icon in bottom right corner
+              Positioned(
+                right: 4,
+                bottom: 4,
+                child: Icon(
+                  _getCalendarSourceIcon(customAppointment),
+                  size: 14,
+                  color:
+                      Theme.of(context).colorScheme.tertiary.withOpacity(0.7),
+                ),
+              ),
             ]),
           ),
         ),
@@ -84,14 +127,28 @@ Widget appointmentBuilder(BuildContext context,
       return Container(
         width: width,
         color: catColor(customAppointment.catTitle),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Text(
-            customAppointment.title,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(
+                customAppointment.title,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
-          ),
+            // Calendar source icon in bottom right corner for multi-day events
+            Positioned(
+              right: 4,
+              bottom: 4,
+              child: Icon(
+                _getCalendarSourceIcon(customAppointment),
+                size: 14,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+              ),
+            ),
+          ],
         ),
       );
     }
