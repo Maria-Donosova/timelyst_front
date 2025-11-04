@@ -7,6 +7,7 @@ import '../screens/common/account.dart';
 import '../screens/common/signUp.dart';
 import '../screens/common/logIn.dart';
 import '../screens/common/about.dart';
+import '../screens/common/contact.dart';
 import '../../providers/authProvider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -54,7 +55,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             );
             break;
           case _timelystMenu.contact_us:
-            _launchContactEmail(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ContactScreen()),
+            );
             break;
         }
       },
@@ -85,7 +89,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Could not launch email app. Please contact us at support@timelyst.app'),
+              content: Text(
+                  'Could not launch email app. Please contact us at support@timelyst.app'),
               backgroundColor: Colors.red,
             ),
           );
