@@ -22,7 +22,6 @@ class GoogleCalendarService {
       : _authService = authService ?? AuthService(),
         _apiClient = apiClient ?? ApiClient();
 
-  
   // Gets calendar changes since last sync (delta sync)
   Future<CalendarDelta> fetchCalendarChanges({
     required String userId,
@@ -30,8 +29,7 @@ class GoogleCalendarService {
     required String syncToken,
     int maxResults = 250,
   }) async {
-    // logger.i(
-    //     'Fetching calendar changes $userId $email in fetchCalendarChanges google calendar service');
+    print('Entering fetchCalendarChanges');
     try {
       final response = await _apiClient.post(
         '$_baseUrl/calendars/delta',
@@ -68,17 +66,70 @@ class GoogleCalendarService {
     required String email,
     required List<Calendar> calendars,
   }) async {
-    // logger.i(
-    //     'Saving selected calendars $userId $email in saveCalendarsBatch google calendar service');
+    print(
+        'Entered fetchCalendarChanges, preparing to save ${calendars.length} Google calendars');
+
+    // Convert calendars to JSON and log the structure
+    final calendarJsonList =
+        calendars.map((c) => c.toJson(email: email)).toList();
+
+    // Log each Google calendar being sent (NESTED structure)
+    for (int i = 0; i < calendarJsonList.length; i++) {
+      final cal = calendarJsonList[i];
+      print('📋 [GOOGLE] Calendar $i: "${cal['summary']}"');
+      print('  🆔 ID: ${cal['id']}');
+      print('  🔗 Provider ID: ${cal['providerCalendarId']}');
+      print('  📊 Source: ${cal['source']}');
+      print('  👤 User: ${cal['user']}');
+      print('  📧 Email: ${cal['email']}');
+      print('  🔄 Structure: NESTED (preferences object preserved)');
+
+      // Log nested preferences structure
+      final preferences = cal['preferences'];
+      if (preferences != null) {
+        print('  📁 Preferences (nested):');
+        print('    📂 ImportSettings:');
+        final importSettings = preferences['importSettings'];
+        if (importSettings != null) {
+          print('      ✅ importAll: ${importSettings['importAll']}');
+          print('      📝 importSubject: ${importSettings['importSubject']}');
+          print('      📄 importBody: ${importSettings['importBody']}');
+          print(
+              '      📞 importConferenceInfo: ${importSettings['importConferenceInfo']}');
+          print(
+              '      👥 importOrganizer: ${importSettings['importOrganizer']}');
+          print(
+              '      📮 importRecipients: ${importSettings['importRecipients']}');
+        }
+        print('    🏷️ category: "${preferences['category']}"');
+        print('    🎨 color: "${preferences['color']}"');
+      }
+
+      // Log metadata
+      final metadata = cal['metadata'];
+      if (metadata != null) {
+        print('  📋 Metadata:');
+        print('    📛 title: "${metadata['title']}"');
+        print('    📝 description: "${metadata['description']}"');
+        print('    🌍 timeZone: "${metadata['timeZone']}"');
+      }
+      print('  ─────────────────────────────────');
+    }
+
+    final requestBody = {
+      'user': userId,
+      'email': email,
+      'calendars': calendarJsonList,
+      'batchSize': calendars.length,
+    };
+
+    print(
+        '📤 [GoogleCalendarService] Sending NESTED structure to: ${Config.backendSaveSelectedGoogleCalendars}');
+
     try {
       final response = await _apiClient.post(
         Config.backendSaveSelectedGoogleCalendars,
-        body: {
-          'user': userId,
-          'email': email,
-          'calendars': calendars.map((c) => c.toJson(email: email)).toList(),
-          'batchSize': calendars.length,
-        },
+        body: requestBody,
         token: await _authService.getAuthToken(),
       );
 
@@ -89,17 +140,16 @@ class GoogleCalendarService {
   }
 
   // Helper methods
-
-  Future<String> _getValidToken() async {
-    if (_cachedToken == null) {
-      _cachedToken = await _authService.getAuthToken();
-    }
-    return _cachedToken!;
-  }
+  // Future<String> _getValidToken() async {
+  //   if (_cachedToken == null) {
+  //     _cachedToken = await _authService.getAuthToken();
+  //   }
+  //   return _cachedToken!;
+  // }
 
   void _handleBatchResponse(http.Response response) {
-    // logger.i(
-    //     'Handling batch response in _handleBatchResponse google calendar service');
+    print(
+        'Entered handleBatchResponse, received response with status code: ${response.statusCode}');
     if (response.statusCode != 200) {
       final errorBody = json.decode(response.body);
       throw Exception(
@@ -117,7 +167,6 @@ class GoogleCalendarService {
   }
 
   Exception _handleError(String operation, dynamic error) {
-    // logger.i('Handling error in _handleError google calendar service');
     if (error is http.ClientException) {
       return Exception('Network error while $operation: ${error.message}');
     }
@@ -129,19 +178,22 @@ class GoogleCalendarService {
     required String email,
     String? pageToken,
   }) async {
+    print('Entering fetchCalendarsPage');
     try {
-      final response = await _apiClient.post(
-        '$_baseUrl/calendars/list',
-        body: {
-          'userId': userId,
-          'email': email,
-          'pageToken': pageToken,
-        },
-        token: await _authService.getAuthToken(),
-      ).timeout(
-        const Duration(seconds: 20),
-        onTimeout: () => throw TimeoutException('Request timeout'),
-      );
+      final response = await _apiClient
+          .post(
+            '$_baseUrl/calendars/list',
+            body: {
+              'userId': userId,
+              'email': email,
+              'pageToken': pageToken,
+            },
+            token: await _authService.getAuthToken(),
+          )
+          .timeout(
+            const Duration(seconds: 20),
+            onTimeout: () => throw TimeoutException('Request timeout'),
+          );
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
