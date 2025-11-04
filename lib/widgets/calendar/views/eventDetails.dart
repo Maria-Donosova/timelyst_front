@@ -551,12 +551,60 @@ class EventDetailsScreenState extends State<EventDetails> {
 
   // Method to delete an event
   Future<void> _deleteEvent() async {
-    // Show confirmation dialog
+    // Get calendar source name for the warning message
+    final calendarSourceName = _eventCalendarInfo != null
+        ? _eventCalendarInfo!.source.name.toUpperCase()
+        : 'source calendar';
+
+    // Show confirmation dialog with enhanced warning
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Event'),
-        content: const Text('Are you sure you want to delete this event?'),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+            SizedBox(width: 8),
+            const Text('Delete Event'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Are you sure you want to delete this event?',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+            SizedBox(height: 16),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline,
+                    color: Colors.orange.shade700,
+                    size: 20
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'This event will be permanently deleted from both the database and your $calendarSourceName calendar. This action cannot be undone.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.orange.shade900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -564,10 +612,10 @@ class EventDetailsScreenState extends State<EventDetails> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
+            child: const Text('Delete Permanently'),
           ),
         ],
       ),
