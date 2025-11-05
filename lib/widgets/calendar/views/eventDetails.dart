@@ -340,7 +340,7 @@ class EventDetailsScreenState extends State<EventDetails> {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         final eventProvider = Provider.of<EventProvider>(context, listen: false);
         final String? currentUserId = authProvider.userId;
-        final String? authToken = authProvider.authToken;
+        final String? authToken = await authProvider.authService.getAuthToken();
 
         if (currentUserId == null || authToken == null) {
           ScaffoldMessenger.of(context).showSnackBar(
