@@ -3,12 +3,11 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../models/calendars.dart';
 import '../../../providers/calendarProvider.dart';
-// import '../../../models/customApp.dart';
-// import '../../../providers/eventProvider.dart';
-import '../../../providers/authProvider.dart'; // Import AuthProvider
+import '../../../providers/eventProvider.dart';
+import '../../../providers/authProvider.dart';
+import '../../../services/eventsService.dart';
 import '../../shared/categories.dart';
 import '../controllers/eventDeletionController.dart';
-import '../controllers/eventSaveController.dart';
 import '../../shared/calendarSelection.dart';
 //import 'event_recurrence_selector.dart';
 // import 'event_category_selector.dart';
@@ -327,6 +326,8 @@ class EventDetailsScreenState extends State<EventDetails> {
   //   }
   // }
 
+  /// Consolidated save method that handles both create and update operations
+  /// for both time events and day events
   Future<void> _saveEvent(BuildContext context) async {
     try {
       if (_appFormKey.currentState!.validate()) {
@@ -335,11 +336,13 @@ class EventDetailsScreenState extends State<EventDetails> {
           _isLoading = true;
         });
 
-        // Use AuthProvider
+        // Get authentication credentials
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final eventProvider = Provider.of<EventProvider>(context, listen: false);
         final String? currentUserId = authProvider.userId;
+        final String? authToken = authProvider.authToken;
 
-        if (currentUserId == null) {
+        if (currentUserId == null || authToken == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content: Text('Authentication error. Please log in again.')),
@@ -392,10 +395,10 @@ class EventDetailsScreenState extends State<EventDetails> {
           return;
         }
 
-        // Validate end time is after start time
-        if (endTime.hour < startTime.hour ||
+        // Validate end time is after start time (only for non-all-day events)
+        if (!_allDay && (endTime.hour < startTime.hour ||
             (endTime.hour == startTime.hour &&
-                endTime.minute <= startTime.minute)) {
+                endTime.minute <= startTime.minute))) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('End time must be after start time'),
@@ -425,15 +428,14 @@ class EventDetailsScreenState extends State<EventDetails> {
           endTime.minute,
         );
 
-        // Prepare event data
+        // Prepare event data (common fields for both day and time events)
         final Map<String, dynamic> eventData = {
-          'user_id': currentUserId, // Use currentUserId from AuthProvider
-          'calendar_id': _selectedCalendars.isNotEmpty
+          'user_id': currentUserId,
+          'user_calendars': _selectedCalendars.isNotEmpty
               ? _selectedCalendars.first.id
               : null,
-          'createdBy': currentUserId, // Use currentUserId from AuthProvider
-          'event_organizer':
-              currentUserId, // Use currentUserId from AuthProvider
+          'createdBy': currentUserId,
+          'event_organizer': currentUserId,
           'event_title': _eventTitleController.text,
           'is_AllDay': _allDay,
           'recurrenceRule': _recurrence != 'None' ? _buildRecurrenceRule() : '',
@@ -443,59 +445,105 @@ class EventDetailsScreenState extends State<EventDetails> {
           'event_location': _eventLocation.text,
           'start': start.toIso8601String(),
           'end': end.toIso8601String(),
-          'isUpdate': widget._id != null && widget._id!.isNotEmpty,
-          'eventId': widget._id,
-          'isAllDay': _allDay,
         };
 
-        // Use the EventSaveController to save the event
-        final success = await EventSaveController.saveEvent(context, eventData);
+        // Determine if this is an update or create operation
+        final isUpdate = widget._id != null && widget._id!.isNotEmpty;
 
-        if (success) {
-          // Show success message before navigation
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(widget._id != null && widget._id!.isNotEmpty
-                  ? 'Event updated successfully!'
-                  : 'Event created successfully!'),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-
-          // Safe navigation - check if we can pop before attempting to
-          if (Navigator.of(context).canPop()) {
-            try {
-              Navigator.of(context).pop(true); // Indicate success
-            } catch (e) {
-              print('Navigation error in _saveEvent: $e');
-              // Don't attempt additional navigation here
+        // Call the appropriate EventService method based on event type and operation
+        bool success = false;
+        try {
+          if (_allDay) {
+            // Day Event (All-day event)
+            if (isUpdate) {
+              final result = await EventService.updateDayEvent(
+                widget._id!,
+                eventData,
+                authToken,
+              );
+              success = result != null;
+            } else {
+              final result = await EventService.createDayEvent(
+                eventData,
+                authToken,
+              );
+              success = result != null;
+            }
+          } else {
+            // Time Event (Timed event)
+            if (isUpdate) {
+              final result = await EventService.updateTimeEvent(
+                widget._id!,
+                eventData,
+                authToken,
+              );
+              success = result != null;
+            } else {
+              final result = await EventService.createTimeEvent(
+                eventData,
+                authToken,
+              );
+              success = result != null;
             }
           }
-          // No return true needed as it's Future<void>
+        } catch (e) {
+          print('Error saving event: $e');
+          success = false;
+        }
+
+        if (success) {
+          // Invalidate cache to force fresh data on next fetch
+          eventProvider.invalidateCache();
+
+          // Show success message
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(isUpdate
+                    ? 'Event updated successfully!'
+                    : 'Event created successfully!'),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+
+            // Safe navigation
+            if (Navigator.of(context).canPop()) {
+              try {
+                Navigator.of(context).pop(true); // Indicate success
+              } catch (e) {
+                print('Navigation error in _saveEvent: $e');
+              }
+            }
+          }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to save event. Please try again.'),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        } // No return false needed
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to save event. Please try again.'),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Unexpected error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      // No return false needed
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Unexpected error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
