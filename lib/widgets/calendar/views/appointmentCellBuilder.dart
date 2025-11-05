@@ -30,9 +30,34 @@ Widget appointmentBuilder(BuildContext context,
 
     final width = MediaQuery.of(context).size.width;
 
+    // Note: This appointmentBuilder is only used for day and week views in the calendar controller
+    // so we can safely show source icons here. Month view uses monthCellBuilder which doesn't show icons.
+
     // Helper function to get the appropriate icon based on calendar source
     IconData _getCalendarSourceIcon(CustomAppointment appointment) {
-      // Check for specific calendar source IDs first
+      // First check the source map which should contain the most reliable information
+      if (appointment.source != null && appointment.source!.isNotEmpty) {
+        final sourceType =
+            appointment.source!['type']?.toString().toLowerCase() ?? '';
+        final sourceName =
+            appointment.source!['name']?.toString().toLowerCase() ?? '';
+
+        if (sourceType.contains('google') || sourceName.contains('google')) {
+          return Icons.mail_outline;
+        } else if (sourceType.contains('microsoft') ||
+            sourceType.contains('outlook') ||
+            sourceName.contains('microsoft') ||
+            sourceName.contains('outlook')) {
+          return Icons.window_outlined;
+        } else if (sourceType.contains('apple') ||
+            sourceType.contains('icloud') ||
+            sourceName.contains('apple') ||
+            sourceName.contains('icloud')) {
+          return Icons.apple;
+        }
+      }
+
+      // Check for specific calendar source IDs
       if (appointment.googleEventId != null &&
           appointment.googleEventId!.isNotEmpty) {
         return Icons.mail_outline;
@@ -44,17 +69,38 @@ Widget appointmentBuilder(BuildContext context,
         return Icons.apple;
       }
 
-      // Fallback to sourceCalendar field if available
+      // Check sourceCalendar field for calendar name patterns
       if (appointment.sourceCalendar != null &&
-          appointment.sourceCalendar!.toLowerCase().contains('google')) {
-        return Icons.mail_outline;
-      } else if (appointment.sourceCalendar != null &&
-          (appointment.sourceCalendar!.toLowerCase().contains('microsoft') ||
-              appointment.sourceCalendar!.toLowerCase().contains('outlook'))) {
-        return Icons.window_outlined;
-      } else if (appointment.sourceCalendar != null &&
-          appointment.sourceCalendar!.toLowerCase().contains('apple')) {
-        return Icons.apple;
+          appointment.sourceCalendar!.isNotEmpty) {
+        final sourceCalendarLower = appointment.sourceCalendar!.toLowerCase();
+
+        if (sourceCalendarLower.contains('google')) {
+          return Icons.mail_outline;
+        } else if (sourceCalendarLower.contains('microsoft') ||
+            sourceCalendarLower.contains('outlook')) {
+          return Icons.window_outlined;
+        } else if (sourceCalendarLower.contains('apple') ||
+            sourceCalendarLower.contains('icloud') ||
+            sourceCalendarLower.contains('caldav')) {
+          return Icons.apple;
+        }
+      }
+
+      // Check calendarId field as well
+      if (appointment.calendarId != null &&
+          appointment.calendarId!.isNotEmpty) {
+        final calendarIdLower = appointment.calendarId!.toLowerCase();
+
+        if (calendarIdLower.contains('google')) {
+          return Icons.mail_outline;
+        } else if (calendarIdLower.contains('microsoft') ||
+            calendarIdLower.contains('outlook')) {
+          return Icons.window_outlined;
+        } else if (calendarIdLower.contains('apple') ||
+            calendarIdLower.contains('icloud') ||
+            calendarIdLower.contains('caldav')) {
+          return Icons.apple;
+        }
       }
 
       // Default icon
@@ -104,7 +150,7 @@ Widget appointmentBuilder(BuildContext context,
                   shape: BoxShape.rectangle,
                 ),
               ),
-              // Calendar source icon in bottom right corner
+              // Calendar source icon in bottom right corner (shown for day/week views)
               Positioned(
                 right: 4,
                 bottom: 4,
@@ -138,7 +184,7 @@ Widget appointmentBuilder(BuildContext context,
                 ),
               ),
             ),
-            // Calendar source icon in bottom right corner for multi-day events
+            // Calendar source icon in bottom right corner for multi-day events (shown for day/week views)
             Positioned(
               right: 4,
               bottom: 4,
