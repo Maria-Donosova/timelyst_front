@@ -1031,19 +1031,6 @@ class EventDetailsScreenState extends State<EventDetails> {
                                   onPressed: _isLoading ? null : _deleteEvent,
                                 ),
                               ),
-                            // Debug info to check if calendar info is available
-                            if (_eventCalendarInfo == null)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 16.0),
-                                child: Tooltip(
-                                  message: 'No calendar info available',
-                                  child: Icon(
-                                    Icons.error_outline,
-                                    size: 20,
-                                    color: Theme.of(context).colorScheme.error,
-                                  ),
-                                ),
-                              ),
                             Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: TextButton(
