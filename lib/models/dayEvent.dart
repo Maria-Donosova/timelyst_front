@@ -86,7 +86,8 @@ class DayEvent {
       'is_AllDay': is_AllDay,
       'recurrenceRule': recurrence.isNotEmpty ? recurrence.first : '',
       'recurrenceId': recurrenceId,
-      'exceptionDates': recurrenceExceptionDates, // backend expects exceptionDates
+      'exceptionDates':
+          recurrenceExceptionDates, // backend expects exceptionDates
       'day_EventInstance': dayEventInstance,
       'category': category,
       'event_body': eventBody,
@@ -100,6 +101,16 @@ class DayEvent {
   }
 
   factory DayEvent.fromJson(Map<String, dynamic> json) {
+    // Debug logging to see what's coming from backend
+    print(
+        '🔍 [DayEvent.fromJson] Parsing JSON for event: ${json['event_title']}');
+    print('  - source field: ${json['source']}');
+    print('  - googleEventId: "${json['googleEventId']}"');
+    print('  - microsoftEventId: "${json['microsoftEventId']}"');
+    print('  - appleEventId: "${json['appleEventId']}"');
+    print('  - source_calendar: "${json['source_calendar']}"');
+    print('  - createdBy: "${json['createdBy']}"');
+
     return DayEvent(
       id: json['id'] ?? json['_id'] ?? '',
       userId: json['user_id'] ?? json['userId'] ?? '',
@@ -133,7 +144,8 @@ class DayEvent {
           : (json['recurrence'] as List<dynamic>?)?.cast<String>() ?? [],
       recurrenceId: json['recurrenceId'] ?? '',
       recurrenceExceptionDates:
-          (json['exceptionDates'] as List<dynamic>?)?.cast<String>() ?? [], // backend uses exceptionDates
+          (json['exceptionDates'] as List<dynamic>?)?.cast<String>() ??
+              [], // backend uses exceptionDates
       dayEventInstance:
           json['day_EventInstance'] ?? json['day_eventInstance'] ?? '',
       category: json['category'] ?? '',
@@ -155,10 +167,10 @@ class DayEvent {
   // Helper method to parse start/end that can be either timestamp or ISO string
   static String _parseStartEnd(dynamic value) {
     if (value == null) return '';
-    
+
     // If it's already a string, return as-is
     if (value is String) return value;
-    
+
     // If it's a number (Unix timestamp in milliseconds), convert to ISO string
     if (value is num) {
       try {
@@ -168,7 +180,7 @@ class DayEvent {
         return '';
       }
     }
-    
+
     // Fallback: convert to string
     return value.toString();
   }

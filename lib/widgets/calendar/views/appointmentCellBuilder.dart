@@ -35,6 +35,17 @@ Widget appointmentBuilder(BuildContext context,
 
     // Helper function to get the appropriate icon based on calendar source
     IconData _getCalendarSourceIcon(CustomAppointment appointment) {
+      // Debug logging to understand what data we have
+      print('🔍 [Icon Debug] Checking appointment: "${appointment.title}"');
+      print('  - source: ${appointment.source}');
+      print('  - googleEventId: ${appointment.googleEventId}');
+      print('  - microsoftEventId: ${appointment.microsoftEventId}');
+      print('  - appleEventId: ${appointment.appleEventId}');
+      print('  - sourceCalendar: ${appointment.sourceCalendar}');
+      print('  - calendarId: ${appointment.calendarId}');
+      print('  - createdBy: ${appointment.createdBy}');
+      print('  - userCalendars: ${appointment.userCalendars}');
+
       // First check the source map which should contain the most reliable information
       if (appointment.source != null && appointment.source!.isNotEmpty) {
         final sourceType =
@@ -42,17 +53,23 @@ Widget appointmentBuilder(BuildContext context,
         final sourceName =
             appointment.source!['name']?.toString().toLowerCase() ?? '';
 
+        print('  - sourceType: "$sourceType"');
+        print('  - sourceName: "$sourceName"');
+
         if (sourceType.contains('google') || sourceName.contains('google')) {
+          print('  ✅ Returning Google icon (mail_outline)');
           return Icons.mail_outline;
         } else if (sourceType.contains('microsoft') ||
             sourceType.contains('outlook') ||
             sourceName.contains('microsoft') ||
             sourceName.contains('outlook')) {
+          print('  ✅ Returning Microsoft icon (window_outlined)');
           return Icons.window_outlined;
         } else if (sourceType.contains('apple') ||
             sourceType.contains('icloud') ||
             sourceName.contains('apple') ||
             sourceName.contains('icloud')) {
+          print('  ✅ Returning Apple icon (apple)');
           return Icons.apple;
         }
       }
@@ -60,12 +77,17 @@ Widget appointmentBuilder(BuildContext context,
       // Check for specific calendar source IDs
       if (appointment.googleEventId != null &&
           appointment.googleEventId!.isNotEmpty) {
+        print('  ✅ Returning Google icon (mail_outline) - googleEventId found');
         return Icons.mail_outline;
       } else if (appointment.microsoftEventId != null &&
           appointment.microsoftEventId!.isNotEmpty) {
+        print(
+            '  ✅ Returning Microsoft icon (window_outlined) - microsoftEventId found');
         return Icons.window_outlined;
       } else if (appointment.appleEventId != null &&
           appointment.appleEventId!.isNotEmpty) {
+        print(
+            '  ✅ Returning Apple icon (apple) - appleEventId found: ${appointment.appleEventId}');
         return Icons.apple;
       }
 
@@ -73,15 +95,22 @@ Widget appointmentBuilder(BuildContext context,
       if (appointment.sourceCalendar != null &&
           appointment.sourceCalendar!.isNotEmpty) {
         final sourceCalendarLower = appointment.sourceCalendar!.toLowerCase();
+        print('  - sourceCalendarLower: "$sourceCalendarLower"');
 
         if (sourceCalendarLower.contains('google')) {
+          print(
+              '  ✅ Returning Google icon (mail_outline) - sourceCalendar contains google');
           return Icons.mail_outline;
         } else if (sourceCalendarLower.contains('microsoft') ||
             sourceCalendarLower.contains('outlook')) {
+          print(
+              '  ✅ Returning Microsoft icon (window_outlined) - sourceCalendar contains microsoft/outlook');
           return Icons.window_outlined;
         } else if (sourceCalendarLower.contains('apple') ||
             sourceCalendarLower.contains('icloud') ||
             sourceCalendarLower.contains('caldav')) {
+          print(
+              '  ✅ Returning Apple icon (apple) - sourceCalendar contains apple/icloud/caldav');
           return Icons.apple;
         }
       }
@@ -90,20 +119,53 @@ Widget appointmentBuilder(BuildContext context,
       if (appointment.calendarId != null &&
           appointment.calendarId!.isNotEmpty) {
         final calendarIdLower = appointment.calendarId!.toLowerCase();
+        print('  - calendarIdLower: "$calendarIdLower"');
 
         if (calendarIdLower.contains('google')) {
+          print(
+              '  ✅ Returning Google icon (mail_outline) - calendarId contains google');
           return Icons.mail_outline;
         } else if (calendarIdLower.contains('microsoft') ||
             calendarIdLower.contains('outlook')) {
+          print(
+              '  ✅ Returning Microsoft icon (window_outlined) - calendarId contains microsoft/outlook');
           return Icons.window_outlined;
         } else if (calendarIdLower.contains('apple') ||
             calendarIdLower.contains('icloud') ||
             calendarIdLower.contains('caldav')) {
+          print(
+              '  ✅ Returning Apple icon (apple) - calendarId contains apple/icloud/caldav');
           return Icons.apple;
         }
       }
 
+      // Check userCalendars field as it might contain calendar names
+      if (appointment.userCalendars.isNotEmpty) {
+        for (final calendar in appointment.userCalendars) {
+          final calendarLower = calendar.toLowerCase();
+          print('  - Checking userCalendar: "$calendarLower"');
+
+          if (calendarLower.contains('google')) {
+            print(
+                '  ✅ Returning Google icon (mail_outline) - userCalendars contains google');
+            return Icons.mail_outline;
+          } else if (calendarLower.contains('microsoft') ||
+              calendarLower.contains('outlook')) {
+            print(
+                '  ✅ Returning Microsoft icon (window_outlined) - userCalendars contains microsoft/outlook');
+            return Icons.window_outlined;
+          } else if (calendarLower.contains('apple') ||
+              calendarLower.contains('icloud') ||
+              calendarLower.contains('caldav')) {
+            print(
+                '  ✅ Returning Apple icon (apple) - userCalendars contains apple/icloud/caldav');
+            return Icons.apple;
+          }
+        }
+      }
+
       // Default icon
+      print('  ❌ No source detected, returning default icon (calendar_today)');
       return Icons.calendar_today;
     }
 
