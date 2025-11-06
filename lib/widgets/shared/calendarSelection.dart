@@ -31,36 +31,53 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
   @override
   void initState() {
     super.initState();
+    print('[CalendarSelection] initState - Starting initialization');
     // Initialize the list of selected calendars with the initial values.
     _selectedCalendars = List.from(widget.initiallySelectedCalendars);
+    print('[CalendarSelection] Initially selected: ${_selectedCalendars.length} calendars');
+
     _authService = Provider.of<AuthService>(context, listen: false);
     _calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
 
     // Use provided calendars or fetch from provider
     if (widget.calendars != null && widget.calendars!.isNotEmpty) {
+      print('[CalendarSelection] Using provided calendars: ${widget.calendars!.length}');
       _calendars = widget.calendars!;
     } else {
-      _loadCalendars();
+      print('[CalendarSelection] No calendars provided, will load from provider');
+      // Use post-frame callback to avoid calling setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadCalendars();
+      });
     }
   }
 
   /// Fetches the list of calendars from the CalendarProvider.
   Future<void> _loadCalendars() async {
+    print('[CalendarSelection] _loadCalendars - Starting');
+    print('[CalendarSelection] Provider already has ${_calendarProvider.calendars.length} calendars');
+
     if (_calendarProvider.calendars.isNotEmpty) {
+      print('[CalendarSelection] Using existing calendars from provider');
       setState(() {
         _calendars = _calendarProvider.calendars;
       });
       return;
     }
 
+    print('[CalendarSelection] Setting loading state to true');
     setState(() {
       _isLoading = true;
       _errorMessage = '';
     });
 
     try {
+      print('[CalendarSelection] Getting userId from AuthService');
       final userId = await _authService.getUserId();
+      print('[CalendarSelection] UserId: $userId');
+
       if (userId == null) {
+        print('[CalendarSelection] ERROR: User ID is null');
         setState(() {
           _errorMessage = 'User ID not available. Please log in.';
           _isLoading = false;
@@ -68,11 +85,20 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
         return;
       }
 
+      print('[CalendarSelection] Initializing calendar provider with userId: $userId');
       // Initialize the calendar provider with userId if not already done
       await _calendarProvider.initialize(userId);
 
+      print('[CalendarSelection] Calendar provider initialized. Calendars count: ${_calendarProvider.calendars.length}');
+
+      if (!mounted) {
+        print('[CalendarSelection] Widget no longer mounted, aborting');
+        return;
+      }
+
       setState(() {
         _calendars = _calendarProvider.calendars;
+        print('[CalendarSelection] Set _calendars to ${_calendars.length} items');
 
         // Initialize selection with any new calendars that match initially selected IDs
         if (widget.initiallySelectedCalendars.isNotEmpty) {
@@ -81,9 +107,12 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
           _selectedCalendars.addAll(
             _calendarProvider.calendars.where((c) => initialIds.contains(c.id))
           );
+          print('[CalendarSelection] Updated selected calendars to ${_selectedCalendars.length}');
         }
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('[CalendarSelection] ERROR: Failed to load calendars: $e');
+      print('[CalendarSelection] Stack trace: $stackTrace');
       setState(() {
         _errorMessage = 'Failed to load calendars: ${e.toString()}';
         _isLoading = false;
@@ -95,6 +124,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
       }
     } finally {
       if (mounted) {
+        print('[CalendarSelection] Setting loading state to false');
         setState(() => _isLoading = false);
       }
     }
@@ -250,8 +280,11 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
   }
 
   Widget _buildBody() {
+    print('[CalendarSelection] _buildBody - isLoading: $_isLoading, hasError: ${_errorMessage.isNotEmpty}, calendars: ${_calendars.length}');
+
     // Show loading indicator
     if (_isLoading) {
+      print('[CalendarSelection] Showing loading indicator');
       return const Center(
         child: CircularProgressIndicator(),
       );
@@ -259,6 +292,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
 
     // Show error message
     if (_errorMessage.isNotEmpty) {
+      print('[CalendarSelection] Showing error: $_errorMessage');
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
