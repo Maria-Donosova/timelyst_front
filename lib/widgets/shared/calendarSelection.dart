@@ -9,10 +9,14 @@ import '../../services/authService.dart';
 class CalendarSelectionScreen extends StatefulWidget {
   final List<Calendar>? calendars;
   final List<Calendar> initiallySelectedCalendars;
+  final AuthService? authService;
+  final CalendarProvider? calendarProvider;
 
   const CalendarSelectionScreen({
     this.calendars,
     this.initiallySelectedCalendars = const [],
+    this.authService,
+    this.calendarProvider,
   });
 
   @override
@@ -36,8 +40,18 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
     _selectedCalendars = List.from(widget.initiallySelectedCalendars);
     print('[CalendarSelection] Initially selected: ${_selectedCalendars.length} calendars');
 
-    _authService = Provider.of<AuthService>(context, listen: false);
-    _calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+    // Use provided services or get from context
+    try {
+      _authService = widget.authService ?? Provider.of<AuthService>(context, listen: false);
+      _calendarProvider = widget.calendarProvider ?? Provider.of<CalendarProvider>(context, listen: false);
+      print('[CalendarSelection] Successfully got AuthService and CalendarProvider');
+    } catch (e) {
+      print('[CalendarSelection] ERROR getting providers: $e');
+      setState(() {
+        _errorMessage = 'Failed to initialize: Missing required services. Please try again.';
+      });
+      return;
+    }
 
     // Use provided calendars or fetch from provider
     if (widget.calendars != null && widget.calendars!.isNotEmpty) {
@@ -373,10 +387,20 @@ Future<List<Calendar>?> showCalendarSelectionDialog(
   BuildContext context, {
   List<Calendar> selectedCalendars = const [],
 }) async {
+  print('[CalendarSelection] showCalendarSelectionDialog called with ${selectedCalendars.length} selected calendars');
+
+  // Get providers from the current context before navigation
+  final authService = Provider.of<AuthService>(context, listen: false);
+  final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+
+  print('[CalendarSelection] Got providers - AuthService: ${authService != null}, CalendarProvider: ${calendarProvider != null}');
+
   return await Navigator.of(context).push<List<Calendar>>(
     MaterialPageRoute(
       builder: (context) => CalendarSelectionScreen(
         initiallySelectedCalendars: selectedCalendars,
+        authService: authService,
+        calendarProvider: calendarProvider,
       ),
     ),
   );
