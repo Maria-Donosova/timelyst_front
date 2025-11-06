@@ -337,7 +337,7 @@ Future<List<Calendar>?> showCalendarSelectionDialog(
           ),
         ),
         ElevatedButton(
-          onPressed: () => Navigator.pop(context, selectedCalendars),
+          onPressed: () => Navigator.pop(context, _selectedCalendars),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
