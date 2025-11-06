@@ -1148,11 +1148,11 @@ class CalendarsEventsService {
     }
   }
 
-  static Future fetchEventCalendarAssociations(String token) async {}
-
-  static Future<void> updateEventCalendarAssociations(
-      String token, String eventId, List<String> calendarIds) async {}
 }
+
+// Note: Event-calendar associations are managed through the event's user_calendars field
+// in the TimeEvent and DayEvent models. Update operations handle calendar associations
+// via the updateTimeEvent and updateDayEvent methods above.
 
 // import 'dart:convert';
 // import 'dart:io';
