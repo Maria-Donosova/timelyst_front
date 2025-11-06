@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/calendarProvider.dart';
 import '../../models/calendars.dart';
+import '../../services/authService.dart';
 
 /// A screen that allows the user to select one or more calendars from a list,
 /// grouped by category for better organization.
 class CalendarSelectionScreen extends StatefulWidget {
-  final List<Calendar> calendars;
+  final List<Calendar>? calendars;
   final List<Calendar> initiallySelectedCalendars;
 
   const CalendarSelectionScreen({
-    required this.calendars,
+    this.calendars,
     this.initiallySelectedCalendars = const [],
   });
 
@@ -21,12 +22,82 @@ class CalendarSelectionScreen extends StatefulWidget {
 
 class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
   late final List<Calendar> _selectedCalendars;
+  late CalendarProvider _calendarProvider;
+  late AuthService _authService;
+  bool _isLoading = false;
+  String _errorMessage = '';
+  List<Calendar> _calendars = [];
 
   @override
   void initState() {
     super.initState();
     // Initialize the list of selected calendars with the initial values.
     _selectedCalendars = List.from(widget.initiallySelectedCalendars);
+    _authService = Provider.of<AuthService>(context, listen: false);
+    _calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+
+    // Use provided calendars or fetch from provider
+    if (widget.calendars != null && widget.calendars!.isNotEmpty) {
+      _calendars = widget.calendars!;
+    } else {
+      _loadCalendars();
+    }
+  }
+
+  /// Fetches the list of calendars from the CalendarProvider.
+  Future<void> _loadCalendars() async {
+    if (_calendarProvider.calendars.isNotEmpty) {
+      setState(() {
+        _calendars = _calendarProvider.calendars;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    try {
+      final userId = await _authService.getUserId();
+      if (userId == null) {
+        setState(() {
+          _errorMessage = 'User ID not available. Please log in.';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Initialize the calendar provider with userId if not already done
+      await _calendarProvider.initialize(userId);
+
+      setState(() {
+        _calendars = _calendarProvider.calendars;
+
+        // Initialize selection with any new calendars that match initially selected IDs
+        if (widget.initiallySelectedCalendars.isNotEmpty) {
+          final initialIds = widget.initiallySelectedCalendars.map((c) => c.id).toSet();
+          _selectedCalendars.clear();
+          _selectedCalendars.addAll(
+            _calendarProvider.calendars.where((c) => initialIds.contains(c.id))
+          );
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to load calendars: ${e.toString()}';
+        _isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_errorMessage)),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   /// Adds or removes a calendar from the list of selected calendars.
@@ -152,13 +223,6 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Group calendars by category
-    final groupedCalendars = <String, List<Calendar>>{};
-    for (final calendar in widget.calendars) {
-      final category = calendar.preferences.category ?? 'Other';
-      groupedCalendars.putIfAbsent(category, () => []).add(calendar);
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -181,57 +245,103 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
           ),
         ],
       ),
-      body: widget.calendars.isEmpty
-          ? _buildEmptyState()
-          : Column(
-              children: [
-                if (_selectedCalendars.isNotEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Selected (${_selectedCalendars.length})',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    // Show loading indicator
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    // Show error message
+    if (_errorMessage.isNotEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _errorMessage,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadCalendars,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show empty state
+    if (_calendars.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    // Group calendars by category
+    final groupedCalendars = <String, List<Calendar>>{};
+    for (final calendar in _calendars) {
+      final category = calendar.preferences.category ?? 'Other';
+      groupedCalendars.putIfAbsent(category, () => []).add(calendar);
+    }
+
+    // Show calendars
+    return Column(
+      children: [
+        if (_selectedCalendars.isNotEmpty) ...[
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Selected (${_selectedCalendars.length})',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
                   ),
-                  _buildSelectedChips(),
-                  const Divider(),
-                ],
-                Expanded(
-                  child: ListView(
-                    children: groupedCalendars.entries
-                        .map((entry) =>
-                            _buildCategorySection(entry.key, entry.value))
-                        .toList(),
-                  ),
-                ),
-              ],
             ),
+          ),
+          _buildSelectedChips(),
+          const Divider(),
+        ],
+        Expanded(
+          child: ListView(
+            children: groupedCalendars.entries
+                .map((entry) => _buildCategorySection(entry.key, entry.value))
+                .toList(),
+          ),
+        ),
+      ],
     );
   }
 }
 
 /// Shows a dialog to select calendars.
 ///
-/// Fetches all calendars from [CalendarProvider] and displays
-/// [CalendarSelectionScreen].
+/// Displays [CalendarSelectionScreen] which will automatically fetch
+/// calendars from [CalendarProvider] if not already loaded.
 /// Returns a list of selected [Calendar] objects, or `null` if the
 /// dialog is dismissed.
 Future<List<Calendar>?> showCalendarSelectionDialog(
   BuildContext context, {
   List<Calendar> selectedCalendars = const [],
 }) async {
-  final calendarProvider =
-      Provider.of<CalendarProvider>(context, listen: false);
-  final allCalendars = calendarProvider.calendars;
-
   return await Navigator.of(context).push<List<Calendar>>(
     MaterialPageRoute(
       builder: (context) => CalendarSelectionScreen(
-        calendars: allCalendars,
         initiallySelectedCalendars: selectedCalendars,
       ),
     ),
