@@ -273,9 +273,14 @@ class EventDetailsScreenState extends State<EventDetails> {
   }
 
   Future<void> _selectCalendar(BuildContext context) async {
-    final result = await showCalendarSelectionDialog(context);
+    print('[EventDetails] Opening calendar selection with ${_selectedCalendars.length} selected calendars');
+    final result = await showCalendarSelectionDialog(
+      context,
+      selectedCalendars: _selectedCalendars,
+    );
 
     if (result != null) {
+      print('[EventDetails] User selected ${result.length} calendars');
       setState(() {
         _selectedCalendars = result;
 
@@ -284,12 +289,16 @@ class EventDetailsScreenState extends State<EventDetails> {
           _selectedCalendarId = firstCalendar.id;
           _eventCalendar.text = firstCalendar.metadata.title;
           _eventCalendarInfo = firstCalendar; // Update the calendar info
+          print('[EventDetails] Selected calendar: ${firstCalendar.metadata.title} (${firstCalendar.id})');
         } else {
           _selectedCalendarId = null;
           _eventCalendar.text = 'No calendar selected';
           _eventCalendarInfo = null; // Clear the calendar info
+          print('[EventDetails] No calendar selected');
         }
       });
+    } else {
+      print('[EventDetails] Calendar selection was cancelled');
     }
   }
 
