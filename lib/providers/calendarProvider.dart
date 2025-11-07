@@ -232,34 +232,41 @@ class CalendarProvider with ChangeNotifier {
 
       print('[CalendarProvider] Found calendar: ${calendar.metadata.title}, current isSelected=${calendar.isSelected}');
 
-      // Create a new input with the selection change
-      final input = CalendarInput(
-        title: calendar.metadata.title,
-        timeZone: calendar.metadata.timeZone ?? 'UTC',
-        isPrimary: calendar.isPrimary,
-        source: calendar.source.name,
-        color: '#${calendar.metadata.color.toARGB32().toRadixString(16)}',
-        description: calendar.metadata.description,
-        isSelected: isSelected, // Include the isSelected field
+      _isLoading = true;
+      notifyListeners();
+
+      final authToken = await _authService.getAuthToken();
+      if (authToken == null) {
+        print('[CalendarProvider] ❌ User not authenticated');
+        throw CalendarServiceException('User not authenticated');
+      }
+
+      // Create input for the dedicated updateCalendarSelection mutation
+      final input = UpdateCalendarInput(
+        isSelected: isSelected,
       );
 
-      print('[CalendarProvider] Calling updateCalendar with input: ${input.toJson()}');
-      final updatedCalendar = await updateCalendar(
+      print('[CalendarProvider] Calling updateCalendarSelection with input: ${input.toJson()}');
+      final updatedCalendar = await CalendarsService.updateCalendarSelection(
         calendarId: calendarId,
+        authToken: authToken,
         input: input,
       );
 
-      if (updatedCalendar != null) {
-        print('[CalendarProvider] ✅ Calendar updated successfully, new isSelected=${updatedCalendar.isSelected}');
-        return true;
-      } else {
-        print('[CalendarProvider] ❌ updateCalendar returned null');
-        return false;
-      }
+      _updateCalendarInState(updatedCalendar);
+      print('[CalendarProvider] ✅ Calendar updated successfully, new isSelected=${updatedCalendar.isSelected}');
+      return true;
+    } on CalendarServiceException catch (e) {
+      print('[CalendarProvider] ❌ CalendarServiceException: ${e.message}');
+      _errorMessage = e.message;
+      return false;
     } catch (e) {
       print('[CalendarProvider] ❌ Exception in setCalendarSelection: $e');
       _errorMessage = 'Failed to update calendar selection: ${e.toString()}';
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
