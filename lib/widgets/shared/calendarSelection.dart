@@ -271,6 +271,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
         final isSelected = entry.value;
 
         try {
+          print('[CalendarSelection] Updating calendar $calendarId to isSelected=$isSelected');
           final success = await _calendarProvider.setCalendarSelection(
             calendarId: calendarId,
             isSelected: isSelected,
@@ -278,13 +279,14 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
 
           if (success) {
             successCount++;
+            print('[CalendarSelection] ✅ Successfully updated calendar $calendarId');
           } else {
             failureCount++;
-            print('[CalendarSelection] Failed to update calendar $calendarId');
+            print('[CalendarSelection] ❌ Failed to update calendar $calendarId');
           }
         } catch (e) {
           failureCount++;
-          print('[CalendarSelection] Error updating calendar $calendarId: $e');
+          print('[CalendarSelection] ❌ Error updating calendar $calendarId: $e');
         }
       }
 
