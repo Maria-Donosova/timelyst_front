@@ -63,7 +63,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
         hasAuthService = true;
         print('[CalendarSelection] Got AuthService from context');
       } catch (e) {
-        print('[CalendarSelection] ERROR: Could not get AuthService: $e');
+        print('[CalendarSelection] Could not get AuthService from context (will try to work without it): $e');
       }
     }
 
@@ -77,23 +77,35 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
       }
     }
 
-    // Check if we have all required services
-    if (!hasAuthService || !hasCalendarProvider) {
-      print('[CalendarSelection] ERROR: Missing required services - Auth: $hasAuthService, Calendar: $hasCalendarProvider');
+    // CalendarProvider is absolutely required
+    if (!hasCalendarProvider) {
+      print('[CalendarSelection] ERROR: CalendarProvider is required but not found');
       setState(() {
-        _errorMessage = 'Failed to initialize: Missing required services. Please ensure you are logged in and try again.';
+        _errorMessage = 'Failed to initialize: Calendar service not available. Please try again.';
       });
       return;
     }
 
-    print('[CalendarSelection] Successfully initialized with all required services');
+    print('[CalendarSelection] Successfully got CalendarProvider');
 
     // Use provided calendars or fetch from provider
     if (widget.calendars != null && widget.calendars!.isNotEmpty) {
       print('[CalendarSelection] Using provided calendars: ${widget.calendars!.length}');
       _calendars = widget.calendars!;
+    } else if (_calendarProvider.calendars.isNotEmpty) {
+      // CalendarProvider already has calendars - use them!
+      print('[CalendarSelection] Using existing calendars from CalendarProvider: ${_calendarProvider.calendars.length}');
+      _calendars = _calendarProvider.calendars;
     } else {
-      print('[CalendarSelection] No calendars provided, will load from provider');
+      // Need to load calendars - check if we have AuthService
+      if (!hasAuthService) {
+        print('[CalendarSelection] ERROR: Need to load calendars but AuthService not available');
+        setState(() {
+          _errorMessage = 'Failed to initialize: Authentication service not available. Please ensure you are logged in and try again.';
+        });
+        return;
+      }
+      print('[CalendarSelection] No calendars available, will load from provider');
       // Use post-frame callback to avoid calling setState during build
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadCalendars();
