@@ -50,7 +50,15 @@ class CalendarProvider with ChangeNotifier {
 
   // Initial load
   Future<void> loadInitialCalendars() async {
-    if (_userId == null) return;
+    // Auto-initialize userId from AuthService if not set
+    if (_userId == null) {
+      _userId = await _authService.getUserId();
+      if (_userId == null) {
+        print('[CalendarProvider] Cannot load calendars: userId is null');
+        return;
+      }
+      print('[CalendarProvider] Auto-initialized userId: $_userId');
+    }
     _resetState();
     await _fetchCalendars();
     _identifyPrimaryCalendar();
@@ -58,14 +66,31 @@ class CalendarProvider with ChangeNotifier {
 
   // Pagination support
   Future<void> loadMoreCalendars() async {
-    if (_userId == null || !_hasMore || _isLoading) return;
+    // Auto-initialize userId from AuthService if not set
+    if (_userId == null) {
+      _userId = await _authService.getUserId();
+      if (_userId == null) {
+        print('[CalendarProvider] Cannot load more calendars: userId is null');
+        return;
+      }
+      print('[CalendarProvider] Auto-initialized userId: $_userId');
+    }
+    if (!_hasMore || _isLoading) return;
     _currentOffset += _pageSize;
     await _fetchCalendars();
   }
 
   // Refresh data
   Future<void> refreshCalendars() async {
-    if (_userId == null) return;
+    // Auto-initialize userId from AuthService if not set
+    if (_userId == null) {
+      _userId = await _authService.getUserId();
+      if (_userId == null) {
+        print('[CalendarProvider] Cannot refresh calendars: userId is null');
+        return;
+      }
+      print('[CalendarProvider] Auto-initialized userId: $_userId');
+    }
     _resetState();
     _eventsCache.clear();
     _lastEventFetchTime.clear();
