@@ -21,14 +21,39 @@ class CalendarsService {
         calendars(limit: \$limit, offset: \$offset) {
           calendars {
             id
+            user
             isSelected
             isPrimary
             source
+            providerCalendarId
+            email
             metadata {
               title
               description
               color
               timeZone
+              defaultReminders {
+                method
+                minutes
+              }
+            }
+            preferences {
+              category
+              color
+              importSettings {
+                importAll
+                importSubject
+                importBody
+                importConferenceInfo
+                importOrganizer
+                importRecipients
+              }
+            }
+            sync {
+              etag
+              syncToken
+              lastSyncedAt
+              expiration
             }
           }
           totalCount
