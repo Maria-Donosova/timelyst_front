@@ -40,18 +40,53 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
     _selectedCalendars = List.from(widget.initiallySelectedCalendars);
     print('[CalendarSelection] Initially selected: ${_selectedCalendars.length} calendars');
 
-    // Use provided services or get from context
-    try {
-      _authService = widget.authService ?? Provider.of<AuthService>(context, listen: false);
-      _calendarProvider = widget.calendarProvider ?? Provider.of<CalendarProvider>(context, listen: false);
-      print('[CalendarSelection] Successfully got AuthService and CalendarProvider');
-    } catch (e) {
-      print('[CalendarSelection] ERROR getting providers: $e');
+    // Try to get services from widget parameters first, then from context
+    bool hasAuthService = false;
+    bool hasCalendarProvider = false;
+
+    if (widget.authService != null) {
+      _authService = widget.authService!;
+      hasAuthService = true;
+      print('[CalendarSelection] Using AuthService from widget parameter');
+    }
+
+    if (widget.calendarProvider != null) {
+      _calendarProvider = widget.calendarProvider!;
+      hasCalendarProvider = true;
+      print('[CalendarSelection] Using CalendarProvider from widget parameter');
+    }
+
+    // Try to get from context if not provided
+    if (!hasAuthService) {
+      try {
+        _authService = Provider.of<AuthService>(context, listen: false);
+        hasAuthService = true;
+        print('[CalendarSelection] Got AuthService from context');
+      } catch (e) {
+        print('[CalendarSelection] ERROR: Could not get AuthService: $e');
+      }
+    }
+
+    if (!hasCalendarProvider) {
+      try {
+        _calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+        hasCalendarProvider = true;
+        print('[CalendarSelection] Got CalendarProvider from context');
+      } catch (e) {
+        print('[CalendarSelection] ERROR: Could not get CalendarProvider: $e');
+      }
+    }
+
+    // Check if we have all required services
+    if (!hasAuthService || !hasCalendarProvider) {
+      print('[CalendarSelection] ERROR: Missing required services - Auth: $hasAuthService, Calendar: $hasCalendarProvider');
       setState(() {
-        _errorMessage = 'Failed to initialize: Missing required services. Please try again.';
+        _errorMessage = 'Failed to initialize: Missing required services. Please ensure you are logged in and try again.';
       });
       return;
     }
+
+    print('[CalendarSelection] Successfully initialized with all required services');
 
     // Use provided calendars or fetch from provider
     if (widget.calendars != null && widget.calendars!.isNotEmpty) {
@@ -389,11 +424,25 @@ Future<List<Calendar>?> showCalendarSelectionDialog(
 }) async {
   print('[CalendarSelection] showCalendarSelectionDialog called with ${selectedCalendars.length} selected calendars');
 
-  // Get providers from the current context before navigation
-  final authService = Provider.of<AuthService>(context, listen: false);
-  final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+  // Try to get providers from the current context before navigation
+  AuthService? authService;
+  CalendarProvider? calendarProvider;
 
-  print('[CalendarSelection] Got providers - AuthService: ${authService != null}, CalendarProvider: ${calendarProvider != null}');
+  try {
+    authService = Provider.of<AuthService>(context, listen: false);
+    print('[CalendarSelection] Got AuthService from context');
+  } catch (e) {
+    print('[CalendarSelection] WARNING: Could not get AuthService from context: $e');
+  }
+
+  try {
+    calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+    print('[CalendarSelection] Got CalendarProvider from context');
+  } catch (e) {
+    print('[CalendarSelection] WARNING: Could not get CalendarProvider from context: $e');
+  }
+
+  print('[CalendarSelection] Providers - AuthService: ${authService != null}, CalendarProvider: ${calendarProvider != null}');
 
   return await Navigator.of(context).push<List<Calendar>>(
     MaterialPageRoute(
