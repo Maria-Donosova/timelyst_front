@@ -427,6 +427,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
     final groupedCalendars = <String, List<Calendar>>{};
     for (final calendar in _calendars) {
       final category = calendar.preferences.category ?? 'Other';
+      print('[CalendarSelection] Calendar "${calendar.metadata.title}" has category: ${calendar.preferences.category} (using: $category)');
       groupedCalendars.putIfAbsent(category, () => []).add(calendar);
     }
 
