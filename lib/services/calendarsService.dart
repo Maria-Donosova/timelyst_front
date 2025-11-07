@@ -21,39 +21,17 @@ class CalendarsService {
         calendars(limit: \$limit, offset: \$offset) {
           calendars {
             id
-            user
             isSelected
             isPrimary
             source
-            providerCalendarId
-            email
             metadata {
               title
               description
               color
               timeZone
-              defaultReminders {
-                method
-                minutes
-              }
             }
             preferences {
               category
-              color
-              importSettings {
-                importAll
-                importSubject
-                importBody
-                importConferenceInfo
-                importOrganizer
-                importRecipients
-              }
-            }
-            sync {
-              etag
-              syncToken
-              lastSyncedAt
-              expiration
             }
           }
           totalCount
@@ -80,6 +58,8 @@ class CalendarsService {
 
         if (data['errors'] != null && data['errors'].isNotEmpty) {
           final errors = data['errors'];
+          print('❌ [CalendarsService] GraphQL Errors: ${errors.map((e) => e['message']).join(", ")}');
+          print('❌ [CalendarsService] Full error details: $errors');
           //logger.e('Failed to fetch calendars: ${errors.map((e) => e['message']).join(", ")}');
           throw CalendarServiceException(
             'Failed to fetch calendars',
@@ -90,6 +70,7 @@ class CalendarsService {
         final responseData = data['data']?['calendars'];
         if (responseData == null) {
           print('❌ [CalendarsService] "calendars" key not found in data object.');
+          print('❌ [CalendarsService] Full response: ${response.body}');
           return PaginatedCalendars(calendars: [], totalCount: 0, hasMore: false);
         }
 
