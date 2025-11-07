@@ -185,6 +185,7 @@ class CalendarsService {
           description
           timeZone
           isPrimary
+          isSelected
           source
           color
           createdAt
@@ -249,6 +250,7 @@ class CalendarsService {
           description
           timeZone
           isPrimary
+          isSelected
           source
           color
           createdAt
@@ -432,6 +434,7 @@ class CalendarInput {
   final bool isPrimary;
   final String source;
   final String color;
+  final bool? isSelected; // Optional field for updating selection state
 
   CalendarInput({
     required this.title,
@@ -440,10 +443,11 @@ class CalendarInput {
     required this.isPrimary,
     required this.source,
     required this.color,
+    this.isSelected, // Optional - only include when updating selection
   });
 
   Map<String, dynamic> toJson() {
-    return {
+    final json = {
       'title': title,
       'description': description,
       'timeZone': timeZone,
@@ -451,6 +455,13 @@ class CalendarInput {
       'source': source,
       'color': color,
     };
+
+    // Only include isSelected if it's explicitly set
+    if (isSelected != null) {
+      json['isSelected'] = isSelected;
+    }
+
+    return json;
   }
 }
 
