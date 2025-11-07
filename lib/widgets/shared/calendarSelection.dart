@@ -86,7 +86,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
       return;
     }
 
-    print('[CalendarSelection] Successfully got CalendarProvider');
+    print('[CalendarSelection] Successfully got CalendarProvider (has ${_calendarProvider.calendars.length} calendars loaded)');
 
     // Use provided calendars or fetch from provider
     if (widget.calendars != null && widget.calendars!.isNotEmpty) {
@@ -97,29 +97,24 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
       print('[CalendarSelection] Using existing calendars from CalendarProvider: ${_calendarProvider.calendars.length}');
       _calendars = _calendarProvider.calendars;
     } else {
-      // Need to load calendars - check if we have AuthService
-      if (!hasAuthService) {
-        print('[CalendarSelection] ERROR: Need to load calendars but AuthService not available');
-        setState(() {
-          _errorMessage = 'Failed to initialize: Authentication service not available. Please ensure you are logged in and try again.';
-        });
-        return;
-      }
-      print('[CalendarSelection] No calendars available, will load from provider');
+      // Need to load calendars - CalendarProvider has its own AuthService internally
+      // so we don't need AuthService here!
+      print('[CalendarSelection] No calendars loaded yet, will trigger CalendarProvider to load them');
       // Use post-frame callback to avoid calling setState during build
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _loadCalendars();
+        _loadCalendarsFromProvider();
       });
     }
   }
 
-  /// Fetches the list of calendars from the CalendarProvider.
-  Future<void> _loadCalendars() async {
-    print('[CalendarSelection] _loadCalendars - Starting');
-    print('[CalendarSelection] Provider already has ${_calendarProvider.calendars.length} calendars');
+  /// Fetches the list of calendars by telling CalendarProvider to load them.
+  /// CalendarProvider has its own AuthService internally, so we don't need it here.
+  Future<void> _loadCalendarsFromProvider() async {
+    print('[CalendarSelection] _loadCalendarsFromProvider - Starting');
+    print('[CalendarSelection] Provider currently has ${_calendarProvider.calendars.length} calendars');
 
     if (_calendarProvider.calendars.isNotEmpty) {
-      print('[CalendarSelection] Using existing calendars from provider');
+      print('[CalendarSelection] Calendars appeared while we were waiting, using them');
       setState(() {
         _calendars = _calendarProvider.calendars;
       });
@@ -133,24 +128,12 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
     });
 
     try {
-      print('[CalendarSelection] Getting userId from AuthService');
-      final userId = await _authService.getUserId();
-      print('[CalendarSelection] UserId: $userId');
+      // CalendarProvider has its own AuthService and can get userId internally
+      // Just trigger a refresh/load on the CalendarProvider
+      print('[CalendarSelection] Calling CalendarProvider.refreshCalendars()');
+      await _calendarProvider.refreshCalendars();
 
-      if (userId == null) {
-        print('[CalendarSelection] ERROR: User ID is null');
-        setState(() {
-          _errorMessage = 'User ID not available. Please log in.';
-          _isLoading = false;
-        });
-        return;
-      }
-
-      print('[CalendarSelection] Initializing calendar provider with userId: $userId');
-      // Initialize the calendar provider with userId if not already done
-      await _calendarProvider.initialize(userId);
-
-      print('[CalendarSelection] Calendar provider initialized. Calendars count: ${_calendarProvider.calendars.length}');
+      print('[CalendarSelection] CalendarProvider refresh complete. Calendars count: ${_calendarProvider.calendars.length}');
 
       if (!mounted) {
         print('[CalendarSelection] Widget no longer mounted, aborting');
@@ -373,7 +356,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: _loadCalendars,
+                onPressed: _loadCalendarsFromProvider,
                 child: const Text('Retry'),
               ),
             ],
