@@ -352,3 +352,5 @@ Future<List<Calendar>?> showCalendarSelectionDialog(
     ),
   );
 }
+
+class _selectedCalendars {}

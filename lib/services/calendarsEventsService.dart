@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 
 import '../../config/envVarConfig.dart';
 import '../../models/customApp.dart';
@@ -1148,59 +1149,112 @@ class CalendarsEventsService {
     }
   }
 
+  // Note: Event-calendar associations are managed through the event's user_calendars field
+  // in the TimeEvent and DayEvent models. Update operations handle calendar associations
+  // via the updateTimeEvent and updateDayEvent methods above.
+
+  /// Fetches event-calendar associations from the backend.
+  static Future<Map<String, List<String>>> fetchEventCalendarAssociations(
+      String token) async {
+    final String query = '''
+      query GetEventCalendarAssociations {
+        eventCalendarAssociations {
+          eventId
+          calendarIds
+        }
+      }
+    ''';
+
+    final response = await http.post(
+      Uri.parse(Config.backendGraphqlURL),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'query': query,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      // Check for GraphQL errors
+      if (data['errors'] != null && data['errors'].length > 0) {
+        final errors = data['errors'];
+        print(
+            'Fetching event-calendar associations failed with errors: $errors');
+        throw Exception(
+            'Fetching event-calendar associations failed: ${errors.map((e) => e['message']).join(", ")}');
+      }
+
+      // Extract the associations from the response
+      final List<dynamic> associationsJson =
+          data['data']['eventCalendarAssociations'] ?? [];
+
+      // Convert to Map<String, List<String>>
+      final Map<String, List<String>> associations = {};
+      for (final association in associationsJson) {
+        final eventId = association['eventId'] as String;
+        final calendarIds = List<String>.from(association['calendarIds'] ?? []);
+        associations[eventId] = calendarIds;
+      }
+
+      return associations;
+    } else {
+      throw HttpException(
+          'Failed to fetch event-calendar associations: ${response.statusCode}');
+    }
+  }
+
+  /// Updates event-calendar associations for a given event.
+  static Future<void> updateEventCalendarAssociations(
+      String token, String eventId, List<String> calendarIds) async {
+    final String mutation = '''
+      mutation UpdateEventCalendarAssociations(\$eventId: String!, \$calendarIds: [String!]!) {
+        updateEventCalendarAssociations(eventId: \$eventId, calendarIds: \$calendarIds) {
+          success
+          message
+        }
+      }
+    ''';
+
+    final response = await http.post(
+      Uri.parse(Config.backendGraphqlURL),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'query': mutation,
+        'variables': {
+          'eventId': eventId,
+          'calendarIds': calendarIds,
+        },
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      // Check for GraphQL errors
+      if (data['errors'] != null && data['errors'].length > 0) {
+        final errors = data['errors'];
+        print(
+            'Updating event-calendar associations failed with errors: $errors');
+        throw Exception(
+            'Updating event-calendar associations failed: ${errors.map((e) => e['message']).join(", ")}');
+      }
+
+      // Check if the update was successful
+      final result = data['data']['updateEventCalendarAssociations'];
+      if (result == null || !result['success']) {
+        throw Exception(result?['message'] ??
+            'Failed to update event-calendar associations');
+      }
+    } else {
+      throw HttpException(
+          'Failed to update event-calendar associations: ${response.statusCode}');
+    }
+  }
 }
-
-// Note: Event-calendar associations are managed through the event's user_calendars field
-// in the TimeEvent and DayEvent models. Update operations handle calendar associations
-// via the updateTimeEvent and updateDayEvent methods above.
-
-// import 'dart:convert';
-// import 'dart:io';
-// import 'package:http/http.dart' as http;
-// import '../config/envVarConfig.dart';
-
-// /// Service for managing event-calendar associations, agnostic of calendar provider.
-// class CalendarsEventsService {
-//   static String get _baseUrl => Config.backendFetchGoogleCalendars;
-
-//   /// Fetches event-calendar associations from the backend.
-//   static Future<Map<String, List<String>>> fetchEventCalendarAssociations(String token) async {
-//     final headers = _buildHeaders(token);
-//     final response = await http.get(
-//       Uri.parse('$_baseUrl/event-calendars'),
-//       headers: headers,
-//     );
-//     if (response.statusCode == 200) {
-//       final decoded = json.decode(response.body);
-//       // Expecting {eventId: [calendarId1, ...]}
-//       if (decoded is Map<String, dynamic>) {
-//         return decoded.map((key, value) => MapEntry(key, List<String>.from(value)));
-//       } else {
-//         throw Exception('Malformed response for event-calendar associations');
-//       }
-//     } else {
-//       throw HttpException('Failed to fetch event-calendar associations: ${response.statusCode}');
-//     }
-//   }
-
-//   /// Updates event-calendar associations for a given event.
-//   static Future<void> updateEventCalendarAssociations(String token, String eventId, List<String> calendarIds) async {
-//     final headers = _buildHeaders(token);
-//     final body = json.encode({'eventId': eventId, 'calendarIds': calendarIds});
-//     final response = await http.post(
-//       Uri.parse('$_baseUrl/event-calendars'),
-//       headers: headers,
-//       body: body,
-//     );
-//     if (response.statusCode != 200) {
-//       throw HttpException('Failed to update event-calendar associations: ${response.statusCode}');
-//     }
-//   }
-
-//   static Map<String, String> _buildHeaders(String token) => {
-//         'Content-Type': 'application/json',
-//         'Authorization': 'Bearer $token',
-//         'X-Client-Version': '1.0.0',
-//         'X-Requested-With': 'XMLHttpRequest',
-//       };
-// }
