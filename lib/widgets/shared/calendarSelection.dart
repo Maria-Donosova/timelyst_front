@@ -185,25 +185,77 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
     });
   }
 
+  /// Toggles all calendars in a category.
+  void _toggleCategory(String category, List<Calendar> calendars, bool selected) {
+    setState(() {
+      if (selected) {
+        // Add all calendars from this category that aren't already selected
+        for (final calendar in calendars) {
+          if (!_selectedCalendars.any((c) => c.id == calendar.id)) {
+            _selectedCalendars.add(calendar);
+          }
+        }
+      } else {
+        // Remove all calendars from this category
+        final calendarIds = calendars.map((c) => c.id).toSet();
+        _selectedCalendars.removeWhere((c) => calendarIds.contains(c.id));
+      }
+    });
+  }
+
+  /// Gets the selection state of a category.
+  /// Returns: null (none selected), false (some selected), true (all selected)
+  bool? _getCategorySelectionState(List<Calendar> calendars) {
+    final selectedCount = calendars.where((calendar) =>
+      _selectedCalendars.any((c) => c.id == calendar.id)
+    ).length;
+
+    if (selectedCount == 0) return false;
+    if (selectedCount == calendars.length) return true;
+    return null; // Partial selection
+  }
+
   /// Builds a UI section for a specific category of calendars.
   Widget _buildCategorySection(String category, List<Calendar> calendars) {
+    final categorySelectionState = _getCategorySelectionState(calendars);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 16, left: 16, bottom: 8),
-          child: Text(
+        // Category header with checkbox
+        CheckboxListTile(
+          title: Text(
             category.toUpperCase(),
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context)
                       .colorScheme
                       .primary
-                      .withValues(alpha: 0.7),
+                      .withValues(alpha: 0.85),
                   letterSpacing: 1.2,
                 ),
           ),
+          subtitle: Text(
+            '${calendars.length} calendar${calendars.length != 1 ? 's' : ''}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.6),
+                ),
+          ),
+          value: categorySelectionState,
+          tristate: true,
+          activeColor: Theme.of(context).primaryColor,
+          onChanged: (bool? value) {
+            // If currently all selected (true) or partially selected (null), deselect all
+            // If currently none selected (false), select all
+            final shouldSelect = categorySelectionState != true;
+            _toggleCategory(category, calendars, shouldSelect);
+          },
+          contentPadding: const EdgeInsets.only(left: 16, right: 16, top: 8),
         ),
+        // Individual calendars with indentation
         ...calendars.map((calendar) {
           final isSelected = _selectedCalendars.any((c) => c.id == calendar.id);
           final source = calendar.source.toString().split('.').last;
@@ -217,6 +269,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
               }
             },
             activeColor: Theme.of(context).primaryColor,
+            contentPadding: const EdgeInsets.only(left: 48, right: 16),
           );
         }).toList(),
         const Divider(height: 24),
