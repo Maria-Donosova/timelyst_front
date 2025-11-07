@@ -223,10 +223,16 @@ class CalendarProvider with ChangeNotifier {
     required bool isSelected,
   }) async {
     try {
+      print('[CalendarProvider] setCalendarSelection called for $calendarId, isSelected=$isSelected');
       final calendar = getCalendarById(calendarId);
-      if (calendar == null) return false;
+      if (calendar == null) {
+        print('[CalendarProvider] ❌ Calendar $calendarId not found');
+        return false;
+      }
 
-      // Create a new input with just the selection change
+      print('[CalendarProvider] Found calendar: ${calendar.metadata.title}, current isSelected=${calendar.isSelected}');
+
+      // Create a new input with the selection change
       final input = CalendarInput(
         title: calendar.metadata.title,
         timeZone: calendar.metadata.timeZone ?? 'UTC',
@@ -234,15 +240,24 @@ class CalendarProvider with ChangeNotifier {
         source: calendar.source.name,
         color: '#${calendar.metadata.color.toARGB32().toRadixString(16)}',
         description: calendar.metadata.description,
+        isSelected: isSelected, // Include the isSelected field
       );
 
+      print('[CalendarProvider] Calling updateCalendar with input: ${input.toJson()}');
       final updatedCalendar = await updateCalendar(
         calendarId: calendarId,
         input: input,
       );
 
-      return updatedCalendar != null;
+      if (updatedCalendar != null) {
+        print('[CalendarProvider] ✅ Calendar updated successfully, new isSelected=${updatedCalendar.isSelected}');
+        return true;
+      } else {
+        print('[CalendarProvider] ❌ updateCalendar returned null');
+        return false;
+      }
     } catch (e) {
+      print('[CalendarProvider] ❌ Exception in setCalendarSelection: $e');
       _errorMessage = 'Failed to update calendar selection: ${e.toString()}';
       return false;
     }
