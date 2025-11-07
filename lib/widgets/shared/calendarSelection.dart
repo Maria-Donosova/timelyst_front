@@ -26,9 +26,11 @@ class CalendarSelectionScreen extends StatefulWidget {
 
 class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
   late final List<Calendar> _selectedCalendars;
+  late final Set<String> _originalSelectedIds; // Track original selection state
   late CalendarProvider _calendarProvider;
   late AuthService _authService;
   bool _isLoading = false;
+  bool _isSaving = false;
   String _errorMessage = '';
   List<Calendar> _calendars = [];
 
@@ -38,6 +40,8 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
     print('[CalendarSelection] initState - Starting initialization');
     // Initialize the list of selected calendars with the initial values.
     _selectedCalendars = List.from(widget.initiallySelectedCalendars);
+    // Track original selection state for comparison during save
+    _originalSelectedIds = widget.initiallySelectedCalendars.map((c) => c.id).toSet();
     print('[CalendarSelection] Initially selected: ${_selectedCalendars.length} calendars');
 
     // Try to get services from widget parameters first, then from context
@@ -215,6 +219,135 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
     return null; // Partial selection
   }
 
+  /// Saves the current calendar selections to the database.
+  /// Updates all calendars whose selection state has changed.
+  Future<void> _saveCalendarSelections() async {
+    print('[CalendarSelection] _saveCalendarSelections - Starting save');
+
+    setState(() {
+      _isSaving = true;
+      _errorMessage = '';
+    });
+
+    try {
+      // Get current selected IDs
+      final currentSelectedIds = _selectedCalendars.map((c) => c.id).toSet();
+
+      // Find calendars that need to be updated (selection state changed)
+      final calendarsToUpdate = <String, bool>{};
+
+      // Check all calendars for changes
+      for (final calendar in _calendars) {
+        final wasSelected = _originalSelectedIds.contains(calendar.id);
+        final isNowSelected = currentSelectedIds.contains(calendar.id);
+
+        if (wasSelected != isNowSelected) {
+          calendarsToUpdate[calendar.id] = isNowSelected;
+          print('[CalendarSelection] Calendar "${calendar.metadata.title}" selection changed: $wasSelected -> $isNowSelected');
+        }
+      }
+
+      if (calendarsToUpdate.isEmpty) {
+        print('[CalendarSelection] No changes to save');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No changes to save'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+        return;
+      }
+
+      print('[CalendarSelection] Updating ${calendarsToUpdate.length} calendars');
+
+      // Update each calendar's selection state
+      int successCount = 0;
+      int failureCount = 0;
+
+      for (final entry in calendarsToUpdate.entries) {
+        final calendarId = entry.key;
+        final isSelected = entry.value;
+
+        try {
+          final success = await _calendarProvider.setCalendarSelection(
+            calendarId: calendarId,
+            isSelected: isSelected,
+          );
+
+          if (success) {
+            successCount++;
+          } else {
+            failureCount++;
+            print('[CalendarSelection] Failed to update calendar $calendarId');
+          }
+        } catch (e) {
+          failureCount++;
+          print('[CalendarSelection] Error updating calendar $calendarId: $e');
+        }
+      }
+
+      print('[CalendarSelection] Save complete. Success: $successCount, Failures: $failureCount');
+
+      if (!mounted) return;
+
+      if (failureCount == 0) {
+        // All updates successful
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully saved $successCount calendar selection${successCount != 1 ? 's' : ''}'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+
+        // Update original selection state to current state
+        setState(() {
+          _originalSelectedIds.clear();
+          _originalSelectedIds.addAll(currentSelectedIds);
+        });
+
+        // Refresh the calendar list from provider to ensure UI is in sync
+        await _calendarProvider.refreshCalendars();
+        if (mounted) {
+          setState(() {
+            _calendars = _calendarProvider.calendars;
+          });
+        }
+      } else {
+        // Some updates failed
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Saved $successCount calendar${successCount != 1 ? 's' : ''}, but $failureCount failed'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      print('[CalendarSelection] ERROR during save: $e');
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to save calendar selections: ${e.toString()}';
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_errorMessage),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
+  }
+
   /// Builds a UI section for a specific category of calendars.
   Widget _buildCategorySection(String category, List<Calendar> calendars) {
     final categorySelectionState = _getCategorySelectionState(calendars);
@@ -363,6 +496,28 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
           ],
         ),
         actions: [
+          // Save button
+          TextButton.icon(
+            onPressed: _isSaving ? null : _saveCalendarSelections,
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.primary,
+            ),
+            icon: _isSaving
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  )
+                : const Icon(Icons.save, size: 20),
+            label: Text(_isSaving ? 'Saving...' : 'Save'),
+          ),
+          const SizedBox(width: 8),
+          // Done button
           TextButton(
             onPressed: () => Navigator.of(context).pop(_selectedCalendars),
             style: TextButton.styleFrom(
