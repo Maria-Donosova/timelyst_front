@@ -300,6 +300,75 @@ class CalendarsService {
     }
   }
 
+  static Future<Calendar> updateCalendarSelection({
+    required String calendarId,
+    required String authToken,
+    required UpdateCalendarInput input,
+  }) async {
+    print('[CalendarsService] updateCalendarSelection - calendarId: $calendarId, isSelected: ${input.isSelected}');
+
+    final String mutation = '''
+      mutation UpdateCalendarSelection(\$id: ID!, \$input: UpdateCalendarInput!) {
+        updateCalendarSelection(id: \$id, input: \$input) {
+          id
+          isSelected
+          isPrimary
+          source
+          metadata {
+            title
+            description
+            timeZone
+            color
+          }
+          preferences {
+            category
+          }
+        }
+      }
+    ''';
+
+    try {
+      final response = await _apiClient.post(
+        Config.backendGraphqlURL,
+        body: {
+          'query': mutation,
+          'variables': {
+            'id': calendarId,
+            'input': input.toJson(),
+          },
+        },
+        token: authToken,
+      );
+
+      print('[CalendarsService] Response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data['errors'] != null && data['errors'].isNotEmpty) {
+          final errors = data['errors'];
+          print('[CalendarsService] GraphQL errors: ${errors.map((e) => e['message']).join(", ")}');
+          throw CalendarServiceException(
+            'Failed to update calendar selection',
+            errors: errors,
+          );
+        }
+
+        print('[CalendarsService] Successfully updated calendar selection');
+        return Calendar.fromJson(data['data']['updateCalendarSelection']);
+      } else {
+        print('[CalendarsService] HTTP error: ${response.statusCode}');
+        throw CalendarServiceException(
+          'Failed to update calendar selection: HTTP ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      print('[CalendarsService] Exception: $e');
+      rethrow;
+    }
+  }
+
   static Future<bool> deleteCalendar({
     required String calendarId,
     required String authToken,
@@ -462,6 +531,20 @@ class CalendarInput {
     }
 
     return json;
+  }
+}
+
+class UpdateCalendarInput {
+  final bool isSelected;
+
+  UpdateCalendarInput({
+    required this.isSelected,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'isSelected': isSelected,
+    };
   }
 }
 
