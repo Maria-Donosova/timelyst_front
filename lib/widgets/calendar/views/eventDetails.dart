@@ -68,6 +68,7 @@ class EventDetailsScreenState extends State<EventDetails> {
   late TextEditingController _eventParticipants;
   late TextEditingController
       _eventCalendar; // Changed to non-nullable and initialized in initState
+  late TextEditingController _eventConferenceDetails; // NEW: Conference details
 
   final _appFormKey = GlobalKey<FormState>();
   bool isChecked = false;
@@ -81,6 +82,7 @@ class EventDetailsScreenState extends State<EventDetails> {
 
   bool _allDay = false;
   bool _isRecurring = false;
+  bool _hasReminder = false; // NEW: Reminder flag
   String _recurrence = 'None';
   List<String> _selectedDays = [];
   String _selectedCategory = '';
@@ -111,6 +113,7 @@ class EventDetailsScreenState extends State<EventDetails> {
         TextEditingController(text: widget._eventBody);
     _selectedCategory = widget._catTitle ?? 'Misc';
     _eventParticipants = TextEditingController(text: widget._participants);
+    _eventConferenceDetails = TextEditingController(text: ''); // NEW: Initialize conference details
     _allDay = widget._allDay ?? false;
     _selectedCalendarId = widget._calendarId;
     _eventCalendar = TextEditingController();
@@ -145,6 +148,7 @@ class EventDetailsScreenState extends State<EventDetails> {
     _eventDescriptionController.dispose();
     _eventLocation.dispose();
     _eventParticipants.dispose();
+    _eventConferenceDetails.dispose(); // NEW: Dispose conference details
     _eventCalendar.dispose(); // Now non-nullable, direct disposal
     super.dispose();
   }
@@ -437,24 +441,43 @@ class EventDetailsScreenState extends State<EventDetails> {
           endTime.minute,
         );
 
+        // Get device timezone
+        final timeZone = DateTime.now().timeZoneName;
+
         // Prepare event data (common fields for both day and time events)
         final Map<String, dynamic> eventData = {
           'user_id': currentUserId,
           'user_calendars': _selectedCalendars.isNotEmpty
               ? _selectedCalendars.first.id
               : null,
+          'source_calendar': _selectedCalendars.isNotEmpty
+              ? _selectedCalendars.first.id
+              : null, // NEW: Source calendar mapping
           'createdBy': currentUserId,
           'event_organizer': currentUserId,
           'event_title': _eventTitleController.text,
           'is_AllDay': _allDay,
           'recurrenceRule': _recurrence != 'None' ? _buildRecurrenceRule() : '',
+          'recurrenceId': '', // NEW: Recurrence ID for instances
+          'exceptionDates': [], // NEW: Exception dates for recurring events
           'category': _selectedCategory,
           'event_attendees': _eventParticipants.text,
           'event_body': _eventDescriptionController.text,
           'event_location': _eventLocation.text,
+          'event_ConferenceDetails': _eventConferenceDetails.text, // NEW: Conference details
+          'reminder': _hasReminder, // NEW: Reminder flag
+          'holiday': false, // NEW: Holiday flag (default false)
           'start': start.toIso8601String(),
           'end': end.toIso8601String(),
         };
+
+        // Add timeZone for TimeEvents only (not for DayEvents)
+        if (!_allDay) {
+          eventData['timeZone'] = timeZone; // NEW: Timezone for time events
+          eventData['time_EventInstance'] = []; // NEW: Time event instances
+        } else {
+          eventData['day_EventInstance'] = ''; // NEW: Day event instance
+        }
 
         // Determine if this is an update or create operation
         final isUpdate = widget._id != null && widget._id!.isNotEmpty;
@@ -1007,6 +1030,49 @@ class EventDetailsScreenState extends State<EventDetails> {
                             }
                             return null;
                           }),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: SizedBox(
+                      width: width * 0.8,
+                      child: TextFormField(
+                        autocorrect: true,
+                        controller: _eventConferenceDetails,
+                        style: Theme.of(context).textTheme.displaySmall,
+                        maxLines: null,
+                        decoration: const InputDecoration(
+                          labelText: 'Conference Details (Zoom, Google Meet, etc.)',
+                          labelStyle: TextStyle(fontSize: 14),
+                          border: InputBorder.none,
+                          hintText: 'https://zoom.us/j/...',
+                          errorStyle: TextStyle(color: Colors.redAccent),
+                        ),
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.url,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: SizedBox(
+                      width: width * 0.8,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: _hasReminder,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _hasReminder = value ?? false;
+                              });
+                            },
+                          ),
+                          Text(
+                            'Set Reminder',
+                            style: Theme.of(context).textTheme.displaySmall,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Padding(
