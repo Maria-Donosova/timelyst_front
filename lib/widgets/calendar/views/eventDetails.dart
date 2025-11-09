@@ -163,7 +163,7 @@ class EventDetailsScreenState extends State<EventDetails> {
 
     if (selectedDate != null) {
       setState(() {
-        _eventDateController.text = DateFormat('MMMM d').format(selectedDate);
+        _eventDateController.text = DateFormat('MMMM d', 'en_US').format(selectedDate);
       });
     }
   }
@@ -370,7 +370,7 @@ class EventDetailsScreenState extends State<EventDetails> {
         final dateStr = _eventDateController.text;
         DateTime? eventDate;
         try {
-          eventDate = DateFormat('MMMM d').parse(dateStr);
+          eventDate = DateFormat('MMMM d', 'en_US').parse(dateStr);
           if (eventDate.year != DateTime.now().year) {
             eventDate =
                 DateTime(DateTime.now().year, eventDate.month, eventDate.day);
@@ -379,7 +379,7 @@ class EventDetailsScreenState extends State<EventDetails> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  'Invalid date format. Please use format like "April 26"'),
+                  'Invalid date format. Please use format like "November 6"'),
               behavior: SnackBarBehavior.floating,
             ),
           );
