@@ -304,7 +304,7 @@ class _CalendarWState extends State<CalendarW> {
 
   void _calendarTapped(CalendarTapDetails details) {
     if (details.targetElement == CalendarElement.calendarCell) {
-      _cellDateText = DateFormat('MMMM dd').format(details.date!).toString();
+      _cellDateText = DateFormat('MMMM d', 'en_US').format(details.date!).toString();
       _startTimeText = DateFormat('jm').format(details.date!).toString();
       _endTimeText = DateFormat('jm')
           .format(details.date!.add(const Duration(minutes: 30)))
@@ -314,7 +314,7 @@ class _CalendarWState extends State<CalendarW> {
       if (details.appointments != null && details.appointments!.isNotEmpty) {
         final CustomAppointment _customAppointment = details.appointments![0];
 
-        _dateText = DateFormat('MMM dd')
+        _dateText = DateFormat('MMMM d', 'en_US')
             .format(_customAppointment.startTime)
             .toString();
 
