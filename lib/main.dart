@@ -39,8 +39,13 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider<AuthProvider, CalendarProvider>(
           create: (_) => CalendarProvider(authService: authService),
-          update: (_, auth, previous) =>
-              previous!..updateAuth(auth.authService),
+          update: (_, auth, previous) {
+            // Set up the Google auth error callback to trigger re-auth notification
+            previous!.setGoogleAuthErrorCallback(() {
+              auth.setGoogleReAuthRequired(true);
+            });
+            return previous..updateAuth(auth.authService);
+          },
         ),
       ],
       child: MaterialApp(

@@ -7,6 +7,17 @@ import 'package:timelyst_flutter/services/authService.dart';
 import '../../utils/apiClient.dart';
 import '../../models/calendars.dart';
 
+/// Custom exception for Google Calendar operations with status code
+class GoogleCalendarException implements Exception {
+  final String message;
+  final int? statusCode;
+
+  GoogleCalendarException(this.message, {this.statusCode});
+
+  @override
+  String toString() => message;
+}
+
 class GoogleCalendarService {
   late final ApiClient _apiClient;
   late final AuthService _authService;
@@ -47,15 +58,26 @@ class GoogleCalendarService {
         if (decoded['success'] == true && decoded['data'] != null) {
           return CalendarDelta.fromJson(decoded['data']);
         } else {
-          throw Exception(
-              decoded['message'] ?? 'Failed to fetch calendar delta');
+          throw GoogleCalendarException(
+            decoded['message'] ?? 'Failed to fetch calendar delta',
+            statusCode: response.statusCode,
+          );
         }
+      } else if (response.statusCode == 401 || response.statusCode == 403) {
+        throw GoogleCalendarException(
+          response.statusCode == 401
+              ? 'Google Calendar authentication expired'
+              : 'Google Calendar permission denied',
+          statusCode: response.statusCode,
+        );
       } else {
-        throw HttpException(
+        throw GoogleCalendarException(
           'Failed to load calendar changes: ${response.statusCode}',
+          statusCode: response.statusCode,
         );
       }
     } catch (e) {
+      if (e is GoogleCalendarException) rethrow;
       throw _handleError('fetching calendar changes', e);
     }
   }
@@ -168,9 +190,30 @@ class GoogleCalendarService {
 
   Exception _handleError(String operation, dynamic error) {
     if (error is http.ClientException) {
-      return Exception('Network error while $operation: ${error.message}');
+      return GoogleCalendarException(
+        'Network error while $operation: ${error.message}',
+        statusCode: null,
+      );
     }
-    return Exception('Error $operation: ${error.toString()}');
+    if (error is HttpException) {
+      // Extract status code from HttpException message
+      final message = error.message;
+      if (message.contains('401')) {
+        return GoogleCalendarException(
+          'Authentication expired while $operation',
+          statusCode: 401,
+        );
+      } else if (message.contains('403')) {
+        return GoogleCalendarException(
+          'Permission denied while $operation',
+          statusCode: 403,
+        );
+      }
+    }
+    return GoogleCalendarException(
+      'Error $operation: ${error.toString()}',
+      statusCode: null,
+    );
   }
 
   Future<CalendarPage> fetchCalendarsPage({
@@ -202,11 +245,22 @@ class GoogleCalendarService {
         } else {
           final message =
               decoded['message'] ?? 'Failed to fetch calendars page';
-          throw Exception(message is String ? message : json.encode(message));
+          throw GoogleCalendarException(
+            message is String ? message : json.encode(message),
+            statusCode: response.statusCode,
+          );
         }
+      } else if (response.statusCode == 401 || response.statusCode == 403) {
+        throw GoogleCalendarException(
+          response.statusCode == 401
+              ? 'Google Calendar authentication expired'
+              : 'Google Calendar permission denied',
+          statusCode: response.statusCode,
+        );
       } else {
-        throw HttpException(
+        throw GoogleCalendarException(
           'Failed to load calendars page: ${response.statusCode}',
+          statusCode: response.statusCode,
         );
       }
     } on TimeoutException catch (e) {

@@ -5,6 +5,7 @@ import 'package:timelyst_flutter/models/calendars.dart';
 
 import './../services/calendarsService.dart';
 import './../services/authService.dart';
+import './../services/googleIntegration/googleCalendarService.dart';
 
 class CalendarProvider with ChangeNotifier {
   // State management
@@ -19,12 +20,22 @@ class CalendarProvider with ChangeNotifier {
   AuthService _authService;
   String? _userId;
 
+  // Callback for triggering Google re-authentication
+  Function()? _onGoogleAuthError;
+
   // Cache for calendar events
   final Map<String, List<CalendarEvent>> _eventsCache = {};
   final Map<String, DateTime> _lastEventFetchTime = {};
 
-  CalendarProvider({required AuthService authService})
-      : _authService = authService;
+  CalendarProvider({
+    required AuthService authService,
+    Function()? onGoogleAuthError,
+  })  : _authService = authService,
+        _onGoogleAuthError = onGoogleAuthError;
+
+  void setGoogleAuthErrorCallback(Function() callback) {
+    _onGoogleAuthError = callback;
+  }
 
   void updateAuth(AuthService authService) {
     _authService = authService;
@@ -342,10 +353,17 @@ class CalendarProvider with ChangeNotifier {
       _totalCount = result.totalCount;
       _hasMore = result.hasMore;
       _errorMessage = null;
+    } on GoogleCalendarException catch (e) {
+      _errorMessage = e.message;
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        // Trigger Google re-authentication notification
+        _onGoogleAuthError?.call();
+      }
     } on CalendarServiceException catch (e) {
       _errorMessage = e.message;
-      if (e.statusCode == 401) {
-        // Handle unauthorized error (e.g., trigger logout)
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        // Trigger Google re-authentication notification
+        _onGoogleAuthError?.call();
       }
     } catch (e) {
       _errorMessage = 'Failed to fetch calendars: ${e.toString()}';
