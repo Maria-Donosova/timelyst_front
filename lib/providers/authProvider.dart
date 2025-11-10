@@ -17,6 +17,19 @@ class AuthProvider with ChangeNotifier {
   String? _userId;
   String? get userId => _userId;
 
+  bool _googleReAuthRequired = false;
+  bool get googleReAuthRequired => _googleReAuthRequired;
+
+  void setGoogleReAuthRequired(bool required) {
+    _googleReAuthRequired = required;
+    notifyListeners();
+  }
+
+  void clearGoogleReAuthRequired() {
+    _googleReAuthRequired = false;
+    notifyListeners();
+  }
+
   Future<void> tryAutoLogin() async {
     final token = await _authService.getAuthToken();
     if (token != null) {
