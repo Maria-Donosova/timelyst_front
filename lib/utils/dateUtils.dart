@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 
 class DateTimeUtils {
   // Parse any date format (ISO string or timestamp)
+  // Always converts to local timezone to ensure proper display
   static DateTime parseAnyFormat(dynamic dateValue) {
     if (dateValue == null) return DateTime.now();
 
     try {
       // Check if it's a numeric timestamp (milliseconds since epoch)
       if (dateValue is num) {
-        return DateTime.fromMillisecondsSinceEpoch(dateValue.toInt());
+        return DateTime.fromMillisecondsSinceEpoch(dateValue.toInt()).toLocal();
       }
       if (dateValue is String && dateValue.contains(RegExp(r'^\d+$'))) {
-        return DateTime.fromMillisecondsSinceEpoch(int.parse(dateValue));
+        return DateTime.fromMillisecondsSinceEpoch(int.parse(dateValue)).toLocal();
       }
-      // Otherwise try parsing as ISO string
-      return DateTime.parse(dateValue.toString());
+      // Otherwise try parsing as ISO string and convert to local timezone
+      return DateTime.parse(dateValue.toString()).toLocal();
     } catch (e) {
       print('❌ [DateTimeUtils] Error parsing date: $e');
       return DateTime.now(); // Fallback
