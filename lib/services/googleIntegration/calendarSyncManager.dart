@@ -20,6 +20,12 @@ class CalendarSyncManager {
         calendars: calendarPage.calendars,
         syncToken: calendarPage.syncToken,
       );
+    } on GoogleCalendarException catch (e) {
+      print('CalendarSyncManager: Google auth error syncing calendars: $e');
+      return CalendarSyncResult.error(
+        e.toString(),
+        statusCode: e.statusCode,
+      );
     } catch (e) {
       print('CalendarSyncManager: ERROR syncing calendars: $e, $userId');
       return CalendarSyncResult.error(e.toString());
@@ -194,6 +200,16 @@ class CalendarSyncManager {
         syncToken: delta.newSyncToken,
         hasMoreChanges: delta.hasMoreChanges,
       );
+    } on GoogleCalendarException catch (e) {
+      if (e.statusCode == 410 || e.toString().contains('410')) {
+        // Sync token expired, fall back to full sync
+        return await _performInitialSync(userId, email);
+      }
+      // Propagate auth errors
+      return CalendarSyncResult.error(
+        e.toString(),
+        statusCode: e.statusCode,
+      );
     } catch (e) {
       if (e.toString().contains('410')) {
         // Sync token expired, fall back to full sync
@@ -235,6 +251,7 @@ class CalendarSyncResult {
   final String? syncToken;
   final bool hasMoreChanges;
   final String? error;
+  final int? statusCode;
 
   CalendarSyncResult._({
     this.calendars = const [],
@@ -243,6 +260,7 @@ class CalendarSyncResult {
     this.syncToken,
     this.hasMoreChanges = false,
     this.error,
+    this.statusCode,
   });
 
   factory CalendarSyncResult.success({
@@ -264,11 +282,12 @@ class CalendarSyncResult {
         hasMoreChanges: hasMoreChanges,
       );
 
-  factory CalendarSyncResult.error(String error) =>
-      CalendarSyncResult._(error: error);
+  factory CalendarSyncResult.error(String error, {int? statusCode}) =>
+      CalendarSyncResult._(error: error, statusCode: statusCode);
 
   bool get isSuccess => error == null;
   bool get isDelta => changes != null;
+  bool get isAuthError => statusCode == 401 || statusCode == 403;
 }
 
 class CalendarSaveResult {

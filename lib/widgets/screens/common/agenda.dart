@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/providers/eventProvider.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
+import 'package:timelyst_flutter/providers/authProvider.dart';
 import '../../shared/customAppbar.dart';
+import '../../shared/googleReauthBanner.dart';
 import '../../layout/leftPanel.dart';
 import '../../layout/rightPanel.dart';
 import '../../responsive/responsive_widgets.dart';
@@ -209,29 +211,51 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
       body: SafeArea(
         child: Stack(
           children: [
-            // Main content
-            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              !isLandscape
-                  ? Expanded(flex: 1, child: LeftPanel())
-                  : Expanded(flex: 1, child: LeftPanel()),
-              !isLandscape
-                  ? Expanded(
-                      flex: 2,
-                      child: RightPanel(),
-                    )
-                  : Expanded(
-                      flex: 2,
-                      child: RightPanel(),
-                    ),
-            ]),
+            // Main content with padding for notification banner
+            Consumer<AuthProvider>(
+              builder: (context, authProvider, _) {
+                return Padding(
+                  padding: EdgeInsets.only(
+                    top: authProvider.googleReAuthRequired ? 56.0 : 0.0,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      !isLandscape
+                          ? Expanded(flex: 1, child: LeftPanel())
+                          : Expanded(flex: 1, child: LeftPanel()),
+                      !isLandscape
+                          ? Expanded(
+                              flex: 2,
+                              child: RightPanel(),
+                            )
+                          : Expanded(
+                              flex: 2,
+                              child: RightPanel(),
+                            ),
+                    ],
+                  ),
+                );
+              },
+            ),
 
-            // Sync progress indicator
+            // Google re-authentication banner
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: GoogleReauthBanner(),
+            ),
+
+            // Sync progress indicator (below re-auth banner if present)
             if (_isSyncInProgress)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Container(
+              Consumer<AuthProvider>(
+                builder: (context, authProvider, _) {
+                  return Positioned(
+                    top: authProvider.googleReAuthRequired ? 56.0 : 0.0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.blue[100],
@@ -269,9 +293,10 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
                             fontSize: 12,
                           ),
                         ),
-                    ],
-                  ),
-                ),
+                      ],
+                    ),
+                  );
+                },
               ),
           ],
         ),
