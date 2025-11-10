@@ -144,7 +144,7 @@ class Calendar {
         etag: json['etag'],
         syncToken: json['syncToken'],
         lastSyncedAt: json['lastSyncedAt'] != null
-            ? DateTime.parse(json['lastSyncedAt'])
+            ? DateTime.parse(json['lastSyncedAt']).toLocal()
             : null,
       ),
     );
@@ -390,10 +390,10 @@ class CalendarSyncInfo {
       etag: json['etag'],
       syncToken: json['syncToken'],
       lastSyncedAt: json['lastSyncedAt'] != null
-          ? DateTime.parse(json['lastSyncedAt'])
+          ? DateTime.parse(json['lastSyncedAt']).toLocal()
           : null,
       expiration: json['expiration'] != null
-          ? DateTime.parse(json['expiration'])
+          ? DateTime.parse(json['expiration']).toLocal()
           : null,
     );
   }

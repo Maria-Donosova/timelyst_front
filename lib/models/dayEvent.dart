@@ -186,10 +186,11 @@ class DayEvent {
   }
 
   // Add these methods to parse date times
+  // Always convert to local timezone for consistent display
 
   DateTime getStartDateTime() {
     try {
-      return DateTime.parse(start);
+      return DateTime.parse(start).toLocal();
     } catch (e) {
       return DateTime.now(); // Fallback
     }
@@ -197,7 +198,7 @@ class DayEvent {
 
   DateTime getEndDateTime() {
     try {
-      return DateTime.parse(end);
+      return DateTime.parse(end).toLocal();
     } catch (e) {
       return DateTime.now(); // Fallback
     }

@@ -420,8 +420,8 @@ class CalendarEvent {
     return CalendarEvent(
       id: json['id'],
       title: json['title'],
-      start: DateTime.parse(json['start']),
-      end: DateTime.parse(json['end']),
+      start: DateTime.parse(json['start']).toLocal(),
+      end: DateTime.parse(json['end']).toLocal(),
     );
   }
 }
