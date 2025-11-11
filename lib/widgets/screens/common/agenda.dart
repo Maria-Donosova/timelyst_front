@@ -295,7 +295,8 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
                         ),
                       ],
                     ),
-                  );
+                  ),
+                );
                 },
               ),
           ],
