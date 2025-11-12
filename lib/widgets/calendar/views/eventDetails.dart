@@ -196,6 +196,21 @@ class EventDetailsScreenState extends State<EventDetails> {
     }
   }
 
+  /// Formats DateTime to ISO8601 string without timezone conversion
+  /// This preserves the local time values as entered by the user
+  String _formatDateTimeWithoutTimezone(DateTime dateTime) {
+    final year = dateTime.year.toString().padLeft(4, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final second = dateTime.second.toString().padLeft(2, '0');
+
+    // Return ISO8601 format without timezone offset
+    // Format: YYYY-MM-DDTHH:mm:ss
+    return '$year-$month-${day}T$hour:$minute:$second';
+  }
+
   Future<void> _selectStart(BuildContext context, bool isStart) async {
     TimeOfDay initialStart = TimeOfDay.now();
 
@@ -424,7 +439,8 @@ class EventDetailsScreenState extends State<EventDetails> {
           return;
         }
 
-        // Create DateTime objects
+        // Create DateTime objects in local timezone
+        // We don't convert to UTC because we want to preserve the user's input time
         final start = DateTime(
           eventDate.year,
           eventDate.month,
@@ -467,8 +483,9 @@ class EventDetailsScreenState extends State<EventDetails> {
           'event_ConferenceDetails': _eventConferenceDetails.text, // NEW: Conference details
           'reminder': _hasReminder, // NEW: Reminder flag
           'holiday': false, // NEW: Holiday flag (default false)
-          'start': start.toIso8601String(),
-          'end': end.toIso8601String(),
+          // Format datetime without timezone conversion to preserve user's input time
+          'start': _formatDateTimeWithoutTimezone(start),
+          'end': _formatDateTimeWithoutTimezone(end),
         };
 
         // Add timeZone for TimeEvents only (not for DayEvents)
