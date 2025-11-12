@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class DateTimeUtils {
   // Parse any date format (ISO string or timestamp)
-  // Always converts to local timezone to ensure proper display
+  // Preserves local timezone to prevent unwanted conversions
   static DateTime parseAnyFormat(dynamic dateValue) {
     if (dateValue == null) return DateTime.now();
 
@@ -14,8 +14,20 @@ class DateTimeUtils {
       if (dateValue is String && dateValue.contains(RegExp(r'^\d+$'))) {
         return DateTime.fromMillisecondsSinceEpoch(int.parse(dateValue)).toLocal();
       }
-      // Otherwise try parsing as ISO string and convert to local timezone
-      return DateTime.parse(dateValue.toString()).toLocal();
+
+      // Parse as ISO string
+      final dateString = dateValue.toString();
+      final parsedDate = DateTime.parse(dateString);
+
+      // Only convert to local if the string explicitly contains UTC indicator (Z or +00:00)
+      // Otherwise, treat it as already being in local time to prevent timezone shifts
+      if (dateString.endsWith('Z') || dateString.contains('+') || dateString.contains('-')) {
+        // Has timezone info, convert to local
+        return parsedDate.toLocal();
+      } else {
+        // No timezone info, treat as local time (don't convert)
+        return parsedDate;
+      }
     } catch (e) {
       print('❌ [DateTimeUtils] Error parsing date: $e');
       return DateTime.now(); // Fallback
