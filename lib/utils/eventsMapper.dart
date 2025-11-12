@@ -10,9 +10,9 @@ class EventMapper {
     DateTime endTime;
 
     try {
-      // Parse and convert to local timezone for consistent display
-      startTime = DateTime.parse(dayEvent.start).toLocal();
-      endTime = DateTime.parse(dayEvent.end).toLocal();
+      // Parse dates preserving local timezone (no conversion to prevent time shifts)
+      startTime = DateTimeUtils.parseAnyFormat(dayEvent.start);
+      endTime = DateTimeUtils.parseAnyFormat(dayEvent.end);
 
       // Validate that dates are not too old (older than 2 years ago)
       final twoYearsAgo = DateTime.now().subtract(Duration(days: 730));
