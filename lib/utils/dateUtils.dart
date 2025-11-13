@@ -19,13 +19,21 @@ class DateTimeUtils {
       final dateString = dateValue.toString();
       final parsedDate = DateTime.parse(dateString);
 
-      // Only convert to local if the string explicitly contains UTC indicator (Z or +00:00)
-      // Otherwise, treat it as already being in local time to prevent timezone shifts
-      if (dateString.endsWith('Z') || dateString.contains('+') || dateString.contains('-')) {
-        // Has timezone info, convert to local
-        return parsedDate.toLocal();
+      // Check if the string has explicit timezone information
+      // - Ends with 'Z' (UTC marker): "2024-11-12T15:00:00Z"
+      // - Has timezone offset at end: "2024-11-12T15:00:00+05:00" or "2024-11-12T15:00:00-07:00"
+      // We need to avoid matching date separators like in "2024-11-12"
+      final hasUtcMarker = dateString.endsWith('Z');
+      final hasTimezoneOffset = RegExp(r'[+-]\d{2}:\d{2}$').hasMatch(dateString);
+
+      if (hasUtcMarker || hasTimezoneOffset) {
+        // Has timezone info, convert to local timezone for display
+        final result = parsedDate.toLocal();
+        print('🕐 [DateTimeUtils] Parsed "$dateString" → ${result.toString()} (converted to local)');
+        return result;
       } else {
-        // No timezone info, treat as local time (don't convert)
+        // No timezone info, treat as already in local timezone (don't convert)
+        print('🕐 [DateTimeUtils] Parsed "$dateString" → ${parsedDate.toString()} (no conversion)');
         return parsedDate;
       }
     } catch (e) {

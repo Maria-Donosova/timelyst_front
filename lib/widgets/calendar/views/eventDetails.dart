@@ -457,6 +457,12 @@ class EventDetailsScreenState extends State<EventDetails> {
           endTime.minute,
         );
 
+        print('💾 [EventDetails] Saving event with times:');
+        print('   Input from controller: "${_eventStartTimeController.text}" → "${_eventEndTimeController.text}"');
+        print('   Parsed to TimeOfDay: ${startTime.hour}:${startTime.minute} → ${endTime.hour}:${endTime.minute}');
+        print('   DateTime objects: ${start.toString()} → ${end.toString()}');
+        print('   Formatted for API: ${_formatDateTimeWithoutTimezone(start)} → ${_formatDateTimeWithoutTimezone(end)}');
+
         // Get device timezone
         final timeZone = DateTime.now().timeZoneName;
 

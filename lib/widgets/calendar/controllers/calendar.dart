@@ -325,6 +325,10 @@ class _CalendarWState extends State<CalendarW> {
         _endTimeText =
             DateFormat('hh:mm a').format(_customAppointment.endTime).toString();
 
+        print('📅 [Calendar] Opening existing event:');
+        print('   CustomAppointment times: ${_customAppointment.startTime} → ${_customAppointment.endTime}');
+        print('   Formatted for display: "$_startTimeText" → "$_endTimeText"');
+
         showDialog(
             context: context,
             builder: (BuildContext context) {
