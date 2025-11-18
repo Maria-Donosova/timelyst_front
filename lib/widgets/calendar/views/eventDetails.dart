@@ -6,6 +6,7 @@ import '../../../providers/calendarProvider.dart';
 import '../../../providers/eventProvider.dart';
 import '../../../providers/authProvider.dart';
 import '../../../services/eventsService.dart';
+import '../../../utils/timezoneUtils.dart';
 import '../../shared/categories.dart';
 import '../controllers/eventDeletionController.dart';
 import '../../shared/calendarSelection.dart';
@@ -196,19 +197,11 @@ class EventDetailsScreenState extends State<EventDetails> {
     }
   }
 
-  /// Formats DateTime to ISO8601 string without timezone conversion
-  /// This preserves the local time values as entered by the user
-  String _formatDateTimeWithoutTimezone(DateTime dateTime) {
-    final year = dateTime.year.toString().padLeft(4, '0');
-    final month = dateTime.month.toString().padLeft(2, '0');
-    final day = dateTime.day.toString().padLeft(2, '0');
-    final hour = dateTime.hour.toString().padLeft(2, '0');
-    final minute = dateTime.minute.toString().padLeft(2, '0');
-    final second = dateTime.second.toString().padLeft(2, '0');
-
-    // Return ISO8601 format without timezone offset
-    // Format: YYYY-MM-DDTHH:mm:ss
-    return '$year-$month-${day}T$hour:$minute:$second';
+  /// Formats DateTime to ISO8601 string WITH timezone offset
+  /// This preserves both the local time and timezone information
+  /// Example: "2024-11-18T14:30:00.000-05:00"
+  String _formatDateTimeWithTimezone(DateTime dateTime) {
+    return TimezoneUtils.formatDateTimeWithTimezone(dateTime);
   }
 
   Future<void> _selectStart(BuildContext context, bool isStart) async {
@@ -457,8 +450,8 @@ class EventDetailsScreenState extends State<EventDetails> {
           endTime.minute,
         );
 
-        // Get device timezone
-        final timeZone = DateTime.now().timeZoneName;
+        // Get device timezone as IANA timezone name (e.g., "America/New_York")
+        final deviceTimeZone = TimezoneUtils.getDeviceTimeZone();
 
         // Prepare event data (common fields for both day and time events)
         final Map<String, dynamic> eventData = {
@@ -483,16 +476,21 @@ class EventDetailsScreenState extends State<EventDetails> {
           'event_ConferenceDetails': _eventConferenceDetails.text, // NEW: Conference details
           'reminder': _hasReminder, // NEW: Reminder flag
           'holiday': false, // NEW: Holiday flag (default false)
-          // Format datetime without timezone conversion to preserve user's input time
-          'start': _formatDateTimeWithoutTimezone(start),
-          'end': _formatDateTimeWithoutTimezone(end),
+          // Format datetime WITH timezone offset to preserve timezone information
+          'start': _formatDateTimeWithTimezone(start),
+          'end': _formatDateTimeWithTimezone(end),
+          // NEW: Separate timezone fields for start and end
+          'start_timeZone': deviceTimeZone,
+          'end_timeZone': deviceTimeZone,
         };
 
         // Add timeZone for TimeEvents only (not for DayEvents)
+        // Keep this for backward compatibility with backend
         if (!_allDay) {
-          eventData['timeZone'] = timeZone; // NEW: Timezone for time events
+          eventData['timeZone'] = deviceTimeZone; // Legacy: Single timezone for time events
           eventData['time_EventInstance'] = []; // NEW: Time event instances
         } else {
+          eventData['timeZone'] = deviceTimeZone; // Add timezone for day events too
           eventData['day_EventInstance'] = ''; // NEW: Day event instance
         }
 
