@@ -1,9 +1,10 @@
 // Timezone utility functions for handling IANA timezones and datetime formatting
-import 'package:timezone/standalone.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 
 class TimezoneUtils {
   static bool _initialized = false;
+  static String? _cachedLocalTimezone;
 
   /// Initialize timezone database
   /// Call this once during app initialization (e.g., in main.dart)
@@ -11,18 +12,42 @@ class TimezoneUtils {
     if (!_initialized) {
       tz_data.initializeTimeZones();
       _initialized = true;
+
+      // Try to determine local timezone
+      // Note: Flutter doesn't provide a direct way to get IANA timezone
+      // We'll use UTC as default and can be overridden
+      try {
+        // Attempt to get local timezone name
+        // This may not work on all platforms, so we fallback to UTC
+        final localName = DateTime.now().timeZoneName;
+        // Store the abbreviation for now, we'll use UTC as IANA fallback
+        _cachedLocalTimezone = 'UTC';
+      } catch (e) {
+        _cachedLocalTimezone = 'UTC';
+      }
     }
   }
 
   /// Get the device's IANA timezone name (e.g., "America/New_York")
-  /// This is more accurate than DateTime.now().timeZoneName which returns abbreviations like "EST"
+  /// Note: This returns UTC by default since Flutter doesn't provide direct access
+  /// to IANA timezone names. For production, consider using flutter_native_timezone package.
   static String getDeviceTimeZone() {
     if (!_initialized) {
-      // If not initialized, fall back to local timezone name
-      // This might not work correctly on all platforms
-      return tz.local.name;
+      // If not initialized, return a reasonable default
+      return 'UTC';
     }
-    return tz.local.name;
+
+    // For now, we use UTC as the default IANA timezone
+    // In a production app, you would use flutter_native_timezone package
+    // or detect timezone from browser/platform
+    return _cachedLocalTimezone ?? 'UTC';
+  }
+
+  /// Set the local timezone manually (useful for testing or when timezone is known)
+  static void setLocalTimezone(String timeZoneName) {
+    if (isValidTimezone(timeZoneName)) {
+      _cachedLocalTimezone = timeZoneName;
+    }
   }
 
   /// Format DateTime to ISO8601 string WITH timezone offset
