@@ -19,6 +19,9 @@ class TimeEvent {
   final String end;
   // final Map<String, dynamic> start;
   // final Map<String, dynamic> end;
+  final String startTimeZone;  // IANA timezone for start (e.g., "America/New_York")
+  final String endTimeZone;    // IANA timezone for end (e.g., "America/New_York")
+  final String timeZone;       // Legacy single timezone field for backward compatibility
   final bool is_AllDay;
   final List<String> recurrence;
   final String recurrenceId;
@@ -51,6 +54,9 @@ class TimeEvent {
     required this.eventTitle,
     required this.start,
     required this.end,
+    this.startTimeZone = '',
+    this.endTimeZone = '',
+    this.timeZone = '',
     required this.is_AllDay,
     required this.recurrence,
     required this.recurrenceId,
@@ -84,6 +90,9 @@ class TimeEvent {
       // Flatten the start and end date objects to match backend expectations
       'start': start, // Already a string, no conversion needed
       'end': end,
+      'start_timeZone': startTimeZone,
+      'end_timeZone': endTimeZone,
+      'timeZone': timeZone, // Legacy field for backward compatibility
       'is_AllDay': is_AllDay,
       'recurrenceRule': recurrence.isNotEmpty ? recurrence.first : '',
       'recurrenceId': recurrenceId,
@@ -140,6 +149,9 @@ class TimeEvent {
       // end: json['event_endDate'] != null
       //     ? {'dateTime': json['event_endDate']}
       //     : (json['end'] as Map<String, dynamic>?) ?? {},
+      startTimeZone: json['start_timeZone'] ?? json['startTimeZone'] ?? '',
+      endTimeZone: json['end_timeZone'] ?? json['endTimeZone'] ?? '',
+      timeZone: json['timeZone'] ?? '',
       is_AllDay: json['is_AllDay'] ?? false,
       recurrence: json['recurrenceRule'] != null
           ? [json['recurrenceRule']]

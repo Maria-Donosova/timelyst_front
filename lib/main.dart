@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/services/authService.dart';
+import 'package:timelyst_flutter/utils/timezoneUtils.dart';
 
 import 'themes.dart';
 
@@ -14,6 +15,12 @@ import 'providers/taskProvider.dart';
 import 'package:timelyst_flutter/widgets/screens/common/wrapper.dart';
 
 Future main() async {
+  // Ensure Flutter bindings are initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize timezone database for accurate timezone handling
+  await TimezoneUtils.initialize();
+
   // Create an instance of AuthService
   final authService = AuthService();
   runApp(MyApp(authService: authService));
