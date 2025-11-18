@@ -340,6 +340,25 @@ For existing events in the database that don't have timezone fields populated:
 5. ✅ **DST Handling**: IANA timezones automatically handle daylight saving transitions
 6. ✅ **Database Ready**: Leverages existing database schema fields
 
+## Frontend Timezone Detection Note
+
+**Current Implementation**: The frontend currently defaults to 'UTC' as the IANA timezone name. The DateTime objects still include the correct timezone offset (e.g., "-05:00"), so times are preserved accurately, but the timezone name sent to the backend is 'UTC'.
+
+**For Production**: Consider adding `flutter_native_timezone` package to get the actual device IANA timezone (e.g., "America/New_York"). Alternatively, for web apps, you can detect the timezone from the browser using JavaScript:
+
+```dart
+import 'dart:html' as html;
+
+String getBrowserTimezone() {
+  try {
+    // This works in web browsers
+    return html.window.navigator.timeZone ?? 'UTC';
+  } catch (e) {
+    return 'UTC';
+  }
+}
+```
+
 ## References
 
 - **IANA Timezone Database**: https://www.iana.org/time-zones
