@@ -44,7 +44,9 @@ class EventMapper {
           dayEvent.eventTitle.isEmpty ? 'Untitled Event' : dayEvent.eventTitle,
       description: dayEvent.eventBody,
       startTime: startTime,
+      startTimeZone: dayEvent.startTimeZone,
       endTime: endTime,
+      endTimeZone: dayEvent.endTimeZone,
       // startTime:
       //     DateTime.parse(dayEvent.start['dateTime'] ?? dayEvent.start['date']),
       // endTime: DateTime.parse(dayEvent.end['dateTime'] ?? dayEvent.end['date']),
@@ -123,7 +125,9 @@ class EventMapper {
           : timeEvent.eventTitle,
       description: timeEvent.eventBody,
       startTime: startTime,
+      startTimeZone: timeEvent.startTimeZone,
       endTime: endTime,
+      endTimeZone: timeEvent.endTimeZone,
       isAllDay: timeEvent.is_AllDay,
       location: timeEvent.eventLocation,
       // ignore: unnecessary_null_comparison
