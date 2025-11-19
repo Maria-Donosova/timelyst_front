@@ -20,7 +20,7 @@ class MicrosoftSignInManager {
     try {
 
       // Generate and launch Microsoft OAuth URL
-      final authUrl = _authService.generateAuthUrl();
+      final authUrl = await _authService.generateAuthUrl();
 
       // Launch the OAuth URL in browser
       final uri = Uri.parse(authUrl);
