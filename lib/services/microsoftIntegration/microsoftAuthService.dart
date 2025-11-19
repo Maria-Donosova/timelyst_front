@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:timelyst_flutter/config/envVarConfig.dart';
 import 'package:timelyst_flutter/utils/apiClient.dart';
 import 'package:timelyst_flutter/services/authService.dart';
@@ -9,13 +10,17 @@ import 'package:timelyst_flutter/models/calendars.dart';
 class MicrosoftAuthService {
   final ApiClient _apiClient = ApiClient();
   final AuthService _authService = AuthService();
-  
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+
   // PKCE (Proof Key for Code Exchange) implementation for security
+  static const String _codeVerifierKey = 'microsoft_code_verifier';
+  static const String _codeChallengeKey = 'microsoft_code_challenge';
+
   String? _codeVerifier;
   String? _codeChallenge;
 
   /// Generates PKCE code verifier and challenge for secure OAuth flow
-  void _generatePKCECodes() {
+  Future<void> _generatePKCECodes() async {
     // Generate a random code verifier (43-128 chars)
     final random = Random.secure();
     final bytes = List<int>.generate(32, (i) => random.nextInt(256));
@@ -24,12 +29,17 @@ class MicrosoftAuthService {
     // Create code challenge using SHA256
     final challenge = sha256.convert(utf8.encode(_codeVerifier!));
     _codeChallenge = base64UrlEncode(challenge.bytes).replaceAll('=', '');
+
+    // Persist PKCE codes to secure storage for cross-instance access
+    await _secureStorage.write(key: _codeVerifierKey, value: _codeVerifier);
+    await _secureStorage.write(key: _codeChallengeKey, value: _codeChallenge);
+    print('🔍 [MicrosoftAuthService] Generated and stored PKCE codes');
   }
 
   /// Generates Microsoft OAuth authorization URL
-  String generateAuthUrl() {
+  Future<String> generateAuthUrl() async {
     // Generate PKCE codes before creating the auth URL
-    _generatePKCECodes();
+    await _generatePKCECodes();
 
     // Add prompt=select_account to always prompt for account selection
     final params = {
@@ -63,6 +73,12 @@ class MicrosoftAuthService {
     try {
       final authToken = await _authService.getAuthToken();
       final maskedToken = (authToken?.length ?? 0) > 10 ? '${authToken?.substring(0, 10)}...' : authToken;
+
+      // Load code verifier from secure storage if not in memory
+      if (_codeVerifier == null) {
+        _codeVerifier = await _secureStorage.read(key: _codeVerifierKey);
+        print('🔍 [MicrosoftAuthService] Loaded code verifier from secure storage');
+      }
 
       // Log PKCE state for debugging
       print('🔍 [MicrosoftAuthService] Sending auth code to backend');
@@ -146,10 +162,15 @@ class MicrosoftAuthService {
   }
 
   /// Clears stored PKCE parameters (call after successful auth)
-  void clearAuthState() {
+  Future<void> clearAuthState() async {
     _codeVerifier = null;
     _codeChallenge = null;
-    print('🔍 [MicrosoftAuthService] Cleared PKCE auth state');
+
+    // Clear from secure storage as well
+    await _secureStorage.delete(key: _codeVerifierKey);
+    await _secureStorage.delete(key: _codeChallengeKey);
+
+    print('🔍 [MicrosoftAuthService] Cleared PKCE auth state from memory and storage');
   }
 
   /// Gets current user's email from Microsoft Graph (if needed as fallback)
