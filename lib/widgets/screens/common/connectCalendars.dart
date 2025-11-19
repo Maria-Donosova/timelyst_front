@@ -519,7 +519,7 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                                     // Generate Microsoft OAuth URL and navigate in same tab
                                     final authService = MicrosoftAuthService();
                                     final authUrl =
-                                        authService.generateAuthUrl();
+                                        await authService.generateAuthUrl();
 
                                     // Ensure redirect happens in same window, not new tab
                                     // Use location.replace to avoid back button issues
