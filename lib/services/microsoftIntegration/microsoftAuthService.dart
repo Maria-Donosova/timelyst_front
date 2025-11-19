@@ -20,7 +20,7 @@ class MicrosoftAuthService {
     final random = Random.secure();
     final bytes = List<int>.generate(32, (i) => random.nextInt(256));
     _codeVerifier = base64UrlEncode(bytes).replaceAll('=', '');
-    
+
     // Create code challenge using SHA256
     final challenge = sha256.convert(utf8.encode(_codeVerifier!));
     _codeChallenge = base64UrlEncode(challenge.bytes).replaceAll('=', '');
@@ -28,21 +28,26 @@ class MicrosoftAuthService {
 
   /// Generates Microsoft OAuth authorization URL
   String generateAuthUrl() {
+    // Generate PKCE codes before creating the auth URL
+    _generatePKCECodes();
+
     // Add prompt=select_account to always prompt for account selection
     final params = {
       'client_id': Config.microsoftClientId,
       'response_type': 'code',
       'redirect_uri': 'https://timelyst-back.fly.dev/microsoft/callback',
       'scope': 'openid profile email https://graph.microsoft.com/calendars.read https://graph.microsoft.com/calendars.readwrite offline_access',
+      'code_challenge': _codeChallenge!,
+      'code_challenge_method': 'S256',
       'prompt': 'select_account', // Force account selection every time
     };
-    
+
     final queryString = params.entries
         .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
         .join('&');
-    
+
     final authUrl = '${Config.microsoftAuthUrl}?$queryString';
-    
+
     return authUrl;
   }
 
@@ -56,10 +61,14 @@ class MicrosoftAuthService {
   /// Sends Microsoft authorization code to backend for token exchange
   Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode) async {
     try {
-      
       final authToken = await _authService.getAuthToken();
       final maskedToken = (authToken?.length ?? 0) > 10 ? '${authToken?.substring(0, 10)}...' : authToken;
-      
+
+      // Log PKCE state for debugging
+      print('🔍 [MicrosoftAuthService] Sending auth code to backend');
+      print('🔍 [MicrosoftAuthService] Code verifier present: ${_codeVerifier != null}');
+      print('🔍 [MicrosoftAuthService] Auth token present: ${authToken != null}');
+
       final body = {
         'code': authCode,
         'codeVerifier': _codeVerifier, // Include PKCE code verifier
@@ -71,11 +80,12 @@ class MicrosoftAuthService {
         body: body,
         token: authToken,
       );
-      
+
+      print('🔍 [MicrosoftAuthService] Backend response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        
+
         // Extract calendars from the unified response
         List<Calendar> calendars = [];
         if (responseData['calendars'] != null) {
@@ -99,6 +109,9 @@ class MicrosoftAuthService {
           // Could implement Microsoft Graph API call here as fallback
         }
 
+        // Clear PKCE state after successful authentication
+        clearAuthState();
+
         return {
           'success': true,
           'message': 'Microsoft auth successful',
@@ -107,12 +120,19 @@ class MicrosoftAuthService {
           'calendars': calendars,
         };
       } else {
-        final errorData = jsonDecode(response.body);
+        String errorMessage = 'Status ${response.statusCode}';
+        try {
+          final errorData = jsonDecode(response.body);
+          errorMessage = errorData['message'] ?? errorData['error'] ?? errorMessage;
+          print('❌ [MicrosoftAuthService] Backend error details: $errorData');
+        } catch (e) {
+          print('❌ [MicrosoftAuthService] Backend error (raw): ${response.body}');
+        }
         print('❌ [MicrosoftAuthService] Backend request failed with status: ${response.statusCode}');
         return {
           'success': false,
-          'message': 'Failed to authenticate with Microsoft: ${response.statusCode}',
-          'error': errorData,
+          'message': 'Failed to authenticate with Microsoft: $errorMessage',
+          'statusCode': response.statusCode,
         };
       }
     } catch (e) {
@@ -123,6 +143,13 @@ class MicrosoftAuthService {
         'error': e.toString(),
       };
     }
+  }
+
+  /// Clears stored PKCE parameters (call after successful auth)
+  void clearAuthState() {
+    _codeVerifier = null;
+    _codeChallenge = null;
+    print('🔍 [MicrosoftAuthService] Cleared PKCE auth state');
   }
 
   /// Gets current user's email from Microsoft Graph (if needed as fallback)
