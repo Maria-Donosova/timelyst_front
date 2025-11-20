@@ -1,46 +1,51 @@
 // Timezone utility functions for handling IANA timezones and datetime formatting
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 
 class TimezoneUtils {
   static bool _initialized = false;
   static String? _cachedLocalTimezone;
 
-  /// Initialize timezone database
+  /// Initialize timezone database and detect device timezone
   /// Call this once during app initialization (e.g., in main.dart)
   static Future<void> initialize() async {
     if (!_initialized) {
+      // Initialize timezone database
       tz_data.initializeTimeZones();
       _initialized = true;
 
-      // Try to determine local timezone
-      // Note: Flutter doesn't provide a direct way to get IANA timezone
-      // We'll use UTC as default and can be overridden
+      // Detect the device's actual IANA timezone
       try {
-        // Attempt to get local timezone name
-        // This may not work on all platforms, so we fallback to UTC
-        final localName = DateTime.now().timeZoneName;
-        // Store the abbreviation for now, we'll use UTC as IANA fallback
-        _cachedLocalTimezone = 'UTC';
+        final String timeZoneName = await FlutterNativeTimezone.getLocalTimezone();
+        print('🌍 [TimezoneUtils] Detected device timezone: $timeZoneName');
+
+        // Validate that the timezone is recognized
+        if (isValidTimezone(timeZoneName)) {
+          _cachedLocalTimezone = timeZoneName;
+          print('✅ [TimezoneUtils] Using timezone: $_cachedLocalTimezone');
+        } else {
+          print('⚠️ [TimezoneUtils] Invalid timezone detected: $timeZoneName, falling back to UTC');
+          _cachedLocalTimezone = 'UTC';
+        }
       } catch (e) {
+        print('❌ [TimezoneUtils] Error detecting timezone: $e, falling back to UTC');
         _cachedLocalTimezone = 'UTC';
       }
     }
   }
 
   /// Get the device's IANA timezone name (e.g., "America/New_York")
-  /// Note: This returns UTC by default since Flutter doesn't provide direct access
-  /// to IANA timezone names. For production, consider using flutter_native_timezone package.
+  /// Returns the detected timezone or 'UTC' if detection failed
   static String getDeviceTimeZone() {
     if (!_initialized) {
-      // If not initialized, return a reasonable default
+      print('⚠️ [TimezoneUtils] Not initialized! Call TimezoneUtils.initialize() first. Using UTC as fallback.');
       return 'UTC';
     }
 
-    // For now, we use UTC as the default IANA timezone
-    // In a production app, you would use flutter_native_timezone package
-    // or detect timezone from browser/platform
-    return _cachedLocalTimezone ?? 'UTC';
+    final timezone = _cachedLocalTimezone ?? 'UTC';
+    print('🕐 [TimezoneUtils] Getting device timezone: $timezone');
+    return timezone;
   }
 
   /// Set the local timezone manually (useful for testing or when timezone is known)
