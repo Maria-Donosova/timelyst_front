@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:html' as html;
+import 'package:provider/provider.dart';
 
 import '../../shared/customAppbar.dart';
 import '../../responsive/responsive_helper.dart';
@@ -9,6 +10,7 @@ import '../../../services/googleIntegration/googleSignInManager.dart';
 import '../../../services/microsoftIntegration/microsoftSignInManager.dart';
 import '../../../services/microsoftIntegration/microsoftAuthService.dart';
 import '../../../services/appleIntegration/appleSignInManager.dart';
+import '../../../providers/authProvider.dart';
 import './calendarSettings.dart';
 
 import 'agenda.dart';
@@ -195,6 +197,13 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
 
       if (result.userId != null && result.calendars != null) {
         print("✅ [ConnectCalendars] Microsoft authentication successful");
+
+        // Refresh auth provider state to sync UI with stored auth tokens
+        if (mounted) {
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
+          await authProvider.refreshAuthState();
+          print("🔄 [ConnectCalendars] Auth state refreshed after Microsoft OAuth");
+        }
 
         if (mounted) {
           // Show success feedback before navigation
@@ -393,6 +402,13 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                                         signInResult.calendars != null) {
                                       print(
                                           "✅ [ConnectCalendars] Google authentication successful");
+
+                                      // Refresh auth provider state to sync UI with stored auth tokens
+                                      if (context.mounted) {
+                                        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                                        await authProvider.refreshAuthState();
+                                        print("🔄 [ConnectCalendars] Auth state refreshed after Google OAuth");
+                                      }
 
                                       if (context.mounted) {
                                         Navigator.pushReplacement(
@@ -620,6 +636,13 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                                         signInResult.calendars != null) {
                                       print(
                                           "✅ [ConnectCalendars] Apple authentication successful");
+
+                                      // Refresh auth provider state to sync UI with stored auth tokens
+                                      if (context.mounted) {
+                                        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                                        await authProvider.refreshAuthState();
+                                        print("🔄 [ConnectCalendars] Auth state refreshed after Apple OAuth");
+                                      }
 
                                       if (context.mounted) {
                                         Navigator.pushReplacement(
