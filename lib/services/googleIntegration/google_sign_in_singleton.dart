@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../config/envVarConfig.dart';
 
 class GoogleSignInSingleton {
-  static final GoogleSignInSingleton _singleton = GoogleSignInSingleton._internal();
+  static final GoogleSignInSingleton _singleton =
+      GoogleSignInSingleton._internal();
 
   factory GoogleSignInSingleton() {
     return _singleton;
@@ -23,6 +24,7 @@ class GoogleSignInSingleton {
     'profile',
     'email',
     'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/calendar.calendarlist.readonly',
   ];
 
   GoogleSignIn _initializeGoogleSignIn() {
