@@ -9,6 +9,7 @@ import '../../utils/apiClient.dart';
 import '../../config/envVarConfig.dart';
 import 'google_sign_in_singleton.dart';
 import '../../models/calendars.dart';
+import '../../utils/timezoneUtils.dart';
 
 class GoogleAuthService {
   late final ApiClient _apiClient;
@@ -50,12 +51,16 @@ class GoogleAuthService {
 
   Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode) async {
     try {
-      
+
       final authToken = await _authService.getAuthToken();
       final maskedToken = (authToken?.length ?? 0) > 10 ? '${authToken?.substring(0, 10)}...' : authToken;
-      
+
+      // Get device timezone for calendar event synchronization
+      final deviceTimeZone = TimezoneUtils.getDeviceTimeZone();
+
       final body = {
         'code': authCode,
+        'timeZone': deviceTimeZone,
       };
 
       final response = await _apiClient.post(
