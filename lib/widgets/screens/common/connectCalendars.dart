@@ -7,6 +7,7 @@ import '../../responsive/responsive_helper.dart';
 import '../../responsive/responsive_button.dart';
 
 import '../../../services/googleIntegration/googleSignInManager.dart';
+import '../../../services/googleIntegration/calendarSyncManager.dart';
 import '../../../services/microsoftIntegration/microsoftSignInManager.dart';
 import '../../../services/microsoftIntegration/microsoftAuthService.dart';
 import '../../../services/appleIntegration/appleSignInManager.dart';
@@ -411,18 +412,66 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                                       }
 
                                       if (context.mounted) {
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                CalendarSettings(
-                                              userId: signInResult.userId,
-                                              email: signInResult.email,
-                                              calendars:
-                                                  signInResult.calendars!,
+                                        // Set up default preferences for all calendars
+                                        // Import subject only, with default 'Work' category
+                                        final calendarsWithDefaults = signInResult.calendars!.map((calendar) {
+                                          return calendar.copyWith(
+                                            preferences: calendar.preferences.copyWith(
+                                              importSettings: calendar.preferences.importSettings.copyWith(
+                                                importAll: false,
+                                                importSubject: true,
+                                                importBody: false,
+                                                importConferenceInfo: false,
+                                                importOrganizer: false,
+                                                importRecipients: false,
+                                              ),
+                                              category: 'Work', // Default category
                                             ),
-                                          ),
-                                        );
+                                          );
+                                        }).toList();
+
+                                        print("🔄 [ConnectCalendars] Saving ${calendarsWithDefaults.length} calendars with default settings...");
+
+                                        // Save calendars immediately with default preferences
+                                        try {
+                                          final syncManager = CalendarSyncManager();
+                                          final saveResult = await syncManager.saveSelectedCalendars(
+                                            userId: signInResult.userId,
+                                            email: signInResult.email,
+                                            selectedCalendars: calendarsWithDefaults,
+                                          );
+
+                                          if (saveResult.success) {
+                                            print("✅ [ConnectCalendars] Calendars saved successfully, redirecting to Agenda");
+
+                                            // Navigate directly to Agenda with sync in progress
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => Agenda(
+                                                  calendars: calendarsWithDefaults,
+                                                  userId: signInResult.userId,
+                                                  email: signInResult.email,
+                                                  syncInProgress: true,
+                                                  syncIntegrationType: 'GOOGLE',
+                                                ),
+                                              ),
+                                            );
+                                          } else {
+                                            throw Exception(saveResult.error ?? 'Failed to save calendars');
+                                          }
+                                        } catch (e) {
+                                          print("❌ [ConnectCalendars] Failed to save calendars: $e");
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text('Failed to save calendar settings: ${e.toString()}'),
+                                                backgroundColor: Colors.red,
+                                                duration: Duration(seconds: 5),
+                                              ),
+                                            );
+                                          }
+                                        }
                                       } else {
                                         print(
                                             '⚠️ [ConnectCalendars] Context not mounted - cannot navigate');
