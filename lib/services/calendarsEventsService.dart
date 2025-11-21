@@ -27,6 +27,8 @@ class CalendarsEventsService {
             event_title
             start
             end
+            start_timeZone
+            end_timeZone
             is_AllDay
             recurrenceId
             recurrenceRule
@@ -112,6 +114,8 @@ class CalendarsEventsService {
           event_title
           start
           end
+          start_timeZone
+          end_timeZone
           timeZone
           is_AllDay
           recurrenceId
@@ -194,6 +198,8 @@ class CalendarsEventsService {
             event_title
             start
             end
+            start_timeZone
+            end_timeZone
             timeZone
             is_AllDay
             recurrenceId
@@ -321,6 +327,8 @@ class CalendarsEventsService {
           event_title
           start
           end
+          start_timeZone
+          end_timeZone
           timeZone
           is_AllDay
           recurrenceId
@@ -526,6 +534,8 @@ class CalendarsEventsService {
           event_title
           start
           end
+          start_timeZone
+          end_timeZone
           is_AllDay
           recurrenceId
           recurrenceRule
@@ -703,6 +713,8 @@ class CalendarsEventsService {
       event_title
       start
       end
+      start_timeZone
+      end_timeZone
       timeZone
       is_AllDay
       recurrenceId
@@ -864,6 +876,8 @@ class CalendarsEventsService {
           event_title
           start
           end
+          start_timeZone
+          end_timeZone
           is_AllDay
           recurrenceId
           recurrenceRule
