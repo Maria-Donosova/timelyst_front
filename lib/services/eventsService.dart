@@ -40,6 +40,9 @@ class EventService {
             event_title
             start
             end
+            start_timeZone
+            end_timeZone
+            timeZone
             is_AllDay
             recurrenceId
             recurrenceRule
@@ -131,6 +134,8 @@ class EventService {
           event_title
           start
           end
+          start_timeZone
+          end_timeZone
           timeZone
           is_AllDay
           recurrenceId
@@ -224,6 +229,8 @@ class EventService {
             event_title
             start
             end
+            start_timeZone
+            end_timeZone
             timeZone
             is_AllDay
             recurrenceId
