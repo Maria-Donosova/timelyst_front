@@ -450,10 +450,30 @@ class EventDetailsScreenState extends State<EventDetails> {
           endTime.minute,
         );
 
+        print('📅 [EventDetails] User picked times:');
+        print('  - Date: ${eventDate.toString()}');
+        print('  - Start time: ${startTime.hour}:${startTime.minute}');
+        print('  - End time: ${endTime.hour}:${endTime.minute}');
+        print('  - Created DateTime objects:');
+        print('    - start: $start');
+        print('    - end: $end');
+        print('    - start.timeZoneName: ${start.timeZoneName}');
+        print('    - start.timeZoneOffset: ${start.timeZoneOffset}');
+
         // Get device timezone as IANA timezone name (e.g., "America/New_York")
         final deviceTimeZone = TimezoneUtils.getDeviceTimeZone();
+        print('  - deviceTimeZone: $deviceTimeZone');
 
         // Prepare event data (common fields for both day and time events)
+        final startFormatted = _formatDateTimeWithTimezone(start);
+        final endFormatted = _formatDateTimeWithTimezone(end);
+
+        print('📤 [EventDetails] Formatting for backend:');
+        print('  - start formatted: $startFormatted');
+        print('  - end formatted: $endFormatted');
+        print('  - start_timeZone: $deviceTimeZone');
+        print('  - end_timeZone: $deviceTimeZone');
+
         final Map<String, dynamic> eventData = {
           'user_id': currentUserId,
           'user_calendars': _selectedCalendars.isNotEmpty
@@ -477,12 +497,15 @@ class EventDetailsScreenState extends State<EventDetails> {
           'reminder': _hasReminder, // NEW: Reminder flag
           'holiday': false, // NEW: Holiday flag (default false)
           // Format datetime WITH timezone offset to preserve timezone information
-          'start': _formatDateTimeWithTimezone(start),
-          'end': _formatDateTimeWithTimezone(end),
+          'start': startFormatted,
+          'end': endFormatted,
           // NEW: Separate timezone fields for start and end
           'start_timeZone': deviceTimeZone,
           'end_timeZone': deviceTimeZone,
         };
+
+        print('📦 [EventDetails] Complete eventData being sent to service:');
+        print('  ${eventData.toString()}');
 
         // Add timeZone for TimeEvents only (not for DayEvents)
         // Keep this for backward compatibility with backend
