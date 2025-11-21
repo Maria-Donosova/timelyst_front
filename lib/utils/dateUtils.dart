@@ -4,28 +4,44 @@ class DateTimeUtils {
   // Parse any date format (ISO string or timestamp)
   // Preserves local timezone to prevent unwanted conversions
   static DateTime parseAnyFormat(dynamic dateValue) {
-    if (dateValue == null) return DateTime.now();
+    print('🔍 [DateTimeUtils.parseAnyFormat] Parsing: $dateValue (type: ${dateValue.runtimeType})');
+
+    if (dateValue == null) {
+      print('  ⚠️ Value is null, returning DateTime.now()');
+      return DateTime.now();
+    }
 
     try {
       // Check if it's a numeric timestamp (milliseconds since epoch)
       if (dateValue is num) {
-        return DateTime.fromMillisecondsSinceEpoch(dateValue.toInt()).toLocal();
+        final result = DateTime.fromMillisecondsSinceEpoch(dateValue.toInt()).toLocal();
+        print('  ✅ Parsed as timestamp: $result');
+        return result;
       }
       if (dateValue is String && dateValue.contains(RegExp(r'^\d+$'))) {
-        return DateTime.fromMillisecondsSinceEpoch(int.parse(dateValue)).toLocal();
+        final result = DateTime.fromMillisecondsSinceEpoch(int.parse(dateValue)).toLocal();
+        print('  ✅ Parsed as string timestamp: $result');
+        return result;
       }
 
       // Parse as ISO string
       final dateString = dateValue.toString();
       final parsedDate = DateTime.parse(dateString);
+      print('  - Parsed ISO string: $parsedDate');
+      print('  - parsedDate.isUtc: ${parsedDate.isUtc}');
 
       // Only convert to local if the string explicitly contains UTC indicator (Z or +00:00)
       // Otherwise, treat it as already being in local time to prevent timezone shifts
       if (dateString.endsWith('Z') || dateString.contains('+') || dateString.contains('-')) {
         // Has timezone info, convert to local
-        return parsedDate.toLocal();
+        final result = parsedDate.toLocal();
+        print('  ✅ Has timezone info, converted to local: $result');
+        print('    - result.timeZoneName: ${result.timeZoneName}');
+        print('    - result.timeZoneOffset: ${result.timeZoneOffset}');
+        return result;
       } else {
         // No timezone info, treat as local time (don't convert)
+        print('  ✅ No timezone info, treating as local: $parsedDate');
         return parsedDate;
       }
     } catch (e) {

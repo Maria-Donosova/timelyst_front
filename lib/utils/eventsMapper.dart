@@ -82,6 +82,13 @@ class EventMapper {
 
   static CustomAppointment mapTimeEventToCustomAppointment(
       TimeEvent timeEvent) {
+    print('🗺️ [EventMapper] Mapping TimeEvent to CustomAppointment:');
+    print('  - Event: ${timeEvent.eventTitle}');
+    print('  - timeEvent.start: ${timeEvent.start}');
+    print('  - timeEvent.end: ${timeEvent.end}');
+    print('  - timeEvent.startTimeZone: ${timeEvent.startTimeZone}');
+    print('  - timeEvent.endTimeZone: ${timeEvent.endTimeZone}');
+
     DateTime startTime;
     DateTime endTime;
 
@@ -89,6 +96,11 @@ class EventMapper {
       // Parse start time with improved error handling
       startTime = DateTimeUtils.parseAnyFormat(timeEvent.start);
       endTime = DateTimeUtils.parseAnyFormat(timeEvent.end);
+
+      print('  - Parsed startTime: $startTime');
+      print('  - Parsed endTime: $endTime');
+      print('  - startTime.timeZoneName: ${startTime.timeZoneName}');
+      print('  - startTime.timeZoneOffset: ${startTime.timeZoneOffset}');
 
       // Validate reasonable date range (not in far future or past)
       final now = DateTime.now();
