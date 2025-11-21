@@ -1,4 +1,6 @@
 // models/day_event.dart
+import '../utils/dateUtils.dart';
+
 class DayEvent {
   final String id;
   final String userId;
@@ -198,22 +200,14 @@ class DayEvent {
   }
 
   // Add these methods to parse date times
-  // Always convert to local timezone for consistent display
+  // Use DateTimeUtils.parseAnyFormat to prevent double timezone conversion
 
   DateTime getStartDateTime() {
-    try {
-      return DateTime.parse(start).toLocal();
-    } catch (e) {
-      return DateTime.now(); // Fallback
-    }
+    return DateTimeUtils.parseAnyFormat(start);
   }
 
   DateTime getEndDateTime() {
-    try {
-      return DateTime.parse(end).toLocal();
-    } catch (e) {
-      return DateTime.now(); // Fallback
-    }
+    return DateTimeUtils.parseAnyFormat(end);
   }
 
 //   DateTime getStartDateTime() {

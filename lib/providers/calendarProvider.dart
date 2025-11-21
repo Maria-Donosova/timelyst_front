@@ -6,6 +6,7 @@ import 'package:timelyst_flutter/models/calendars.dart';
 import './../services/calendarsService.dart';
 import './../services/authService.dart';
 import './../services/googleIntegration/googleCalendarService.dart';
+import './../utils/dateUtils.dart';
 
 class CalendarProvider with ChangeNotifier {
   // State management
@@ -438,8 +439,8 @@ class CalendarEvent {
     return CalendarEvent(
       id: json['id'],
       title: json['title'],
-      start: DateTime.parse(json['start']).toLocal(),
-      end: DateTime.parse(json['end']).toLocal(),
+      start: DateTimeUtils.parseAnyFormat(json['start']),
+      end: DateTimeUtils.parseAnyFormat(json['end']),
     );
   }
 }
