@@ -115,12 +115,11 @@ class TimeEvent {
     // Debug logging to see what's coming from backend
     print(
         '🔍 [TimeEvent.fromJson] Parsing JSON for event: ${json['event_title']}');
-    print('  - source field: ${json['source']}');
-    print('  - googleEventId: "${json['googleEventId']}"');
-    print('  - microsoftEventId: "${json['microsoftEventId']}"');
-    print('  - appleEventId: "${json['appleEventId']}"');
-    print('  - source_calendar: "${json['source_calendar']}"');
-    print('  - createdBy: "${json['createdBy']}"');
+    print('  - RAW start from backend: ${json['start']} (type: ${json['start'].runtimeType})');
+    print('  - RAW end from backend: ${json['end']} (type: ${json['end'].runtimeType})');
+    print('  - start_timeZone: "${json['start_timeZone'] ?? json['startTimeZone']}"');
+    print('  - end_timeZone: "${json['end_timeZone'] ?? json['endTimeZone']}"');
+    print('  - timeZone: "${json['timeZone']}"');
 
     return TimeEvent(
       id: json['id'] ?? json['_id'] ?? '',
@@ -180,23 +179,36 @@ class TimeEvent {
 
   // Helper method to parse start/end that can be either timestamp or ISO string
   static String _parseStartEnd(dynamic value) {
-    if (value == null) return '';
+    print('🔄 [TimeEvent._parseStartEnd] Parsing value: $value (type: ${value.runtimeType})');
+
+    if (value == null) {
+      print('  ⚠️ Value is null, returning empty string');
+      return '';
+    }
 
     // If it's already a string, return as-is
-    if (value is String) return value;
+    if (value is String) {
+      print('  ✅ Value is already a string: $value');
+      return value;
+    }
 
     // If it's a number (Unix timestamp in milliseconds), convert to ISO string
     if (value is num) {
       try {
         final dateTime = DateTime.fromMillisecondsSinceEpoch(value.toInt());
-        return dateTime.toIso8601String();
+        final isoString = dateTime.toIso8601String();
+        print('  🔄 Converted timestamp to ISO: $isoString');
+        return isoString;
       } catch (e) {
+        print('  ❌ Error converting timestamp: $e');
         return '';
       }
     }
 
     // Fallback: convert to string
-    return value.toString();
+    final result = value.toString();
+    print('  🔄 Converted to string: $result');
+    return result;
   }
 
   // Add these methods to parse date times
