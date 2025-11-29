@@ -80,7 +80,7 @@ class _AccountSettingsState extends State<AccountSettings> {
 
       
       setState(() {
-        _calendars = paginatedCalendars.calendars;
+        _calendars = paginatedCalendars;
         groupedCalendars = _groupCalendarsBySource(_calendars);
         _isLoading = false;
         _hasError = false;
