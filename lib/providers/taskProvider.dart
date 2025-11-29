@@ -24,8 +24,6 @@ class TaskProvider with ChangeNotifier {
     _authService = authService;
   }
 
-  
-
   Future<void> fetchTasks({bool forceRefresh = false}) async {
     print("Entered fetchTasks in TaskProvider");
     
@@ -72,7 +70,7 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  Future<void> createTask(String title, String category) async {
+  Future<void> createTask(String description, String priority) async {
     if (_authService == null) return;
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return;
@@ -80,27 +78,36 @@ class TaskProvider with ChangeNotifier {
     // Optimistic update
     final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     final newTask = Task(
-      taskId: tempId,
-      title: title,
-      category: category,
-      status: 'pending',
+      id: tempId,
+      userId: 'temp', // Placeholder
+      description: description,
+      priority: priority,
+      isCompleted: false,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
     
     _tasks.add(newTask);
     notifyListeners();
 
     try {
-      final createdTask = await TasksService.createTask(authToken, newTask);
+      final taskInput = {
+        'description': description,
+        'priority': priority,
+        'isCompleted': false,
+      };
+      
+      final createdTask = await TasksService.createTask(authToken, taskInput);
       
       // Replace temp task with real one
-      final index = _tasks.indexWhere((t) => t.taskId == tempId);
+      final index = _tasks.indexWhere((t) => t.id == tempId);
       if (index != -1) {
         _tasks[index] = createdTask;
         notifyListeners();
       }
     } catch (e) {
       // Revert on failure
-      _tasks.removeWhere((t) => t.taskId == tempId);
+      _tasks.removeWhere((t) => t.id == tempId);
       _errorMessage = 'Failed to create task: $e';
       notifyListeners();
     }
@@ -112,43 +119,60 @@ class TaskProvider with ChangeNotifier {
     if (authToken == null) return;
 
     // Find task to revert if needed
-    final taskIndex = _tasks.indexWhere((t) => t.taskId == taskId);
+    final taskIndex = _tasks.indexWhere((t) => t.id == taskId);
     if (taskIndex == -1) return;
     final task = _tasks[taskIndex];
 
     // Optimistic update
-    _tasks.removeAt(taskIndex);
+    // Assuming we want to remove completed tasks from the list or mark them as completed
+    // If we remove them:
+    // _tasks.removeAt(taskIndex);
+    // If we just mark them:
+    final updatedTask = Task(
+      id: task.id,
+      userId: task.userId,
+      description: task.description,
+      priority: task.priority,
+      isCompleted: true,
+      dueDate: task.dueDate,
+      createdAt: task.createdAt,
+      updatedAt: DateTime.now(),
+    );
+    _tasks[taskIndex] = updatedTask;
+    
     notifyListeners();
 
     try {
-      // Use the dedicated markTaskAsDone method from TasksService
-      await TasksService.markTaskAsDone(taskId, authToken);
+      await TasksService.updateTask(taskId, authToken, {'isCompleted': true});
     } catch (e) {
       // Revert on failure
-      _tasks.insert(taskIndex, task);
+      _tasks[taskIndex] = task;
       _errorMessage = 'Failed to mark task as complete: $e';
       notifyListeners();
     }
   }
 
-  // Update to allow for updates of title and category
-  Future<void> updateTask(String taskId, String title, String category) async {
+  // Update to allow for updates of description and priority
+  Future<void> updateTask(String taskId, String description, String priority) async {
     if (_authService == null) return;
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return;
 
-    final index = _tasks.indexWhere((task) => task.taskId == taskId);
+    final index = _tasks.indexWhere((task) => task.id == taskId);
     if (index == -1) return;
     
     final originalTask = _tasks[index];
 
     // Create an updated task with the new values
     final updatedTask = Task(
-      taskId: taskId,
-      title: title,
-      status: originalTask.status,
-      category: category,
-      task_type: originalTask.task_type,
+      id: taskId,
+      userId: originalTask.userId,
+      description: description,
+      priority: priority,
+      isCompleted: originalTask.isCompleted,
+      dueDate: originalTask.dueDate,
+      createdAt: originalTask.createdAt,
+      updatedAt: DateTime.now(),
     );
 
     // Optimistic update
@@ -156,8 +180,12 @@ class TaskProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      final taskInput = {
+        'description': description,
+        'priority': priority,
+      };
       // Send the update to the server
-      await TasksService.updateTask(taskId, authToken, updatedTask);
+      await TasksService.updateTask(taskId, authToken, taskInput);
     } catch (e) {
       // Revert on failure
       _tasks[index] = originalTask;
@@ -171,7 +199,7 @@ class TaskProvider with ChangeNotifier {
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return;
 
-    final index = _tasks.indexWhere((task) => task.taskId == taskId);
+    final index = _tasks.indexWhere((task) => task.id == taskId);
     if (index == -1) return;
     final originalTask = _tasks[index];
 

@@ -18,82 +18,53 @@ class AuthService {
   AuthService.test(this._apiClient, this._storage);
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final String query = '''
-      mutation UserLogin(\$email: String!, \$password: String!) {
-        userLogin(email: \$email, password: \$password) {
-          token
-          userId
-          role
-        }
-      }
-    ''';
-
-    final Map<String, dynamic> variables = {
-      'email': email,
-      'password': password,
-    };
-
     final response = await _apiClient.post(
-      Config.backendGraphqlURL,
-      body: {'query': query, 'variables': variables},
-      token: await getAuthToken(),
+      '${Config.backendURL}/auth/login',
+      body: {
+        'email': email,
+        'password': password,
+      },
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      if (data['errors'] != null && data['errors'].isNotEmpty) {
-        throw Exception(
-            'Login failed: ${data['errors'].map((e) => e['message']).join(", ")}');
-      }
-      final loginData = data['data']['userLogin'];
-      await saveAuthToken(loginData['token']);
-      await saveUserId(loginData['userId']);
-      await saveUserEmail(email); // Store the email used for login
-      return loginData;
+      final token = data['token'];
+      final user = data['user'];
+      
+      await saveAuthToken(token);
+      await saveUserId(user['id']);
+      await saveUserEmail(email); 
+      
+      return data;
     } else {
-      throw Exception('Failed to login: ${response.statusCode}');
+      throw Exception('Failed to login: ${response.statusCode} - ${response.body}');
     }
   }
 
   Future<Map<String, dynamic>> register(String email, String password,
       String name, String lastName, bool consent) async {
-    final String query = '''
-      mutation RegisterUser(\$email: String!, \$name: String!, \$lastName: String!, \$password: String!, \$consent: Boolean!) {
-        registerUser(userInput: {email: \$email, name: \$name, last_name: \$lastName, password: \$password, consent: \$consent}) {
-          token
-          userId
-          role
-        }
-      }
-    ''';
-
-    final Map<String, dynamic> variables = {
-      'email': email,
-      'name': name,
-      'lastName': lastName,
-      'password': password,
-      'consent': consent,
-    };
-
     final response = await _apiClient.post(
-      Config.backendGraphqlURL,
-      body: {'query': query, 'variables': variables},
-      token: await getAuthToken(),
+      '${Config.backendURL}/auth/register',
+      body: {
+        'email': email,
+        'password': password,
+        'name': name,
+        'lastName': lastName,
+      },
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       final data = jsonDecode(response.body);
-      if (data['errors'] != null && data['errors'].isNotEmpty) {
-        throw Exception(
-            'Registration failed: ${data['errors'].map((e) => e['message']).join(", ")}');
-      }
-      final registerData = data['data']['registerUser'];
-      await saveAuthToken(registerData['token']);
-      await saveUserId(registerData['userId']);
-      await saveUserEmail(email); // Store the email used for registration
-      return registerData;
+      final token = data['token'];
+      final user = data['user'];
+      
+      await saveAuthToken(token);
+      await saveUserId(user['id']);
+      await saveUserEmail(email);
+      
+      return data;
     } else {
-      throw Exception('Failed to signup: ${response.statusCode}');
+      throw Exception('Failed to register: ${response.statusCode} - ${response.body}');
     }
   }
 

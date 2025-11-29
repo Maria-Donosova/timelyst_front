@@ -43,16 +43,17 @@ class Config {
   
 
   static String get frontendURL {
-    return _configService.get('FRONTEND_URL') ?? 'https://timelyst-back.fly.dev';
+    return _configService.get('FRONTEND_URL') ?? 'https://timelyst-core.fly.dev';
   }
 
   static String get backendURL {
-    return _configService.get('BACKEND_URL') ?? 'https://timelyst-back.fly.dev';
+    return _configService.get('BACKEND_URL') ?? 'https://timelyst-core.fly.dev';
   }
 
+  // Legacy GraphQL URL - keeping it just in case, but it should probably be removed or updated
   static String get backendGraphqlURL {
     final value = _configService.get('BACKEND_URL_GRAPHQL');
-    return value ?? 'http://localhost:8081/graphql';
+    return value ?? 'https://timelyst-core.fly.dev/graphql';
   }
 
   // Microsoft OAuth Configuration
@@ -85,19 +86,12 @@ class Config {
   }
 
   // Microsoft Backend Endpoints
-  static String get backendMicrosoftAuth {
-    final value = _configService.get('BACKEND_MICROSOFT_AUTH');
-    return value ?? '${backendURL}/microsoft/auth';
+  static String get backendMicrosoftConnect {
+    return '$backendURL/integrations/microsoft/connect';
   }
 
-  static String get backendMicrosoftCalendarsSave {
-    final value = _configService.get('BACKEND_MICROSOFT_CALENDARS_SAVE');
-    return value ?? '${backendURL}/microsoft/calendars/save';
-  }
-
-  static String get backendMicrosoftCalendarsFetch {
-    final value = _configService.get('BACKEND_MICROSOFT_CALENDARS_FETCH');
-    return value ?? '${backendURL}/microsoft/calendars/fetch';
+  static String get backendMicrosoftSync {
+    return '$backendURL/integrations/microsoft/sync';
   }
 
   // Apple iCloud OAuth Configuration
@@ -135,18 +129,20 @@ class Config {
   }
 
   // Apple Backend Endpoints
-  static String get backendAppleAuth {
-    final value = _configService.get('BACKEND_APPLE_AUTH');
-    return value ?? '${backendURL}/apple/auth';
+  static String get backendAppleConnect {
+    return '$backendURL/integrations/apple/connect';
   }
 
-  static String get backendAppleCalendarsSave {
-    final value = _configService.get('BACKEND_APPLE_CALENDARS_SAVE');
-    return value ?? '${backendURL}/apple/calendars/save';
+  static String get backendAppleSync {
+    return '$backendURL/integrations/apple/sync';
   }
 
-  static String get backendAppleCalendarsFetch {
-    final value = _configService.get('BACKEND_APPLE_CALENDARS_FETCH');
-    return value ?? '${backendURL}/apple/calendars/fetch';
+  // Google Backend Endpoints
+  static String get backendGoogleConnect {
+    return '$backendURL/integrations/google/connect';
+  }
+
+  static String get backendGoogleSync {
+    return '$backendURL/integrations/google/sync';
   }
 }

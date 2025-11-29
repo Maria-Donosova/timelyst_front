@@ -51,73 +51,37 @@ class GoogleAuthService {
 
   Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode) async {
     try {
-
       final authToken = await _authService.getAuthToken();
-      final maskedToken = (authToken?.length ?? 0) > 10 ? '${authToken?.substring(0, 10)}...' : authToken;
-
-      // Get device timezone for calendar event synchronization
-      final deviceTimeZone = TimezoneUtils.getDeviceTimeZone();
-
+      
       final body = {
         'code': authCode,
-        'timeZone': deviceTimeZone,
       };
 
       final response = await _apiClient.post(
-        Config.backendGoogleCalendar,
+        Config.backendGoogleConnect,
         body: body,
         token: authToken,
       );
-      
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
         
-        // Extract calendars from the unified response
-        List<Calendar> calendars = [];
-        if (responseData['calendars'] != null) {
-          final calendarsData = responseData['calendars'] as List;
-          calendars = <Calendar>[];
-          for (var item in calendarsData) {
-            if (item is Map<String, dynamic>) {
-              calendars.add(Calendar.fromGoogleJson(item));
-            } else {
-              print('❌ [GoogleAuthService] Found invalid item in calendars list: $item');
-            }
-          }
-        } else {
-          print('⚠️ [GoogleAuthService] No calendars found in backend response');
-        }
-
-        // Get email from backend response, fallback to Google Sign-In if not provided
-        String? email = responseData['email'];
-        if (email == null) {
-          print('⚠️ [GoogleAuthService] Email not found in backend response, getting from Google Sign-In...');
-          email = await getCurrentUserEmail();
-        }
-
         return {
           'success': true,
-          'message': 'Auth code sent to backend successfully',
-          'email': email,
-          'data': responseData,
-          'calendars': calendars,
+          'message': responseData['message'] ?? 'Google account connected',
         };
       } else {
-        final errorData = jsonDecode(response.body);
         print('❌ [GoogleAuthService] Backend request failed with status: ${response.statusCode}');
         return {
           'success': false,
-          'message':
-              'Failed to send Auth code to backend: ${response.statusCode}',
-          'error': errorData,
+          'message': 'Failed to connect Google account: ${response.statusCode}',
         };
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       print('❌ [GoogleAuthService] Exception in sendAuthCodeToBackend: $e');
       return {
         'success': false,
-        'message': 'Failed to send Auth code to backend: $e',
+        'message': 'Failed to connect Google account: $e',
       };
     }
   }

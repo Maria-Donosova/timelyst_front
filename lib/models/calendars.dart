@@ -1,272 +1,85 @@
 import 'package:flutter/material.dart';
 
-enum CalendarSource { google, outlook, apple }
+enum CalendarSource { LOCAL, GOOGLE, MICROSOFT, APPLE }
 
 class Calendar {
   final String id;
   final String userId;
   final CalendarSource source;
   final String providerCalendarId;
-  final String email;
-  final bool isSelected;
-  final bool isPrimary;
   final CalendarMetadata metadata;
   final CalendarPreferences preferences;
   final CalendarSyncInfo sync;
-  final List<String> eventCount;
+  final String? syncToken;
+  final bool isSelected;
+  final bool isPrimary;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   Calendar({
     required this.id,
     required this.userId,
     required this.source,
     required this.providerCalendarId,
-    required this.email,
-    required this.isSelected,
-    required this.isPrimary,
     required this.metadata,
     required this.preferences,
     required this.sync,
-    this.eventCount = const [],
+    this.syncToken,
+    required this.isSelected,
+    required this.isPrimary,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   factory Calendar.fromJson(Map<String, dynamic> json) {
     return Calendar(
       id: json['id'] ?? '',
-      userId: json['user'] ?? '',
+      userId: json['userId'] ?? '',
       source: _parseSource(json['source']),
       providerCalendarId: json['providerCalendarId'] ?? '',
-      email: json['email'] ?? '',
-      isSelected: json['isSelected'] ?? false,
-      isPrimary: json['isPrimary'] ?? false,
       metadata: CalendarMetadata.fromJson(json['metadata'] ?? {}),
       preferences: CalendarPreferences.fromJson(json['preferences'] ?? {}),
       sync: CalendarSyncInfo.fromJson(json['sync'] ?? {}),
-      eventCount:
-          (json['events'] as List?)?.map((e) => e.toString()).toList() ?? [],
-    );
-  }
-
-  Calendar copyWith({
-    String? id,
-    String? userId,
-    CalendarSource? source,
-    String? providerCalendarId,
-    String? email,
-    bool? isSelected,
-    bool? isPrimary,
-    CalendarMetadata? metadata,
-    CalendarPreferences? preferences,
-    CalendarSyncInfo? sync,
-    List<String>? eventCount,
-  }) {
-    return Calendar(
-      id: id ?? this.id,
-      userId: userId ?? this.userId,
-      source: source ?? this.source,
-      providerCalendarId: providerCalendarId ?? this.providerCalendarId,
-      email: email ?? this.email,
-      isSelected: isSelected ?? this.isSelected,
-      isPrimary: isPrimary ?? this.isPrimary,
-      metadata: metadata ?? this.metadata,
-      preferences: preferences ?? this.preferences,
-      sync: sync ?? this.sync,
-      eventCount: eventCount ?? this.eventCount,
+      syncToken: json['syncToken'],
+      isSelected: json['isSelected'] ?? false,
+      isPrimary: json['isPrimary'] ?? false,
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
     );
   }
 
   static CalendarSource _parseSource(String? source) {
-    if (source == null) return CalendarSource.google; // Default fallback for null
+    if (source == null) return CalendarSource.LOCAL;
     
     switch (source.toUpperCase()) {
       case 'GOOGLE':
-        return CalendarSource.google;
-      case 'OUTLOOK':
-        return CalendarSource.outlook;
+        return CalendarSource.GOOGLE;
+      case 'MICROSOFT':
+        return CalendarSource.MICROSOFT;
       case 'APPLE':
-        return CalendarSource.apple;
+        return CalendarSource.APPLE;
+      case 'LOCAL':
       default:
-        return CalendarSource.google; // Default fallback
+        return CalendarSource.LOCAL;
     }
   }
 
-  Map<String, dynamic> toJson({required String email}) {
+  Map<String, dynamic> toJson() {
     return {
-      'id': providerCalendarId.isNotEmpty ? providerCalendarId : id,
-      'summary': metadata.title,
-      'user': userId,
-      'source': source.name.toUpperCase(),
+      'id': id,
+      'userId': userId,
+      'source': source.name,
       'providerCalendarId': providerCalendarId,
-      'isSelected': isSelected,
-      'isPrimary': isPrimary,
       'metadata': metadata.toJson(),
       'preferences': preferences.toJson(),
       'sync': sync.toJson(),
-      'events': eventCount,
-      'email': email,
+      'syncToken': syncToken,
+      'isSelected': isSelected,
+      'isPrimary': isPrimary,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
-
-  // Helper for legacy API support during migration
-  factory Calendar.fromLegacyJson(Map<String, dynamic> json) {
-    return Calendar(
-      id: json['id'] ?? '',
-      userId: json['user'] ?? '',
-      source: _parseSource(json['sourceCalendar'] ?? 'Google'),
-      providerCalendarId: json['calendarId'] ?? '',
-      email: json['email'] ?? '',
-      isSelected: json['isSelected'] ?? false,
-      isPrimary: json['isPrimary'] ?? false,
-      metadata: CalendarMetadata(
-        title: json['title'] ?? '',
-        description: json['description'],
-        timeZone: json['timeZone'],
-        color: _parseColor(json['calendarColor']),
-        defaultReminders: (json['defaultReminders'] as List?)
-                ?.map((r) => CalendarReminder.fromJson(r))
-                .toList() ??
-            [],
-        notifications: [],
-        allowedConferenceTypes: [],
-      ),
-      preferences: CalendarPreferences(
-        importSettings: CalendarImportSettings(
-          importAll: json['importAll'] ?? false,
-          importSubject: json['importSubject'] ?? false,
-          importBody: json['importBody'] ?? false,
-          importConferenceInfo: json['importConferenceInfo'] ?? false,
-          importOrganizer: json['importOrganizer'] ?? false,
-          importRecipients: json['importRecipients'] ?? false,
-        ),
-        category: json['category'],
-        userColor: _parseColor(json['catColor']),
-      ),
-      sync: CalendarSyncInfo(
-        etag: json['etag'],
-        syncToken: json['syncToken'],
-        lastSyncedAt: json['lastSyncedAt'] != null
-            ? DateTime.parse(json['lastSyncedAt']).toLocal()
-            : null,
-      ),
-    );
-  }
-
-  factory Calendar.fromMicrosoftJson(Map<String, dynamic> json) {
-    return Calendar(
-      id: '', // This will be set by the backend
-      userId: '', // This will be set by the backend
-      source: CalendarSource.outlook,
-      providerCalendarId: json['id'] ?? '',
-      email: '', // This will be set by the backend
-      isSelected: true,
-      isPrimary: json['isDefaultCalendar'] ?? false,
-      metadata: CalendarMetadata(
-        title: json['name'] ?? json['summary'] ?? 'Unknown Calendar',
-        description: null, // Microsoft doesn't provide description in calendar list
-        timeZone: null, // Will be filled later from detailed calendar info
-        color: _parseColor(json['hexColor'] ?? json['backgroundColor']),
-        defaultReminders: [], // Will be filled from calendar settings
-        notifications: [],
-        allowedConferenceTypes: [],
-      ),
-      preferences: CalendarPreferences(
-        importSettings: CalendarImportSettings(
-          importAll: false,
-          importSubject: true,
-          importBody: false,
-          importConferenceInfo: false,
-          importOrganizer: false,
-          importRecipients: false,
-        ),
-        category: null,
-        userColor: null,
-      ),
-      sync: CalendarSyncInfo(
-        etag: json['changeKey'],
-        syncToken: null, // This will be set by the backend
-        lastSyncedAt: null, // This will be set by the backend
-      ),
-    );
-  }
-
-  factory Calendar.fromAppleJson(Map<String, dynamic> json) {
-    return Calendar(
-      id: '', // This will be set by the backend
-      userId: '', // This will be set by the backend
-      source: CalendarSource.apple,
-      providerCalendarId: json['id'] ?? json['calendarId'] ?? '',
-      email: '', // This will be set by the backend
-      isSelected: true,
-      isPrimary: json['isPrimary'] ?? json['isDefault'] ?? json['primary'] ?? false,
-      metadata: CalendarMetadata(
-        title: json['summary'] ?? json['title'] ?? json['name'] ?? json['displayName'] ?? 'Unknown Calendar',
-        description: json['description'],
-        timeZone: json['timeZone'],
-        color: _parseColor(json['color'] ?? json['hexColor']),
-        defaultReminders: [], // Apple calendar reminders will be filled from calendar settings
-        notifications: [],
-        allowedConferenceTypes: [],
-      ),
-      preferences: CalendarPreferences(
-        importSettings: CalendarImportSettings(
-          importAll: false,
-          importSubject: true,
-          importBody: false,
-          importConferenceInfo: false,
-          importOrganizer: false,
-          importRecipients: false,
-        ),
-        category: null,
-        userColor: null,
-      ),
-      sync: CalendarSyncInfo(
-        etag: json['etag'] ?? json['syncTag'],
-        syncToken: null, // This will be set by the backend
-        lastSyncedAt: null, // This will be set by the backend
-      ),
-    );
-  }
-
-  factory Calendar.fromGoogleJson(Map<String, dynamic> json) {
-    return Calendar(
-      id: '', // This will be set by the backend
-      userId: '', // This will be set by the backend
-      source: CalendarSource.google,
-      providerCalendarId: json['id'] ?? '',
-      email: '', // This will be set by the backend
-      isSelected: true,
-      isPrimary: json['primary'] ?? false,
-      metadata: CalendarMetadata(
-        title: json.containsKey('summary') ? json['summary'] : 'Unknown Calendar',
-        description: json['description'],
-        timeZone: json['timeZone'],
-        color: _parseColor(json['backgroundColor']),
-        defaultReminders: (json['defaultReminders'] as List?)
-                ?.map((r) => CalendarReminder.fromJson(r))
-                .toList() ??
-            [],
-        notifications: [],
-        allowedConferenceTypes: [],
-      ),
-      preferences: CalendarPreferences(
-        importSettings: CalendarImportSettings(
-          importAll: false,
-          importSubject: true,
-          importBody: false,
-          importConferenceInfo: false,
-          importOrganizer: false,
-          importRecipients: false,
-        ),
-        category: null,
-        userColor: null,
-      ),
-      sync: CalendarSyncInfo(
-        etag: json['etag'],
-        syncToken: null, // This will be set by the backend
-        lastSyncedAt: null, // This will be set by the backend
-      ),
-    );
-  }
-
   
   static Color _parseColor(String? hexColor) {
     hexColor = hexColor?.replaceAll('#', '');
@@ -320,7 +133,7 @@ class CalendarMetadata {
       'title': title,
       'description': description,
       'timeZone': timeZone,
-      'color': '#${color.toARGB32().toRadixString(16).padLeft(8, '0')}',
+      'color': '#${color.value.toRadixString(16).padLeft(8, '0')}',
       'defaultReminders': defaultReminders.map((r) => r.toJson()).toList(),
       'notifications': notifications.map((n) => n.toJson()).toList(),
       'allowedConferenceTypes': allowedConferenceTypes,
@@ -354,21 +167,9 @@ class CalendarPreferences {
       'importSettings': importSettings.toJson(),
       'category': category,
       'color': userColor != null
-          ? '#${userColor!.toARGB32().toRadixString(16).padLeft(8, '0')}'
+          ? '#${userColor!.value.toRadixString(16).padLeft(8, '0')}'
           : null,
     };
-  }
-
-  CalendarPreferences copyWith({
-    CalendarImportSettings? importSettings,
-    String? category,
-    Color? userColor,
-  }) {
-    return CalendarPreferences(
-      importSettings: importSettings ?? this.importSettings,
-      category: category ?? this.category,
-      userColor: userColor ?? this.userColor,
-    );
   }
 }
 
@@ -503,79 +304,8 @@ class CalendarImportSettings {
       'importRecipients': importRecipients,
     };
   }
-
-  CalendarImportSettings copyWith({
-    bool? importAll,
-    bool? importSubject,
-    bool? importBody,
-    bool? importConferenceInfo,
-    bool? importOrganizer,
-    bool? importRecipients,
-  }) {
-    return CalendarImportSettings(
-      importAll: importAll ?? this.importAll,
-      importSubject: importSubject ?? this.importSubject,
-      importBody: importBody ?? this.importBody,
-      importConferenceInfo: importConferenceInfo ?? this.importConferenceInfo,
-      importOrganizer: importOrganizer ?? this.importOrganizer,
-      importRecipients: importRecipients ?? this.importRecipients,
-    );
-  }
 }
 
 enum ReminderMethod { email, popup, sms }
 
 enum NotificationType { eventCreation, eventChange, eventCancellation }
-
-class CalendarPage {
-  final List<Calendar> calendars;
-  final String? nextPageToken;
-  final bool hasMore;
-  final String? syncToken;
-  final int totalItems;
-
-  CalendarPage({
-    required this.calendars,
-    this.nextPageToken,
-    this.hasMore = false,
-    this.syncToken,
-    this.totalItems = 0,
-  });
-
-  factory CalendarPage.fromJson(Map<String, dynamic> json) {
-    return CalendarPage(
-      calendars: (json['calendars'] as List)
-          .map((json) => Calendar.fromJson(json))
-          .toList(),
-      nextPageToken: json['nextPageToken'],
-      hasMore: json['hasMore'] ?? false,
-      syncToken: json['syncToken'],
-      totalItems: json['totalItems'] ?? 0,
-    );
-  }
-}
-
-class CalendarDelta {
-  final List<Calendar> changes;
-  final List<String> deletedCalendarIds;
-  final String newSyncToken;
-  final bool hasMoreChanges;
-
-  CalendarDelta({
-    required this.changes,
-    required this.deletedCalendarIds,
-    required this.newSyncToken,
-    this.hasMoreChanges = false,
-  });
-
-  factory CalendarDelta.fromJson(Map<String, dynamic> json) {
-    return CalendarDelta(
-      changes: (json['changes'] as List)
-          .map((json) => Calendar.fromJson(json))
-          .toList(),
-      deletedCalendarIds: (json['deleted'] as List?)?.cast<String>() ?? [],
-      newSyncToken: json['newSyncToken'],
-      hasMoreChanges: json['hasMoreChanges'] ?? false,
-    );
-  }
-}

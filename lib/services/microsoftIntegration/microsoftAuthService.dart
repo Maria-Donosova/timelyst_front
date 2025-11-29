@@ -72,83 +72,39 @@ class MicrosoftAuthService {
   Future<Map<String, dynamic>> sendAuthCodeToBackend(String authCode) async {
     try {
       final authToken = await _authService.getAuthToken();
-      final maskedToken = (authToken?.length ?? 0) > 10 ? '${authToken?.substring(0, 10)}...' : authToken;
-
+      
       // Load code verifier from secure storage if not in memory
       if (_codeVerifier == null) {
         _codeVerifier = await _secureStorage.read(key: _codeVerifierKey);
-        print('🔍 [MicrosoftAuthService] Loaded code verifier from secure storage');
       }
-
-      // Log PKCE state for debugging
-      print('🔍 [MicrosoftAuthService] Sending auth code to backend');
-      print('🔍 [MicrosoftAuthService] Code verifier present: ${_codeVerifier != null}');
-      print('🔍 [MicrosoftAuthService] Auth token present: ${authToken != null}');
 
       final body = {
         'code': authCode,
-        'codeVerifier': _codeVerifier, // Include PKCE code verifier
-        'redirectUri': 'https://timelyst-back.fly.dev/microsoft/callback',
+        'codeVerifier': _codeVerifier, // Include PKCE code verifier just in case
+        'redirectUri': 'https://timelyst-back.fly.dev/microsoft/callback', // Keep this or update if needed
       };
 
       final response = await _apiClient.post(
-        Config.backendMicrosoftAuth,
+        Config.backendMicrosoftConnect,
         body: body,
         token: authToken,
       );
 
-      print('🔍 [MicrosoftAuthService] Backend response status: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-
-        // Extract calendars from the unified response
-        List<Calendar> calendars = [];
-        if (responseData['calendars'] != null) {
-          final calendarsData = responseData['calendars'] as List;
-          calendars = <Calendar>[];
-          for (var item in calendarsData) {
-            if (item is Map<String, dynamic>) {
-              calendars.add(Calendar.fromMicrosoftJson(item));
-            } else {
-              print('❌ [MicrosoftAuthService] Found invalid item in calendars list: $item');
-            }
-          }
-        } else {
-          print('⚠️ [MicrosoftAuthService] No calendars found in backend response');
-        }
-
-        // Get email from backend response, fallback to Microsoft Graph if not provided
-        String? email = responseData['email'];
-        if (email == null) {
-          print('⚠️ [MicrosoftAuthService] Email not found in backend response');
-          // Could implement Microsoft Graph API call here as fallback
-        }
-
+        
         // Clear PKCE state after successful authentication
         clearAuthState();
 
         return {
           'success': true,
-          'message': 'Microsoft auth successful',
-          'email': email,
-          'data': responseData,
-          'calendars': calendars,
+          'message': responseData['message'] ?? 'Microsoft account connected',
         };
       } else {
-        String errorMessage = 'Status ${response.statusCode}';
-        try {
-          final errorData = jsonDecode(response.body);
-          errorMessage = errorData['message'] ?? errorData['error'] ?? errorMessage;
-          print('❌ [MicrosoftAuthService] Backend error details: $errorData');
-        } catch (e) {
-          print('❌ [MicrosoftAuthService] Backend error (raw): ${response.body}');
-        }
         print('❌ [MicrosoftAuthService] Backend request failed with status: ${response.statusCode}');
         return {
           'success': false,
-          'message': 'Failed to authenticate with Microsoft: $errorMessage',
-          'statusCode': response.statusCode,
+          'message': 'Failed to connect Microsoft account: ${response.statusCode}',
         };
       }
     } catch (e) {
@@ -156,7 +112,6 @@ class MicrosoftAuthService {
       return {
         'success': false,
         'message': 'Failed to send auth code to backend: $e',
-        'error': e.toString(),
       };
     }
   }

@@ -153,50 +153,6 @@ class EventProvider with ChangeNotifier {
     );
   }
 
-  
-
-  Future<void> fetchDayEvents() async {
-    if (_authService == null) return;
-    final authToken = await _authService!.getAuthToken();
-    final userId = await _authService!.getUserId();
-    if (authToken == null || userId == null) return;
-
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      final dayEvents = await EventService.fetchDayEvents(userId, authToken);
-      _updateEvents(dayEvents);
-      _errorMessage = '';
-    } catch (e) {
-      _errorMessage = 'Failed to fetch day events: $e';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> fetchTimeEvents() async {
-    if (_authService == null) return;
-    final authToken = await _authService!.getAuthToken();
-    final userId = await _authService!.getUserId();
-    if (authToken == null || userId == null) return;
-
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      final timeEvents = await EventService.fetchTimeEvents(userId, authToken);
-      _updateEvents(timeEvents);
-      _errorMessage = '';
-    } catch (e) {
-      _errorMessage = 'Failed to fetch time events: $e';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
   Future<void> fetchAllEvents({
     bool forceFullRefresh = false,
     DateTime? startDate,
@@ -267,10 +223,12 @@ class EventProvider with ChangeNotifier {
       final timeout = customTimeout ?? 
                      (viewType == 'parallel' ? _parallelEventTimeout : _defaultEventTimeout);
       
-      final backendResults = await Future.wait([
-        EventService.fetchDayEvents(userId, authToken, startDate: startDate, endDate: endDate),
-        EventService.fetchTimeEvents(userId, authToken, startDate: startDate, endDate: endDate),
-      ]).timeout(
+      final fetchedEvents = await EventService.fetchEvents(
+        userId, 
+        authToken, 
+        startDate: startDate, 
+        endDate: endDate
+      ).timeout(
         timeout,
         onTimeout: () {
           print('⏰ [EventProvider] API calls timed out after ${timeout.inSeconds} seconds');
@@ -282,41 +240,16 @@ class EventProvider with ChangeNotifier {
       final apiDuration = apiEndTime.difference(apiStartTime);
       print('✅ [EventProvider] Backend API calls completed in ${apiDuration.inMilliseconds}ms');
 
-      final dayEvents = backendResults[0];
-      final timeEvents = backendResults[1];
-
       if (_debugLogging) {
-        print('🔍 [EventProvider] Fetched ${dayEvents.length} day events and ${timeEvents.length} time events');
-        
-        // Debug: Log events by source and time
-        final now = DateTime.now();
-        final todayStart = DateTime(now.year, now.month, now.day);
-        final todayEnd = todayStart.add(Duration(days: 1));
-        
-        final allEvents = [...dayEvents, ...timeEvents];
-        final todayEvents = allEvents.where((event) {
-          return event.startTime.isAfter(todayStart) && event.startTime.isBefore(todayEnd);
-        }).toList();
-        
-        print('📅 [EventProvider] Today\'s events (${todayEvents.length}):');
-        for (int i = 0; i < todayEvents.length && i < 5; i++) { // Limit to first 5 for brevity
-          final event = todayEvents[i];
-          final timeStr = event.isAllDay ? 'All Day' : '${event.startTime.hour.toString().padLeft(2, '0')}:${event.startTime.minute.toString().padLeft(2, '0')}';
-          print('  [$i] $timeStr - "${event.title}" (source: ${event.userCalendars})');
-        }
-        if (todayEvents.length > 5) {
-          print('  ... and ${todayEvents.length - 5} more');
-        }
+        print('🔍 [EventProvider] Fetched ${fetchedEvents.length} events');
       }
       
-      final allEvents = [...dayEvents, ...timeEvents];
-
       // Sync events for the specific date range requested
       if (startDate != null && endDate != null) {
-        _syncEventsForDateRange(allEvents, startDate, endDate);
+        _syncEventsForDateRange(fetchedEvents, startDate, endDate);
       } else {
         // For backward compatibility, replace all events if no date range specified
-        _syncEventsIncremental(allEvents);
+        _syncEventsIncremental(fetchedEvents);
       }
 
       // Store current events as previous for next comparison
@@ -325,7 +258,7 @@ class EventProvider with ChangeNotifier {
       // Cache the results if we have a specific date range
       if (startDate != null && endDate != null) {
         final cacheKey = _generateCacheKey(startDate, endDate);
-        _cacheEvents(cacheKey, allEvents);
+        _cacheEvents(cacheKey, fetchedEvents);
       }
 
       _errorMessage = '';
@@ -347,40 +280,13 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  Future<CustomAppointment?> fetchEvent(String id, {bool isAllDay = false}) async {
-    if (_authService == null) return null;
-    final authToken = await _authService!.getAuthToken();
-    if (authToken == null) return null;
-
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      CustomAppointment event;
-      if (isAllDay) {
-        event = await EventService.fetchTimeEvent(id, authToken);
-      } else {
-        event = await EventService.fetchTimeEvent(id, authToken);
-      }
-      _updateSingleEvent(event);
-      _errorMessage = '';
-      return event;
-    } catch (e) {
-      _errorMessage = 'Failed to fetch event: $e';
-      return null;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
   void addSingleEvent(CustomAppointment event) {
     _updateSingleEvent(event);
     notifyListeners();
   }
 
-  Future<CustomAppointment?> createDayEvent(
-      Map<String, dynamic> dayEventInput) async {
+  Future<CustomAppointment?> createEvent(
+      Map<String, dynamic> eventInput) async {
     if (_authService == null) return null;
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return null;
@@ -390,13 +296,13 @@ class EventProvider with ChangeNotifier {
 
     try {
       final newEvent =
-          await EventService.createDayEvent(dayEventInput, authToken);
+          await EventService.createEvent(eventInput, authToken);
       _events.add(newEvent);
       _errorMessage = '';
       notifyListeners();
       return newEvent;
     } catch (e) {
-      _errorMessage = 'Failed to create day event: $e';
+      _errorMessage = 'Failed to create event: $e';
       notifyListeners();
       return null;
     } finally {
@@ -405,56 +311,8 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  Future<CustomAppointment?> createTimeEvent(
-      Map<String, dynamic> timeEventInput) async {
-    if (_authService == null) return null;
-    final authToken = await _authService!.getAuthToken();
-    if (authToken == null) return null;
-
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      final newEvent =
-          await EventService.createTimeEvent(timeEventInput, authToken);
-      _events.add(newEvent);
-      _errorMessage = '';
-      return newEvent;
-    } catch (e) {
-      _errorMessage = 'Failed to create time event: $e';
-      return null;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<CustomAppointment?> updateDayEvent(
-      String id, Map<String, dynamic> dayEventInput) async {
-    if (_authService == null) return null;
-    final authToken = await _authService!.getAuthToken();
-    if (authToken == null) return null;
-
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      final updatedEvent =
-          await EventService.updateDayEvent(id, dayEventInput, authToken);
-      _updateSingleEvent(updatedEvent);
-      _errorMessage = '';
-      return updatedEvent;
-    } catch (e) {
-      _errorMessage = 'Failed to update day event: $e';
-      return null;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<CustomAppointment?> updateTimeEvent(
-      String id, Map<String, dynamic> timeEventInput) async {
+  Future<CustomAppointment?> updateEvent(
+      String id, Map<String, dynamic> eventInput) async {
     if (_authService == null) return null;
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return null;
@@ -470,12 +328,12 @@ class EventProvider with ChangeNotifier {
 
     try {
       final updatedEvent =
-          await EventService.updateTimeEvent(id, timeEventInput, authToken);
+          await EventService.updateEvent(id, eventInput, authToken);
       _updateSingleEvent(updatedEvent);
       _errorMessage = '';
       return updatedEvent;
     } catch (e) {
-      _errorMessage = 'Failed to update time event: $e';
+      _errorMessage = 'Failed to update event: $e';
       return null;
     } finally {
       _isLoading = false;
@@ -483,7 +341,7 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> deleteDayEvent(String id) async {
+  Future<bool> deleteEvent(String id) async {
     if (_authService == null) return false;
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return false;
@@ -492,38 +350,12 @@ class EventProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final success = await EventService.deleteDayEvent(id, authToken);
-      if (success) {
-        _events.removeWhere((event) => event.id == id);
-        _errorMessage = '';
-      }
-      return success;
+      await EventService.deleteEvent(id, authToken);
+      _events.removeWhere((event) => event.id == id);
+      _errorMessage = '';
+      return true;
     } catch (e) {
-      _errorMessage = 'Failed to delete day event: $e';
-      return false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<bool> deleteTimeEvent(String id) async {
-    if (_authService == null) return false;
-    final authToken = await _authService!.getAuthToken();
-    if (authToken == null) return false;
-
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      final success = await EventService.deleteTimeEvent(id, authToken);
-      if (success) {
-        _events.removeWhere((event) => event.id == id);
-        _errorMessage = '';
-      }
-      return success;
-    } catch (e) {
-      _errorMessage = 'Failed to delete time event: $e';
+      _errorMessage = 'Failed to delete event: $e';
       return false;
     } finally {
       _isLoading = false;
@@ -714,12 +546,11 @@ class EventProvider with ChangeNotifier {
 
   /// Updates an existing event in the local state (for immediate UI response)
   /// This method is used for drag-and-drop operations and other local updates
-  void updateEvent(CustomAppointment oldEvent, CustomAppointment newEvent) {
+  void updateEventLocal(CustomAppointment oldEvent, CustomAppointment newEvent) {
     final index = _events.indexWhere((event) => event.id == oldEvent.id);
     if (index >= 0) {
       _events[index] = newEvent;
       notifyListeners();
-    } else {
     }
   }
 

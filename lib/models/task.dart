@@ -1,36 +1,51 @@
 class Task {
-  final String taskId;
+  final String id;
+  final String userId;
   final String title;
-  String status;
-  final String task_type;
-  final String category;
+  final String description;
+  final DateTime? dueDate;
+  final bool isCompleted;
+  final String priority;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   Task({
-    this.taskId = '',
+    required this.id,
+    required this.userId,
     required this.title,
-    required this.status,
-    this.task_type = "Task",
-    this.category = 'Work',
+    required this.description,
+    this.dueDate,
+    required this.isCompleted,
+    required this.priority,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
-  // Convert JSON to Task object
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
-      taskId: json['id'],
+      id: json['id'],
+      userId: json['userId'],
       title: json['title'],
-      status: json['status'],
-      task_type: json['task_type'],
-      category: json['category'],
+      description: json['description'] ?? '',
+      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
+      isCompleted: json['isCompleted'] ?? false,
+      priority: json['priority'] ?? 'MEDIUM',
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
     );
   }
 
-  // Convert Task object to JSON
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
+      'userId': userId,
       'title': title,
-      'status': status,
-      'task_type': task_type,
-      'category': category,
+      'description': description,
+      'dueDate': dueDate?.toIso8601String(),
+      'isCompleted': isCompleted,
+      'priority': priority,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 }

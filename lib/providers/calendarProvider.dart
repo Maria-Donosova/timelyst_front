@@ -14,10 +14,6 @@ class CalendarProvider with ChangeNotifier {
   Calendar? _primaryCalendar;
   bool _isLoading = false;
   String? _errorMessage;
-  int _totalCount = 0;
-  bool _hasMore = true;
-  int _currentOffset = 0;
-  final int _pageSize = 20;
   AuthService _authService;
   String? _userId;
 
@@ -47,8 +43,6 @@ class CalendarProvider with ChangeNotifier {
   Calendar? get primaryCalendar => _primaryCalendar;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  int get totalCount => _totalCount;
-  bool get hasMore => _hasMore;
 
   // Initialize with user ID
   Future<void> initialize(String userId) async {
@@ -74,22 +68,6 @@ class CalendarProvider with ChangeNotifier {
     _resetState();
     await _fetchCalendars();
     _identifyPrimaryCalendar();
-  }
-
-  // Pagination support
-  Future<void> loadMoreCalendars() async {
-    // Auto-initialize userId from AuthService if not set
-    if (_userId == null) {
-      _userId = await _authService.getUserId();
-      if (_userId == null) {
-        print('[CalendarProvider] Cannot load more calendars: userId is null');
-        return;
-      }
-      print('[CalendarProvider] Auto-initialized userId: $_userId');
-    }
-    if (!_hasMore || _isLoading) return;
-    _currentOffset += _pageSize;
-    await _fetchCalendars();
   }
 
   // Refresh data
@@ -134,30 +112,18 @@ class CalendarProvider with ChangeNotifier {
 
       final authToken = await _authService.getAuthToken();
       if (authToken == null)
-        throw CalendarServiceException('User not authenticated');
+        throw Exception('User not authenticated');
 
-      // Here you would call your event fetching service
-      // This is a placeholder - implement according to your actual event service
-      // final events = await CalendarEventsService.fetchEvents(
-      //   calendarId: calendarId,
-      //   authToken: authToken,
-      //   startDate: startDate,
-      //   endDate: endDate,
-      // );
-
-      // For now, we'll use the events from the calendar model
+      // For now, we'll use the events from the calendar model if available, or empty list
+      // Since fetchUserCalendars might not return events anymore
       final calendar = _calendars.firstWhere((c) => c.id == calendarId);
-      final events = calendar.eventCount
-          .map((e) => CalendarEvent.fromJson(jsonDecode(e)))
-          .toList();
+      // Assuming events are fetched separately via EventService
+      final events = <CalendarEvent>[]; 
 
       _eventsCache[calendarId] = events;
       _lastEventFetchTime[calendarId] = now;
 
       return events;
-    } on CalendarServiceException catch (e) {
-      _errorMessage = e.message;
-      return null;
     } catch (e) {
       _errorMessage = 'Failed to fetch events: ${e.toString()}';
       return null;
@@ -168,14 +134,14 @@ class CalendarProvider with ChangeNotifier {
   }
 
   // CRUD Operations
-  Future<Calendar?> createCalendar(CalendarInput input) async {
+  Future<Calendar?> createCalendar(Map<String, dynamic> input) async {
     try {
       _isLoading = true;
       notifyListeners();
 
       final authToken = await _authService.getAuthToken();
       if (authToken == null)
-        throw CalendarServiceException('User not authenticated');
+        throw Exception('User not authenticated');
 
       final newCalendar = await CalendarsService.createCalendar(
         authToken: authToken,
@@ -186,9 +152,6 @@ class CalendarProvider with ChangeNotifier {
       if (newCalendar.isPrimary) _primaryCalendar = newCalendar;
 
       return newCalendar;
-    } on CalendarServiceException catch (e) {
-      _errorMessage = e.message;
-      return null;
     } catch (e) {
       _errorMessage = 'Failed to create calendar: ${e.toString()}';
       return null;
@@ -200,7 +163,7 @@ class CalendarProvider with ChangeNotifier {
 
   Future<Calendar?> updateCalendar({
     required String calendarId,
-    required CalendarInput input,
+    required Map<String, dynamic> input,
   }) async {
     try {
       _isLoading = true;
@@ -208,7 +171,7 @@ class CalendarProvider with ChangeNotifier {
 
       final authToken = await _authService.getAuthToken();
       if (authToken == null)
-        throw CalendarServiceException('User not authenticated');
+        throw Exception('User not authenticated');
 
       final updatedCalendar = await CalendarsService.updateCalendar(
         calendarId: calendarId,
@@ -218,9 +181,6 @@ class CalendarProvider with ChangeNotifier {
 
       _updateCalendarInState(updatedCalendar);
       return updatedCalendar;
-    } on CalendarServiceException catch (e) {
-      _errorMessage = e.message;
-      return null;
     } catch (e) {
       _errorMessage = 'Failed to update calendar: ${e.toString()}';
       return null;
@@ -242,24 +202,17 @@ class CalendarProvider with ChangeNotifier {
         return false;
       }
 
-      print('[CalendarProvider] Found calendar: ${calendar.metadata.title}, current isSelected=${calendar.isSelected}');
-
       _isLoading = true;
       notifyListeners();
 
       final authToken = await _authService.getAuthToken();
       if (authToken == null) {
-        print('[CalendarProvider] ❌ User not authenticated');
-        throw CalendarServiceException('User not authenticated');
+        throw Exception('User not authenticated');
       }
 
-      // Create input for the dedicated updateCalendarSelection mutation
-      final input = UpdateCalendarInput(
-        isSelected: isSelected,
-      );
+      final input = {'isSelected': isSelected};
 
-      print('[CalendarProvider] Calling updateCalendarSelection with input: ${input.toJson()}');
-      final updatedCalendar = await CalendarsService.updateCalendarSelection(
+      final updatedCalendar = await CalendarsService.updateCalendar(
         calendarId: calendarId,
         authToken: authToken,
         input: input,
@@ -268,10 +221,6 @@ class CalendarProvider with ChangeNotifier {
       _updateCalendarInState(updatedCalendar);
       print('[CalendarProvider] ✅ Calendar updated successfully, new isSelected=${updatedCalendar.isSelected}');
       return true;
-    } on CalendarServiceException catch (e) {
-      print('[CalendarProvider] ❌ CalendarServiceException: ${e.message}');
-      _errorMessage = e.message;
-      return false;
     } catch (e) {
       print('[CalendarProvider] ❌ Exception in setCalendarSelection: $e');
       _errorMessage = 'Failed to update calendar selection: ${e.toString()}';
@@ -289,27 +238,22 @@ class CalendarProvider with ChangeNotifier {
 
       final authToken = await _authService.getAuthToken();
       if (authToken == null)
-        throw CalendarServiceException('User not authenticated');
+        throw Exception('User not authenticated');
 
-      final success = await CalendarsService.deleteCalendar(
+      await CalendarsService.deleteCalendar(
         calendarId: calendarId,
         authToken: authToken,
       );
 
-      if (success) {
-        _calendars.removeWhere((calendar) => calendar.id == calendarId);
-        _eventsCache.remove(calendarId);
-        _lastEventFetchTime.remove(calendarId);
+      _calendars.removeWhere((calendar) => calendar.id == calendarId);
+      _eventsCache.remove(calendarId);
+      _lastEventFetchTime.remove(calendarId);
 
-        if (_primaryCalendar?.id == calendarId) {
-          _primaryCalendar = _calendars.firstWhereOrNull((c) => c.isPrimary);
-        }
+      if (_primaryCalendar?.id == calendarId) {
+        _primaryCalendar = _calendars.firstWhereOrNull((c) => c.isPrimary);
       }
 
-      return success;
-    } on CalendarServiceException catch (e) {
-      _errorMessage = e.message;
-      return false;
+      return true;
     } catch (e) {
       _errorMessage = 'Failed to delete calendar: ${e.toString()}';
       return false;
@@ -322,8 +266,6 @@ class CalendarProvider with ChangeNotifier {
   // Helper methods
   void _resetState() {
     _calendars = [];
-    _currentOffset = 0;
-    _hasMore = true;
     _errorMessage = null;
     _primaryCalendar = null;
     notifyListeners();
@@ -336,36 +278,19 @@ class CalendarProvider with ChangeNotifier {
 
       final authToken = await _authService.getAuthToken();
       if (authToken == null)
-        throw CalendarServiceException('User not authenticated');
+        throw Exception('User not authenticated');
 
-      final result = await CalendarsService.fetchUserCalendars(
-        userId: _userId!, // Now passing the user ID
+      final calendars = await CalendarsService.fetchUserCalendars(
         authToken: authToken,
-        limit: _pageSize,
-        offset: _currentOffset,
       );
 
       if (refresh) {
-        _calendars = result.calendars;
+        _calendars = calendars;
       } else {
-        _calendars.addAll(result.calendars);
+        _calendars.addAll(calendars);
       }
 
-      _totalCount = result.totalCount;
-      _hasMore = result.hasMore;
       _errorMessage = null;
-    } on GoogleCalendarException catch (e) {
-      _errorMessage = e.message;
-      if (e.statusCode == 401 || e.statusCode == 403) {
-        // Trigger Google re-authentication notification
-        _onGoogleAuthError?.call();
-      }
-    } on CalendarServiceException catch (e) {
-      _errorMessage = e.message;
-      if (e.statusCode == 401 || e.statusCode == 403) {
-        // Trigger Google re-authentication notification
-        _onGoogleAuthError?.call();
-      }
     } catch (e) {
       _errorMessage = 'Failed to fetch calendars: ${e.toString()}';
     } finally {
