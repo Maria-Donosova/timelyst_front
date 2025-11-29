@@ -131,7 +131,6 @@ class AppleCalDAVManager {
             title: calMap['metadata']?['title'] ?? calMap['title'] ?? 'Unknown',
             color: calMap['metadata']?['color'] ?? calMap['color'] ?? '#000000',
             timeZone: calMap['metadata']?['timeZone'] ?? 'UTC',
-            accessRole: calMap['metadata']?['accessRole'] ?? 'owner',
           ),
           preferences: CalendarPreferences(
             category: calMap['category'],
@@ -144,14 +143,10 @@ class AppleCalDAVManager {
               importRecipients: calMap['importRecipients'] ?? false,
             ),
           ),
-          sync: CalendarSync(
+          sync: CalendarSyncInfo(
             syncToken: calMap['syncToken'],
-            lastSync: calMap['lastSync'] != null
+            lastSyncedAt: calMap['lastSync'] != null
                 ? DateTime.tryParse(calMap['lastSync'])
-                : null,
-            watchChannelId: calMap['watchChannelId'],
-            watchChannelExpiration: calMap['watchChannelExpiration'] != null
-                ? DateTime.tryParse(calMap['watchChannelExpiration'])
                 : null,
           ),
           isSelected: true,

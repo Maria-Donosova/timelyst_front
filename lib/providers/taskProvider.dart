@@ -80,6 +80,7 @@ class TaskProvider with ChangeNotifier {
     final newTask = Task(
       id: tempId,
       userId: 'temp', // Placeholder
+      title: description,
       description: description,
       priority: priority,
       isCompleted: false,
@@ -131,6 +132,7 @@ class TaskProvider with ChangeNotifier {
     final updatedTask = Task(
       id: task.id,
       userId: task.userId,
+      title: task.title,
       description: task.description,
       priority: task.priority,
       isCompleted: true,
@@ -167,6 +169,7 @@ class TaskProvider with ChangeNotifier {
     final updatedTask = Task(
       id: taskId,
       userId: originalTask.userId,
+      title: originalTask.title,
       description: description,
       priority: priority,
       isCompleted: originalTask.isCompleted,

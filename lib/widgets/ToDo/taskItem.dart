@@ -48,6 +48,7 @@ class _TaskItemState extends State<TaskItem> {
                   task: Task(
                     id: widget.id,
                     userId: '', // Placeholder
+                    title: widget.title,
                     description: widget.title,
                     priority: widget.category,
                     isCompleted: widget.status == 'completed',
