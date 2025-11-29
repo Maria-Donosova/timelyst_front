@@ -40,6 +40,8 @@ class EventService {
             event_title
             start
             end
+            start_timeZone
+            end_timeZone
             is_AllDay
             recurrenceId
             recurrenceRule
@@ -131,6 +133,8 @@ class EventService {
           event_title
           start
           end
+          start_timeZone
+          end_timeZone
           timeZone
           is_AllDay
           recurrenceId
@@ -224,6 +228,8 @@ class EventService {
             event_title
             start
             end
+            start_timeZone
+            end_timeZone
             timeZone
             is_AllDay
             recurrenceId
@@ -283,9 +289,14 @@ class EventService {
           json['user_id'] = json['user_id']['_id'];
         }
 
-        // Add debug logging to see the structure of each event before mapping
-        // print(
-        //     'Processing time event: ${json['id']} with title: ${json['event_title']}');
+        print('📥 [EventService.fetchTimeEvents] Event from backend:');
+        print('  - id: ${json['id']}');
+        print('  - title: ${json['event_title']}');
+        print('  - start: ${json['start']}');
+        print('  - end: ${json['end']}');
+        print('  - start_timeZone: ${json['start_timeZone']}');
+        print('  - end_timeZone: ${json['end_timeZone']}');
+        print('  - timeZone: ${json['timeZone']}');
 
         return TimeEvent.fromJson(json);
       }).toList();
@@ -320,9 +331,14 @@ class EventService {
   // Create a TimeEvent and map it to CustomAppointment
   static Future<CustomAppointment> createTimeEvent(
       Map<String, dynamic> timeEventInput, String authToken) async {
-    // print("Entering createTimeEvent in EventService");
-    // print("TimeEventInput: $timeEventInput");
-    // print("AuthToken in Event Service: $authToken");
+    print("📨 [EventService.createTimeEvent] Entering createTimeEvent");
+    print("📨 [EventService.createTimeEvent] TimeEventInput received:");
+    print("  - start: ${timeEventInput['start']}");
+    print("  - end: ${timeEventInput['end']}");
+    print("  - start_timeZone: ${timeEventInput['start_timeZone']}");
+    print("  - end_timeZone: ${timeEventInput['end_timeZone']}");
+    print("  - timeZone: ${timeEventInput['timeZone']}");
+    print("  - Full input: $timeEventInput");
 
     // Ensure start and end dates are properly formatted as strings, not nested objects
     // if (timeEventInput['start'] != null) {
@@ -393,6 +409,10 @@ class EventService {
         throw Exception(
             'Authentication token is required to create a time event');
       }
+
+      print("📡 [EventService.createTimeEvent] Sending to backend:");
+      print("  - URL: ${Config.backendGraphqlURL}");
+      print("  - Variables: ${{'timeEventInput': timeEventInput}}");
 
       // Send the HTTP POST request
       final response = await _apiClient.post(
@@ -471,8 +491,20 @@ class EventService {
                 createTimeEventData['user_id']['_id'];
           }
 
+          print("📥 [EventService.createTimeEvent] Response from backend:");
+          print("  - start: ${createTimeEventData['start']}");
+          print("  - end: ${createTimeEventData['end']}");
+          print("  - start_timeZone: ${createTimeEventData['start_timeZone']}");
+          print("  - end_timeZone: ${createTimeEventData['end_timeZone']}");
+          print("  - timeZone: ${createTimeEventData['timeZone']}");
+
           final TimeEvent timeEvent = TimeEvent.fromJson(createTimeEventData);
-          // print('Time event created successfully: ${timeEvent.id}');
+          print('✅ [EventService.createTimeEvent] Time event created successfully: ${timeEvent.id}');
+          print('  - timeEvent.start: ${timeEvent.start}');
+          print('  - timeEvent.end: ${timeEvent.end}');
+          print('  - timeEvent.startTimeZone: ${timeEvent.startTimeZone}');
+          print('  - timeEvent.endTimeZone: ${timeEvent.endTimeZone}');
+
           final customAppointment =
               EventMapper.mapTimeEventToCustomAppointment(timeEvent);
           // Remove the Provider line that's causing the error
@@ -548,7 +580,6 @@ class EventService {
           end
           start_timeZone
           end_timeZone
-          timeZone
           is_AllDay
           recurrenceId
           recurrenceRule
@@ -871,7 +902,6 @@ class EventService {
           end
           start_timeZone
           end_timeZone
-          timeZone
           is_AllDay
           recurrenceId
           recurrenceRule

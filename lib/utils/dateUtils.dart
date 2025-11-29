@@ -4,28 +4,73 @@ class DateTimeUtils {
   // Parse any date format (ISO string or timestamp)
   // Preserves local timezone to prevent unwanted conversions
   static DateTime parseAnyFormat(dynamic dateValue) {
-    if (dateValue == null) return DateTime.now();
+    print('🔍 [DateTimeUtils.parseAnyFormat] Parsing: $dateValue (type: ${dateValue.runtimeType})');
+
+    if (dateValue == null) {
+      print('  ⚠️ Value is null, returning DateTime.now()');
+      return DateTime.now();
+    }
 
     try {
       // Check if it's a numeric timestamp (milliseconds since epoch)
       if (dateValue is num) {
-        return DateTime.fromMillisecondsSinceEpoch(dateValue.toInt()).toLocal();
+        final result = DateTime.fromMillisecondsSinceEpoch(dateValue.toInt()).toLocal();
+        print('  ✅ Parsed as timestamp: $result');
+        return result;
       }
       if (dateValue is String && dateValue.contains(RegExp(r'^\d+$'))) {
-        return DateTime.fromMillisecondsSinceEpoch(int.parse(dateValue)).toLocal();
+        final result = DateTime.fromMillisecondsSinceEpoch(int.parse(dateValue)).toLocal();
+        print('  ✅ Parsed as string timestamp: $result');
+        return result;
       }
 
       // Parse as ISO string
       final dateString = dateValue.toString();
-      final parsedDate = DateTime.parse(dateString);
+      print('  - Original string: $dateString');
 
-      // Only convert to local if the string explicitly contains UTC indicator (Z or +00:00)
-      // Otherwise, treat it as already being in local time to prevent timezone shifts
-      if (dateString.endsWith('Z') || dateString.contains('+') || dateString.contains('-')) {
-        // Has timezone info, convert to local
-        return parsedDate.toLocal();
+      // Backend returns times with timezone offset (e.g., "2024-11-21T14:30:00-05:00")
+      // These represent the correct "wall clock time" in the event's timezone
+      // We need to preserve those time components WITHOUT timezone conversion
+
+      if (dateString.contains('+') || (dateString.contains('-') && dateString.lastIndexOf('-') > 10)) {
+        // Has timezone offset info (e.g., "+05:00" or "-05:00")
+        // Extract the datetime components directly from the string BEFORE parsing
+        // to preserve the "wall clock time" that the backend sent
+        final RegExp isoRegex = RegExp(
+          r'(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,6}))?',
+        );
+        final match = isoRegex.firstMatch(dateString);
+
+        if (match != null) {
+          final year = int.parse(match.group(1)!);
+          final month = int.parse(match.group(2)!);
+          final day = int.parse(match.group(3)!);
+          final hour = int.parse(match.group(4)!);
+          final minute = int.parse(match.group(5)!);
+          final second = int.parse(match.group(6)!);
+          final millisecond = match.group(7) != null
+            ? int.parse(match.group(7)!.padRight(3, '0').substring(0, 3))
+            : 0;
+
+          final result = DateTime(year, month, day, hour, minute, second, millisecond);
+          print('  ✅ Preserved wall clock time from backend: $result');
+          print('    - Extracted: $year-$month-$day $hour:$minute:$second');
+          return result;
+        }
+        // Fallback if regex doesn't match
+        final parsedDate = DateTime.parse(dateString);
+        print('  ⚠️ Regex failed, using fallback parse: $parsedDate');
+        return parsedDate;
+      } else if (dateString.endsWith('Z')) {
+        // UTC indicator - convert to local timezone
+        final parsedDate = DateTime.parse(dateString);
+        final result = parsedDate.toLocal();
+        print('  ✅ UTC time, converted to local: $result');
+        return result;
       } else {
         // No timezone info, treat as local time (don't convert)
+        final parsedDate = DateTime.parse(dateString);
+        print('  ✅ No timezone info, treating as local: $parsedDate');
         return parsedDate;
       }
     } catch (e) {
