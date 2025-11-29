@@ -9,7 +9,7 @@ import '../utils/apiClient.dart';
 class TasksService {
   static final ApiClient _apiClient = ApiClient();
 
-  static Future<List<Task>> fetchUserTasks(String authToken) async {
+  static Future<List<Task>> fetchUserTasks(String authToken, {bool includeDone = false}) async {
     final String query = '''
         query UserTasks {
           tasks {
@@ -40,6 +40,11 @@ class TasksService {
       final List<dynamic> tasksData = data['data']['tasks'];
       final List<Task> tasks =
           tasksData.map((task) => Task.fromJson(task)).toList();
+      
+      if (includeDone) {
+        return tasks;
+      }
+
       final List<Task> activeTasks =
           tasks.where((task) => task.status != 'done').toList();
       return activeTasks;

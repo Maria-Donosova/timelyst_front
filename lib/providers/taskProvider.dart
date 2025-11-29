@@ -9,6 +9,10 @@ class TaskProvider with ChangeNotifier {
   List<Task> _tasks = [];
   bool _isLoading = true;
   String _errorMessage = '';
+  
+  // Caching
+  DateTime? _lastFetchTime;
+  static const Duration _cacheDuration = Duration(minutes: 1);
 
   List<Task> get tasks => _tasks;
   bool get isLoading => _isLoading;
@@ -22,8 +26,18 @@ class TaskProvider with ChangeNotifier {
 
   
 
-  Future<void> fetchTasks() async {
+  Future<void> fetchTasks({bool forceRefresh = false}) async {
     print("Entered fetchTasks in TaskProvider");
+    
+    // Check cache
+    if (!forceRefresh && 
+        _lastFetchTime != null && 
+        DateTime.now().difference(_lastFetchTime!) < _cacheDuration && 
+        _tasks.isNotEmpty) {
+      print("⚡ [TaskProvider] Returning cached tasks");
+      return;
+    }
+
     if (_authService == null) {
       print("AuthService is null in TaskProvider");
       return;
@@ -46,6 +60,7 @@ class TaskProvider with ChangeNotifier {
           throw TimeoutException('Task fetching timed out', Duration(seconds: 45));
         }
       );
+      _lastFetchTime = DateTime.now();
       print("✅ [TaskProvider] Fetched ${_tasks.length} tasks successfully");
       _errorMessage = '';
     } catch (e) {
@@ -62,15 +77,30 @@ class TaskProvider with ChangeNotifier {
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return;
 
+    // Optimistic update
+    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
+    final newTask = Task(
+      taskId: tempId,
+      title: title,
+      category: category,
+      status: 'pending',
+    );
+    
+    _tasks.add(newTask);
+    notifyListeners();
+
     try {
-      final newTask = Task(
-        title: title,
-        category: category,
-        status: 'pending',
-      );
-      await TasksService.createTask(authToken, newTask);
-      await fetchTasks();
+      final createdTask = await TasksService.createTask(authToken, newTask);
+      
+      // Replace temp task with real one
+      final index = _tasks.indexWhere((t) => t.taskId == tempId);
+      if (index != -1) {
+        _tasks[index] = createdTask;
+        notifyListeners();
+      }
     } catch (e) {
+      // Revert on failure
+      _tasks.removeWhere((t) => t.taskId == tempId);
       _errorMessage = 'Failed to create task: $e';
       notifyListeners();
     }
@@ -81,15 +111,21 @@ class TaskProvider with ChangeNotifier {
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return;
 
+    // Find task to revert if needed
+    final taskIndex = _tasks.indexWhere((t) => t.taskId == taskId);
+    if (taskIndex == -1) return;
+    final task = _tasks[taskIndex];
+
+    // Optimistic update
+    _tasks.removeAt(taskIndex);
+    notifyListeners();
+
     try {
       // Use the dedicated markTaskAsDone method from TasksService
       await TasksService.markTaskAsDone(taskId, authToken);
-
-      // Remove the task from the local list since it's now done
-      // This matches the behavior in fetchUserTasks which filters out 'done' tasks
-      _tasks.removeWhere((task) => task.taskId == taskId);
-      notifyListeners();
     } catch (e) {
+      // Revert on failure
+      _tasks.insert(taskIndex, task);
       _errorMessage = 'Failed to mark task as complete: $e';
       notifyListeners();
     }
@@ -101,27 +137,30 @@ class TaskProvider with ChangeNotifier {
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return;
 
+    final index = _tasks.indexWhere((task) => task.taskId == taskId);
+    if (index == -1) return;
+    
+    final originalTask = _tasks[index];
+
+    // Create an updated task with the new values
+    final updatedTask = Task(
+      taskId: taskId,
+      title: title,
+      status: originalTask.status,
+      category: category,
+      task_type: originalTask.task_type,
+    );
+
+    // Optimistic update
+    _tasks[index] = updatedTask;
+    notifyListeners();
+
     try {
-      // Find the task to update
-      final task = _tasks.firstWhere((task) => task.taskId == taskId);
-
-      // Create an updated task with the new values
-      final updatedTask = Task(
-        taskId: taskId,
-        title: title,
-        status: task.status,
-        category: category,
-        task_type: task.task_type,
-      );
-
       // Send the update to the server
       await TasksService.updateTask(taskId, authToken, updatedTask);
-
-      // Update the local task list
-      final index = _tasks.indexWhere((task) => task.taskId == taskId);
-      _tasks[index] = updatedTask;
-      notifyListeners();
     } catch (e) {
+      // Revert on failure
+      _tasks[index] = originalTask;
       _errorMessage = 'Failed to update task: $e';
       notifyListeners();
     }
@@ -132,13 +171,19 @@ class TaskProvider with ChangeNotifier {
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return;
 
+    final index = _tasks.indexWhere((task) => task.taskId == taskId);
+    if (index == -1) return;
+    final originalTask = _tasks[index];
+
+    // Optimistic update
+    _tasks.removeAt(index);
+    notifyListeners();
+
     try {
       await TasksService.deleteTask(taskId, authToken);
-
-      // Remove the task from the local list
-      _tasks.removeWhere((task) => task.taskId == taskId);
-      notifyListeners();
     } catch (e) {
+      // Revert on failure
+      _tasks.insert(index, originalTask);
       _errorMessage = 'Failed to delete task: $e';
       notifyListeners();
     }

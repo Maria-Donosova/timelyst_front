@@ -538,7 +538,7 @@ class EventProvider with ChangeNotifier {
   }
 
   /// Syncs events for a specific date range without affecting events outside that range
-  void _syncEventsForDateRange(List<CustomAppointment> fetchedEvents, DateTime startDate, DateTime endDate) {
+  bool _syncEventsForDateRange(List<CustomAppointment> fetchedEvents, DateTime startDate, DateTime endDate) {
     final syncStartTime = DateTime.now();
     if (_debugLogging) print('🔄 [EventProvider] Starting date range sync for ${startDate.toIso8601String().substring(0, 10)} to ${endDate.toIso8601String().substring(0, 10)}');
     
@@ -572,7 +572,7 @@ class EventProvider with ChangeNotifier {
     }).toList();
     
     // Add all fetched events (they will replace any with same ID)
-    final updatedEvents = [...eventsToKeep, ...fetchedEvents];
+    // final updatedEvents = [...eventsToKeep, ...fetchedEvents];
     
     // Remove exact duplicates by ID (keep the fetched version)
     final finalEvents = <CustomAppointment>[];
@@ -607,12 +607,12 @@ class EventProvider with ChangeNotifier {
       print('📊 [EventProvider] Kept ${eventsToKeep.length} existing, added ${fetchedEvents.length} new');
     }
     
-    notifyListeners();
+    return changesMade > 0 || fetchedEvents.isNotEmpty;
   }
 
   /// Performs incremental synchronization of events
   /// Only adds new events, updates changed events, and removes deleted events
-  void _syncEventsIncremental(List<CustomAppointment> fetchedEvents) {
+  bool _syncEventsIncremental(List<CustomAppointment> fetchedEvents) {
     final syncStartTime = DateTime.now();
     print('🔄 [EventProvider] Starting incremental sync of ${fetchedEvents.length} fetched events with ${_events.length} existing events');
     final fetchedEventMap = Map<String, CustomAppointment>.fromIterable(
@@ -683,9 +683,7 @@ class EventProvider with ChangeNotifier {
     final syncDuration = syncEndTime.difference(syncStartTime);
     print('🔄 [EventProvider] Incremental sync completed: $changes changes made in ${syncDuration.inMilliseconds}ms');
     
-    if (changes > 0) {
-      notifyListeners();
-    }
+    return changes > 0;
   }
 
   /// Simple event change detection
