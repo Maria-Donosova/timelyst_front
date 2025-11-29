@@ -416,8 +416,8 @@ class _CalendarWState extends State<CalendarW> {
           timeEventInstance: oldAppointment.timeEventInstance,
         );
 
-        // Update the event in the provider
-        eventProvider.updateEvent(oldAppointment, newAppointment);
+        // Update the event in the provider (using local update for optimistic UI)
+        eventProvider.updateEventLocal(oldAppointment, newAppointment);
         AppLogger.debug(
             'Updated recurring event with exception date', 'Calendar');
       } else {
@@ -443,8 +443,8 @@ class _CalendarWState extends State<CalendarW> {
           timeEventInstance: oldAppointment.timeEventInstance,
         );
 
-        // Update the event in the provider
-        eventProvider.updateEvent(oldAppointment, updatedAppointment);
+        // Update the event in the provider (using local update for optimistic UI)
+        eventProvider.updateEventLocal(oldAppointment, updatedAppointment);
         AppLogger.debug('Updated non-recurring event', 'Calendar');
       }
 

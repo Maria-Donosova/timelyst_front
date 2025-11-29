@@ -19,13 +19,8 @@ class EventDeletionController {
     try {
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
 
-      bool success;
-
-      if (isAllDay) {
-        success = await eventProvider.deleteDayEvent(eventId);
-      } else {
-        success = await eventProvider.deleteTimeEvent(eventId);
-      }
+      // Use the unified deleteEvent method
+      final success = await eventProvider.deleteEvent(eventId);
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -46,10 +46,13 @@ class _TaskItemState extends State<TaskItem> {
               builder: (_) {
                 return EditTaskW(
                   task: Task(
-                    taskId: widget.id,
-                    title: widget.title,
-                    status: '',
-                    category: widget.category,
+                    id: widget.id,
+                    userId: '', // Placeholder
+                    description: widget.title,
+                    priority: widget.category,
+                    isCompleted: widget.status == 'completed',
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
                   ),
                   onSave: (updatedTask) async {
                     try {
@@ -58,10 +61,16 @@ class _TaskItemState extends State<TaskItem> {
                       final authToken = await authService.getAuthToken();
 
                       if (authToken != null) {
+                        final taskInput = {
+                          'description': updatedTask.description,
+                          'priority': updatedTask.priority,
+                          'isCompleted': updatedTask.isCompleted,
+                        };
+                        
                         await TasksService.updateTask(
-                          updatedTask.taskId,
+                          updatedTask.id,
                           authToken,
-                          updatedTask,
+                          taskInput,
                         );
                         widget
                             .onTaskUpdated(updatedTask); // Notify parent widget

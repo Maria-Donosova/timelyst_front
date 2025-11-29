@@ -802,6 +802,8 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                                           tablet: 18.0,
                                           desktop: 20.0,
                                         ),
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey[600],
                                       ),
                                 ),
                               ),
@@ -814,38 +816,6 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
                 ),
               ),
             ),
-            // Loading overlay for Microsoft callback processing
-            if (_processingMicrosoft)
-              Container(
-                color: Colors.black.withOpacity(0.5),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Processing Microsoft authorization...',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Please wait while we connect your calendar',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
           ],
         ),
       ),

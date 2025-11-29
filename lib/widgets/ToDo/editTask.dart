@@ -26,20 +26,20 @@ class _EditTaskWState extends State<EditTaskW> {
   @override
   void initState() {
     super.initState();
-    _taskDescriptionController.text = widget.task.title;
-    selectedCategory = widget.task.category;
+    _taskDescriptionController.text = widget.task.description;
+    selectedCategory = widget.task.priority; // Using priority as category
   }
 
   void _saveTask() async {
     if (_form.currentState!.validate()) {
       final updatedTask = Task(
-        taskId: widget.task.taskId,
-        title: _taskDescriptionController.text,
-        status: '',
-        category: selectedCategory!,
-        // dateCreated: widget.task.dateCreated,
-        // dateChanged: DateTime.now(),
-        //creator: widget.task.creator,
+        id: widget.task.id,
+        userId: widget.task.userId,
+        description: _taskDescriptionController.text,
+        priority: selectedCategory!,
+        isCompleted: widget.task.isCompleted,
+        createdAt: widget.task.createdAt,
+        updatedAt: DateTime.now(),
       );
 
       try {
@@ -48,10 +48,16 @@ class _EditTaskWState extends State<EditTaskW> {
         final authToken = await authService.getAuthToken();
 
         if (authToken != null) {
+          final taskInput = {
+            'description': updatedTask.description,
+            'priority': updatedTask.priority,
+            'isCompleted': updatedTask.isCompleted,
+          };
+          
           await TasksService.updateTask(
-            updatedTask.taskId,
+            updatedTask.id,
             authToken,
-            updatedTask,
+            taskInput,
           );
           widget.onSave(updatedTask); // Notify parent widget
           Navigator.of(context).pop(); // Close the bottom sheet

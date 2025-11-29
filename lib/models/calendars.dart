@@ -88,6 +88,36 @@ class Calendar {
     }
     return Color(int.parse(hexColor.padLeft(8, 'FF'), radix: 16));
   }
+
+  Calendar copyWith({
+    String? id,
+    String? userId,
+    CalendarSource? source,
+    String? providerCalendarId,
+    CalendarMetadata? metadata,
+    CalendarPreferences? preferences,
+    CalendarSyncInfo? sync,
+    String? syncToken,
+    bool? isSelected,
+    bool? isPrimary,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Calendar(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      source: source ?? this.source,
+      providerCalendarId: providerCalendarId ?? this.providerCalendarId,
+      metadata: metadata ?? this.metadata,
+      preferences: preferences ?? this.preferences,
+      sync: sync ?? this.sync,
+      syncToken: syncToken ?? this.syncToken,
+      isSelected: isSelected ?? this.isSelected,
+      isPrimary: isPrimary ?? this.isPrimary,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }
 
 class CalendarMetadata {
@@ -139,6 +169,26 @@ class CalendarMetadata {
       'allowedConferenceTypes': allowedConferenceTypes,
     };
   }
+
+  CalendarMetadata copyWith({
+    String? title,
+    String? description,
+    String? timeZone,
+    Color? color,
+    List<CalendarReminder>? defaultReminders,
+    List<CalendarNotification>? notifications,
+    List<String>? allowedConferenceTypes,
+  }) {
+    return CalendarMetadata(
+      title: title ?? this.title,
+      description: description ?? this.description,
+      timeZone: timeZone ?? this.timeZone,
+      color: color ?? this.color,
+      defaultReminders: defaultReminders ?? this.defaultReminders,
+      notifications: notifications ?? this.notifications,
+      allowedConferenceTypes: allowedConferenceTypes ?? this.allowedConferenceTypes,
+    );
+  }
 }
 
 class CalendarPreferences {
@@ -170,6 +220,18 @@ class CalendarPreferences {
           ? '#${userColor!.value.toRadixString(16).padLeft(8, '0')}'
           : null,
     };
+  }
+
+  CalendarPreferences copyWith({
+    CalendarImportSettings? importSettings,
+    String? category,
+    Color? userColor,
+  }) {
+    return CalendarPreferences(
+      importSettings: importSettings ?? this.importSettings,
+      category: category ?? this.category,
+      userColor: userColor ?? this.userColor,
+    );
   }
 }
 
@@ -303,6 +365,24 @@ class CalendarImportSettings {
       'importOrganizer': importOrganizer,
       'importRecipients': importRecipients,
     };
+  }
+
+  CalendarImportSettings copyWith({
+    bool? importAll,
+    bool? importSubject,
+    bool? importBody,
+    bool? importConferenceInfo,
+    bool? importOrganizer,
+    bool? importRecipients,
+  }) {
+    return CalendarImportSettings(
+      importAll: importAll ?? this.importAll,
+      importSubject: importSubject ?? this.importSubject,
+      importBody: importBody ?? this.importBody,
+      importConferenceInfo: importConferenceInfo ?? this.importConferenceInfo,
+      importOrganizer: importOrganizer ?? this.importOrganizer,
+      importRecipients: importRecipients ?? this.importRecipients,
+    );
   }
 }
 

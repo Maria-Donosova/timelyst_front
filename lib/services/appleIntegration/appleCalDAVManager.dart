@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:timelyst_flutter/services/appleIntegration/appleCalendarService.dart';
+import 'package:timelyst_flutter/services/appleIntegration/appleAuthService.dart';
 import 'package:timelyst_flutter/services/appleIntegration/appleCalDAVService.dart';
 import 'package:timelyst_flutter/services/appleIntegration/appleSignInResult.dart';
 import 'package:timelyst_flutter/models/calendars.dart';
@@ -6,56 +8,52 @@ import 'package:timelyst_flutter/models/calendars.dart';
 /// Manager for Apple Calendar CalDAV integration
 /// Replaces the OAuth-based AppleSignInManager with direct credential authentication
 class AppleCalDAVManager {
-  final AppleCalDAVService _calDAVService;
+  final AppleCalendarService _appleCalendarService;
+  final AppleAuthService _appleAuthService;
+  final AppleCalDAVService _appleCalDAVService;
 
   AppleCalDAVManager({
-    AppleCalDAVService? calDAVService,
-  }) : _calDAVService = calDAVService ?? AppleCalDAVService();
+    AppleCalendarService? appleCalendarService,
+    AppleAuthService? appleAuthService,
+    AppleCalDAVService? appleCalDAVService,
+  })  : _appleCalendarService = appleCalendarService ?? AppleCalendarService(),
+        _appleAuthService = appleAuthService ?? AppleAuthService(),
+        _appleCalDAVService = appleCalDAVService ?? AppleCalDAVService();
 
   /// Connects to Apple Calendar using Apple ID and App-Specific Password
-  /// This replaces the OAuth flow with direct credential authentication
   Future<AppleSignInResult> connectAppleCalendar({
     required String appleId,
     required String appPassword,
   }) async {
     try {
-
-      // Validate inputs
-      if (!_calDAVService.isValidAppleId(appleId)) {
-        throw Exception('Please enter a valid Apple ID (email address)');
-      }
-
-      if (!_calDAVService.isValidAppPassword(appPassword)) {
-        throw Exception('Please enter a valid 16-character App-Specific Password');
-      }
-
-      // Format the app password properly
-      final formattedPassword = _calDAVService.formatAppPassword(appPassword);
-      
-      // Connect to Apple Calendar
-      final response = await _calDAVService.connectAppleCalendar(
-        appleId: appleId,
-        appPassword: formattedPassword,
+      // 1. Connect/Authenticate
+      final authResult = await _appleAuthService.connectAppleAccount(
+        appleId,
+        appPassword,
       );
 
-      if (response['success'] == true) {
-        
-        // Fetch initial calendars
-        final calendarsResponse = await _calDAVService.fetchAppleCalendars(appleId);
-        
+      if (authResult['success'] == true) {
+        // 2. Fetch calendars from Apple (using the legacy service for now as it has the endpoint)
+        // Ideally this should be part of the connect response or a method in AppleCalendarService
+        final calendarsResponse =
+            await _appleCalDAVService.fetchAppleCalendars(appleId);
+
         final calendarsData = calendarsResponse['data'];
-        final calendarsList = calendarsData is List 
-          ? calendarsData.map((cal) => Calendar.fromAppleJson(cal as Map<String, dynamic>)).toList()
-          : <Calendar>[];
-        
+        final calendarsList = calendarsData is List
+            ? calendarsData
+                .map((cal) => Calendar.fromJson(cal as Map<String, dynamic>))
+                .toList()
+            : <Calendar>[];
+
         return AppleSignInResult(
-          userId: response['userId'] ?? '',
-          email: response['email'] ?? appleId,
-          authCode: null, // Not used for CalDAV
+          userId: authResult['userId'] ?? '', // Assuming auth returns userId
+          email: appleId,
+          authCode: null,
           calendars: calendarsList,
         );
       } else {
-        throw Exception(response['message'] ?? 'Failed to connect Apple Calendar');
+        throw Exception(
+            authResult['message'] ?? 'Failed to connect Apple Calendar');
       }
     } catch (e) {
       print('❌ [AppleCalDAVManager] Error connecting Apple Calendar: $e');
@@ -66,21 +64,15 @@ class AppleCalDAVManager {
   /// Fetches Apple calendars for a connected account
   Future<List<Calendar>> fetchCalendars(String email) async {
     try {
-      
-      final response = await _calDAVService.fetchAppleCalendars(email);
-      
-      if (response['success'] == true) {
-        final calendars = response['data'] as List?;
-        
-        final calendarsList = calendars is List 
-          ? calendars.map((cal) => Calendar.fromAppleJson(cal as Map<String, dynamic>)).toList()
-          : <Calendar>[];
-        
-        
-        return calendarsList;
-      } else {
-        throw Exception(response['message'] ?? 'Failed to fetch calendars');
+      final response = await _appleCalDAVService.fetchAppleCalendars(email);
+
+      if (response['data'] != null) {
+        final calendars = response['data'] as List;
+        return calendars
+            .map((cal) => Calendar.fromJson(cal as Map<String, dynamic>))
+            .toList();
       }
+      return [];
     } catch (e) {
       print('❌ [AppleCalDAVManager] Error fetching calendars: $e');
       rethrow;
@@ -93,48 +85,87 @@ class AppleCalDAVManager {
     required List<Map<String, dynamic>> selectedCalendars,
   }) async {
     try {
-      
       // Enhanced logging: Show each calendar to be saved
       for (int i = 0; i < selectedCalendars.length; i++) {
         final calendar = selectedCalendars[i];
         print('  🍎 ID: ${calendar['id'] ?? calendar['providerCalendarId']}');
-        print('  🍎 Title: ${calendar['metadata']?['title'] ?? calendar['title']}');
+        print(
+            '  🍎 Title: ${calendar['metadata']?['title'] ?? calendar['title']}');
         print('  🍎 Import All: ${calendar['importAll']}');
         print('  🍎 Import Subject: ${calendar['importSubject']}');
         print('  🍎 Category: ${calendar['category']}');
         print('  🍎 Color: ${calendar['color']}');
       }
-      
+
       // Filter out calendars with no import options enabled
       final validCalendars = selectedCalendars.where((calendar) {
         final hasImportOptions = calendar['importAll'] == true ||
-               calendar['importSubject'] == true ||
-               calendar['importBody'] == true ||
-               calendar['importConferenceInfo'] == true ||
-               calendar['importOrganizer'] == true ||
-               calendar['importRecipients'] == true;
-        
-        final calendarTitle = calendar['metadata']?['title'] ?? calendar['title'] ?? 'Unknown';
+            calendar['importSubject'] == true ||
+            calendar['importBody'] == true ||
+            calendar['importConferenceInfo'] == true ||
+            calendar['importOrganizer'] == true ||
+            calendar['importRecipients'] == true;
+
         return hasImportOptions;
       }).toList();
 
-
       if (validCalendars.isEmpty) {
         print('❌ [AppleCalDAVManager] No valid calendars to save');
-        throw Exception('No valid calendars to save. Please enable at least one import option.');
+        throw Exception(
+            'No valid calendars to save. Please enable at least one import option.');
       }
 
+      // Convert Map<String, dynamic> to List<Calendar>
+      final List<Calendar> calendarsToSync = validCalendars.map((calMap) {
+        // Ensure required fields are present and map correctly
+        // We use fromJson if possible, or manual mapping if the map structure is different
+        // The selectedCalendars map comes from the UI selection which might be slightly different from backend JSON
+        // But let's try to construct a Calendar object.
 
-      final response = await _calDAVService.saveSelectedCalendars(
+        return Calendar(
+          id: calMap['id'] ?? '',
+          userId: calMap['user'] ?? '',
+          source: CalendarSource.APPLE,
+          providerCalendarId: calMap['providerCalendarId'] ?? '',
+          metadata: CalendarMetadata(
+            title: calMap['metadata']?['title'] ?? calMap['title'] ?? 'Unknown',
+            color: calMap['metadata']?['color'] ?? calMap['color'] ?? '#000000',
+            timeZone: calMap['metadata']?['timeZone'] ?? 'UTC',
+            accessRole: calMap['metadata']?['accessRole'] ?? 'owner',
+          ),
+          preferences: CalendarPreferences(
+            category: calMap['category'],
+            importSettings: CalendarImportSettings(
+              importAll: calMap['importAll'] ?? false,
+              importSubject: calMap['importSubject'] ?? false,
+              importBody: calMap['importBody'] ?? false,
+              importConferenceInfo: calMap['importConferenceInfo'] ?? false,
+              importOrganizer: calMap['importOrganizer'] ?? false,
+              importRecipients: calMap['importRecipients'] ?? false,
+            ),
+          ),
+          sync: CalendarSync(
+            syncToken: calMap['syncToken'],
+            lastSync: calMap['lastSync'] != null
+                ? DateTime.tryParse(calMap['lastSync'])
+                : null,
+            watchChannelId: calMap['watchChannelId'],
+            watchChannelExpiration: calMap['watchChannelExpiration'] != null
+                ? DateTime.tryParse(calMap['watchChannelExpiration'])
+                : null,
+          ),
+          isSelected: true,
+          isPrimary: calMap['isPrimary'] ?? false,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+      }).toList();
+
+      await _appleCalendarService.syncAppleCalendars(
+        userId: '', // This will be handled by the backend or service if needed
         email: email,
-        calendars: validCalendars,
+        calendars: calendarsToSync,
       );
-
-
-      if (response['success'] != true) {
-        throw Exception(response['message'] ?? 'Failed to save calendars');
-      }
-
     } catch (e) {
       print('❌ [AppleCalDAVManager] Error saving calendars: $e');
       rethrow;
@@ -144,13 +175,7 @@ class AppleCalDAVManager {
   /// Deletes all Apple calendars for the user
   Future<void> deleteCalendars() async {
     try {
-      
-      final response = await _calDAVService.deleteAppleCalendars();
-      
-      if (response['success'] != true) {
-        throw Exception(response['message'] ?? 'Failed to delete calendars');
-      }
-
+      await _appleCalDAVService.deleteAppleCalendars();
     } catch (e) {
       print('❌ [AppleCalDAVManager] Error deleting calendars: $e');
       rethrow;
@@ -160,13 +185,7 @@ class AppleCalDAVManager {
   /// Disconnects an Apple account
   Future<void> disconnectAccount(String email) async {
     try {
-      
-      final response = await _calDAVService.disconnectAppleAccount(email);
-      
-      if (response['success'] != true) {
-        throw Exception(response['message'] ?? 'Failed to disconnect account');
-      }
-
+      await _appleCalDAVService.disconnectAppleAccount(email);
     } catch (e) {
       print('❌ [AppleCalDAVManager] Error disconnecting account: $e');
       rethrow;

@@ -10,9 +10,6 @@ import '../../../utils/timezoneUtils.dart';
 import '../../shared/categories.dart';
 import '../controllers/eventDeletionController.dart';
 import '../../shared/calendarSelection.dart';
-//import 'event_recurrence_selector.dart';
-// import 'event_category_selector.dart';
-// import 'event_date_time_picker.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
@@ -91,11 +88,11 @@ class EventDetailsScreenState extends State<EventDetails> {
   // Helper function to get the appropriate icon based on calendar source
   IconData _getCalendarSourceIcon(CalendarSource source) {
     switch (source) {
-      case CalendarSource.google:
+      case CalendarSource.GOOGLE:
         return Icons.mail_outline;
-      case CalendarSource.outlook:
+      case CalendarSource.MICROSOFT:
         return Icons.window_outlined;
-      case CalendarSource.apple:
+      case CalendarSource.APPLE:
         return Icons.apple;
       default:
         return Icons.calendar_today;
@@ -314,39 +311,6 @@ class EventDetailsScreenState extends State<EventDetails> {
     }
   }
 
-  // Future<void> _selectRecurrenceRule(BuildContext context) async {
-  //   final result = await showRecurrenceSelectionDialog(
-  //     context,
-  //     initialRecurrence: _recurrence,
-  //     initialSelectedDays: _selectedDays,
-  //   );
-
-  //   if (result != null) {
-  //     setState(() {
-  //       _recurrence = result['recurrence'];
-  //       _selectedDays = List<String>.from(result['selectedDays']);
-
-  //       // Update UI state based on selection
-  //       if (_recurrence != 'None') {
-  //         _isRecurring = true;
-  //       }
-  //     });
-  //   }
-  // }
-
-  // Future<void> _selectCategory(BuildContext context) async {
-  //   final result = await showCategorySelectionDialog(
-  //     context,
-  //     initialCategory: _selectedCategory,
-  //   );
-
-  //   if (result != null) {
-  //     setState(() {
-  //       _selectedCategory = result;
-  //     });
-  //   }
-  // }
-
   /// Consolidated save method that handles both create and update operations
   /// for both time events and day events
   Future<void> _saveEvent(BuildContext context) async {
@@ -476,46 +440,23 @@ class EventDetailsScreenState extends State<EventDetails> {
 
         final Map<String, dynamic> eventData = {
           'user_id': currentUserId,
-          'user_calendars': _selectedCalendars.isNotEmpty
+          'calendarId': _selectedCalendars.isNotEmpty
               ? _selectedCalendars.first.id
               : null,
-          'source_calendar': _selectedCalendars.isNotEmpty
-              ? _selectedCalendars.first.id
-              : null, // NEW: Source calendar mapping
-          'createdBy': currentUserId,
-          'event_organizer': currentUserId,
-          'event_title': _eventTitleController.text,
-          'is_AllDay': _allDay,
+          'eventTitle': _eventTitleController.text,
+          'isAllDay': _allDay,
           'recurrenceRule': _recurrence != 'None' ? _buildRecurrenceRule() : '',
-          'recurrenceId': '', // NEW: Recurrence ID for instances
-          'exceptionDates': [], // NEW: Exception dates for recurring events
           'category': _selectedCategory,
-          'event_attendees': _eventParticipants.text,
-          'event_body': _eventDescriptionController.text,
-          'event_location': _eventLocation.text,
-          'event_ConferenceDetails': _eventConferenceDetails.text, // NEW: Conference details
-          'reminder': _hasReminder, // NEW: Reminder flag
-          'holiday': false, // NEW: Holiday flag (default false)
-          // Format datetime WITH timezone offset to preserve timezone information
+          'description': _eventDescriptionController.text,
+          'location': _eventLocation.text,
           'start': startFormatted,
           'end': endFormatted,
-          // NEW: Separate timezone fields for start and end
-          'start_timeZone': deviceTimeZone,
-          'end_timeZone': deviceTimeZone,
+          'startTimeZone': deviceTimeZone,
+          'endTimeZone': deviceTimeZone,
         };
 
         print('📦 [EventDetails] Complete eventData being sent to service:');
         print('  ${eventData.toString()}');
-
-        // Add timeZone for TimeEvents only (not for DayEvents)
-        // Keep this for backward compatibility with backend
-        if (!_allDay) {
-          eventData['timeZone'] = deviceTimeZone; // Legacy: Single timezone for time events
-          eventData['time_EventInstance'] = []; // NEW: Time event instances
-        } else {
-          eventData['timeZone'] = deviceTimeZone; // Add timezone for day events too
-          eventData['day_EventInstance'] = ''; // NEW: Day event instance
-        }
 
         // Determine if this is an update or create operation
         final isUpdate = widget._id != null && widget._id!.isNotEmpty;
@@ -523,38 +464,19 @@ class EventDetailsScreenState extends State<EventDetails> {
         // Call the appropriate EventService method based on event type and operation
         bool success = false;
         try {
-          if (_allDay) {
-            // Day Event (All-day event)
-            if (isUpdate) {
-              final result = await EventService.updateDayEvent(
-                widget._id!,
-                eventData,
-                authToken,
-              );
-              success = result != null;
-            } else {
-              final result = await EventService.createDayEvent(
-                eventData,
-                authToken,
-              );
-              success = result != null;
-            }
+          if (isUpdate) {
+            final result = await EventService.updateEvent(
+              widget._id!,
+              eventData,
+              authToken,
+            );
+            success = result != null;
           } else {
-            // Time Event (Timed event)
-            if (isUpdate) {
-              final result = await EventService.updateTimeEvent(
-                widget._id!,
-                eventData,
-                authToken,
-              );
-              success = result != null;
-            } else {
-              final result = await EventService.createTimeEvent(
-                eventData,
-                authToken,
-              );
-              success = result != null;
-            }
+            final result = await EventService.createEvent(
+              eventData,
+              authToken,
+            );
+            success = result != null;
           }
         } catch (e) {
           print('Error saving event: $e');
@@ -798,435 +720,99 @@ class EventDetailsScreenState extends State<EventDetails> {
                                 labelStyle:
                                     Theme.of(context).textTheme.bodyLarge,
                                 border: InputBorder.none,
-                                errorStyle: TextStyle(
-                                    color: Theme.of(context).colorScheme.error),
                               ),
-                              textInputAction: TextInputAction.next,
-                              keyboardType: TextInputType.name,
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Please provide a value.';
-                                }
-                                return null;
-                              },
                             ),
                           ),
                         ),
-                        //profile icon button to select the associated the calendar to which the event is to be added
                         IconButton(
-                          iconSize: Theme.of(context).iconTheme.size,
-                          icon: Icon(Icons.person),
-                          onPressed: () {
-                            _selectCalendar(context);
-                          },
+                          icon: Icon(Icons.delete),
+                          onPressed: _deleteEvent,
                         ),
                       ],
                     ),
                   ),
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.end,
-                    spacing: 8,
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: _eventDateController,
+                    readOnly: true,
+                    onTap: () => _selectDate(context),
+                    decoration: InputDecoration(
+                      labelText: 'Date',
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Row(
                     children: [
-                      TextFormField(
-                        controller: _eventCalendar,
-                        readOnly: true, // Make it read-only
-                        decoration: InputDecoration(
-                          labelText: 'Calendar',
-                          labelStyle: Theme.of(context).textTheme.bodyLarge,
-                          border: InputBorder.none,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 100,
+                      Expanded(
                         child: TextFormField(
-                            autocorrect: true,
-                            controller: _eventDateController,
-                            style: Theme.of(context).textTheme.displaySmall,
-                            decoration: InputDecoration(
-                              labelText: 'Date',
-                              labelStyle:
-                                  Theme.of(context).textTheme.bodyMedium,
-                              border: InputBorder.none,
-                              errorStyle: TextStyle(
-                                  color: Theme.of(context).colorScheme.error),
-                            ),
-                            textInputAction: TextInputAction.next,
-                            keyboardType: TextInputType.datetime,
-                            onTap: () async {
-                              await _selectDate(context);
-                            }),
-                      ),
-                      SizedBox(
-                        width: 80,
-                        child: TextFormField(
-                          autocorrect: true,
                           controller: _eventStartTimeController,
-                          style: Theme.of(context).textTheme.displaySmall,
+                          readOnly: true,
+                          onTap: () => _selectStart(context, true),
                           decoration: InputDecoration(
-                            labelText: 'Begin',
-                            labelStyle: Theme.of(context).textTheme.bodyMedium,
-                            border: InputBorder.none,
-                            errorStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.error),
+                            labelText: 'Start Time',
+                            suffixIcon: Icon(Icons.access_time),
                           ),
-                          textInputAction: TextInputAction.next,
-                          keyboardType: TextInputType.datetime,
-                          onTap: () async {
-                            await _selectStart(context, true);
-                          },
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please provide a value.';
-                            } else {
-                              return null;
-                            }
-                          },
                         ),
                       ),
-                      SizedBox(
-                        width: 80,
+                      SizedBox(width: 20),
+                      Expanded(
                         child: TextFormField(
-                          autocorrect: true,
                           controller: _eventEndTimeController,
-                          style: Theme.of(context).textTheme.displaySmall,
+                          readOnly: true,
+                          onTap: () => _selectEndTime(context),
                           decoration: InputDecoration(
-                            labelText: 'End',
-                            labelStyle: Theme.of(context).textTheme.bodyMedium,
-                            border: InputBorder.none,
-                            errorStyle: TextStyle(
-                                color: Theme.of(context).colorScheme.error),
+                            labelText: 'End Time',
+                            suffixIcon: Icon(Icons.access_time),
                           ),
-                          textInputAction: TextInputAction.next,
-                          keyboardType: TextInputType.datetime,
-                          onTap: () async {
-                            await _selectEndTime(context);
-                          },
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please provide a value.';
-                            } else {
-                              return null;
-                            }
-                          },
                         ),
                       ),
-                      IconButton(
-                        iconSize: Theme.of(context).iconTheme.size,
-                        onPressed: () {
-                          setState(() {
-                            _allDay = !_allDay;
-                            _setAllDay();
-                            isAllDay = !isAllDay!;
-                          });
-                        },
-                        color: _allDay
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Theme.of(context).colorScheme.tertiary,
-                        icon: _allDay
-                            ? Icon(Icons.hourglass_full_rounded)
-                            : Icon(Icons.hourglass_empty_rounded),
-                        tooltip: "All Day",
-                      ),
-                      if (_recurrence == 'Weekly')
-                        Tooltip(
-                          message: _selectedDays.join(', '),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: _isRecurring
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .tertiary,
-                                    textStyle: Theme.of(context)
-                                        .textTheme
-                                        .displaySmall,
-                                  ),
-                                  icon: Icon(
-                                      size: Theme.of(context).iconTheme.size,
-                                      Icons.event_repeat_rounded),
-                                  onPressed: () {
-                                    //_selectRecurrenceRule(context);
-                                    setState(() {
-                                      _isRecurring = !_isRecurring;
-                                    });
-                                  }),
-                              Text(_recurrence.toString(),
-                                  style:
-                                      Theme.of(context).textTheme.displaySmall),
-                            ],
-                          ),
-                        )
-                      else
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                                style: TextButton.styleFrom(
-                                  foregroundColor: _isRecurring
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.tertiary,
-                                  textStyle:
-                                      Theme.of(context).textTheme.displaySmall,
-                                ),
-                                icon: Icon(
-                                    size: Theme.of(context).iconTheme.size,
-                                    Icons.event_repeat_rounded),
-                                onPressed: () {
-                                  //_selectRecurrenceRule(context);
-                                  setState(() {
-                                    _isRecurring = !_isRecurring;
-                                  });
-                                }),
-                            Text(
-                              _recurrence.toString(),
-                              style: Theme.of(context).textTheme.displaySmall,
-                            ),
-                          ],
-                        ),
                     ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 6.0),
-                    child: SizedBox(
-                      width: width,
-                      child: Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.end,
-                        children: categories.map((String category) {
-                          categoryColor = catColor(category);
-                          return ChoiceChip(
-                            visualDensity: VisualDensity.standard,
-                            avatar: CircleAvatar(
-                              backgroundColor: categoryColor,
-                              radius: 4.5,
-                            ),
-                            label: Text(
-                              category,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                            selected: _selectedCategory == category,
-                            selectedColor: Colors.grey.shade200,
-                            backgroundColor: Colors.white,
-                            onSelected: (bool selected) {
-                              setState(() {
-                                _selectedCategory =
-                                    (selected ? category : null)!;
-                              });
-                            },
-                          );
-                        }).toList(),
+                  SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _allDay,
+                        onChanged: (value) => _toggleAllDay(value!),
                       ),
+                      Text('All Day'),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: _eventCalendar,
+                    readOnly: true,
+                    onTap: () => _selectCalendar(context),
+                    decoration: InputDecoration(
+                      labelText: 'Calendar',
+                      suffixIcon: _eventCalendarInfo != null
+                          ? Icon(_getCalendarSourceIcon(_eventCalendarInfo!.source))
+                          : Icon(Icons.calendar_today),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: SizedBox(
-                      width: width * 0.8,
-                      child: TextFormField(
-                        autocorrect: true,
-                        controller: _eventLocation,
-                        style: Theme.of(context).textTheme.displaySmall,
-                        maxLines: null,
-                        decoration: const InputDecoration(
-                          labelText: 'Location',
-                          labelStyle: TextStyle(fontSize: 14),
-                          border: InputBorder.none,
-                          errorStyle: TextStyle(color: Colors.redAccent),
-                        ),
-                        textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: _eventLocation,
+                    decoration: InputDecoration(
+                      labelText: 'Location',
+                      suffixIcon: Icon(Icons.location_on),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: SizedBox(
-                      width: width * 0.8,
-                      child: TextFormField(
-                          autocorrect: true,
-                          controller: _eventParticipants,
-                          style: Theme.of(context).textTheme.displaySmall,
-                          maxLines: null,
-                          decoration: const InputDecoration(
-                            labelText: 'Participants',
-                            labelStyle: TextStyle(fontSize: 14),
-                            border: InputBorder.none,
-                            errorStyle: TextStyle(color: Colors.redAccent),
-                          ),
-                          textInputAction: TextInputAction.next,
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            const pattern =
-                                r'^([\w-\.]+@([\w-]+\.)+[\w-]{2,4},\s*)*[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$|^$';
-                            final regExp = RegExp(pattern);
-                            if (!regExp.hasMatch(value!)) {
-                              return 'Please enter a valid email';
-                            }
-                            return null;
-                          }),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: _eventDescriptionController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                      border: OutlineInputBorder(),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: SizedBox(
-                      width: width * 0.8,
-                      child: TextFormField(
-                        autocorrect: true,
-                        controller: _eventConferenceDetails,
-                        style: Theme.of(context).textTheme.displaySmall,
-                        maxLines: null,
-                        decoration: const InputDecoration(
-                          labelText: 'Conference Details (Zoom, Google Meet, etc.)',
-                          labelStyle: TextStyle(fontSize: 14),
-                          border: InputBorder.none,
-                          hintText: 'https://zoom.us/j/...',
-                          errorStyle: TextStyle(color: Colors.redAccent),
-                        ),
-                        textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.url,
-                      ),
-                    ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => _saveEvent(context),
+                    child: Text('Save'),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: SizedBox(
-                      width: width * 0.8,
-                      child: Row(
-                        children: [
-                          Checkbox(
-                            value: _hasReminder,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                _hasReminder = value ?? false;
-                              });
-                            },
-                          ),
-                          Text(
-                            'Set Reminder',
-                            style: Theme.of(context).textTheme.displaySmall,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: SizedBox(
-                      width: 500,
-                      child: TextFormField(
-                        autocorrect: true,
-                        controller: _eventDescriptionController,
-                        style: Theme.of(context).textTheme.displaySmall,
-                        maxLines: null,
-                        decoration: const InputDecoration(
-                          labelText: 'Description',
-                          fillColor: Colors.grey,
-                          labelStyle: TextStyle(fontSize: 14),
-                          border: InputBorder.none,
-                          errorStyle: TextStyle(color: Colors.redAccent),
-                        ),
-                        textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.name,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 120),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.secondary,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                print("Cancel");
-                              });
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Cancel',
-                                style: TextStyle(
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
-                                )),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            // Calendar source icon in bottom right corner
-                            if (_eventCalendarInfo != null)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 16.0),
-                                child: Tooltip(
-                                  message:
-                                      'Source: ${_eventCalendarInfo!.source.name}',
-                                  child: Icon(
-                                    _getCalendarSourceIcon(
-                                        _eventCalendarInfo!.source),
-                                    size: 20,
-                                    color:
-                                        Theme.of(context).colorScheme.tertiary,
-                                  ),
-                                ),
-                              ),
-                            // Only show Delete button for existing events
-                            if (widget._id != null && widget._id!.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: TextButton(
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: Colors.red.shade400,
-                                  ),
-                                  child: Text('Delete',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      )),
-                                  onPressed: _isLoading ? null : _deleteEvent,
-                                ),
-                              ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: TextButton(
-                                style: TextButton.styleFrom(
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.secondary,
-                                ),
-                                child: Text('Save',
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary,
-                                    )),
-                                onPressed: _isLoading
-                                    ? null
-                                    : () async {
-                                        if (_appFormKey.currentState!
-                                            .validate()) {
-                                          await _saveEvent(context);
-                                        } else {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                                content: Text(
-                                                    'Please fix the errors in the form')),
-                                          );
-                                        }
-                                      },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
                 ],
               ),
             ),

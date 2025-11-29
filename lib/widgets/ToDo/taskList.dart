@@ -64,21 +64,21 @@ class TaskListW extends StatelessWidget {
                           itemBuilder: (ctx, index) {
                             final task = taskProvider.tasks[index];
                             return ReorderableDragStartListener(
-                              key: Key(task.taskId),
+                              key: Key(task.id),
                               index: index,
                               child: Dismissible(
-                                key: Key(task.taskId),
+                                key: Key(task.id),
                                 direction: DismissDirection.horizontal,
                                 child: TaskItem(
-                                  id: task.taskId,
-                                  title: task.title,
-                                  category: task.category,
-                                  status: task.status,
+                                  id: task.id,
+                                  title: task.description,
+                                  category: task.priority, // Using priority as category for now
+                                  status: task.isCompleted ? 'completed' : 'pending',
                                   onTaskUpdated: (updatedTask) async {
                                     await taskProvider.updateTask(
-                                        updatedTask.taskId,
-                                        updatedTask.title,
-                                        updatedTask.category);
+                                        updatedTask.id,
+                                        updatedTask.description,
+                                        updatedTask.priority);
                                   },
                                 ),
                                 onDismissed:
@@ -86,10 +86,10 @@ class TaskListW extends StatelessWidget {
                                   if (direction ==
                                       DismissDirection.startToEnd) {
                                     await DoneTaskW.markTaskAsComplete(
-                                        context, task.taskId);
+                                        context, task.id);
                                   } else {
                                     await DeleteTaskW.deleteTask(
-                                        context, task.taskId);
+                                        context, task.id);
                                   }
                                 },
                                 confirmDismiss:
