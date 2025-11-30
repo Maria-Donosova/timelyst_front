@@ -23,6 +23,7 @@ class _NewTaskWState extends State<NewTaskW> {
   final _form = GlobalKey<FormState>();
   final _taskController = TextEditingController();
   String? selectedCategory;
+  DateTime? selectedDate;
 
   @override
   void dispose() {
@@ -37,6 +38,7 @@ class _NewTaskWState extends State<NewTaskW> {
         await taskProvider.createTask(
           _taskController.text,
           selectedCategory!,
+          dueDate: selectedDate,
         );
 
         final scaffoldContext = ScaffoldMessenger.of(context);
@@ -118,43 +120,96 @@ class _NewTaskWState extends State<NewTaskW> {
                             },
                           ),
                           const SizedBox(height: 15),
-                          DropdownButtonFormField<String>(
-                            hint: Text('Select Category'),
-                            value: selectedCategory,
-                            onChanged: (newValue) {
-                              setModalState(() {
-                                selectedCategory = newValue;
-                              });
-                            },
-                            selectedItemBuilder: (BuildContext context) {
-                              return categories.map((category) {
-                                return Row(
-                                  children: [
-                                    CircleAvatar(
-                                      backgroundColor: catColor(category),
-                                      radius: 5,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(category),
-                                  ],
-                                );
-                              }).toList();
-                            },
-                            items: categories.map((category) {
-                              return DropdownMenuItem<String>(
-                                value: category,
-                                child: Row(
-                                  children: [
-                                    CircleAvatar(
-                                      backgroundColor: catColor(category),
-                                      radius: 5,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(category),
-                                  ],
+                          Row(
+                            children: [
+                              Expanded(
+                                child: DropdownButtonFormField<String>(
+                                  hint: Text('Select Category'),
+                                  value: selectedCategory,
+                                  onChanged: (newValue) {
+                                    setModalState(() {
+                                      selectedCategory = newValue;
+                                    });
+                                  },
+                                  selectedItemBuilder: (BuildContext context) {
+                                    return categories.map((category) {
+                                      return Row(
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: catColor(category),
+                                            radius: 5,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(category),
+                                        ],
+                                      );
+                                    }).toList();
+                                  },
+                                  items: categories.map((category) {
+                                    return DropdownMenuItem<String>(
+                                      value: category,
+                                      child: Row(
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: catColor(category),
+                                            radius: 5,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(category),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
-                              );
-                            }).toList(),
+                              ),
+                              const SizedBox(width: 10),
+                              InkWell(
+                                onTap: () async {
+                                  final DateTime? picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: selectedDate ?? DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime(2101),
+                                  );
+                                  if (picked != null && picked != selectedDate) {
+                                    setModalState(() {
+                                      selectedDate = picked;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Theme.of(context).dividerColor,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_today,
+                                        size: 20,
+                                        color: selectedDate != null
+                                            ? Theme.of(context).primaryColor
+                                            : Theme.of(context).disabledColor,
+                                      ),
+                                      if (selectedDate != null) ...[
+                                        SizedBox(width: 8),
+                                        Text(
+                                          "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 20),
                           Row(

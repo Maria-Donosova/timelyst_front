@@ -70,7 +70,7 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  Future<void> createTask(String description, String priority) async {
+  Future<void> createTask(String description, String priority, {DateTime? dueDate}) async {
     if (_authService == null) return;
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return;
@@ -84,6 +84,7 @@ class TaskProvider with ChangeNotifier {
       description: description,
       priority: priority,
       isCompleted: false,
+      dueDate: dueDate,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -96,6 +97,7 @@ class TaskProvider with ChangeNotifier {
         'description': description,
         'priority': priority,
         'isCompleted': false,
+        if (dueDate != null) 'dueDate': dueDate.toIso8601String(),
       };
       
       final createdTask = await TasksService.createTask(authToken, taskInput);
