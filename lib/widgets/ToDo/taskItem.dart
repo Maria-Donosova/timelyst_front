@@ -126,7 +126,7 @@ class _TaskItemState extends State<TaskItem> {
                             ),
                             if (widget.dueDate != null)
                               Text(
-                                DateFormat('MMM d').format(widget.dueDate!),
+                                DateFormat('MMM d h:mm a').format(widget.dueDate!),
                                 style: TextStyle(
                                   color: Colors.grey,
                                   fontSize: 12,
