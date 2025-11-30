@@ -58,6 +58,26 @@ class TaskListW extends StatelessWidget {
                 ),
               ],
             ),
+            PopupMenuButton<TaskSort>(
+              icon: Icon(Icons.sort),
+              onSelected: (TaskSort result) {
+                taskProvider.setSort(result);
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<TaskSort>>[
+                const PopupMenuItem<TaskSort>(
+                  value: TaskSort.none,
+                  child: Text('Default Order'),
+                ),
+                const PopupMenuItem<TaskSort>(
+                  value: TaskSort.dueDateAsc,
+                  child: Text('Due Date (Earliest First)'),
+                ),
+                const PopupMenuItem<TaskSort>(
+                  value: TaskSort.dueDateDesc,
+                  child: Text('Due Date (Latest First)'),
+                ),
+              ],
+            ),
           ],
         ),
         body: TabBarView(

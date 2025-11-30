@@ -6,6 +6,7 @@ import 'package:timelyst_flutter/services/authService.dart';
 
 
 enum TaskFilter { all, active, completed }
+enum TaskSort { none, dueDateAsc, dueDateDesc }
 
 class TaskProvider with ChangeNotifier {
   AuthService? _authService;
@@ -13,6 +14,7 @@ class TaskProvider with ChangeNotifier {
   bool _isLoading = true;
   String _errorMessage = '';
   TaskFilter _filter = TaskFilter.all;
+  TaskSort _sort = TaskSort.none;
   
   // Caching
   DateTime? _lastFetchTime;
@@ -22,6 +24,7 @@ class TaskProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
   TaskFilter get filter => _filter;
+  TaskSort get sort => _sort;
 
   TaskProvider({AuthService? authService}) : _authService = authService;
 
@@ -80,6 +83,7 @@ class TaskProvider with ChangeNotifier {
       );
       _lastFetchTime = DateTime.now();
       print("✅ [TaskProvider] Fetched ${_tasks.length} tasks successfully");
+      _sortTasks(); // Sort tasks after fetching
       _errorMessage = '';
     } catch (e) {
       _errorMessage = 'Failed to fetch tasks: $e';
@@ -250,5 +254,31 @@ class TaskProvider with ChangeNotifier {
     final task = _tasks.removeAt(oldIndex);
     _tasks.insert(newIndex, task);
     notifyListeners();
+  }
+
+  void setSort(TaskSort sort) {
+    if (_sort != sort) {
+      _sort = sort;
+      _sortTasks();
+      notifyListeners();
+    }
+  }
+
+  void _sortTasks() {
+    if (_sort == TaskSort.none) {
+      return;
+    }
+
+    _tasks.sort((a, b) {
+      if (a.dueDate == null && b.dueDate == null) return 0;
+      if (a.dueDate == null) return 1; // No due date at the end
+      if (b.dueDate == null) return -1;
+
+      if (_sort == TaskSort.dueDateAsc) {
+        return a.dueDate!.compareTo(b.dueDate!);
+      } else {
+        return b.dueDate!.compareTo(a.dueDate!);
+      }
+    });
   }
 }
