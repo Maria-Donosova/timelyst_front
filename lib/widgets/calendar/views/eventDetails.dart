@@ -429,8 +429,8 @@ class EventDetailsScreenState extends State<EventDetails> {
         print('  - deviceTimeZone: $deviceTimeZone');
 
         // Prepare event data (common fields for both day and time events)
-        final startFormatted = _formatDateTimeWithTimezone(start);
-        final endFormatted = _formatDateTimeWithTimezone(end);
+        final startFormatted = start.toUtc().toIso8601String();
+        final endFormatted = end.toUtc().toIso8601String();
 
         print('📤 [EventDetails] Formatting for backend:');
         print('  - start formatted: $startFormatted');

@@ -27,7 +27,7 @@ class Task {
       userId: json['userId'],
       title: json['title'],
       description: json['description'] ?? '',
-      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
+      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']).toLocal() : null,
       isCompleted: json['isCompleted'] ?? false,
       priority: json['priority'] ?? 'MEDIUM',
       createdAt: DateTime.parse(json['createdAt']),

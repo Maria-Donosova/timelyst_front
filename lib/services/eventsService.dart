@@ -18,8 +18,8 @@ class EventService {
     final start = startDate ?? DateTime.now().subtract(Duration(days: 90));
     final end = endDate ?? DateTime.now().add(Duration(days: 120));
     
-    final startDateStr = start.toIso8601String();
-    final endDateStr = end.toIso8601String();
+    final startDateStr = start.toUtc().toIso8601String();
+    final endDateStr = end.toUtc().toIso8601String();
     
     try {
       // Construct query parameters

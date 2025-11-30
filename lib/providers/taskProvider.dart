@@ -117,7 +117,7 @@ class TaskProvider with ChangeNotifier {
         'description': description,
         'priority': priority,
         'isCompleted': false,
-        if (dueDate != null) 'dueDate': dueDate.toIso8601String(),
+        if (dueDate != null) 'dueDate': dueDate.toUtc().toIso8601String(),
       };
       
       final createdTask = await TasksService.createTask(authToken, taskInput);
