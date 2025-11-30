@@ -24,6 +24,7 @@ class _NewTaskWState extends State<NewTaskW> {
   final _taskController = TextEditingController();
   String? selectedCategory;
   DateTime? selectedDate;
+  TimeOfDay? selectedTime;
 
   @override
   void dispose() {
@@ -35,10 +36,21 @@ class _NewTaskWState extends State<NewTaskW> {
     if (_form.currentState!.validate() && selectedCategory != null) {
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
       try {
+        DateTime? finalDueDate = selectedDate;
+        if (finalDueDate != null && selectedTime != null) {
+          finalDueDate = DateTime(
+            finalDueDate.year,
+            finalDueDate.month,
+            finalDueDate.day,
+            selectedTime!.hour,
+            selectedTime!.minute,
+          );
+        }
+
         await taskProvider.createTask(
           _taskController.text,
           selectedCategory!,
-          dueDate: selectedDate,
+          dueDate: finalDueDate,
         );
 
         final scaffoldContext = ScaffoldMessenger.of(context);
@@ -160,6 +172,54 @@ class _NewTaskWState extends State<NewTaskW> {
                                       ),
                                     );
                                   }).toList(),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              InkWell(
+                                onTap: () async {
+                                  final TimeOfDay? picked = await showTimePicker(
+                                    context: context,
+                                    initialTime: selectedTime ?? TimeOfDay.now(),
+                                  );
+                                  if (picked != null && picked != selectedTime) {
+                                    setModalState(() {
+                                      selectedTime = picked;
+                                      if (selectedDate == null) {
+                                        selectedDate = DateTime.now();
+                                      }
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Theme.of(context).dividerColor,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.access_time,
+                                        size: 20,
+                                        color: selectedTime != null
+                                            ? Theme.of(context).primaryColor
+                                            : Theme.of(context).disabledColor,
+                                      ),
+                                      if (selectedTime != null) ...[
+                                        SizedBox(width: 8),
+                                        Text(
+                                          selectedTime!.format(context),
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 10),
