@@ -59,34 +59,8 @@ class _TaskItemState extends State<TaskItem> {
                     createdAt: DateTime.now(),
                     updatedAt: DateTime.now(),
                   ),
-                  onSave: (updatedTask) async {
-                    try {
-                      // Get the auth token from secure storage
-                      final authService = AuthService();
-                      final authToken = await authService.getAuthToken();
-
-                      if (authToken != null) {
-                        final taskInput = {
-                          'description': updatedTask.description,
-                          'priority': updatedTask.priority,
-                          'isCompleted': updatedTask.isCompleted,
-                        };
-                        
-                        await TasksService.updateTask(
-                          updatedTask.id,
-                          authToken,
-                          taskInput,
-                        );
-                        widget
-                            .onTaskUpdated(updatedTask); // Notify parent widget
-                      } else {
-                        throw Exception('Authentication token not found');
-                      }
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to update task: $e')),
-                      );
-                    }
+                  onSave: (updatedTask) {
+                    widget.onTaskUpdated(updatedTask); // Notify parent widget
                   },
                 );
               },

@@ -224,6 +224,29 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
+  void updateLocalTask(Task updatedTask) {
+    final index = _tasks.indexWhere((task) => task.id == updatedTask.id);
+    if (index != -1) {
+      final existingTask = _tasks[index];
+      // Ensure we don't lose important fields if the UI passed placeholders
+      final mergedTask = Task(
+        id: updatedTask.id,
+        userId: (updatedTask.userId.isEmpty) ? existingTask.userId : updatedTask.userId,
+        title: updatedTask.title,
+        description: updatedTask.description,
+        priority: updatedTask.priority,
+        isCompleted: updatedTask.isCompleted,
+        dueDate: updatedTask.dueDate,
+        createdAt: existingTask.createdAt, // Preserve creation time
+        updatedAt: DateTime.now(),
+      );
+      
+      _tasks[index] = mergedTask;
+      _sortTasks();
+      notifyListeners();
+    }
+  }
+
   Future<void> deleteTask(String taskId) async {
     if (_authService == null) return;
     final authToken = await _authService!.getAuthToken();
