@@ -84,6 +84,7 @@ class TaskListW extends StatelessWidget {
                                   id: task.id,
                                   title: task.description,
                                   category: task.priority, // Using priority as category for now
+                                  dueDate: task.dueDate,
                                   status: task.isCompleted ? 'completed' : 'pending',
                                   onTaskUpdated: (updatedTask) async {
                                     await taskProvider.updateTask(

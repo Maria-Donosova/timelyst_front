@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../models/task.dart';
 import '../../services/tasksService.dart';
 import '../../services/authService.dart';
@@ -10,6 +11,7 @@ class TaskItem extends StatefulWidget {
   final String title;
   final String category;
   final String status;
+  final DateTime? dueDate;
   final Function(Task) onTaskUpdated;
 
   const TaskItem({
@@ -17,6 +19,7 @@ class TaskItem extends StatefulWidget {
     required this.title,
     required this.category,
     required this.status,
+    this.dueDate,
     required this.onTaskUpdated,
   });
 
@@ -51,6 +54,7 @@ class _TaskItemState extends State<TaskItem> {
                     title: widget.title,
                     description: widget.title,
                     priority: widget.category,
+                    dueDate: widget.dueDate,
                     isCompleted: widget.status == 'completed',
                     createdAt: DateTime.now(),
                     updatedAt: DateTime.now(),
@@ -114,8 +118,21 @@ class _TaskItemState extends State<TaskItem> {
                             style: Theme.of(context).textTheme.displaySmall,
                           ),
                         ),
-                        Text(
-                          widget.category,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              widget.category,
+                            ),
+                            if (widget.dueDate != null)
+                              Text(
+                                DateFormat('MMM d').format(widget.dueDate!),
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                          ],
                         ),
                       ],
                     ),

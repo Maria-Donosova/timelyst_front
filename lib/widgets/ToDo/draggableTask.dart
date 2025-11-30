@@ -28,10 +28,11 @@ class DraggableTask extends StatelessWidget {
         ),
       ),
       child: TaskItem(
-        id: task.taskId,
+        id: task.id,
         title: task.title,
-        category: task.category,
-        status: task.status,
+        category: task.priority,
+        dueDate: task.dueDate,
+        status: task.isCompleted ? 'completed' : 'pending',
         onTaskUpdated: onTaskUpdated,
       ),
     );
