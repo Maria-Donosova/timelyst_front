@@ -37,6 +37,8 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    // Initialize timestamp to prevent immediate "resume" trigger
+    _lastFetchTime = DateTime.now();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkForSyncInProgress();
@@ -159,16 +161,15 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
       final now = DateTime.now();
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
 
-      // Always invalidate cache when app resumes to catch external changes
-      eventProvider.invalidateCache();
-      print('📱 [Agenda] App resumed - cache invalidated for fresh data');
-
+      // Only invalidate and refresh if enough time has passed
       if (_lastFetchTime == null ||
           now.difference(_lastFetchTime!).inMinutes >= 5) {
+        print('📱 [Agenda] App resumed - invalidating cache and refreshing data');
+        eventProvider.invalidateCache();
         _refreshData();
       } else {
         print(
-            '📱 [Agenda] Recent fetch detected, cache invalidated but not forcing immediate refresh');
+            '📱 [Agenda] Recent fetch detected, skipping resume refresh');
       }
     }
   }
