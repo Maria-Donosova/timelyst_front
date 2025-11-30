@@ -177,6 +177,53 @@ class _NewTaskWState extends State<NewTaskW> {
                               const SizedBox(width: 10),
                               InkWell(
                                 onTap: () async {
+                                  final DateTime? picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: selectedDate ?? DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime(2101),
+                                  );
+                                  if (picked != null && picked != selectedDate) {
+                                    setModalState(() {
+                                      selectedDate = picked;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Theme.of(context).dividerColor,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_today,
+                                        size: 20,
+                                        color: selectedDate != null
+                                            ? Theme.of(context).primaryColor
+                                            : Theme.of(context).disabledColor,
+                                      ),
+                                      if (selectedDate != null) ...[
+                                        SizedBox(width: 8),
+                                        Text(
+                                          "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              InkWell(
+                                onTap: () async {
                                   final TimeOfDay? picked = await showTimePicker(
                                     context: context,
                                     initialTime: selectedTime ?? TimeOfDay.now(),
@@ -213,53 +260,6 @@ class _NewTaskWState extends State<NewTaskW> {
                                         SizedBox(width: 8),
                                         Text(
                                           selectedTime!.format(context),
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              InkWell(
-                                onTap: () async {
-                                  final DateTime? picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: selectedDate ?? DateTime.now(),
-                                    firstDate: DateTime.now(),
-                                    lastDate: DateTime(2101),
-                                  );
-                                  if (picked != null && picked != selectedDate) {
-                                    setModalState(() {
-                                      selectedDate = picked;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: Theme.of(context).dividerColor,
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.calendar_today,
-                                        size: 20,
-                                        color: selectedDate != null
-                                            ? Theme.of(context).primaryColor
-                                            : Theme.of(context).disabledColor,
-                                      ),
-                                      if (selectedDate != null) ...[
-                                        SizedBox(width: 8),
-                                        Text(
-                                          "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
                                           style: TextStyle(
                                             fontSize: 14,
                                           ),
