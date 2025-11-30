@@ -111,6 +111,7 @@ class TaskProvider with ChangeNotifier {
       _tasks.removeWhere((t) => t.id == tempId);
       _errorMessage = 'Failed to create task: $e';
       notifyListeners();
+      rethrow;
     }
   }
 

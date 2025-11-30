@@ -36,6 +36,7 @@ RUN apk --no-cache add gettext
 
 # Copy built web app to nginx
 COPY --from=build /app/build/web /usr/share/nginx/html
+COPY --from=build /app/web/index.html.template /usr/share/nginx/html/index.html.template
 
 # Copy nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
