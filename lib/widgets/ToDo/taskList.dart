@@ -30,24 +30,35 @@ class TaskListW extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          toolbarHeight: 0,
-          bottom: PreferredSize(
-            preferredSize:
-                Size.fromHeight(54),
-            child: TabBar(
-              tabs: [
-                Tab(text: 'ToDo'),
-              ],
-              labelPadding: EdgeInsets.only(top: 5.3),
-              labelStyle: Theme.of(context).textTheme.displayLarge,
-              unselectedLabelStyle: Theme.of(context).textTheme.bodyLarge,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Colors.white,
-              indicatorWeight: 0.001,
-              indicatorSize: TabBarIndicatorSize.tab,
-              dividerColor: Colors.transparent,
+          title: Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(
+              'ToDo',
+              style: Theme.of(context).textTheme.displayLarge,
             ),
           ),
+          actions: [
+            PopupMenuButton<TaskFilter>(
+              icon: Icon(Icons.filter_list),
+              onSelected: (TaskFilter result) {
+                taskProvider.setFilter(result);
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<TaskFilter>>[
+                const PopupMenuItem<TaskFilter>(
+                  value: TaskFilter.all,
+                  child: Text('All Tasks'),
+                ),
+                const PopupMenuItem<TaskFilter>(
+                  value: TaskFilter.active,
+                  child: Text('Active Tasks'),
+                ),
+                const PopupMenuItem<TaskFilter>(
+                  value: TaskFilter.completed,
+                  child: Text('Completed Tasks'),
+                ),
+              ],
+            ),
+          ],
         ),
         body: TabBarView(
           children: [

@@ -4,11 +4,15 @@ import 'package:timelyst_flutter/services/tasksService.dart';
 import 'package:timelyst_flutter/models/task.dart';
 import 'package:timelyst_flutter/services/authService.dart';
 
+
+enum TaskFilter { all, active, completed }
+
 class TaskProvider with ChangeNotifier {
   AuthService? _authService;
   List<Task> _tasks = [];
   bool _isLoading = true;
   String _errorMessage = '';
+  TaskFilter _filter = TaskFilter.all;
   
   // Caching
   DateTime? _lastFetchTime;
@@ -17,11 +21,19 @@ class TaskProvider with ChangeNotifier {
   List<Task> get tasks => _tasks;
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
+  TaskFilter get filter => _filter;
 
   TaskProvider({AuthService? authService}) : _authService = authService;
 
   void setAuth(AuthService authService) {
     _authService = authService;
+  }
+
+  void setFilter(TaskFilter filter) {
+    if (_filter != filter) {
+      _filter = filter;
+      fetchTasks(forceRefresh: true);
+    }
   }
 
   Future<void> fetchTasks({bool forceRefresh = false}) async {
@@ -51,7 +63,15 @@ class TaskProvider with ChangeNotifier {
 
     try {
       print("🔄 [TaskProvider] Starting API call to fetch tasks...");
-      _tasks = await TasksService.fetchUserTasks(authToken).timeout(
+      
+      bool? completed;
+      if (_filter == TaskFilter.active) {
+        completed = false;
+      } else if (_filter == TaskFilter.completed) {
+        completed = true;
+      }
+
+      _tasks = await TasksService.fetchUserTasks(authToken, completed: completed).timeout(
         Duration(seconds: 45), // Allow more time for backend processing
         onTimeout: () {
           print('⏰ [TaskProvider] Task fetching timed out after 45 seconds');

@@ -6,10 +6,15 @@ import '../utils/apiClient.dart';
 class TasksService {
   static final ApiClient _apiClient = ApiClient();
 
-  static Future<List<Task>> fetchUserTasks(String authToken) async {
+  static Future<List<Task>> fetchUserTasks(String authToken, {bool? completed}) async {
     try {
+      String url = '${Config.backendURL}/tasks';
+      if (completed != null) {
+        url += '?completed=$completed';
+      }
+
       final response = await _apiClient.get(
-        '${Config.backendURL}/tasks',
+        url,
         token: authToken,
       );
 
