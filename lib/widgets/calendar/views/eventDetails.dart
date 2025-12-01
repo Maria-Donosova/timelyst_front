@@ -233,7 +233,7 @@ class EventDetailsScreenState extends State<EventDetails> {
         selectedStart.hour,
         selectedStart.minute,
       );
-      final endDate = start.add(const Duration(minutes: 30));
+      final endDate = start.add(const Duration(minutes: 60));
       final newEnd = TimeOfDay.fromDateTime(endDate);
 
       setState(() {
@@ -247,7 +247,7 @@ class EventDetailsScreenState extends State<EventDetails> {
     final selectedEnd = await showTimePicker(
       context: context,
       initialTime:
-          TimeOfDay.fromDateTime(DateTime.now().add(Duration(minutes: 30))),
+          TimeOfDay.fromDateTime(DateTime.now().add(Duration(minutes: 60))),
       initialEntryMode: TimePickerEntryMode.inputOnly,
     );
 

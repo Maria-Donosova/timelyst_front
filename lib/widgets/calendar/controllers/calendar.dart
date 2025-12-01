@@ -330,10 +330,10 @@ class _CalendarWState extends State<CalendarW> {
 
   Future<void> _calendarTapped(CalendarTapDetails details) async {
     if (details.targetElement == CalendarElement.calendarCell) {
-      _cellDateText = DateFormat('MMMM d', 'en_US').format(details.date!).toString();
+      _cellDateText = DateFormat('MMMM d', 'en_US').format(DateTime.now()).toString();
       _startTimeText = DateFormat('jm').format(details.date!).toString();
       _endTimeText = DateFormat('jm')
-          .format(details.date!.add(const Duration(minutes: 30)))
+          .format(details.date!.add(const Duration(minutes: 60)))
           .toString();
     }
     if (details.targetElement == CalendarElement.appointment) {
