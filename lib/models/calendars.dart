@@ -37,9 +37,14 @@ class Calendar {
       userId: json['userId'] ?? '',
       source: _parseSource(json['source']),
       providerCalendarId: json['providerCalendarId'] ?? '',
-      metadata: CalendarMetadata.fromJson(json['metadata'] ?? {}),
-      preferences: CalendarPreferences.fromJson(json['preferences'] ?? {}),
-      sync: CalendarSyncInfo.fromJson(json['sync'] ?? {}),
+      metadata: CalendarMetadata.fromJson(
+          json['metadata'] is Map<String, dynamic> ? json['metadata'] : {}),
+      preferences: CalendarPreferences.fromJson(
+          json['preferences'] is Map<String, dynamic>
+              ? json['preferences']
+              : {}),
+      sync: CalendarSyncInfo.fromJson(
+          json['sync'] is Map<String, dynamic> ? json['sync'] : {}),
       syncToken: json['syncToken'],
       isSelected: json['isSelected'] ?? false,
       isPrimary: json['isPrimary'] ?? false,
