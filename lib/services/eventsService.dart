@@ -30,15 +30,35 @@ class EventService {
       
       final uri = Uri.parse('${Config.backendURL}/events').replace(queryParameters: queryParams);
 
+      print('🔄 [EventService] GET $uri');
       final response = await _apiClient.get(
         uri.toString(),
         token: authToken,
       );
 
+      print('🔄 [EventService] Response status: ${response.statusCode}');
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
+        final body = response.body;
+        print('🔄 [EventService] Response body length: ${body.length}');
+        if (body == 'null') {
+           print('🔄 [EventService] Body is "null" string');
+           return [];
+        }
+
+        final List<dynamic> data = jsonDecode(body);
+        print('🔄 [EventService] Decoded data length: ${data.length}');
         
-        final List<TimeEvent> events = data.map((json) => TimeEvent.fromJson(json)).toList();
+        final List<TimeEvent> events = data.map((json) {
+          try {
+            return TimeEvent.fromJson(json);
+          } catch (e) {
+            print('❌ [EventService] Error parsing TimeEvent: $e');
+            print('❌ [EventService] JSON: $json');
+            rethrow;
+          }
+        }).toList();
+
+        print('🔄 [EventService] Parsed ${events.length} events');
 
         return events
             .map((event) {
@@ -55,7 +75,9 @@ class EventService {
       } else {
         throw Exception('Failed to fetch events: ${response.statusCode}');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ [EventService] Exception in fetchEvents: $e');
+      print('❌ [EventService] Stack trace: $stackTrace');
       rethrow;
     }
   }

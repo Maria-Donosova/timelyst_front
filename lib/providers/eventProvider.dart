@@ -447,24 +447,34 @@ class EventProvider with ChangeNotifier {
   bool _syncEventsIncremental(List<CustomAppointment> fetchedEvents) {
     final syncStartTime = DateTime.now();
     print('🔄 [EventProvider] Starting incremental sync of ${fetchedEvents.length} fetched events with ${_events.length} existing events');
-    final fetchedEventMap = Map<String, CustomAppointment>.fromIterable(
-      fetchedEvents,
-      key: (e) => e.id,
-      value: (e) => e,
-    );
     
-    final currentEventMap = Map<String, CustomAppointment>.fromIterable(
-      _events,
-      key: (e) => e.id,
-      value: (e) => e,
-    );
+    try {
+      final fetchedEventMap = Map<String, CustomAppointment>.fromIterable(
+        fetchedEvents,
+        key: (e) => e.id,
+        value: (e) => e,
+      );
+      
+      final currentEventMap = Map<String, CustomAppointment>.fromIterable(
+        _events,
+        key: (e) => e.id,
+        value: (e) => e,
+      );
 
-    final fetchedIds = fetchedEventMap.keys.toSet();
-    final currentIds = currentEventMap.keys.toSet();
+      final fetchedIds = fetchedEventMap.keys.toSet();
+      final currentIds = currentEventMap.keys.toSet();
 
-    // Find new events (in fetched but not in current)
-    final newEventIds = fetchedIds.difference(currentIds);
-    final newEvents = newEventIds.map((id) => fetchedEventMap[id]!).toList();
+      // Find new events (in fetched but not in current)
+      final newEventIds = fetchedIds.difference(currentIds);
+      print('🔄 [EventProvider] Found ${newEventIds.length} new events');
+      
+      final newEvents = newEventIds.map((id) {
+        final event = fetchedEventMap[id];
+        if (event == null) {
+          print('❌ [EventProvider] Event with ID $id is null in fetchedEventMap!');
+        }
+        return event!;
+      }).toList();
 
     // Find removed events (in current but not in fetched)
     final removedEventIds = currentIds.difference(fetchedIds);
@@ -516,6 +526,11 @@ class EventProvider with ChangeNotifier {
     print('🔄 [EventProvider] Incremental sync completed: $changes changes made in ${syncDuration.inMilliseconds}ms');
     
     return changes > 0;
+    } catch (e, stackTrace) {
+      print('❌ [EventProvider] Error in _syncEventsIncremental: $e');
+      print('❌ [EventProvider] Stack trace: $stackTrace');
+      return false;
+    }
   }
 
   /// Simple event change detection
