@@ -225,6 +225,7 @@ class TaskProvider with ChangeNotifier {
   }
 
   void updateLocalTask(Task updatedTask) {
+    print("DEBUG: TaskProvider updateLocalTask id: ${updatedTask.id}, dueDate: ${updatedTask.dueDate}");
     final index = _tasks.indexWhere((task) => task.id == updatedTask.id);
     if (index != -1) {
       final existingTask = _tasks[index];

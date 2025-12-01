@@ -5,11 +5,13 @@ import '../../../models/calendars.dart';
 import '../../../providers/calendarProvider.dart';
 import '../../../providers/eventProvider.dart';
 import '../../../providers/authProvider.dart';
-import '../../../services/eventsService.dart';
+
 import '../../../utils/timezoneUtils.dart';
 import '../../shared/categories.dart';
 import '../controllers/eventDeletionController.dart';
+import '../../../models/customApp.dart';
 import '../../shared/calendarSelection.dart';
+import 'eventRecurrenceSelection.dart';
 
 class EventDetails extends StatefulWidget {
   EventDetails({
@@ -135,6 +137,16 @@ class EventDetailsScreenState extends State<EventDetails> {
         }
       }
     });
+
+    if (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty) {
+      if (widget._recurrenceRule!.contains('DAILY')) {
+        _recurrence = 'Daily';
+      } else if (widget._recurrenceRule!.contains('WEEKLY')) {
+        _recurrence = 'Weekly';
+      } else if (widget._recurrenceRule!.contains('YEARLY')) {
+        _recurrence = 'Yearly';
+      }
+    }
   }
 
   @override
@@ -197,9 +209,7 @@ class EventDetailsScreenState extends State<EventDetails> {
   /// Formats DateTime to ISO8601 string WITH timezone offset
   /// This preserves both the local time and timezone information
   /// Example: "2024-11-18T14:30:00.000-05:00"
-  String _formatDateTimeWithTimezone(DateTime dateTime) {
-    return TimezoneUtils.formatDateTimeWithTimezone(dateTime);
-  }
+
 
   Future<void> _selectStart(BuildContext context, bool isStart) async {
     TimeOfDay initialStart = TimeOfDay.now();
@@ -264,22 +274,7 @@ class EventDetailsScreenState extends State<EventDetails> {
     });
   }
 
-  //  function the changes the color of eventrepeat icon once the user chooses a recurrence pattern and clicked Saved within the _selectRecurrenceRule function
-  void _changeRecurringColor() {
-    if (_recurrence != 'None') {
-      setState(() {
-        _isRecurring = true;
-      });
-    }
-  }
 
-  void _changeRecurringPattern() {
-    if (_recurrence != 'None') {
-      // No need to set _recurrence to itself
-      // Just call parseRRule if needed
-      //parseRRule(_recurrence);
-    }
-  }
 
   Future<void> _selectCalendar(BuildContext context) async {
     print('[EventDetails] Opening calendar selection with ${_selectedCalendars.length} selected calendars');
@@ -461,32 +456,24 @@ class EventDetailsScreenState extends State<EventDetails> {
         // Determine if this is an update or create operation
         final isUpdate = widget._id != null && widget._id!.isNotEmpty;
 
-        // Call the appropriate EventService method based on event type and operation
-        bool success = false;
+        // Call the appropriate EventProvider method based on event type and operation
+        CustomAppointment? result;
         try {
           if (isUpdate) {
-            final result = await EventService.updateEvent(
+            result = await eventProvider.updateEvent(
               widget._id!,
               eventData,
-              authToken,
             );
-            success = result != null;
           } else {
-            final result = await EventService.createEvent(
+            result = await eventProvider.createEvent(
               eventData,
-              authToken,
             );
-            success = result != null;
           }
         } catch (e) {
           print('Error saving event: $e');
-          success = false;
         }
 
-        if (success) {
-          // Invalidate cache to force fresh data on next fetch
-          eventProvider.invalidateCache();
-
+        if (result != null) {
           // Show success message
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -684,9 +671,7 @@ class EventDetailsScreenState extends State<EventDetails> {
   @override
   Widget build(BuildContext context) {
     //bool _isSelected = false;
-    final selectedCategory = widget._catTitle ?? 'Misc';
-    var categoryColor = catColor(selectedCategory);
-    var isAllDay = widget._allDay;
+
     final width = MediaQuery.of(context).size.width;
 
     return _isLoading
@@ -789,6 +774,63 @@ class EventDetailsScreenState extends State<EventDetails> {
                       suffixIcon: _eventCalendarInfo != null
                           ? Icon(_getCalendarSourceIcon(_eventCalendarInfo!.source))
                           : Icon(Icons.calendar_today),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    decoration: InputDecoration(
+                      labelText: 'Category',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: categories.map((String category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: catColor(category),
+                              radius: 5,
+                            ),
+                            SizedBox(width: 8),
+                            Text(category),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedCategory = newValue!;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  InkWell(
+                    onTap: () async {
+                      final result = await showRecurrenceSelectionDialog(
+                        context,
+                        initialRecurrence: _recurrence,
+                        initialSelectedDays: _selectedDays,
+                      );
+                      if (result != null) {
+                        setState(() {
+                          _recurrence = result['recurrence'];
+                          _selectedDays = result['selectedDays'];
+                          if (_recurrence != 'None') {
+                            _isRecurring = true;
+                          } else {
+                            _isRecurring = false;
+                          }
+                        });
+                      }
+                    },
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'Recurrence',
+                        border: OutlineInputBorder(),
+                        suffixIcon: Icon(Icons.repeat),
+                      ),
+                      child: Text(_recurrence),
                     ),
                   ),
                   SizedBox(height: 20),

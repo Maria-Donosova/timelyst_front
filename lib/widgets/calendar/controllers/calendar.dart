@@ -302,7 +302,7 @@ class _CalendarWState extends State<CalendarW> {
     );
   }
 
-  void _calendarTapped(CalendarTapDetails details) {
+  Future<void> _calendarTapped(CalendarTapDetails details) async {
     if (details.targetElement == CalendarElement.calendarCell) {
       _cellDateText = DateFormat('MMMM d', 'en_US').format(details.date!).toString();
       _startTimeText = DateFormat('jm').format(details.date!).toString();
@@ -325,7 +325,7 @@ class _CalendarWState extends State<CalendarW> {
         _endTimeText =
             DateFormat('hh:mm a').format(_customAppointment.endTime).toString();
 
-        showDialog(
+        final result = await showDialog(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
@@ -346,9 +346,13 @@ class _CalendarWState extends State<CalendarW> {
                 ),
               );
             });
+
+        if (result == true) {
+          setState(() {});
+        }
       }
-    } else
-      showDialog(
+    } else {
+      final result = await showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
@@ -368,6 +372,11 @@ class _CalendarWState extends State<CalendarW> {
               ),
             );
           });
+
+      if (result == true) {
+        setState(() {});
+      }
+    }
   }
 
   /// Handles drag-and-drop operations, especially for recurring events
