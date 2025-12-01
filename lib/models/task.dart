@@ -41,11 +41,11 @@ class Task {
       'userId': userId,
       'title': title,
       'description': description,
-      'dueDate': dueDate?.toIso8601String(),
+      'dueDate': dueDate?.toUtc().toIso8601String(),
       'isCompleted': isCompleted,
       'priority': priority,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
+      'updatedAt': updatedAt.toUtc().toIso8601String(),
     };
   }
 }

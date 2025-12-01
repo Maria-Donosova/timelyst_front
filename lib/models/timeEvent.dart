@@ -69,8 +69,8 @@ class TimeEvent {
       'providerEventId': providerEventId,
       'etag': etag,
       'eventTitle': eventTitle,
-      'start': start.toIso8601String(),
-      'end': end.toIso8601String(),
+      'start': start.toUtc().toIso8601String(),
+      'end': end.toUtc().toIso8601String(),
       'startTimeZone': startTimeZone,
       'endTimeZone': endTimeZone,
       'recurrenceRule': recurrenceRule,
@@ -78,8 +78,8 @@ class TimeEvent {
       'category': category,
       'location': location,
       'description': description,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
+      'updatedAt': updatedAt.toUtc().toIso8601String(),
     };
   }
 }

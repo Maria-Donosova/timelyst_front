@@ -52,8 +52,8 @@ class User {
       'googleAccounts': googleAccounts,
       'microsoftAccounts': microsoftAccounts,
       'appleAccounts': appleAccounts,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
+      'updatedAt': updatedAt.toUtc().toIso8601String(),
     };
   }
 }

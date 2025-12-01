@@ -81,8 +81,8 @@ class Calendar {
       'syncToken': syncToken,
       'isSelected': isSelected,
       'isPrimary': isPrimary,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
+      'updatedAt': updatedAt.toUtc().toIso8601String(),
     };
   }
   
@@ -270,8 +270,8 @@ class CalendarSyncInfo {
     return {
       'etag': etag,
       'syncToken': syncToken,
-      'lastSyncedAt': lastSyncedAt?.toIso8601String(),
-      'expiration': expiration?.toIso8601String(),
+      'lastSyncedAt': lastSyncedAt?.toUtc().toIso8601String(),
+      'expiration': expiration?.toUtc().toIso8601String(),
     };
   }
 }
