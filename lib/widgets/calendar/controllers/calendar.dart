@@ -251,8 +251,32 @@ class _CalendarWState extends State<CalendarW> {
         ),
         Padding(
           padding: const EdgeInsets.only(right: 8, left: 10),
-          child: SizedBox(
-            child: PopupMenuButton(
+          child: Row(
+            children: [
+              IconButton(
+                tooltip: 'Today',
+                icon: Icon(
+                  Icons.today,
+                  color: Colors.grey[800],
+                ),
+                iconSize: 20,
+                onPressed: () {
+                  final eventProvider =
+                      Provider.of<EventProvider>(context, listen: false);
+
+                  setState(() {
+                    // Invalidate cache when user manually switches views
+                    eventProvider.invalidateCache();
+                    print(
+                        '📅 [Calendar] Manual switch to Today - cache invalidated for fresh event data');
+
+                    _controller.view = CalendarView.day;
+                    _controller.displayDate = DateTime.now();
+                  });
+                },
+              ),
+              SizedBox(
+                child: PopupMenuButton(
               tooltip: 'Mode',
               icon: Icon(
                 Icons.calendar_today_outlined,
@@ -296,6 +320,8 @@ class _CalendarWState extends State<CalendarW> {
                 );
               },
             ),
+          ),
+            ],
           ),
         ),
       ],
