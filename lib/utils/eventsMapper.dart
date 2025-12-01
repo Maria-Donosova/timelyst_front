@@ -6,7 +6,7 @@ class EventMapper {
   static CustomAppointment mapTimeEventToCustomAppointment(TimeEvent timeEvent) {
     // Debug logging for source information
     print('🔍 [EventMapper] Mapping TimeEvent: "${timeEvent.eventTitle}"');
-    print('  - calendarId: "${timeEvent.calendarId}"');
+    print('  - calendarIds: "${timeEvent.calendarIds}"');
     print('  - providerEventId: "${timeEvent.providerEventId}"');
 
     return CustomAppointment(
@@ -22,7 +22,8 @@ class EventMapper {
       recurrenceRule: timeEvent.recurrenceRule,
       catTitle: timeEvent.category,
       catColor: _getColorFromCategory(timeEvent.category),
-      calendarId: timeEvent.calendarId,
+      calendarId: timeEvent.calendarIds.isNotEmpty ? timeEvent.calendarIds.first : null,
+      userCalendars: timeEvent.calendarIds,
       // Map providerEventId to specific provider IDs if needed, or just use a generic one
       googleEventId: timeEvent.providerEventId, // Assuming providerEventId holds the external ID
       // You might need logic to determine which provider it is if CustomAppointment distinguishes them

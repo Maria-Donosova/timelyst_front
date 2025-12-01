@@ -23,19 +23,9 @@ class EventSaveController {
 
       CustomAppointment? result;
       if (isUpdate && eventId != null && eventId.isNotEmpty) {
-        if (isAllDay) {
-          result = await eventProvider.updateDayEvent(
-              eventId, cleanEventData);
-        } else {
-          result = await eventProvider.updateTimeEvent(
-              eventId, cleanEventData);
-        }
+        result = await eventProvider.updateEvent(eventId, cleanEventData);
       } else {
-        if (isAllDay) {
-          result = await eventProvider.createDayEvent(cleanEventData);
-        } else {
-          result = await eventProvider.createTimeEvent(cleanEventData);
-        }
+        result = await eventProvider.createEvent(cleanEventData);
       }
 
       if (result != null) {
