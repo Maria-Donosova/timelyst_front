@@ -1,7 +1,18 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:timelyst_flutter/utils/auth_event_bus.dart';
 
 class ApiClient {
+  final http.Client _client;
+
+  ApiClient({http.Client? client}) : _client = client ?? http.Client();
+
+  void _checkResponse(http.Response response) {
+    if (response.statusCode == 401) {
+      AuthEventBus.emit(AuthEvent.unauthorized);
+    }
+  }
+
   Future<http.Response> post(String url,
       {Map<String, String>? headers, dynamic body, String? token}) async {
     final defaultHeaders = {
@@ -13,11 +24,14 @@ class ApiClient {
       defaultHeaders.addAll(headers);
     }
 
-    return http.post(
+    final response = await _client.post(
       Uri.parse(url),
       headers: defaultHeaders,
       body: jsonEncode(body),
     );
+
+    _checkResponse(response);
+    return response;
   }
 
   Future<http.Response> delete(String url,
@@ -31,11 +45,14 @@ class ApiClient {
       defaultHeaders.addAll(headers);
     }
 
-    return http.delete(
+    final response = await _client.delete(
       Uri.parse(url),
       headers: defaultHeaders,
       body: body != null ? jsonEncode(body) : null,
     );
+
+    _checkResponse(response);
+    return response;
   }
 
   Future<http.Response> get(String url,
@@ -49,10 +66,13 @@ class ApiClient {
       defaultHeaders.addAll(headers);
     }
 
-    return http.get(
+    final response = await _client.get(
       Uri.parse(url),
       headers: defaultHeaders,
     );
+
+    _checkResponse(response);
+    return response;
   }
 
   Future<http.Response> put(String url,
@@ -66,10 +86,13 @@ class ApiClient {
       defaultHeaders.addAll(headers);
     }
 
-    return http.put(
+    final response = await _client.put(
       Uri.parse(url),
       headers: defaultHeaders,
       body: jsonEncode(body),
     );
+
+    _checkResponse(response);
+    return response;
   }
 }

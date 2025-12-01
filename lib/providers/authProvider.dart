@@ -1,10 +1,25 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/services/authService.dart';
+import 'package:timelyst_flutter/utils/auth_event_bus.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
+  StreamSubscription? _authSubscription;
 
-  AuthProvider(this._authService);
+  AuthProvider(this._authService) {
+    _authSubscription = AuthEventBus.stream.listen((event) {
+      if (event == AuthEvent.unauthorized) {
+        logout();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
 
   AuthService get authService => _authService;
 
