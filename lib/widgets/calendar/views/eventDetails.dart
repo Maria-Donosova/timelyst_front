@@ -448,6 +448,7 @@ class EventDetailsScreenState extends State<EventDetails> {
           'end': endFormatted,
           'startTimeZone': deviceTimeZone,
           'endTimeZone': deviceTimeZone,
+          'exdates': [],
         };
 
         print('📦 [EventDetails] Complete eventData being sent to service:');
