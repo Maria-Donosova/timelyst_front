@@ -163,10 +163,19 @@ class EventDetailsScreenState extends State<EventDetails> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+    DateTime initialDate = DateTime.now();
+    try {
+      if (_eventDateController.text.isNotEmpty) {
+        final parsedDate = DateFormat('MMMM d', 'en_US').parse(_eventDateController.text);
+        initialDate = DateTime(DateTime.now().year, parsedDate.month, parsedDate.day);
+      }
+    } catch (e) {
+      print('Error parsing initial date: $e');
+    }
+
     final selectedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: initialDate,
       firstDate: DateTime(2023, 1),
       lastDate: DateTime(2101),
     );
@@ -214,8 +223,8 @@ class EventDetailsScreenState extends State<EventDetails> {
   Future<void> _selectStart(BuildContext context, bool isStart) async {
     TimeOfDay initialStart = TimeOfDay.now();
 
-    if (widget._start != null && widget._start!.isNotEmpty) {
-      initialStart = _parseTimeString(widget._start!);
+    if (_eventStartTimeController.text.isNotEmpty) {
+      initialStart = _parseTimeString(_eventStartTimeController.text);
     }
 
     final selectedStart = await showTimePicker(
@@ -244,10 +253,15 @@ class EventDetailsScreenState extends State<EventDetails> {
   }
 
   Future<void> _selectEndTime(BuildContext context) async {
+    TimeOfDay initialEnd = TimeOfDay.fromDateTime(DateTime.now().add(const Duration(minutes: 60)));
+    
+    if (_eventEndTimeController.text.isNotEmpty) {
+      initialEnd = _parseTimeString(_eventEndTimeController.text);
+    }
+
     final selectedEnd = await showTimePicker(
       context: context,
-      initialTime:
-          TimeOfDay.fromDateTime(DateTime.now().add(Duration(minutes: 60))),
+      initialTime: initialEnd,
       initialEntryMode: TimePickerEntryMode.inputOnly,
     );
 
