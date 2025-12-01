@@ -163,6 +163,7 @@ class EventDetailsScreenState extends State<EventDetails> {
     super.dispose();
   }
 
+  Future<void> _selectDate(BuildContext context) async {
     DateTime initialDate = DateTime.now();
     try {
       if (_eventDateController.text.isNotEmpty) {
