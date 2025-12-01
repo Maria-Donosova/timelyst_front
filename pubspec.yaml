@@ -35,7 +35,7 @@ dependencies:
   http: ^1.2.2
   googleapis: ^13.1.0
   googleapis_auth: ^1.2.0
-  graphql_flutter: ^5.1.2
+
   syncfusion_flutter_calendar: ^30.1.37
   syncfusion_flutter_core: ^30.1.37
   syncfusion_flutter_datepicker: ^30.1.37

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timelyst_flutter/models/calendars.dart';
 
@@ -49,6 +50,36 @@ void main() {
       expect(calendar.metadata, isA<CalendarMetadata>());
       expect(calendar.preferences, isA<CalendarPreferences>());
       expect(calendar.sync, isA<CalendarSyncInfo>());
+    });
+    });
+
+
+  group('Calendar Model Serialization', () {
+    test('toJson converts dates to UTC', () {
+      final calendar = Calendar(
+        id: 'test-id',
+        userId: 'user-123',
+        source: CalendarSource.LOCAL,
+        providerCalendarId: 'prov-id',
+        metadata: CalendarMetadata(title: 'Test', color: const Color(0xFFA4BDFC)),
+        preferences: CalendarPreferences(importSettings: CalendarImportSettings()),
+        sync: CalendarSyncInfo(
+          lastSyncedAt: DateTime.parse('2023-01-01T12:00:00'), // Local time
+          expiration: DateTime.parse('2023-01-02T12:00:00'), // Local time
+        ),
+        syncToken: 'token',
+        isSelected: true,
+        isPrimary: false,
+        createdAt: DateTime.parse('2023-01-01T10:00:00'), // Local time
+        updatedAt: DateTime.parse('2023-01-01T11:00:00'), // Local time
+      );
+
+      final json = calendar.toJson();
+
+      expect(json['createdAt'], endsWith('Z'));
+      expect(json['updatedAt'], endsWith('Z'));
+      expect(json['sync']['lastSyncedAt'], endsWith('Z'));
+      expect(json['sync']['expiration'], endsWith('Z'));
     });
   });
 }

@@ -3,7 +3,7 @@ import '../../utils/dateUtils.dart';
 class TimeEvent {
   final String id;
   final String userId;
-  final String calendarId;
+  final List<String> calendarIds;
   final String providerEventId;
   final String etag;
   final String eventTitle;
@@ -22,7 +22,7 @@ class TimeEvent {
   TimeEvent({
     required this.id,
     required this.userId,
-    required this.calendarId,
+    required this.calendarIds,
     required this.providerEventId,
     required this.etag,
     required this.eventTitle,
@@ -43,7 +43,10 @@ class TimeEvent {
     return TimeEvent(
       id: json['id'] ?? '',
       userId: json['userId'] ?? '',
-      calendarId: json['calendarId'] ?? '',
+      calendarIds: (json['calendarIds'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
       providerEventId: json['providerEventId'] ?? '',
       etag: json['etag'] ?? '',
       eventTitle: json['eventTitle'] ?? '',
@@ -65,12 +68,12 @@ class TimeEvent {
     return {
       'id': id,
       'userId': userId,
-      'calendarId': calendarId,
+      'calendarIds': calendarIds,
       'providerEventId': providerEventId,
       'etag': etag,
       'eventTitle': eventTitle,
-      'start': start.toUtc().toIso8601String(),
-      'end': end.toUtc().toIso8601String(),
+      'start': start.toIso8601String(),
+      'end': end.toIso8601String(),
       'startTimeZone': startTimeZone,
       'endTimeZone': endTimeZone,
       'recurrenceRule': recurrenceRule,
@@ -78,8 +81,8 @@ class TimeEvent {
       'category': category,
       'location': location,
       'description': description,
-      'createdAt': createdAt.toUtc().toIso8601String(),
-      'updatedAt': updatedAt.toUtc().toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 }
