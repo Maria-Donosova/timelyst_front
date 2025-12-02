@@ -42,7 +42,10 @@ class Config {
   } 
 
   static String get microsoftRedirectUri {
-    return '$frontendURL/microsoft/callback';
+    final baseUrl = frontendURL.endsWith('/') 
+        ? frontendURL.substring(0, frontendURL.length - 1) 
+        : frontendURL;
+    return '$baseUrl/microsoft/callback';
   }
   
 
