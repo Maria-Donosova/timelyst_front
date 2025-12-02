@@ -16,7 +16,7 @@ class GoogleSignInManager {
     try {
       
       final serverAuthCode =
-          await _googleAuthService.requestServerAuthenticatioinCode();
+          await _googleAuthService.requestServerAuthenticationCode();
       
       if (serverAuthCode != null) {
         
