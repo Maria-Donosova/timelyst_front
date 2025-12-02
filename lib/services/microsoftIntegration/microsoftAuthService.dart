@@ -45,7 +45,7 @@ class MicrosoftAuthService {
     final params = {
       'client_id': Config.microsoftClientId,
       'response_type': 'code',
-      'redirect_uri': 'https://timelyst-back.fly.dev/microsoft/callback',
+      'redirect_uri': Config.microsoftRedirectUri,
       'scope': 'openid profile email https://graph.microsoft.com/calendars.read https://graph.microsoft.com/calendars.readwrite offline_access',
       'code_challenge': _codeChallenge!,
       'code_challenge_method': 'S256',
@@ -81,7 +81,7 @@ class MicrosoftAuthService {
       final body = {
         'code': authCode,
         'codeVerifier': _codeVerifier, // Include PKCE code verifier just in case
-        'redirectUri': 'https://timelyst-back.fly.dev/microsoft/callback', // Keep this or update if needed
+        'redirectUri': Config.microsoftRedirectUri, // Keep this or update if needed
       };
 
       final response = await _apiClient.post(
