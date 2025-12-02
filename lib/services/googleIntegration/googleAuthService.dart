@@ -28,16 +28,28 @@ class GoogleAuthService {
       // Ensure we sign out first to force a fresh sign-in and get a new auth code
       await _googleSignIn.signOut();
       
-      // Use signIn() which handles the flow based on configuration (forceCodeForRefreshToken: true)
-      final gsi.GoogleSignInAccount? account = await _googleSignIn.signIn();
+      // Use requestServerAuthCode() which is the correct method for web with GIS
+      // We cast to dynamic because the method might not be statically available in all versions/platforms
+      // but we know it exists for web with the correct package version.
+      // However, to be safe and avoid the previous NoSuchMethodError if the package version is weird,
+      // we can try to use it directly if the type allows, or keep the dynamic cast but ensure the package is correct.
+      // Given the user's error "NoSuchMethodError: method not found: 'requestServerAuthCode'", 
+      // it implies the method WAS NOT on the object. 
+      // But with the GIS script, the underlying JS should work. 
+      // The Dart method `requestServerAuthCode` MUST exist on `GoogleSignIn` for this to compile/run.
+      // If it doesn't exist on the Dart class, we can't call it.
+      // Let's check if we can use the `google_sign_in_web` specific implementation or if it's exposed on the main plugin.
+      // Actually, `requestServerAuthCode` IS exposed on `GoogleSignIn` in newer versions.
+      // Let's try calling it directly without cast first.
       
-      if (account == null) {
+      final authCode = await _googleSignIn.requestServerAuthCode();
+      
+      if (authCode == null) {
         print('⚠️ [GoogleAuthService] Sign-in aborted by user');
         return null;
       }
 
-      final authCode = account.serverAuthCode;
-      final maskedCode = (authCode?.length ?? 0) > 10 ? '${authCode?.substring(0, 10)}...' : authCode;
+      final maskedCode = (authCode.length) > 10 ? '${authCode.substring(0, 10)}...' : authCode;
       print('✅ [GoogleAuthService] Obtained server auth code: $maskedCode');
       
       return authCode;

@@ -52,6 +52,8 @@
     // The value below is injected by flutter build, do not touch.
     var serviceWorkerVersion = "1.0.0";
   </script>
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 </head>
