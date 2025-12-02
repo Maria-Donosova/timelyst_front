@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:google_sign_in/google_sign_in.dart' as gsi;
+import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart' as gsi_platform;
 
 
 import '../authService.dart';
@@ -35,7 +36,7 @@ class GoogleAuthService {
         // We need to cast to dynamic because we can't be 100% sure of the platform interface version
         // at compile time without checking pubspec.lock, and we want to avoid compilation errors.
         // The user claims requestServerAuthCode is the correct method.
-        final platform = gsi.GoogleSignInPlatform.instance;
+        final platform = gsi_platform.GoogleSignInPlatform.instance;
         final authCode = await (platform as dynamic).requestServerAuthCode();
         
         if (authCode != null) {
