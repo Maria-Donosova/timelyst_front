@@ -2,9 +2,11 @@ import 'dart:convert';
 import '../../config/envVarConfig.dart';
 import '../../utils/apiClient.dart';
 import '../../models/calendars.dart';
+import '../authService.dart';
 
 class AppleCalendarService {
   static final ApiClient _apiClient = ApiClient();
+  final AuthService _authService = AuthService();
 
   Future<void> syncAppleCalendars({
     required String userId,
@@ -19,9 +21,12 @@ class AppleCalendarService {
         'calendars': calendars.map((c) => c.toJson()).toList(),
       };
 
+      final token = await _authService.getAuthToken();
+
       final response = await _apiClient.post(
         Config.backendAppleSync,
         body: body,
+        token: token,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
