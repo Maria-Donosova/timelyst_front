@@ -103,6 +103,7 @@ class GoogleAuthService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        print('🔍 [GoogleAuthService] Raw backend response: ${response.body}');
         final responseData = jsonDecode(response.body);
         
         return {

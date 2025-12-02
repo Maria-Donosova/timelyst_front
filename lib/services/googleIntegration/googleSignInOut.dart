@@ -29,6 +29,8 @@ class GoogleSignInOutService {
         // Get userId from stored auth token instead of backend response  
         final userId = await _authService.getUserId();
         
+        print('🔍 [GoogleSignInOutService] Full backend response data: $response');
+        
         // Try multiple possible locations for email in the response
         final email = response['email'] ?? 
                      response['data']?['email'] ?? 
