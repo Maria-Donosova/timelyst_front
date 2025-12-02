@@ -25,9 +25,21 @@ class GoogleAuthService {
 
   Future<String?> requestServerAuthenticationCode() async {
     try {
+      // Ensure we sign out first to force a fresh sign-in and get a new auth code
       await _googleSignIn.signOut();
-      final authCode = await (_googleSignIn as dynamic).requestServerAuthCode();
+      
+      // Use signIn() which handles the flow based on configuration (forceCodeForRefreshToken: true)
+      final gsi.GoogleSignInAccount? account = await _googleSignIn.signIn();
+      
+      if (account == null) {
+        print('⚠️ [GoogleAuthService] Sign-in aborted by user');
+        return null;
+      }
+
+      final authCode = account.serverAuthCode;
       final maskedCode = (authCode?.length ?? 0) > 10 ? '${authCode?.substring(0, 10)}...' : authCode;
+      print('✅ [GoogleAuthService] Obtained server auth code: $maskedCode');
+      
       return authCode;
     } catch (e, stackTrace) {
       print('❌ [GoogleAuthService] Error requesting auth code: $e');
