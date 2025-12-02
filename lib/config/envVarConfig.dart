@@ -36,6 +36,7 @@ class Config {
     return value ?? '${backendURL}/google/calendars/save';
   }
 
+  static String get redirectUri {
     final value = _configService.get('REDIRECT_URI');
     return value ?? 'http://localhost:8080';
   } 
