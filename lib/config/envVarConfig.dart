@@ -45,7 +45,7 @@ class Config {
     final baseUrl = frontendURL.endsWith('/') 
         ? frontendURL.substring(0, frontendURL.length - 1) 
         : frontendURL;
-    return '$baseUrl/microsoft/callback';
+    return '$baseUrl/'; // Ensure it ends with a slash if it's the root
   }
   
 
