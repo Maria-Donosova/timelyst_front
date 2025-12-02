@@ -99,6 +99,7 @@ class MicrosoftAuthService {
         return {
           'success': true,
           'message': responseData['message'] ?? 'Microsoft account connected',
+          'data': responseData, // Pass the full response data
         };
       } else {
         print('❌ [MicrosoftAuthService] Backend request failed with status: ${response.statusCode}');

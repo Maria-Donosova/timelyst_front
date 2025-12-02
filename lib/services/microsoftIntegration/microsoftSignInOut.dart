@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:timelyst_flutter/services/microsoftIntegration/microsoftSignInResult.dart';
 import 'package:timelyst_flutter/services/microsoftIntegration/microsoftAuthService.dart';
 import 'package:timelyst_flutter/services/authService.dart';
+import 'package:timelyst_flutter/models/calendars.dart';
 
 class MicrosoftSignInOutService {
   late final MicrosoftAuthService _microsoftAuthService;
@@ -19,6 +20,8 @@ class MicrosoftSignInOutService {
     try {
       // Send auth code to backend for token exchange
       final response = await _microsoftAuthService.sendAuthCodeToBackend(authCode);
+      
+      print('🔍 [MicrosoftSignInOutService] Backend response: $response');
 
       
       if (response['success']) {
@@ -29,7 +32,20 @@ class MicrosoftSignInOutService {
         final email = response['email'] ?? 
                      response['data']?['email'] ?? 
                      response['data']?['microsoftEmail'];
-        final calendars = response['calendars'];
+        
+        // Extract calendars from response or data object
+        final calendarsData = response['calendars'] ?? response['data']?['calendars'];
+        
+        List<Calendar> calendars = [];
+        if (calendarsData != null) {
+          try {
+            calendars = (calendarsData as List)
+                .map((item) => Calendar.fromJson(item))
+                .toList();
+          } catch (e) {
+            print('❌ [MicrosoftSignInOutService] Error parsing calendars: $e');
+          }
+        }
         
         
         return MicrosoftSignInResult(
