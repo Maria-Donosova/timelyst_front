@@ -386,15 +386,12 @@ class EventProvider with ChangeNotifier {
                               event.startTime.isAfter(endDate) ||
                               event.startTime.isAtSameMomentAs(endDate);
       
-      // Keep events that aren't being replaced by new data
-      final notBeingReplaced = !fetchedEventIds.contains(event.id);
-      
       // For all-day events, be more lenient with date boundaries
       final isAllDayWithinBuffer = event.isAllDay && 
                                   event.startTime.isAfter(bufferStart) && 
                                   event.startTime.isBefore(bufferEnd);
       
-      final shouldKeep = outsideCoreRange || notBeingReplaced || isAllDayWithinBuffer;
+      final shouldKeep = outsideCoreRange || isAllDayWithinBuffer;
       
       if (_debugLogging && !shouldKeep) {
         print('🗑️ [EventProvider] Removing/replacing: "${event.title}" (${event.startTime.toIso8601String().substring(0, 10)})');
