@@ -28,8 +28,27 @@ class GoogleAuthService {
       // Ensure we sign out first to force a fresh sign-in and get a new auth code
       await _googleSignIn.signOut();
       
-      // Use signIn() which handles the flow based on configuration (forceCodeForRefreshToken: true)
-      // Note: requestServerAuthCode() is not available on the GoogleSignIn class in this version.
+      // Try to get the code using the platform interface directly, as the wrapper method might be missing
+      // in some versions or on some platforms.
+      // This is specifically for the web GIS flow where signIn() returns null code.
+      try {
+        // We need to cast to dynamic because we can't be 100% sure of the platform interface version
+        // at compile time without checking pubspec.lock, and we want to avoid compilation errors.
+        // The user claims requestServerAuthCode is the correct method.
+        final platform = gsi.GoogleSignInPlatform.instance;
+        final authCode = await (platform as dynamic).requestServerAuthCode();
+        
+        if (authCode != null) {
+          final maskedCode = (authCode.length) > 10 ? '${authCode.substring(0, 10)}...' : authCode;
+          print('✅ [GoogleAuthService] Obtained server auth code via Platform Interface: $maskedCode');
+          return authCode;
+        }
+      } catch (e) {
+        print('⚠️ [GoogleAuthService] Failed to call requestServerAuthCode on platform interface: $e');
+      }
+
+      // Fallback to signIn() if the above fails or returns null
+      print('ℹ️ [GoogleAuthService] Falling back to signIn()');
       final gsi.GoogleSignInAccount? account = await _googleSignIn.signIn();
       
       if (account == null) {
@@ -43,7 +62,7 @@ class GoogleAuthService {
       if (authCode == null) {
         print('⚠️ [GoogleAuthService] Sign-in successful but serverAuthCode is null. Check if GIS script is present and forceCodeForRefreshToken is true.');
       } else {
-        print('✅ [GoogleAuthService] Obtained server auth code: $maskedCode');
+        print('✅ [GoogleAuthService] Obtained server auth code via signIn: $maskedCode');
       }
       
       return authCode;
