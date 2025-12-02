@@ -108,6 +108,7 @@ class GoogleAuthService {
         return {
           'success': true,
           'message': responseData['message'] ?? 'Google account connected',
+          if (responseData is Map<String, dynamic>) ...responseData,
         };
       } else {
         print('❌ [GoogleAuthService] Backend request failed with status: ${response.statusCode}');
