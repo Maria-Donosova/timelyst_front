@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:timelyst_flutter/services/googleIntegration/google_sign_in_result.dart';
+import '../../models/calendars.dart';
 import 'googleAuthService.dart';
 import 'google_sign_in_singleton.dart';
 import '../authService.dart';
@@ -32,6 +33,8 @@ class GoogleSignInOutService {
         print('🔍 [GoogleSignInOutService] Full backend response data: $response');
         
         // Try multiple possible locations for email in the response
+        final email = response['email'] ?? 
+                     response['data']?['email'] ?? 
                      response['data']?['googleEmail'];
         
         // Fix: Backend returns 'allCalendars', not 'calendars'
