@@ -32,10 +32,14 @@ class GoogleSignInOutService {
         print('🔍 [GoogleSignInOutService] Full backend response data: $response');
         
         // Try multiple possible locations for email in the response
-        final email = response['email'] ?? 
-                     response['data']?['email'] ?? 
                      response['data']?['googleEmail'];
-        final calendars = response['calendars'];
+        
+        // Fix: Backend returns 'allCalendars', not 'calendars'
+        // Also need to parse the JSON list into Calendar objects
+        final calendarsList = response['allCalendars'] as List?;
+        final calendars = calendarsList
+            ?.map((json) => Calendar.fromJson(json as Map<String, dynamic>))
+            .toList();
         
         
         // CRITICAL FIX: Save the email to secure storage for Google Calendar integration
