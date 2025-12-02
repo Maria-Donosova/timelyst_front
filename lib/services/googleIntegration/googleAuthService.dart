@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:google_sign_in_web/web_only.dart' as web_only;
+
 
 import '../authService.dart';
 import '../../utils/apiClient.dart';
@@ -25,7 +25,8 @@ class GoogleAuthService {
 
   Future<String?> requestServerAuthenticatioinCode() async {
     try {
-      final authCode = await web_only.requestServerAuthCode();
+      await _googleSignIn.signOut();
+      final authCode = await _googleSignIn.requestServerAuthCode();
       final maskedCode = (authCode?.length ?? 0) > 10 ? '${authCode?.substring(0, 10)}...' : authCode;
       return authCode;
     } catch (e, stackTrace) {
