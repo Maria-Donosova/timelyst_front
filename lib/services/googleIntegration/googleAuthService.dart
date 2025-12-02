@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in/google_sign_in.dart' as gsi;
 
 
 import '../authService.dart';
@@ -14,19 +14,19 @@ import '../../utils/timezoneUtils.dart';
 class GoogleAuthService {
   late final ApiClient _apiClient;
   late final AuthService _authService;
-  final GoogleSignIn _googleSignIn;
+  final gsi.GoogleSignIn _googleSignIn;
 
-  GoogleAuthService({GoogleSignIn? googleSignIn})
+  GoogleAuthService({gsi.GoogleSignIn? googleSignIn})
       : _googleSignIn = googleSignIn ?? GoogleSignInSingleton().googleSignIn,
         _apiClient = ApiClient(),
         _authService = AuthService();
 
   GoogleAuthService.test(this._apiClient, this._authService, this._googleSignIn);
 
-  Future<String?> requestServerAuthenticatioinCode() async {
+  Future<String?> requestServerAuthenticationCode() async {
     try {
       await _googleSignIn.signOut();
-      final authCode = await _googleSignIn.requestServerAuthCode();
+      final authCode = await (_googleSignIn as dynamic).requestServerAuthCode();
       final maskedCode = (authCode?.length ?? 0) > 10 ? '${authCode?.substring(0, 10)}...' : authCode;
       return authCode;
     } catch (e, stackTrace) {
@@ -37,7 +37,7 @@ class GoogleAuthService {
 
   Future<String?> getCurrentUserEmail() async {
     try {
-      final GoogleSignInAccount? currentUser = _googleSignIn.currentUser;
+      final gsi.GoogleSignInAccount? currentUser = _googleSignIn.currentUser;
       if (currentUser != null) {
         return currentUser.email;
       } else {
