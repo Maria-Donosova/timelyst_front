@@ -37,9 +37,11 @@ class GoogleSignInOutService {
                      response['data']?['email'] ?? 
                      response['data']?['googleEmail'];
         
-        // Fix: Backend returns 'allCalendars', not 'calendars'
+        // Fix: Backend returns 'calendars' inside 'data' object
         // Also need to parse the JSON list into Calendar objects
-        final calendarsList = response['allCalendars'] as List?;
+        final calendarsList = (response['allCalendars'] ?? 
+                              response['data']?['calendars'] ?? 
+                              response['calendars']) as List?;
         final calendars = calendarsList
             ?.map((json) => Calendar.fromJson(json as Map<String, dynamic>))
             .toList();

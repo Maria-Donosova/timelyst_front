@@ -34,7 +34,10 @@ class MicrosoftSignInOutService {
                      response['data']?['microsoftEmail'];
         
         // Extract calendars from response or data object
-        final calendarsData = response['calendars'] ?? response['data']?['calendars'];
+        // Handle potential double-nesting of data object from backend
+        final calendarsData = response['calendars'] ?? 
+                            response['data']?['calendars'] ?? 
+                            response['data']?['data']?['calendars'];
         
         List<Calendar> calendars = [];
         if (calendarsData != null) {
