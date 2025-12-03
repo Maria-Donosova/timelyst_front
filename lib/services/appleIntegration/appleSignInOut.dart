@@ -36,10 +36,8 @@ class AppleSignInOutService {
         // Fetch initial calendars
         final calendarsResponse = await _calDAVService.fetchAppleCalendars(email);
         
-        // Handle potential nested structure similar to other services
-        final calendars = (calendarsResponse['calendars'] ?? 
-                          calendarsResponse['data']?['calendars'] ?? 
-                          calendarsResponse['data']) as List?;
+        // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
+        final calendars = response['data']?['calendars'] as List?;
         
         
         final calendarsList = calendars is List 
@@ -102,9 +100,8 @@ class AppleSignInOutService {
     try {
       
       final response = await _calDAVService.fetchAppleCalendars(email);
-      final calendars = (response['calendars'] ?? 
-                        response['data']?['calendars'] ?? 
-                        response['data']) as List?;
+      // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
+      final calendars = response['data']?['calendars'] as List?;
       
       final calendarsList = calendars is List 
         ? calendars.map((cal) => Calendar.fromAppleJson(cal as Map<String, dynamic>)).toList()

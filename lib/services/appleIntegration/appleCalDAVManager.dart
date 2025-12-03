@@ -38,9 +38,8 @@ class AppleCalDAVManager {
         final calendarsResponse =
             await _appleCalDAVService.fetchAppleCalendars(appleId);
 
-        final calendarsData = calendarsResponse['calendars'] ?? 
-                            calendarsResponse['data']?['calendars'] ?? 
-                            calendarsResponse['data'];
+        // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
+        final calendarsData = calendarsResponse['data']?['calendars'];
         final calendarsList = calendarsData is List
             ? calendarsData
                 .map((cal) => Calendar.fromJson(cal as Map<String, dynamic>))
@@ -68,9 +67,8 @@ class AppleCalDAVManager {
     try {
       final response = await _appleCalDAVService.fetchAppleCalendars(email);
       
-      final calendarsData = response['calendars'] ?? 
-                          response['data']?['calendars'] ?? 
-                          response['data'];
+      // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
+      final calendarsData = response['data']?['calendars'];
 
       if (calendarsData != null) {
         final calendars = calendarsData as List;
