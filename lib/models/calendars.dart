@@ -125,7 +125,76 @@ class Calendar {
   }
 }
 
-ed the
+class CalendarMetadata {
+  final String title;
+  final String? description;
+  final String? timeZone;
+  final Color color;
+  final List<CalendarReminder> defaultReminders;
+  final List<CalendarNotification> notifications;
+  final List<String> allowedConferenceTypes;
+
+  CalendarMetadata({
+    required this.title,
+    this.description,
+    this.timeZone,
+    required this.color,
+    this.defaultReminders = const [],
+    this.notifications = const [],
+    this.allowedConferenceTypes = const [],
+  });
+
+  factory CalendarMetadata.fromJson(Map<String, dynamic> json) {
+    return CalendarMetadata(
+      title: json['title'] ?? json['summary'] ?? '',
+      description: json['description'],
+      timeZone: json['timeZone'],
+      color: Calendar._parseColor(json['color']),
+      defaultReminders: (json['defaultReminders'] as List?)
+              ?.map((r) => CalendarReminder.fromJson(r))
+              .toList() ??
+          [],
+      notifications: (json['notifications'] as List?)
+              ?.map((n) => CalendarNotification.fromJson(n))
+              .toList() ??
+          [],
+      allowedConferenceTypes:
+          (json['allowedConferenceTypes'] as List?)?.cast<String>() ?? [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'description': description,
+      'timeZone': timeZone,
+      'color': '#${color.value.toRadixString(16).padLeft(8, '0')}',
+      'defaultReminders': defaultReminders.map((r) => r.toJson()).toList(),
+      'notifications': notifications.map((n) => n.toJson()).toList(),
+      'allowedConferenceTypes': allowedConferenceTypes,
+    };
+  }
+
+  CalendarMetadata copyWith({
+    String? title,
+    String? description,
+    String? timeZone,
+    Color? color,
+    List<CalendarReminder>? defaultReminders,
+    List<CalendarNotification>? notifications,
+    List<String>? allowedConferenceTypes,
+  }) {
+    return CalendarMetadata(
+      title: title ?? this.title,
+      description: description ?? this.description,
+      timeZone: timeZone ?? this.timeZone,
+      color: color ?? this.color,
+      defaultReminders: defaultReminders ?? this.defaultReminders,
+      notifications: notifications ?? this.notifications,
+      allowedConferenceTypes: allowedConferenceTypes ?? this.allowedConferenceTypes,
+    );
+  }
+}
 
 class CalendarPreferences {
   late final CalendarImportSettings importSettings;
