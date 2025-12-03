@@ -131,7 +131,7 @@ class EventDetailsScreenState extends State<EventDetails> {
         print('🔍 [EventDetails] Calendar source: ${calendar?.source.name}');
         if (calendar != null) {
           setState(() {
-            _eventCalendar.text = calendar.metadata.title;
+            _eventCalendar.text = calendar.metadata.title ?? 'No Title';
             _eventCalendarInfo = calendar; // Store the calendar object
           });
         }
@@ -306,7 +306,7 @@ class EventDetailsScreenState extends State<EventDetails> {
         if (result.isNotEmpty) {
           final firstCalendar = result.first;
           _selectedCalendarId = firstCalendar.id;
-          _eventCalendar.text = firstCalendar.metadata.title;
+          _eventCalendar.text = firstCalendar.metadata.title ?? 'No Title';
           _eventCalendarInfo = firstCalendar; // Update the calendar info
           print('[EventDetails] Selected calendar: ${firstCalendar.metadata.title} (${firstCalendar.id})');
         } else {

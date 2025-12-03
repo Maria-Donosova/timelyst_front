@@ -138,7 +138,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                           ? Theme.of(context).textTheme.titleMedium?.color
                           : Theme.of(context).disabledColor,
                     ),
-                    child: Text(calendar.metadata.title),
+                    child: Text(calendar.metadata.title ?? 'No Title'),
                   ),
                 ),
               ],

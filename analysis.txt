@@ -1,0 +1,117 @@
+Analyzing timelyst_front...                                     
+
+  error • Undefined class 'CalendarMetadata' • lib/models/calendars.dart:10:9 • undefined_class
+  error • Undefined name 'CalendarMetadata' • lib/models/calendars.dart:40:17 • undefined_identifier
+  error • Undefined class 'CalendarMetadata' • lib/models/calendars.dart:102:5 • undefined_class
+  error • Undefined class 'ed' • lib/models/calendars.dart:128:1 • undefined_class
+  error • Expected to find ';' • lib/models/calendars.dart:128:4 • expected_token
+   info • 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion • lib/models/calendars.dart:156:28 • deprecated_member_use
+warning • Unused import: '../../utils/dateUtils.dart' • lib/models/timeEvent.dart:1:8 • unused_import
+warning • Unused import: 'dart:convert' • lib/providers/calendarProvider.dart:1:8 • unused_import
+warning • Unused import: './../services/googleIntegration/googleCalendarService.dart' • lib/providers/calendarProvider.dart:8:8 • unused_import
+warning • The value of the field '_onGoogleAuthError' isn't used • lib/providers/calendarProvider.dart:21:15 • unused_field
+warning • The value of the local variable 'calendar' isn't used • lib/providers/calendarProvider.dart:119:13 • unused_local_variable
+warning • The value of the field '_previousEvents' isn't used • lib/providers/eventProvider.dart:12:27 • unused_field
+warning • The declaration '_clearExpiredCache' isn't referenced • lib/providers/eventProvider.dart:89:8 • unused_element
+warning • The declaration '_updateEvents' isn't referenced • lib/providers/eventProvider.dart:366:8 • unused_element
+warning • The value of the local variable 'fetchedEventIds' isn't used • lib/providers/eventProvider.dart:382:11 • unused_local_variable
+  error • The method 'CalendarMetadata' isn't defined for the type 'AppleCalDAVManager' • lib/services/appleIntegration/appleCalDAVManager.dart:134:21 • undefined_method
+warning • The value of the local variable 'calendars' isn't used • lib/services/appleIntegration/appleCalDAVService.dart:71:15 • unused_local_variable
+warning • The value of the local variable 'calendarsResponse' isn't used • lib/services/appleIntegration/appleSignInOut.dart:37:15 • unused_local_variable
+  error • The method 'fromAppleJson' isn't defined for the type 'Calendar' • lib/services/appleIntegration/appleSignInOut.dart:44:45 • undefined_method
+  error • The method 'fromAppleJson' isn't defined for the type 'Calendar' • lib/services/appleIntegration/appleSignInOut.dart:107:43 • undefined_method
+   info • 'dart:js_util' is deprecated and shouldn't be used. Use dart:js_interop instead • lib/services/config_service_web.dart:1:1 • deprecated_member_use
+warning • Unused import: 'dart:convert' • lib/services/contactService.dart:1:8 • unused_import
+warning • Unused import: 'package:http/http.dart' • lib/services/contactService.dart:2:8 • unused_import
+warning • Unused import: '../../models/calendars.dart' • lib/services/googleIntegration/googleAuthService.dart:12:8 • unused_import
+warning • Unused import: '../../utils/timezoneUtils.dart' • lib/services/googleIntegration/googleAuthService.dart:13:8 • unused_import
+warning • The stack trace variable 'stackTrace' isn't used and can be removed • lib/services/googleIntegration/googleAuthService.dart:70:17 • unused_catch_stack
+warning • The stack trace variable 'stackTrace' isn't used and can be removed • lib/services/googleIntegration/googleAuthService.dart:85:17 • unused_catch_stack
+warning • The value of the local variable 'recurringTimeEvents' isn't used • lib/services/googleIntegration/googleEventsImportService.dart:122:17 • unused_local_variable
+warning • The value of the local variable 'recurringDayEvents' isn't used • lib/services/googleIntegration/googleEventsImportService.dart:146:17 • unused_local_variable
+  error • The method 'mapDayEventToCustomAppointment' isn't defined for the type 'EventMapper' • lib/services/googleIntegration/googleEventsImportService.dart:360:43 • undefined_method
+warning • The value of the local variable 'recurringCount' isn't used • lib/services/googleIntegration/googleEventsImportService.dart:374:11 • unused_local_variable
+warning • The stack trace variable 'stackTrace' isn't used and can be removed • lib/services/googleIntegration/googleSignInManager.dart:29:42 • unused_catch_stack
+warning • The stack trace variable 'stackTrace' isn't used and can be removed • lib/services/googleIntegration/googleSignInManager.dart:33:17 • unused_catch_stack
+warning • The stack trace variable 'stackTrace' isn't used and can be removed • lib/services/googleIntegration/googleSignInManager.dart:43:42 • unused_catch_stack
+warning • The stack trace variable 'stackTrace' isn't used and can be removed • lib/services/googleIntegration/googleSignInManager.dart:46:17 • unused_catch_stack
+warning • Unused import: 'package:flutter/material.dart' • lib/services/googleIntegration/googleSignInOut.dart:3:8 • unused_import
+warning • The stack trace variable 'stackTrace' isn't used and can be removed • lib/services/googleIntegration/googleSignInOut.dart:68:21 • unused_catch_stack
+warning • The stack trace variable 'stackTrace' isn't used and can be removed • lib/services/googleIntegration/googleSignInOut.dart:80:17 • unused_catch_stack
+warning • The stack trace variable 'stackTrace' isn't used and can be removed • lib/services/googleIntegration/googleSignInOut.dart:89:17 • unused_catch_stack
+warning • The operand can't be 'null', so the condition is always 'false' • lib/services/googleIntegration/google_sign_in_singleton.dart:33:20 • unnecessary_null_comparison
+warning • Unused import: 'package:timelyst_flutter/models/calendars.dart' • lib/services/microsoftIntegration/microsoftAuthService.dart:8:8 • unused_import
+warning • The declaration '_generateState' isn't referenced • lib/services/microsoftIntegration/microsoftAuthService.dart:65:10 • unused_element
+warning • The stack trace variable 'stackTrace' isn't used and can be removed • lib/services/microsoftIntegration/microsoftAuthService.dart:139:17 • unused_catch_stack
+warning • Unused import: 'package:timelyst_flutter/services/authService.dart' • lib/widgets/ToDo/deleteTask.dart:5:8 • unused_import
+warning • Unused import: 'package:timelyst_flutter/services/authService.dart' • lib/widgets/ToDo/doneTask.dart:5:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/ToDo/draggableTask.dart:24:32 • deprecated_member_use
+warning • Unused import: '../../services/tasksService.dart' • lib/widgets/ToDo/taskItem.dart:4:8 • unused_import
+warning • Unused import: '../../services/authService.dart' • lib/widgets/ToDo/taskItem.dart:5:8 • unused_import
+warning • Unused import: 'package:timelyst_flutter/models/task.dart' • lib/widgets/ToDo/taskList.dart:3:8 • unused_import
+warning • Unused import: '../responsive/responsive_widgets.dart' • lib/widgets/ToDo/taskList.dart:9:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/calendar/appleCalendarConnectionForm.dart:130:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/calendar/appleCalendarConnectionForm.dart:173:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/calendar/appleCalendarConnectionForm.dart:175:55 • deprecated_member_use
+warning • Unused import: '../../../models/calendars.dart' • lib/widgets/calendar/views/appointmentCellBuilder.dart:5:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/calendar/views/appointmentCellBuilder.dart:188:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/calendar/views/appointmentCellBuilder.dart:221:62 • deprecated_member_use
+warning • The value of the field '_isEditing' isn't used • lib/widgets/calendar/views/eventDetails.dart:75:8 • unused_field
+warning • The value of the field '_isRecurring' isn't used • lib/widgets/calendar/views/eventDetails.dart:84:8 • unused_field
+warning • The value of the field '_hasReminder' isn't used • lib/widgets/calendar/views/eventDetails.dart:85:8 • unused_field
+warning • Unused import: 'package:timelyst_flutter/providers/eventProvider.dart' • lib/widgets/layout/rightPanel.dart:3:8 • unused_import
+warning • Unused import: 'responsive_container.dart' • lib/widgets/responsive/adaptive_form.dart:5:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/responsive/adaptive_form.dart:278:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/responsive/responsive_form_field.dart:210:62 • deprecated_member_use
+warning • Unused import: 'responsive_helper.dart' • lib/widgets/responsive/responsive_text.dart:2:8 • unused_import
+warning • Unused import: '../../responsive/responsive_widgets.dart' • lib/widgets/screens/common/agenda.dart:11:8 • unused_import
+warning • The value of the local variable 'screenSize' isn't used • lib/widgets/screens/common/calendarSettings.dart:600:11 • unused_local_variable
+   info • 'dart:html' is deprecated and shouldn't be used. Use package:web and dart:js_interop instead • lib/widgets/screens/common/connectCalendars.dart:2:1 • deprecated_member_use
+warning • Unused import: '../../responsive/responsive_button.dart' • lib/widgets/screens/common/connectCalendars.dart:7:8 • unused_import
+warning • Unused import: '../../../services/googleIntegration/calendarSyncManager.dart' • lib/widgets/screens/common/connectCalendars.dart:10:8 • unused_import
+warning • The declaration '_showAppleInstructions' isn't referenced • lib/widgets/screens/common/connectCalendars.dart:57:8 • unused_element
+   info • The import of '../../responsive/responsive_form_field.dart' is unnecessary because all of the used elements are also provided by the import of '../../responsive/responsive_widgets.dart' • lib/widgets/screens/common/contact.dart:4:8 • unnecessary_import
+warning • Unused import: '../../responsive/responsive_button.dart' • lib/widgets/screens/common/contact.dart:5:8 • unused_import
+   info • The import of '../../responsive/adaptive_form.dart' is unnecessary because all of the used elements are also provided by the import of '../../responsive/responsive_widgets.dart' • lib/widgets/screens/common/contact.dart:6:8 • unnecessary_import
+   info • 'dart:html' is deprecated and shouldn't be used. Use package:web and dart:js_interop instead • lib/widgets/screens/common/microsoftOAuthCallback.dart:5:1 • deprecated_member_use
+warning • The value of the local variable 'screenSize' isn't used • lib/widgets/screens/common/signUp.dart:37:11 • unused_local_variable
+   info • 'dart:html' is deprecated and shouldn't be used. Use package:web and dart:js_interop instead • lib/widgets/screens/common/wrapper.dart:7:1 • deprecated_member_use
+warning • The value of the field '_authService' isn't used • lib/widgets/shared/calendarSelection.dart:31:20 • unused_field
+warning • The declaration '_launchContactEmail' isn't referenced • lib/widgets/shared/customAppbar.dart:110:16 • unused_element
+warning • Unused import: 'package:timelyst_flutter/services/authService.dart' • test/auth_test.dart:6:8 • unused_import
+warning • Unused import: 'package:timelyst_flutter/config/envVarConfig.dart' • test/unit/auth_service_test.dart:10:8 • unused_import
+  error • The name 'CalendarMetadata' isn't a type, so it can't be used as a type argument • test/unit/calendar_model_test.dart:26:37 • non_type_as_type_argument
+  error • The name 'CalendarMetadata' isn't a type, so it can't be used as a type argument • test/unit/calendar_model_test.dart:50:37 • non_type_as_type_argument
+  error • The function 'CalendarMetadata' isn't defined • test/unit/calendar_model_test.dart:64:19 • undefined_function
+  error • The named parameter 'calendarService' isn't defined • test/unit/calendar_sync_manager_test.dart:18:49 • undefined_named_parameter
+  error • The function 'CalendarPage' isn't defined • test/unit/calendar_sync_manager_test.dart:24:30 • undefined_function
+  error • The method 'fromLegacyJson' isn't defined for the type 'Calendar' • test/unit/calendar_sync_manager_test.dart:24:64 • undefined_method
+  error • The method 'syncCalendars' isn't defined for the type 'CalendarSyncManager' • test/unit/calendar_sync_manager_test.dart:29:50 • undefined_method
+  error • The method 'syncCalendars' isn't defined for the type 'CalendarSyncManager' • test/unit/calendar_sync_manager_test.dart:43:50 • undefined_method
+  error • The method 'fromLegacyJson' isn't defined for the type 'Calendar' • test/unit/calendar_sync_manager_test.dart:54:37 • undefined_method
+  error • The function 'CalendarPage' isn't defined • test/unit/calendar_sync_manager_test.dart:58:38 • undefined_function
+  error • Classes and mixins can only implement other classes and mixins • test/unit/calendar_sync_manager_test.mocks.dart:27:61 • implements_non_class
+  error • Classes and mixins can only implement other classes and mixins • test/unit/calendar_sync_manager_test.mocks.dart:37:60 • implements_non_class
+warning • The method doesn't override an inherited method • test/unit/calendar_sync_manager_test.mocks.dart:57:20 • override_on_non_overriding_member
+  error • The name 'CalendarDelta' isn't a type, so it can't be used as a type argument • test/unit/calendar_sync_manager_test.mocks.dart:67:14 • non_type_as_type_argument
+warning • The method doesn't override an inherited method • test/unit/calendar_sync_manager_test.mocks.dart:67:33 • override_on_non_overriding_member
+  error • The name 'CalendarDelta' isn't a type, so it can't be used as a type argument • test/unit/calendar_sync_manager_test.mocks.dart:84:33 • non_type_as_type_argument
+  error • The name 'CalendarDelta' isn't a type, so it can't be used as a type argument • test/unit/calendar_sync_manager_test.mocks.dart:97:23 • non_type_as_type_argument
+warning • The method doesn't override an inherited method • test/unit/calendar_sync_manager_test.mocks.dart:100:20 • override_on_non_overriding_member
+  error • The name 'CalendarPage' isn't a type, so it can't be used as a type argument • test/unit/calendar_sync_manager_test.mocks.dart:120:14 • non_type_as_type_argument
+warning • The method doesn't override an inherited method • test/unit/calendar_sync_manager_test.mocks.dart:120:32 • override_on_non_overriding_member
+  error • The name 'CalendarPage' isn't a type, so it can't be used as a type argument • test/unit/calendar_sync_manager_test.mocks.dart:135:33 • non_type_as_type_argument
+  error • The name 'CalendarPage' isn't a type, so it can't be used as a type argument • test/unit/calendar_sync_manager_test.mocks.dart:147:23 • non_type_as_type_argument
+  error • The named parameter 'authService' isn't defined • test/unit/google_calendar_service_test.dart:24:53 • undefined_named_parameter
+  error • The named parameter 'apiClient' isn't defined • test/unit/google_calendar_service_test.dart:24:83 • undefined_named_parameter
+  error • The method 'fetchCalendarChanges' isn't defined for the type 'GoogleCalendarService' • test/unit/google_calendar_service_test.dart:46:52 • undefined_method
+  error • The name 'CalendarDelta' isn't a type, so it can't be used as a type argument • test/unit/google_calendar_service_test.dart:50:28 • non_type_as_type_argument
+  error • The method 'fromLegacyJson' isn't defined for the type 'Calendar' • test/unit/google_calendar_service_test.dart:60:20 • undefined_method
+  error • The method 'saveCalendarsBatch' isn't defined for the type 'GoogleCalendarService' • test/unit/google_calendar_service_test.dart:68:53 • undefined_method
+  error • The method 'fetchCalendarsPage' isn't defined for the type 'GoogleCalendarService' • test/unit/google_calendar_service_test.dart:92:52 • undefined_method
+  error • The name 'CalendarPage' isn't a type, so it can't be used as a type argument • test/unit/google_calendar_service_test.dart:96:28 • non_type_as_type_argument
+warning • The method doesn't override an inherited method • test/unit/google_sign_in_out_service_test.mocks.dart:148:23 • override_on_non_overriding_member
+  error • The named parameter 'calendarIds' is required, but there's no corresponding argument • test/unit/time_event_model_test.dart:7:21 • missing_required_argument
+  error • The named parameter 'calendarId' isn't defined • test/unit/time_event_model_test.dart:10:9 • undefined_named_parameter
+warning • Unused import: 'package:syncfusion_flutter_calendar/calendar.dart' • test/widget/calendar_header_test.dart:7:8 • unused_import
+

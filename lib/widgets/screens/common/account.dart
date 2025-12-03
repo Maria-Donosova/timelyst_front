@@ -161,7 +161,7 @@ class _AccountSettingsState extends State<AccountSettings> {
   }
 
   Widget _buildCalendarTile(Calendar calendar) {
-    final color = calendar.metadata.color;
+    final color = calendar.metadata.parsedColor;
     final isSelected = calendar.isSelected;
 
     return Card(
@@ -183,7 +183,7 @@ class _AccountSettingsState extends State<AccountSettings> {
           ),
         ),
         title: Text(
-          calendar.metadata.title,
+          calendar.metadata.title ?? 'No Title',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         subtitle: calendar.metadata.description?.isNotEmpty ?? false

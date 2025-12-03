@@ -53,6 +53,28 @@ class Calendar {
     );
   }
 
+  factory Calendar.fromAppleJson(Map<String, dynamic> json) {
+    return Calendar(
+      id: json['id'] ?? '',
+      userId: json['userId'] ?? '',
+      source: CalendarSource.APPLE,
+      providerCalendarId: json['providerCalendarId'] ?? '',
+      metadata: CalendarMetadata.fromJson(
+          json['metadata'] is Map<String, dynamic> ? json['metadata'] : {}),
+      preferences: CalendarPreferences.fromJson(
+          json['preferences'] is Map<String, dynamic>
+              ? json['preferences']
+              : {}),
+      sync: CalendarSyncInfo.fromJson(
+          json['sync'] is Map<String, dynamic> ? json['sync'] : {}),
+      syncToken: json['syncToken'],
+      isSelected: json['isSelected'] ?? false,
+      isPrimary: json['isPrimary'] ?? false,
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
+    );
+  }
+
   static CalendarSource _parseSource(String? source) {
     if (source == null) return CalendarSource.LOCAL;
     
@@ -125,7 +147,63 @@ class Calendar {
   }
 }
 
-ed the
+class CalendarMetadata {
+  final String? title;
+  final String? color;
+  final String? timeZone;
+  final String? description;
+
+  CalendarMetadata({
+    this.title,
+    this.color,
+    this.timeZone,
+    this.description,
+  });
+
+  factory CalendarMetadata.fromJson(Map<String, dynamic> json) {
+    return CalendarMetadata(
+      title: json['title'],
+      color: json['color'],
+      timeZone: json['timeZone'],
+      description: json['description'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'color': color,
+      'timeZone': timeZone,
+      'description': description,
+    };
+  }
+  
+  CalendarMetadata copyWith({
+    String? title,
+    String? color,
+    String? timeZone,
+    String? description,
+  }) {
+    return CalendarMetadata(
+      title: title ?? this.title,
+      color: color ?? this.color,
+      timeZone: timeZone ?? this.timeZone,
+      description: description ?? this.description,
+    );
+  }
+
+  Color get parsedColor {
+    var hexColor = color?.replaceAll('#', '');
+    if (hexColor == null || hexColor.isEmpty) {
+      return const Color(0xFFA4BDFC);
+    }
+    try {
+      return Color(int.parse(hexColor.padLeft(8, 'FF'), radix: 16));
+    } catch (e) {
+      return const Color(0xFFA4BDFC);
+    }
+  }
+}
 
 class CalendarPreferences {
   late final CalendarImportSettings importSettings;

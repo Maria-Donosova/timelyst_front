@@ -395,7 +395,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
           final isSelected = _selectedCalendars.any((c) => c.id == calendar.id);
           final source = calendar.source.toString().split('.').last;
           return CheckboxListTile(
-            title: Text(calendar.metadata.title),
+            title: Text(calendar.metadata.title ?? 'No Title'),
             subtitle: Text(source[0].toUpperCase() + source.substring(1)),
             value: isSelected,
             onChanged: (bool? value) {
@@ -422,7 +422,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
         children: _selectedCalendars
             .map((calendar) => Chip(
                   label: Text(
-                    calendar.metadata.title,
+                    calendar.metadata.title ?? 'No Title',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),

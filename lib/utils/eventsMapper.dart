@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/customApp.dart';
 import '../models/timeEvent.dart';
+import '../models/dayEvent.dart';
 
 class EventMapper {
   static CustomAppointment mapTimeEventToCustomAppointment(TimeEvent timeEvent) {
@@ -27,6 +28,28 @@ class EventMapper {
       // Map providerEventId to specific provider IDs if needed, or just use a generic one
       googleEventId: timeEvent.providerEventId, // Assuming providerEventId holds the external ID
       // You might need logic to determine which provider it is if CustomAppointment distinguishes them
+    );
+  }
+
+  static CustomAppointment mapDayEventToCustomAppointment(DayEvent dayEvent) {
+    print('🔍 [EventMapper] Mapping DayEvent: "${dayEvent.eventTitle}"');
+    
+    return CustomAppointment(
+      id: dayEvent.id,
+      title: dayEvent.eventTitle.isEmpty ? 'Untitled Event' : dayEvent.eventTitle,
+      description: dayEvent.eventBody,
+      startTime: dayEvent.getStartDateTime().toLocal(),
+      startTimeZone: dayEvent.startTimeZone.isNotEmpty ? dayEvent.startTimeZone : 'UTC',
+      endTime: dayEvent.getEndDateTime().toLocal(),
+      endTimeZone: dayEvent.endTimeZone.isNotEmpty ? dayEvent.endTimeZone : 'UTC',
+      isAllDay: true,
+      location: dayEvent.eventLocation,
+      recurrenceRule: dayEvent.recurrence.isNotEmpty ? dayEvent.recurrence.first : '',
+      catTitle: dayEvent.category,
+      catColor: _getColorFromCategory(dayEvent.category),
+      calendarId: dayEvent.userCalendars.isNotEmpty ? dayEvent.userCalendars.first : null,
+      userCalendars: dayEvent.userCalendars,
+      googleEventId: dayEvent.googleEventId,
     );
   }
 
