@@ -190,10 +190,7 @@ class CalendarProvider with ChangeNotifier {
     }
   }
 
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
+
 
   Future<bool> syncProviderCalendars({
     required String provider,
