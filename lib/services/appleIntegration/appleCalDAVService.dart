@@ -68,9 +68,12 @@ class AppleCalDAVService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final calendars = data['data'] as List?;
+        // Support both Legacy (List) and Standardized (Map) structures
+        // Legacy: { data: [...] }
+        // Standardized: { data: { calendars: [...], user: {...} } }
         
-        
+        // We don't need to cast here, just return the full data object
+        // The manager (AppleCalDAVManager) handles the parsing of data['calendars']
         return data;
       } else {
         final errorBody = response.body;
