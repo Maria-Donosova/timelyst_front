@@ -100,6 +100,29 @@ class CalendarsService {
       rethrow;
     }
   }
+
+  static Future<void> syncProviderCalendars({
+    required String provider,
+    required String authToken,
+    required List<Map<String, dynamic>> calendars,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        '${Config.backendURL}/integrations/$provider/sync',
+        body: {'calendars': calendars},
+        token: authToken,
+      );
+
+      if (response.statusCode != 200) {
+        throw CalendarServiceException(
+          'Failed to sync $provider calendars: HTTP ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 class CalendarServiceException implements Exception {

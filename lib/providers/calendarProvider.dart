@@ -190,6 +190,70 @@ class CalendarProvider with ChangeNotifier {
     }
   }
 
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> syncProviderCalendars({
+    required String provider,
+    required List<Calendar> calendars,
+  }) async {
+    try {
+      print('[CalendarProvider] syncProviderCalendars called for $provider with ${calendars.length} calendars');
+      _isLoading = true;
+      notifyListeners();
+
+      final authToken = await _authService.getAuthToken();
+      if (authToken == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Map calendars to the required JSON structure
+      final calendarsPayload = calendars.map((calendar) {
+        // Construct metadata with category
+        final metadataMap = calendar.metadata.toJson();
+        if (calendar.preferences.category != null) {
+          metadataMap['category'] = calendar.preferences.category;
+        }
+
+        // Construct preferences with importLevel
+        // Default to 'none' if importAll is false, 'all' if true
+        // This logic might need refinement based on user feedback, but following plan for now
+        final importLevel = calendar.preferences.importSettings.importAll ? 'all' : 'none';
+        
+        return {
+          'id': calendar.id,
+          'isSelected': calendar.isSelected,
+          'metadata': metadataMap,
+          'preferences': {
+            'importLevel': importLevel,
+          }
+        };
+      }).toList();
+
+      await CalendarsService.syncProviderCalendars(
+        provider: provider,
+        authToken: authToken,
+        calendars: calendarsPayload,
+      );
+
+      print('[CalendarProvider] ✅ Successfully synced $provider calendars');
+      
+      // Refresh calendars to get the latest state from backend
+      await _fetchCalendars(refresh: true);
+      
+      return true;
+    } catch (e) {
+      print('[CalendarProvider] ❌ Exception in syncProviderCalendars: $e');
+      _errorMessage = 'Failed to sync calendars: ${e.toString()}';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> setCalendarSelection({
     required String calendarId,
     required bool isSelected,

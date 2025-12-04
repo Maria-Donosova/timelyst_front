@@ -220,7 +220,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
   }
 
   /// Saves the current calendar selections to the database.
-  /// Updates all calendars whose selection state has changed.
+  /// Updates all calendars whose selection state has changed using batch sync.
   Future<void> _saveCalendarSelections() async {
     print('[CalendarSelection] _saveCalendarSelections - Starting save');
 
@@ -234,7 +234,7 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
       final currentSelectedIds = _selectedCalendars.map((c) => c.id).toSet();
 
       // Find calendars that need to be updated (selection state changed)
-      final calendarsToUpdate = <String, bool>{};
+      final calendarsToUpdate = <Calendar>[];
 
       // Check all calendars for changes
       for (final calendar in _calendars) {
@@ -242,8 +242,8 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
         final isNowSelected = currentSelectedIds.contains(calendar.id);
 
         if (wasSelected != isNowSelected) {
-          calendarsToUpdate[calendar.id] = isNowSelected;
           print('[CalendarSelection] Calendar "${calendar.metadata.title}" selection changed: $wasSelected -> $isNowSelected');
+          calendarsToUpdate.add(calendar.copyWith(isSelected: isNowSelected));
         }
       }
 
@@ -262,31 +262,71 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
 
       print('[CalendarSelection] Updating ${calendarsToUpdate.length} calendars');
 
-      // Update each calendar's selection state
+      // Group by source
+      final updatesBySource = <CalendarSource, List<Calendar>>{};
+      for (final calendar in calendarsToUpdate) {
+        updatesBySource.putIfAbsent(calendar.source, () => []).add(calendar);
+      }
+
       int successCount = 0;
       int failureCount = 0;
 
-      for (final entry in calendarsToUpdate.entries) {
-        final calendarId = entry.key;
-        final isSelected = entry.value;
+      // Process updates for each source
+      for (final entry in updatesBySource.entries) {
+        final source = entry.key;
+        final calendars = entry.value;
+        
+        if (source == CalendarSource.LOCAL) {
+          // Handle local calendars individually as they might not support batch sync
+          // or just skip if not applicable. For now, we'll try individual updates.
+          for (final calendar in calendars) {
+             try {
+              final success = await _calendarProvider.setCalendarSelection(
+                calendarId: calendar.id,
+                isSelected: calendar.isSelected,
+              );
+              if (success) successCount++; else failureCount++;
+             } catch (e) {
+               print('[CalendarSelection] Error updating local calendar: $e');
+               failureCount++;
+             }
+          }
+          continue;
+        }
+
+        // Map source enum to provider string
+        String provider;
+        switch (source) {
+          case CalendarSource.GOOGLE:
+            provider = 'google';
+            break;
+          case CalendarSource.MICROSOFT:
+            provider = 'microsoft';
+            break;
+          case CalendarSource.APPLE:
+            provider = 'apple';
+            break;
+          default:
+            continue;
+        }
 
         try {
-          print('[CalendarSelection] Updating calendar $calendarId to isSelected=$isSelected');
-          final success = await _calendarProvider.setCalendarSelection(
-            calendarId: calendarId,
-            isSelected: isSelected,
+          print('[CalendarSelection] Syncing ${calendars.length} calendars for provider: $provider');
+          final success = await _calendarProvider.syncProviderCalendars(
+            provider: provider,
+            calendars: calendars,
           );
 
           if (success) {
-            successCount++;
-            print('[CalendarSelection] ✅ Successfully updated calendar $calendarId');
+            successCount += calendars.length;
+            print('[CalendarSelection] ✅ Successfully synced $provider calendars');
           } else {
-            failureCount++;
-            print('[CalendarSelection] ❌ Failed to update calendar $calendarId');
+            failureCount += calendars.length;
+            print('[CalendarSelection] ❌ Failed to sync $provider calendars');
           }
         } catch (e) {
-          failureCount++;
-          print('[CalendarSelection] ❌ Error updating calendar $calendarId: $e');
+          failureCount += calendars.length;
+          print('[CalendarSelection] ❌ Error syncing $provider calendars: $e');
         }
       }
 
@@ -311,7 +351,9 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
         });
 
         // Refresh the calendar list from provider to ensure UI is in sync
-        await _calendarProvider.refreshCalendars();
+        // Note: syncProviderCalendars already refreshes, but doing it here again is safe/idempotent
+        // or we can skip if we trust the provider.
+        // Let's rely on the provider's refresh which happens inside syncProviderCalendars.
         if (mounted) {
           setState(() {
             _calendars = _calendarProvider.calendars;
