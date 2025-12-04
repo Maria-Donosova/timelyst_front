@@ -21,6 +21,8 @@ class GoogleCalendarService {
         'calendars': calendars.map((c) => c.toJson()).toList(),
       };
 
+      print('📦 [GoogleCalendarService] Syncing calendars with body: ${jsonEncode(body)}');
+
       final token = await _authService.getAuthToken();
 
       final response = await _apiClient.post(
