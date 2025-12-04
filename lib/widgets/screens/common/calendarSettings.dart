@@ -100,6 +100,9 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                             ),
                             category: calendar.preferences.category ?? '',
                           ),
+                          metadata: calendar.metadata.copyWith(
+                            category: calendar.preferences.category ?? '',
+                          ),
                         );
                         widget.calendars[index] = updated;
                         _selectedCategories[index] =
@@ -117,6 +120,10 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                               importOrganizer: false,
                               importRecipients: false,
                             ),
+                            category: null,
+                            clearCategory: true,
+                          ),
+                          metadata: calendar.metadata.copyWith(
                             category: null,
                           ),
                         );
@@ -246,6 +253,10 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                                   importRecipients: false,
                                 ),
                                 // Keep the existing category when None is selected
+                                category: calendar.preferences.category ?? '',
+                              ),
+                              // Also keep it in metadata
+                              metadata: calendar.metadata.copyWith(
                                 category: calendar.preferences.category ?? '',
                               ),
                             );
@@ -421,6 +432,9 @@ class _CalendarSettingsState extends State<CalendarSettings> {
                 // Create new calendar with updated preferences
                 final updatedCalendar = widget.calendars[index].copyWith(
                   preferences: widget.calendars[index].preferences.copyWith(
+                    category: value,
+                  ),
+                  metadata: widget.calendars[index].metadata.copyWith(
                     category: value,
                   ),
                 );

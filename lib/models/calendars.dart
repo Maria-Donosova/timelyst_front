@@ -152,12 +152,14 @@ class CalendarMetadata {
   final String? color;
   final String? timeZone;
   final String? description;
+  final String? category;
 
   CalendarMetadata({
     this.title,
     this.color,
     this.timeZone,
     this.description,
+    this.category,
   });
 
   factory CalendarMetadata.fromJson(Map<String, dynamic> json) {
@@ -166,6 +168,7 @@ class CalendarMetadata {
       color: json['color'],
       timeZone: json['timeZone'],
       description: json['description'],
+      category: json['category'],
     );
   }
 
@@ -175,6 +178,7 @@ class CalendarMetadata {
       'color': color,
       'timeZone': timeZone,
       'description': description,
+      'category': category,
     };
   }
   
@@ -183,12 +187,14 @@ class CalendarMetadata {
     String? color,
     String? timeZone,
     String? description,
+    String? category,
   }) {
     return CalendarMetadata(
       title: title ?? this.title,
       color: color ?? this.color,
       timeZone: timeZone ?? this.timeZone,
       description: description ?? this.description,
+      category: category ?? this.category,
     );
   }
 
@@ -239,11 +245,12 @@ class CalendarPreferences {
   CalendarPreferences copyWith({
     CalendarImportSettings? importSettings,
     String? category,
+    bool clearCategory = false,
     Color? userColor,
   }) {
     return CalendarPreferences(
       importSettings: importSettings ?? this.importSettings,
-      category: category ?? this.category,
+      category: clearCategory ? null : (category ?? this.category),
       userColor: userColor ?? this.userColor,
     );
   }
