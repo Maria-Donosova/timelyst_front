@@ -40,6 +40,7 @@ class AppleCalDAVManager {
 
         // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
         final calendarsData = calendarsResponse['data']?['calendars'];
+        
         final calendarsList = calendarsData is List
             ? calendarsData
                 .map((cal) => Calendar.fromJson(cal as Map<String, dynamic>))

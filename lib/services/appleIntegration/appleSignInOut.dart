@@ -34,13 +34,13 @@ class AppleSignInOutService {
         final email = response['email'] ?? appleId;
         
         // Fetch initial calendars
-        final calendarsResponse = await _calDAVService.fetchAppleCalendars(email);
+        // Fetch initial calendars
+        final fetchResponse = await _calDAVService.fetchAppleCalendars(email);
         
         // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
-        final calendars = response['data']?['calendars'] as List?;
+        final calendars = fetchResponse['data']?['calendars'] as List?;
         
-        
-        final calendarsList = calendars is List 
+        final calendarsList = calendars != null 
           ? calendars.map((cal) => Calendar.fromAppleJson(cal as Map<String, dynamic>)).toList()
           : <Calendar>[];
         
@@ -103,7 +103,7 @@ class AppleSignInOutService {
       // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
       final calendars = response['data']?['calendars'] as List?;
       
-      final calendarsList = calendars is List 
+      final calendarsList = calendars != null 
         ? calendars.map((cal) => Calendar.fromAppleJson(cal as Map<String, dynamic>)).toList()
         : <Calendar>[];
       
