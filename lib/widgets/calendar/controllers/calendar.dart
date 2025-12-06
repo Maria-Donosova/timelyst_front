@@ -60,6 +60,8 @@ class _CalendarWState extends State<CalendarW> {
     final isWeek = _controller.view == CalendarView.week;
 
     final eventProvider = Provider.of<EventProvider>(context);
+    // Listen to CalendarProvider to trigger rebuilds when calendars are loaded/updated
+    Provider.of<CalendarProvider>(context);
 
     final List<CustomAppointment> appointments = eventProvider.events;
 

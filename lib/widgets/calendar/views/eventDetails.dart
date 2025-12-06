@@ -122,6 +122,8 @@ class EventDetailsScreenState extends State<EventDetails> {
     _eventCalendar = TextEditingController();
 
     // Use addPostFrameCallback to access the provider after the build cycle.
+    // REMOVED: Moved to didChangeDependencies to ensure reactivity
+    /*
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_selectedCalendarId != null) {
         final calendarProvider =
@@ -140,6 +142,7 @@ class EventDetailsScreenState extends State<EventDetails> {
         }
       }
     });
+    */
 
     if (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty) {
       if (widget._recurrenceRule!.contains('DAILY')) {
@@ -148,6 +151,37 @@ class EventDetailsScreenState extends State<EventDetails> {
         _recurrence = 'Weekly';
       } else if (widget._recurrenceRule!.contains('YEARLY')) {
         _recurrence = 'Yearly';
+      }
+    }
+  }
+
+
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Reactively update calendar info when provider changes
+    if (_selectedCalendarId != null) {
+      try {
+        final calendarProvider = Provider.of<CalendarProvider>(context);
+        final calendar = calendarProvider.getCalendarById(_selectedCalendarId!);
+        
+        if (calendar != null) {
+          // Only update if something changed to avoid unnecessary rebuilds/loops
+          if (_eventCalendarInfo?.id != calendar.id || _eventCalendar.text != calendar.metadata.title) {
+            print('🔍 [EventDetails] Updating calendar info from provider: ${calendar.metadata.title} (${calendar.source.name})');
+            _eventCalendar.text = calendar.metadata.title ?? 'No Title';
+            _eventCalendarInfo = calendar;
+            
+            // Force a rebuild to ensure icon updates
+            // setState(() {}); 
+            // Note: didChangeDependencies triggers before build, so setState might not be needed if variables are used in build
+            // But since we are updating local state variables that build depends on...
+          }
+        }
+      } catch (e) {
+        print('Error in didChangeDependencies: $e');
       }
     }
   }
