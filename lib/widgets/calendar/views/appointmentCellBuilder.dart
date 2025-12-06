@@ -38,6 +38,13 @@ Widget appointmentBuilder(BuildContext context,
     // Helper function to get the appropriate widget based on calendar source
     Widget _getCalendarSourceWidget(CustomAppointment appointment,
         {double size = 14, required Color color}) {
+      
+      // DEBUG: Trace why we are hitting default
+      // print('🔍 [AppointmentBuilder] Checking icon for "${appointment.title}" (ID: ${appointment.id})');
+      // print('   - calendarId: ${appointment.calendarId}');
+      // print('   - source: ${appointment.source}');
+      // print('   - googleEventId: ${appointment.googleEventId}');
+      
       // First check the source map which should contain the most reliable information
       if (appointment.source != null && appointment.source!.isNotEmpty) {
         final sourceType =
@@ -114,6 +121,9 @@ Widget appointmentBuilder(BuildContext context,
         } catch (e) {
           // Ignore provider errors and fall back to string matching
         }
+        
+        // DEBUG: If we got here, provider lookup failed or returned LOCAL/Default
+        // print('   - Provider lookup result: Calendar not found or source is LOCAL');
 
         final calendarIdLower = appointment.calendarId!.toLowerCase();
 

@@ -44,26 +44,26 @@ class TimeEvent {
   factory TimeEvent.fromJson(Map<String, dynamic> json) {
     return TimeEvent(
       id: json['id'] ?? '',
-      userId: json['userId'] ?? '',
-      calendarIds: (json['calendarIds'] as List<dynamic>?)
+      userId: json['userId'] ?? json['user_id'] ?? '',
+      calendarIds: ((json['calendarIds'] ?? json['calendar_ids']) as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      providerEventId: json['providerEventId'] ?? '',
+      providerEventId: json['providerEventId'] ?? json['provider_event_id'] ?? '',
       etag: json['etag'] ?? '',
-      eventTitle: json['eventTitle'] ?? '',
+      eventTitle: json['eventTitle'] ?? json['event_title'] ?? '',
       start: DateTime.parse(json['start']),
       end: DateTime.parse(json['end']),
-      startTimeZone: json['startTimeZone'] ?? 'UTC',
-      endTimeZone: json['endTimeZone'] ?? 'UTC',
-      recurrenceRule: json['recurrenceRule'] ?? '',
-      recurrenceId: json['recurrenceId'],
-      isAllDay: json['isAllDay'] ?? false,
+      startTimeZone: json['startTimeZone'] ?? json['start_time_zone'] ?? 'UTC',
+      endTimeZone: json['endTimeZone'] ?? json['end_time_zone'] ?? 'UTC',
+      recurrenceRule: json['recurrenceRule'] ?? json['recurrence_rule'] ?? '',
+      recurrenceId: json['recurrenceId'] ?? json['recurrence_id'],
+      isAllDay: json['isAllDay'] ?? json['is_all_day'] ?? false,
       category: json['category'] ?? '',
       location: json['location'] ?? '',
       description: json['description'] ?? '',
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.parse(json['createdAt'] ?? json['created_at']),
+      updatedAt: DateTime.parse(json['updatedAt'] ?? json['updated_at']),
     );
   }
 

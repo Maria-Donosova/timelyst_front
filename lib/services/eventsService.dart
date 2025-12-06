@@ -50,6 +50,12 @@ class EventService {
         
         final List<TimeEvent> events = data.map((json) {
           try {
+             // DEBUG: Log first event JSON to check field names
+             /*
+             if (data.indexOf(json) == 0) {
+               print('🔍 [EventService] Sample JSON: $json');
+             }
+             */
             return TimeEvent.fromJson(json);
           } catch (e) {
             print('❌ [EventService] Error parsing TimeEvent: $e');
