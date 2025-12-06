@@ -931,7 +931,6 @@ class EventDetailsScreenState extends State<EventDetails> {
                             (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty) ||
                             (widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty)) ...[
                           // Recurring Event Buttons
-                          Row(// Recurring Event Buttons
                           Row(
                             children: [
                               TextButton(
