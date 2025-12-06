@@ -11,6 +11,7 @@ import '../views/monthlyAppointmentCellBuilder.dart';
 import '../views/eventDetails.dart';
 import '../../../models/customApp.dart';
 import '../../../providers/eventProvider.dart';
+import '../../../providers/calendarProvider.dart';
 import '../../../utils/logger.dart';
 import '../../responsive/responsive_widgets.dart';
 
