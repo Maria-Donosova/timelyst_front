@@ -927,8 +927,11 @@ class EventDetailsScreenState extends State<EventDetails> {
                     children: [
                       // Delete Buttons (Left Side)
                       if (widget._id != null && widget._id!.isNotEmpty) ...[
-                        if (_isRecurring || (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty) || (widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty)) ...[
+                        if (_isRecurring ||
+                            (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty) ||
+                            (widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty)) ...[
                           // Recurring Event Buttons
+                          Row(// Recurring Event Buttons
                           Row(
                             children: [
                               TextButton(
