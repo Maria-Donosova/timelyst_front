@@ -748,7 +748,7 @@ class EventDetailsScreenState extends State<EventDetails> {
                             ),
                           ),
                         ),
-                        ),
+
                       ],
                     ),
                   ),
