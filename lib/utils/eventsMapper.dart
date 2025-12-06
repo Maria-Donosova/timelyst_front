@@ -21,13 +21,14 @@ class EventMapper {
       isAllDay: timeEvent.isAllDay,
       location: timeEvent.location,
       recurrenceRule: timeEvent.recurrenceRule,
+      recurrenceId: timeEvent.recurrenceId,
       catTitle: timeEvent.category,
       catColor: _getColorFromCategory(timeEvent.category),
       calendarId: timeEvent.calendarIds.isNotEmpty ? timeEvent.calendarIds.first : null,
       userCalendars: timeEvent.calendarIds,
       // Map providerEventId to specific provider IDs if needed, or just use a generic one
-      googleEventId: timeEvent.providerEventId, // Assuming providerEventId holds the external ID
-      // You might need logic to determine which provider it is if CustomAppointment distinguishes them
+      // googleEventId: timeEvent.providerEventId, // REMOVED: This was causing all events to be treated as Google events
+      // We should rely on calendar source lookup instead
     );
   }
 

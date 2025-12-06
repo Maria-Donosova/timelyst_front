@@ -28,6 +28,7 @@ class EventDetails extends StatefulWidget {
     String? body,
     String? location,
     String? calendarId,
+    String? recurrenceId,
   })  : _id = id,
         _subject = subject,
         _dateText = dateText,
@@ -35,6 +36,7 @@ class EventDetails extends StatefulWidget {
         _end = end,
         _allDay = isAllDay,
         _recurrenceRule = recurrenceRule,
+        _recurrenceId = recurrenceId,
         _catTitle = catTitle,
         _participants = participants,
         _eventBody = body,
@@ -48,6 +50,7 @@ class EventDetails extends StatefulWidget {
   final String? _end;
   final bool? _allDay;
   final String? _recurrenceRule;
+  final String? _recurrenceId;
   final String? _catTitle;
   final String? _participants;
   final String? _eventBody;
@@ -593,7 +596,26 @@ class EventDetailsScreenState extends State<EventDetails> {
   }
 
   // Method to delete an event
-  Future<void> _deleteEvent() async {
+  Future<void> _deleteEvent({bool isOccurrence = false, bool isSeries = false}) async {
+    // Determine which ID to use
+    String? idToDelete = widget._id;
+    String deleteType = 'Event';
+
+    if (isSeries) {
+      // For series deletion, use the recurrenceId if available
+      if (widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty) {
+        idToDelete = widget._recurrenceId;
+        deleteType = 'Series';
+      } else {
+        // Fallback or error handling if recurrenceId is missing for a series delete
+        print('Warning: Delete Series requested but recurrenceId is missing.');
+        // Depending on backend logic, might still use widget._id or show error
+      }
+    } else if (isOccurrence) {
+      deleteType = 'Occurrence';
+      // For occurrence, we use the specific event ID (widget._id)
+    }
+
     // Get calendar source name for the warning message
     final calendarSourceName = _eventCalendarInfo != null
         ? _eventCalendarInfo!.source.name.toUpperCase()
@@ -607,15 +629,15 @@ class EventDetailsScreenState extends State<EventDetails> {
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
             SizedBox(width: 8),
-            const Text('Delete Event'),
+            Text('Delete $deleteType'),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Are you sure you want to delete this event?',
+            Text(
+              'Are you sure you want to delete this $deleteType.toLowerCase()?',
               style: TextStyle(fontWeight: FontWeight.w500),
             ),
             SizedBox(height: 16),
@@ -634,7 +656,7 @@ class EventDetailsScreenState extends State<EventDetails> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'This event will be permanently deleted from both the database and your $calendarSourceName calendar. This action cannot be undone.',
+                      'This $deleteType.toLowerCase() will be permanently deleted from both the database and your $calendarSourceName calendar. This action cannot be undone.',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.orange.shade900,
@@ -668,8 +690,9 @@ class EventDetailsScreenState extends State<EventDetails> {
       });
 
       try {
+        // Use the appropriate ID for deletion
         final success = await EventDeletionController.deleteEvent(
-            context, widget._id, _allDay);
+            context, idToDelete, _allDay);
 
         if (success) {
           Navigator.of(context).pop(true); // Return true to indicate deletion
@@ -725,9 +748,6 @@ class EventDetailsScreenState extends State<EventDetails> {
                             ),
                           ),
                         ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: _deleteEvent,
                         ),
                       ],
                     ),
@@ -867,9 +887,56 @@ class EventDetailsScreenState extends State<EventDetails> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () => _saveEvent(context),
-                    child: Text('Save'),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Delete Buttons (Left Side)
+                      if (widget._id != null && widget._id!.isNotEmpty) ...[
+                        if (_isRecurring || (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty)) ...[
+                          // Recurring Event Buttons
+                          Row(
+                            children: [
+                              TextButton(
+                                onPressed: () => _deleteEvent(isOccurrence: true),
+                                child: Text(
+                                  'Delete Occurrence',
+                                  style: TextStyle(
+                                    color: Colors.grey[900]!,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              TextButton(
+                                onPressed: () => _deleteEvent(isSeries: true),
+                                child: Text(
+                                  'Delete Series',
+                                  style: TextStyle(
+                                    color: Colors.grey[900]!,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                          // Non-Recurring Event Button
+                          TextButton(
+                            onPressed: () => _deleteEvent(),
+                            child: Text(
+                              'Delete',
+                              style: TextStyle(
+                                color: Colors.grey[900]!,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                      // Save Button (Right Side)
+                      ElevatedButton(
+                        onPressed: () => _saveEvent(context),
+                        child: Text('Save'),
+                      ),
+                    ],
                   ),
                 ],
               ),

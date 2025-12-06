@@ -12,6 +12,7 @@ class TimeEvent {
   final String startTimeZone;
   final String endTimeZone;
   final String recurrenceRule;
+  final String? recurrenceId;
   final bool isAllDay;
   final String category;
   final String location;
@@ -31,6 +32,7 @@ class TimeEvent {
     this.startTimeZone = 'UTC',
     this.endTimeZone = 'UTC',
     required this.recurrenceRule,
+    this.recurrenceId,
     required this.isAllDay,
     required this.category,
     required this.location,
@@ -55,6 +57,7 @@ class TimeEvent {
       startTimeZone: json['startTimeZone'] ?? 'UTC',
       endTimeZone: json['endTimeZone'] ?? 'UTC',
       recurrenceRule: json['recurrenceRule'] ?? '',
+      recurrenceId: json['recurrenceId'],
       isAllDay: json['isAllDay'] ?? false,
       category: json['category'] ?? '',
       location: json['location'] ?? '',
@@ -77,6 +80,7 @@ class TimeEvent {
       'startTimeZone': startTimeZone,
       'endTimeZone': endTimeZone,
       'recurrenceRule': recurrenceRule,
+      'recurrenceId': recurrenceId,
       'isAllDay': isAllDay,
       'category': category,
       'location': location,

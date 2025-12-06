@@ -109,7 +109,6 @@ class EventProvider with ChangeNotifier {
     notifyListeners();
   }
 
-
   /// Fetch events for day view (current day only)
   Future<void> fetchDayViewEvents({DateTime? date, bool isParallelLoad = false}) async {
     final targetDate = date ?? DateTime.now();

@@ -3,6 +3,8 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:timelyst_flutter/widgets/shared/categories.dart';
 import '../../../models/customApp.dart';
 import '../../../models/calendars.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/calendarProvider.dart';
 
 /**
  * Method to build the UI for a single appointment.
@@ -90,6 +92,29 @@ Widget appointmentBuilder(BuildContext context,
       // Check calendarId field as well
       if (appointment.calendarId != null &&
           appointment.calendarId!.isNotEmpty) {
+        
+        // Try to look up the calendar source from CalendarProvider
+        try {
+          final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+          final calendar = calendarProvider.getCalendarById(appointment.calendarId!);
+          
+          if (calendar != null) {
+            switch (calendar.source) {
+              case CalendarSource.GOOGLE:
+                return Icon(Icons.mail_outline, size: size, color: color);
+              case CalendarSource.MICROSOFT:
+                return Icon(Icons.window_outlined, size: size, color: color);
+              case CalendarSource.APPLE:
+                return Icon(Icons.apple, size: size, color: color);
+              default:
+                // Fall through to other checks
+                break;
+            }
+          }
+        } catch (e) {
+          // Ignore provider errors and fall back to string matching
+        }
+
         final calendarIdLower = appointment.calendarId!.toLowerCase();
 
         if (calendarIdLower.contains('google')) {

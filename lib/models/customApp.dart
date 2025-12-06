@@ -15,6 +15,7 @@ class CustomAppointment {
   final bool isAllDay;
   final String location;
   final String? recurrenceRule;
+  final String? recurrenceId;
   final List<DateTime>? recurrenceExceptionDates;
   final List<String> userCalendars;
   final String? timeEventInstance;
@@ -45,6 +46,7 @@ class CustomAppointment {
     required this.isAllDay,
     this.location = '', // Make location optional with default value
     this.recurrenceRule,
+    this.recurrenceId,
     this.recurrenceExceptionDates,
     this.userCalendars = const [],
     this.timeEventInstance,
@@ -90,6 +92,7 @@ class CustomAppointment {
       'location': location,
       'organizer': organizer,
       'recurrenceRule': recurrenceRule,
+      'recurrenceId': recurrenceId,
       'recurrenceExceptionDates': recurrenceExceptionDates?.map((d) => d.toIso8601String()).toList(),
       'userCalendars': userCalendars,
       'timeEventInstance': timeEventInstance,
