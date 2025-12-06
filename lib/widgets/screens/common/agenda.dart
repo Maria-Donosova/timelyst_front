@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:timelyst_flutter/providers/eventProvider.dart';
 import 'package:timelyst_flutter/providers/taskProvider.dart';
 import 'package:timelyst_flutter/providers/authProvider.dart';
+import 'package:timelyst_flutter/providers/calendarProvider.dart';
 import '../../shared/customAppbar.dart';
 import '../../shared/googleReauthBanner.dart';
 import '../../layout/leftPanel.dart';
@@ -183,6 +184,7 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
     // Load tasks and initial events in parallel for better UX
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
+    final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
 
     // Start both operations concurrently - give them time for CalDAV operations
     print(
@@ -191,6 +193,7 @@ class _AgendaState extends State<Agenda> with WidgetsBindingObserver {
       taskProvider.fetchTasks(),
       eventProvider.fetchDayViewEvents(
           isParallelLoad: true), // Load today's events with parallel timeout
+      calendarProvider.loadInitialCalendars(),
     ]).then((_) {
       print('✅ [Agenda] Parallel data refresh completed successfully');
     }).catchError((error) {
