@@ -56,6 +56,9 @@ class EventService {
                print('🔍 [EventService] Sample JSON: $json');
              }
              */
+             if (data.indexOf(json) == 0) {
+                print('🔍 [EventService] Sample JSON: $json');
+             }
             return TimeEvent.fromJson(json);
           } catch (e) {
             print('❌ [EventService] Error parsing TimeEvent: $e');

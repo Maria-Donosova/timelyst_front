@@ -40,10 +40,11 @@ Widget appointmentBuilder(BuildContext context,
         {double size = 14, required Color color}) {
       
       // DEBUG: Trace why we are hitting default
-      // print('🔍 [AppointmentBuilder] Checking icon for "${appointment.title}" (ID: ${appointment.id})');
-      // print('   - calendarId: ${appointment.calendarId}');
-      // print('   - source: ${appointment.source}');
-      // print('   - googleEventId: ${appointment.googleEventId}');
+      // DEBUG: Trace why we are hitting default
+      print('🔍 [AppointmentBuilder] Checking icon for "${appointment.title}" (ID: ${appointment.id})');
+      print('   - calendarId: ${appointment.calendarId}');
+      print('   - source: ${appointment.source}');
+      print('   - googleEventId: ${appointment.googleEventId}');
       
       // First check the source map which should contain the most reliable information
       if (appointment.source != null && appointment.source!.isNotEmpty) {
@@ -106,6 +107,7 @@ Widget appointmentBuilder(BuildContext context,
           final calendar = calendarProvider.getCalendarById(appointment.calendarId!);
           
           if (calendar != null) {
+            print('   - Provider found calendar: ${calendar.metadata.title}, source: ${calendar.source}');
             switch (calendar.source) {
               case CalendarSource.GOOGLE:
                 return Icon(Icons.mail_outline, size: size, color: color);
@@ -123,7 +125,8 @@ Widget appointmentBuilder(BuildContext context,
         }
         
         // DEBUG: If we got here, provider lookup failed or returned LOCAL/Default
-        // print('   - Provider lookup result: Calendar not found or source is LOCAL');
+        // DEBUG: If we got here, provider lookup failed or returned LOCAL/Default
+        print('   - Provider lookup result: Calendar not found or source is LOCAL');
 
         final calendarIdLower = appointment.calendarId!.toLowerCase();
 
