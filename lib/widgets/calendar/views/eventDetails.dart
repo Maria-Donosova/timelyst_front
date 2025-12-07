@@ -585,10 +585,16 @@ class EventDetailsScreenState extends State<EventDetails> {
         // Determine if this is an update or create operation
         final isUpdate = widget._id != null && widget._id!.isNotEmpty;
 
+        print('🔍 [EventDetails] Save Event - isUpdate: $isUpdate');
+        print('🔍 [EventDetails] Save Event - widget._recurrenceRule: ${widget._recurrenceRule}');
+        print('🔍 [EventDetails] Save Event - widget._recurrenceId: ${widget._recurrenceId}');
+
         // Check if this is a recurring event being edited
         final isRecurringEdit = isUpdate && 
                                 (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty ||
                                  widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty);
+
+        print('🔍 [EventDetails] Save Event - isRecurringEdit: $isRecurringEdit');
 
         // Ask user about edit scope for recurring events
         EditScope? editScope;
@@ -735,6 +741,24 @@ class EventDetailsScreenState extends State<EventDetails> {
 
   // Method to delete an event
   Future<void> _deleteEvent({bool isOccurrence = false, bool isSeries = false}) async {
+    // Determine if this is a recurring event (or part of one)
+    final checkIsRecurring = _isRecurring || 
+                           (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty) ||
+                           (widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty);
+
+    // If it's recurring and no specific scope was passed (i.e. clicked the generic Delete button),
+    // ask the user for the scope first.
+    if (checkIsRecurring && !isOccurrence && !isSeries) {
+      final scope = await _showEditScopeDialog();
+      if (scope == null) return; // User cancelled
+      
+      // Recursive call with the selected scope
+      return _deleteEvent(
+        isOccurrence: scope == EditScope.thisOccurrence,
+        isSeries: scope == EditScope.allEvents,
+      );
+    }
+
     // Determine which ID to use
     String? idToDelete = widget._id;
     String deleteType = 'Event';
@@ -752,6 +776,10 @@ class EventDetailsScreenState extends State<EventDetails> {
     } else if (isOccurrence) {
       deleteType = 'Occurrence';
       // For occurrence, we use the specific event ID (widget._id)
+    } else if (checkIsRecurring) {
+        // Fallback for recurring event where we somehow got here without scope
+        // Default to occurrence deletion if ambiguous
+        deleteType = 'Occurrence';
     }
 
     // Get calendar source name for the warning message
@@ -1056,47 +1084,17 @@ class EventDetailsScreenState extends State<EventDetails> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Delete Buttons (Left Side)
+                      // Delete Button (Left Side)
                       if (widget._id != null && widget._id!.isNotEmpty) ...[
-                        if (_isRecurring ||
-                            (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty) ||
-                            (widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty)) ...[
-                          // Recurring Event Buttons
-                          Row(
-                            children: [
-                              TextButton(
-                                onPressed: () => _deleteEvent(isOccurrence: true),
-                                child: Text(
-                                  'Delete Occurrence',
-                                  style: TextStyle(
-                                    color: Colors.grey[900]!,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              TextButton(
-                                onPressed: () => _deleteEvent(isSeries: true),
-                                child: Text(
-                                  'Delete Series',
-                                  style: TextStyle(
-                                    color: Colors.grey[900]!,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ] else ...[
-                          // Non-Recurring Event Button
-                          TextButton(
-                            onPressed: () => _deleteEvent(),
-                            child: Text(
-                              'Delete',
-                              style: TextStyle(
-                                color: Colors.grey[900]!,
-                              ),
+                        TextButton(
+                          onPressed: () => _deleteEvent(),
+                          child: Text(
+                            'Delete',
+                            style: TextStyle(
+                              color: Colors.grey[900]!,
                             ),
                           ),
-                        ],
+                        ),
                       ],
                       // Save Button (Right Side)
                       ElevatedButton(
