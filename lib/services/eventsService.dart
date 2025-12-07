@@ -37,9 +37,15 @@ class EventService {
       );
 
       print('🔄 [EventService] Response status: ${response.statusCode}');
-      if (response.statusCode == 200) {
+        if (response.statusCode == 200) {
         final body = response.body;
         print('🔄 [EventService] Response body length: ${body.length}');
+        
+        // DEBUG: Print body if it contains "Recurrent" to see raw data
+        if (body.contains('Recurrent') || body.contains('recurrent')) {
+           print('🔍 [EventService] RAW BODY CONTAINING RECURRENT: $body');
+        }
+
         if (body == 'null') {
            print('🔄 [EventService] Body is "null" string');
            return [];
@@ -50,15 +56,13 @@ class EventService {
         
         final List<TimeEvent> events = data.map((json) {
           try {
-             // DEBUG: Log first event JSON to check field names
-             /*
-             if (data.indexOf(json) == 0) {
-               print('🔍 [EventService] Sample JSON: $json');
+             // Debug: check for Recurrent in title/description within this specific item
+             final strJson = json.toString();
+             if (strJson.contains('Recurrent') || strJson.contains('recurrent')) {
+                 print('🔍 [EventService] Found Recurrent item JSON: $json');
+                 print('   - All keys: ${json.keys.toList()}');
              }
-             */
-             if (data.indexOf(json) == 0) {
-                print('🔍 [EventService] Sample JSON: $json');
-             }
+
             return TimeEvent.fromJson(json);
           } catch (e) {
             print('❌ [EventService] Error parsing TimeEvent: $e');
