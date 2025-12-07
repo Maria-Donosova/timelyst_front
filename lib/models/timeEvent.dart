@@ -46,6 +46,16 @@ class TimeEvent {
   });
 
   factory TimeEvent.fromJson(Map<String, dynamic> json) {
+    // Debug logging for specific events to check recurrence fields
+    final title = json['eventTitle'] ?? json['event_title'] ?? '';
+    if (title.toString().contains('Recurrent') || title.toString().contains('Google Rec')) {
+      print('🔍 [TimeEvent] Parsing JSON for "$title"');
+      print('  - recurrenceRule: ${json['recurrenceRule']}');
+      print('  - recurrence_rule: ${json['recurrence_rule']}');
+      print('  - recurrence: ${json['recurrence']}'); // Check if it comes as 'recurrence'
+      print('  - All keys: ${json.keys.toList()}');
+    }
+
     return TimeEvent(
       id: json['id'] ?? '',
       userId: json['userId'] ?? json['user_id'] ?? '',
@@ -55,7 +65,7 @@ class TimeEvent {
           [],
       providerEventId: json['providerEventId'] ?? json['provider_event_id'] ?? '',
       etag: json['etag'] ?? '',
-      eventTitle: json['eventTitle'] ?? json['event_title'] ?? '',
+      eventTitle: title,
       start: DateTime.parse(json['start']),
       end: DateTime.parse(json['end']),
       startTimeZone: json['startTimeZone'] ?? json['start_time_zone'] ?? 'UTC',
