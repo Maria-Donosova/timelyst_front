@@ -179,11 +179,6 @@ class EventDetailsScreenState extends State<EventDetails> {
          } else {
            _recurrence = 'Custom';
          }
-      } else {
-          _recurrence = 'Monthly';
-        } else if (widget._recurrenceRule!.contains('FREQ=YEARLY')) {
-          _recurrence = 'Yearly';
-        }
       }
     } else {
       print('🔍 [EventDetails] No recurrence rule found');
