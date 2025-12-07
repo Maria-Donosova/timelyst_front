@@ -162,12 +162,31 @@ class EventDetailsScreenState extends State<EventDetails> {
       // Parse recurrence info for display
       _parseRecurrenceInfo();
       
-      if (widget._recurrenceRule!.contains('DAILY')) {
-        _recurrence = 'Daily';
-      } else if (widget._recurrenceRule!.contains('WEEKLY')) {
-        _recurrence = 'Weekly';
-      } else if (widget._recurrenceRule!.contains('YEARLY')) {
-        _recurrence = 'Yearly';
+      if (_recurrenceInfo != null) {
+        // Use parsed frequency to set _recurrence string
+        final freq = _recurrenceInfo!.frequency.toUpperCase();
+        if (freq == 'DAILY') {
+          _recurrence = 'Daily';
+        } else if (freq == 'WEEKLY') {
+          _recurrence = 'Weekly';
+        } else if (freq == 'MONTHLY') {
+          _recurrence = 'Monthly';
+        } else if (freq == 'YEARLY') {
+          _recurrence = 'Yearly';
+        } else {
+          _recurrence = 'Custom'; 
+        }
+      } else {
+        // Fallback for simple frequency checks if parsing somehow failed but rule exists
+        if (widget._recurrenceRule!.contains('FREQ=DAILY')) {
+          _recurrence = 'Daily';
+        } else if (widget._recurrenceRule!.contains('FREQ=WEEKLY')) {
+          _recurrence = 'Weekly';
+        } else if (widget._recurrenceRule!.contains('FREQ=MONTHLY')) {
+          _recurrence = 'Monthly';
+        } else if (widget._recurrenceRule!.contains('FREQ=YEARLY')) {
+          _recurrence = 'Yearly';
+        }
       }
     } else {
       print('🔍 [EventDetails] No recurrence rule found');
@@ -729,8 +748,15 @@ class EventDetailsScreenState extends State<EventDetails> {
           rule = 'FREQ=WEEKLY';
         }
         break;
+      case 'Monthly':
+        rule = 'FREQ=MONTHLY';
+        break;
       case 'Yearly':
         rule = 'FREQ=YEARLY';
+        break;
+      case 'Custom':
+        // Preserve original rule if it exists
+        rule = widget._recurrenceRule ?? '';
         break;
       default:
         rule = '';
@@ -742,9 +768,12 @@ class EventDetailsScreenState extends State<EventDetails> {
   // Method to delete an event
   Future<void> _deleteEvent({bool isOccurrence = false, bool isSeries = false}) async {
     // Determine if this is a recurring event (or part of one)
-    final checkIsRecurring = _isRecurring || 
-                           (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty) ||
-                           (widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty);
+    final bool hasRule = widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty;
+    final bool hasRecurrenceId = widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty;
+    
+    final checkIsRecurring = _isRecurring || hasRule || hasRecurrenceId;
+                           
+    print('🔍 [EventDetails] _deleteEvent - checkIsRecurring: $checkIsRecurring (isRecurring: $_isRecurring, hasRule: $hasRule, hasRecurrenceId: $hasRecurrenceId)');
 
     // If it's recurring and no specific scope was passed (i.e. clicked the generic Delete button),
     // ask the user for the scope first.
@@ -803,7 +832,7 @@ class EventDetailsScreenState extends State<EventDetails> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Are you sure you want to delete this $deleteType.toLowerCase()?',
+              'Are you sure you want to delete this ${deleteType.toLowerCase()}?',
               style: TextStyle(fontWeight: FontWeight.w500),
             ),
             SizedBox(height: 16),
@@ -822,7 +851,7 @@ class EventDetailsScreenState extends State<EventDetails> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'This $deleteType.toLowerCase() will be permanently deleted from both the database and your $calendarSourceName calendar. This action cannot be undone.',
+                      'This ${deleteType.toLowerCase()} will be permanently deleted from both the database and your $calendarSourceName calendar. This action cannot be undone.',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.orange.shade900,

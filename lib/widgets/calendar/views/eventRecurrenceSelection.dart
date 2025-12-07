@@ -67,6 +67,17 @@ class _RecurrenceSelectionWidgetState extends State<RecurrenceSelectionWidget> {
               },
             ),
             RadioListTile<String>(
+              title: const Text('Monthly'),
+              value: 'Monthly',
+              groupValue: _recurrence,
+              onChanged: (value) {
+                setState(() {
+                  _recurrence = value!;
+                  _selectedDays.clear();
+                });
+              },
+            ),
+            RadioListTile<String>(
               title: const Text('Yearly'),
               value: 'Yearly',
               groupValue: _recurrence,
