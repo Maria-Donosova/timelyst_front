@@ -5,6 +5,7 @@ import '../../../models/customApp.dart';
 import '../../../models/calendars.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/calendarProvider.dart';
+import '../../../utils/rruleParser.dart';
 
 /**
  * Method to build the UI for a single appointment.
@@ -29,6 +30,50 @@ Widget appointmentBuilder(BuildContext context,
     bool isSameDay = customAppointment.startTime.year ==
             customAppointment.endTime.year &&
         customAppointment.startTime.month == customAppointment.endTime.month;
+
+    // Calculate occurrence info string
+    String? occurrenceString;
+    if ((customAppointment.recurrenceRule != null && customAppointment.recurrenceRule!.isNotEmpty) ||
+        (customAppointment.recurrenceId != null && customAppointment.recurrenceId!.isNotEmpty)) {
+      
+      // We need the rule to calculate anything. If it's an exception (recurrenceId) without rule,
+      // we might not know the total count, but we can't calculate occurrence number easily without the rule.
+      // However, if we have the rule (either directly or inherited), we can try.
+      // For now, only if we have a rule.
+      if (customAppointment.recurrenceRule != null && customAppointment.recurrenceRule!.isNotEmpty) {
+         try {
+           final rrule = customAppointment.recurrenceRule!;
+           final recurrenceInfo = RRuleParser.parseRRule(rrule);
+           if (recurrenceInfo != null) {
+              final total = RRuleParser.getTotalOccurrences(rrule, customAppointment.startTime); // Approximate start
+              
+              // To calculate current occurrence, we need original start. 
+              // CustomAppointment has originalStart now.
+              final originalStart = customAppointment.originalStart;
+              final currentStart = customAppointment.startTime; // Or originalStart if available
+              
+              // If originalStart is missing for the series master, it is the start time.
+              // For an occurrence, originalStart should be set.
+              
+              final occurrenceNum = RRuleParser.calculateOccurrenceNumber(
+                eventStart: currentStart,
+                originalStart: originalStart, 
+                rrule: rrule,
+              );
+              
+              if (occurrenceNum != null) {
+                if (total != null) {
+                  occurrenceString = '$occurrenceNum/$total';
+                } else {
+                  occurrenceString = '#$occurrenceNum';
+                }
+              }
+           }
+         } catch (e) {
+           // Ignore errors in cell builder to prevent crash
+         }
+      }
+    }
 
     final width = MediaQuery.of(context).size.width;
 
@@ -187,9 +232,22 @@ Widget appointmentBuilder(BuildContext context,
             child: Stack(children: [
               Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Text(
-                  customAppointment.title,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      customAppointment.title,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    if (occurrenceString != null)
+                      Text(
+                        occurrenceString,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
+                          color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               SizedBox(
@@ -242,11 +300,29 @@ Widget appointmentBuilder(BuildContext context,
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
-              child: Text(
-                customAppointment.title,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      customAppointment.title,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (occurrenceString != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 20.0), // Make room for icon
+                      child: Text(
+                        occurrenceString,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
             // Calendar source icon in bottom right corner for multi-day events (shown for day/week views)

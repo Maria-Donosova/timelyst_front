@@ -157,6 +157,8 @@ class EventDetailsScreenState extends State<EventDetails> {
     */
 
     if (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty) {
+      print('🔍 [EventDetails] Found recurrence rule: ${widget._recurrenceRule}');
+      _isRecurring = true;
       // Parse recurrence info for display
       _parseRecurrenceInfo();
       
@@ -167,6 +169,13 @@ class EventDetailsScreenState extends State<EventDetails> {
       } else if (widget._recurrenceRule!.contains('YEARLY')) {
         _recurrence = 'Yearly';
       }
+    } else {
+      print('🔍 [EventDetails] No recurrence rule found');
+    }
+
+    if (widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty) {
+      print('🔍 [EventDetails] Found recurrence ID (Occurrence): ${widget._recurrenceId}');
+      _isRecurring = true; // It is an occurrence of a recurring series
     }
   }
 
