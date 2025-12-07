@@ -9,6 +9,8 @@ class EventMapper {
     print('🔍 [EventMapper] Mapping TimeEvent: "${timeEvent.eventTitle}"');
     print('  - calendarIds: "${timeEvent.calendarIds}"');
     print('  - providerEventId: "${timeEvent.providerEventId}"');
+    print('  - recurrenceRule: "${timeEvent.recurrenceRule}"');
+    print('  - recurrenceId: "${timeEvent.recurrenceId}"');
 
     return CustomAppointment(
       id: timeEvent.id,

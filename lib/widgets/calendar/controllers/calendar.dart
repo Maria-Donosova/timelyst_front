@@ -355,6 +355,17 @@ class _CalendarWState extends State<CalendarW> {
         _endTimeText =
             DateFormat('hh:mm a').format(_customAppointment.endTime).toString();
 
+        print('🔍 [Calendar] Tapped appointment: "${_customAppointment.title}" (ID: ${_customAppointment.id})');
+        print('  - recurrenceRule: "${_customAppointment.recurrenceRule}"');
+        print('  - recurrenceId: "${_customAppointment.recurrenceId}"');
+        print('  - originalStart: ${_customAppointment.originalStart}');
+        print('  - isAllDay: ${_customAppointment.isAllDay}');
+        
+        // Debug source info
+        print('  - calendarId: ${_customAppointment.calendarId}');
+        // Note: _customAppointment doesn't store 'source' directly, but we can look it up in provider if needed, 
+        // but EventDetails does that. We just want to ensure ID is passed.
+
         final result = await showDialog(
             context: context,
             builder: (BuildContext context) {
