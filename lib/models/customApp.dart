@@ -16,6 +16,8 @@ class CustomAppointment {
   final String location;
   final String? recurrenceRule;
   final String? recurrenceId;
+  final DateTime? originalStart;
+  final List<String>? exDates;
   final List<DateTime>? recurrenceExceptionDates;
   final List<String> userCalendars;
   final String? timeEventInstance;
@@ -47,6 +49,8 @@ class CustomAppointment {
     this.location = '', // Make location optional with default value
     this.recurrenceRule,
     this.recurrenceId,
+    this.originalStart,
+    this.exDates,
     this.recurrenceExceptionDates,
     this.userCalendars = const [],
     this.timeEventInstance,
@@ -93,6 +97,8 @@ class CustomAppointment {
       'organizer': organizer,
       'recurrenceRule': recurrenceRule,
       'recurrenceId': recurrenceId,
+      'originalStart': originalStart?.toIso8601String(),
+      'exDates': exDates,
       'recurrenceExceptionDates': recurrenceExceptionDates?.map((d) => d.toIso8601String()).toList(),
       'userCalendars': userCalendars,
       'timeEventInstance': timeEventInstance,

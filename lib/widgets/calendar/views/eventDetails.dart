@@ -29,6 +29,8 @@ class EventDetails extends StatefulWidget {
     String? location,
     String? calendarId,
     String? recurrenceId,
+    DateTime? originalStart,
+    List<String>? exDates,
   })  : _id = id,
         _subject = subject,
         _dateText = dateText,
@@ -37,6 +39,8 @@ class EventDetails extends StatefulWidget {
         _allDay = isAllDay,
         _recurrenceRule = recurrenceRule,
         _recurrenceId = recurrenceId,
+        _originalStart = originalStart,
+        _exDates = exDates,
         _catTitle = catTitle,
         _participants = participants,
         _eventBody = body,
@@ -51,6 +55,8 @@ class EventDetails extends StatefulWidget {
   final bool? _allDay;
   final String? _recurrenceRule;
   final String? _recurrenceId;
+  final DateTime? _originalStart;
+  final List<String>? _exDates;
   final String? _catTitle;
   final String? _participants;
   final String? _eventBody;

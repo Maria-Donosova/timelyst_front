@@ -22,6 +22,8 @@ class EventMapper {
       location: timeEvent.location,
       recurrenceRule: timeEvent.recurrenceRule,
       recurrenceId: timeEvent.recurrenceId,
+      originalStart: timeEvent.originalStart?.toLocal(),
+      exDates: timeEvent.exDates,
       catTitle: timeEvent.category,
       catColor: _getColorFromCategory(timeEvent.category),
       calendarId: timeEvent.calendarIds.isNotEmpty ? timeEvent.calendarIds.first : null,

@@ -373,6 +373,8 @@ class _CalendarWState extends State<CalendarW> {
                   isAllDay: _customAppointment.isAllDay,
                   recurrenceRule: _customAppointment.recurrenceRule,
                   recurrenceId: _customAppointment.recurrenceId,
+                  originalStart: _customAppointment.originalStart,
+                  exDates: _customAppointment.exDates,
                   calendarId: _customAppointment.calendarId,
                 ),
               );
