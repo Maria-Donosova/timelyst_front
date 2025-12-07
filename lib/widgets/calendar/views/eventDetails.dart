@@ -5,6 +5,7 @@ import '../../../models/calendars.dart';
 import '../../../providers/calendarProvider.dart';
 import '../../../providers/eventProvider.dart';
 import '../../../providers/authProvider.dart';
+import '../../../utils/rruleParser.dart';
 
 import '../../../utils/timezoneUtils.dart';
 import '../../shared/categories.dart';
@@ -96,6 +97,11 @@ class EventDetailsScreenState extends State<EventDetails> {
   List<String> _selectedDays = [];
   String _selectedCategory = '';
 
+  // Recurrence information
+  RecurrenceInfo? _recurrenceInfo;
+  int? _occurrenceNumber;
+  int? _totalOccurrences;
+
   // Helper function to get the appropriate icon based on calendar source
   IconData _getCalendarSourceIcon(CalendarSource source) {
     switch (source) {
@@ -151,6 +157,9 @@ class EventDetailsScreenState extends State<EventDetails> {
     */
 
     if (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty) {
+      // Parse recurrence info for display
+      _parseRecurrenceInfo();
+      
       if (widget._recurrenceRule!.contains('DAILY')) {
         _recurrence = 'Daily';
       } else if (widget._recurrenceRule!.contains('WEEKLY')) {
@@ -161,7 +170,59 @@ class EventDetailsScreenState extends State<EventDetails> {
     }
   }
 
+  /// Parses recurrence information and calculates occurrence number
+  void _parseRecurrenceInfo() {
+    if (widget._recurrenceRule == null || widget._recurrenceRule!.isEmpty) return;
 
+    try {
+      _recurrenceInfo = RRuleParser.parseRRule(widget._recurrenceRule);
+      
+      if (_recurrenceInfo != null) {
+        // Calculate total occurrences
+        _totalOccurrences = RRuleParser.getTotalOccurrences(
+          widget._recurrenceRule!,
+          widget._start != null ? _parseDateTime(widget._start!) : DateTime.now(),
+        );
+
+        // Calculate occurrence number if this is an occurrence (has originalStart or recurrenceId)
+        if (widget._originalStart != null || widget._recurrenceId != null) {
+          final eventStart = widget._start != null ? _parseDateTime(widget._start!) : DateTime.now();
+          _occurrenceNumber = RRuleParser.calculateOccurrenceNumber(
+            eventStart: eventStart,
+            originalStart: widget._originalStart,
+            rrule: widget._recurrenceRule!,
+          );
+        }
+      }
+    } catch (e) {
+      print('Error parsing recurrence info: $e');
+    }
+  }
+
+  /// Helper to parse date/time from string
+  DateTime _parseDateTime(String dateTimeStr) {
+    try {
+      // Try parsing as ISO8601 first
+      return DateTime.parse(dateTimeStr);
+    } catch (e) {
+      // Fallback to current time if parsing fails
+      return DateTime.now();
+    }
+  }
+
+  /// Generates the occurrence text to display
+  String _getOccurrenceText() {
+    if (_occurrenceNumber != null && _totalOccurrences != null) {
+      return 'This is occurrence $_occurrenceNumber of $_totalOccurrences';
+    } else if (_occurrenceNumber != null) {
+      return 'This is occurrence $_occurrenceNumber (ongoing series)';
+    } else if (_totalOccurrences != null) {
+      return 'Part of a series with $_totalOccurrences occurrences';
+    } else if (_recurrenceInfo != null) {
+      return 'Recurring: ${_recurrenceInfo!.getHumanReadableDescription()}';
+    }
+    return 'Recurring event';
+  }
 
   @override
   void didChangeDependencies() {
@@ -515,12 +576,40 @@ class EventDetailsScreenState extends State<EventDetails> {
         // Determine if this is an update or create operation
         final isUpdate = widget._id != null && widget._id!.isNotEmpty;
 
+        // Check if this is a recurring event being edited
+        final isRecurringEdit = isUpdate && 
+                                (widget._recurrenceRule != null && widget._recurrenceRule!.isNotEmpty ||
+                                 widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty);
+
+        // Ask user about edit scope for recurring events
+        EditScope? editScope;
+        if (isRecurringEdit) {
+          editScope = await _showEditScopeDialog();
+          if (editScope == null) {
+            // User cancelled
+            setState(() {
+              _isLoading = false;
+            });
+            return;
+          }
+
+          // Add edit scope to event data
+          eventData['editScope'] = editScope == EditScope.thisOccurrence ? 'occurrence' : 'series';
+        }
+
+        // Determine which ID to use for update
+        String? idToUpdate = widget._id;
+        if (editScope == EditScope.allEvents && widget._recurrenceId != null && widget._recurrenceId!.isNotEmpty) {
+          // Editing series: use the master event ID
+          idToUpdate = widget._recurrenceId;
+        }
+
         // Call the appropriate EventProvider method based on event type and operation
         CustomAppointment? result;
         try {
           if (isUpdate) {
             result = await eventProvider.updateEvent(
-              widget._id!,
+              idToUpdate!,
               eventData,
             );
           } else {
@@ -793,6 +882,33 @@ class EventDetailsScreenState extends State<EventDetails> {
                     ),
                   ),
                   SizedBox(height: 20),
+                  // Occurrence information display
+                  if (_recurrenceInfo != null && (_occurrenceNumber != null || _totalOccurrences != null))
+                    Container(
+                      margin: EdgeInsets.only(bottom: 20),
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.blue.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.repeat, color: Colors.blue.shade700, size: 20),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _getOccurrenceText(),
+                              style: TextStyle(
+                                color: Colors.blue.shade900,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   TextFormField(
                     controller: _eventDateController,
                     readOnly: true,
@@ -985,4 +1101,120 @@ class EventDetailsScreenState extends State<EventDetails> {
             ),
           );
   }
+
+  /// Shows a dialog to ask user whether to edit this occurrence or all events in the series
+  Future<EditScope?> _showEditScopeDialog() async {
+    return showDialog<EditScope>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.event_repeat, color: Colors.blue, size: 28),
+            SizedBox(width: 8),
+            Text('Edit Recurring Event'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'This is a recurring event. What would you like to edit?',
+              style: TextStyle(fontSize: 15),
+            ),
+            SizedBox(height: 20),
+            InkWell(
+              onTap: () => Navigator.pop(context, EditScope.thisOccurrence),
+              child: Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.event, color: Colors.blue, size: 24),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'This occurrence',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Only this event will be changed',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 12),
+            InkWell(
+              onTap: () => Navigator.pop(context, EditScope.allEvents),
+              child: Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.event_repeat, color: Colors.blue, size: 24),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'All events in the series',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'All occurrences will be changed',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(null),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Enum to represent the scope of editing for recurring events
+enum EditScope {
+  thisOccurrence,
+  allEvents,
 }
