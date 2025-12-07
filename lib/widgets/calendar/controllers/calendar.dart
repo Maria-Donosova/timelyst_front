@@ -160,6 +160,7 @@ class _CalendarWState extends State<CalendarW> {
                     dataSource: _EventDataSource(appointments),
                     onTap: _calendarTapped,
                     onDragEnd: _handleDragEnd,
+                    onAppointmentResizeEnd: _handleResizeEnd,
                     onViewChanged: (ViewChangedDetails viewChangedDetails) {
                       final eventProvider =
                           Provider.of<EventProvider>(context, listen: false);
@@ -409,8 +410,34 @@ class _CalendarWState extends State<CalendarW> {
     }
   }
 
+  /// Converts a CustomAppointment to the backend API payload format
+  Map<String, dynamic> _createEventPayload(CustomAppointment appointment) {
+    final payload = <String, dynamic>{
+      'eventTitle': appointment.title,
+      'start': appointment.startTime.toUtc().toIso8601String(),
+      'end': appointment.endTime.toUtc().toIso8601String(),
+      'calendarIds': appointment.userCalendars,
+      'isAllDay': appointment.isAllDay,
+      'location': appointment.location,
+      'description': appointment.description,
+      'category': appointment.catTitle,
+    };
+
+    // Include recurrence rule if present
+    if (appointment.recurrenceRule != null && appointment.recurrenceRule!.isNotEmpty) {
+      payload['recurrenceRule'] = appointment.recurrenceRule;
+    }
+
+    // Include recurrence ID if present (for recurring event instances)
+    if (appointment.recurrenceId != null) {
+      payload['recurrenceId'] = appointment.recurrenceId;
+    }
+
+    return payload;
+  }
+
   /// Handles drag-and-drop operations, especially for recurring events
-  void _handleDragEnd(AppointmentDragEndDetails details) {
+  void _handleDragEnd(AppointmentDragEndDetails details) async {
     if (details.appointment != null) {
       final oldAppointment = details.appointment as CustomAppointment;
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
@@ -425,6 +452,8 @@ class _CalendarWState extends State<CalendarW> {
       final duration =
           oldAppointment.endTime.difference(oldAppointment.startTime);
 
+      CustomAppointment updatedAppointment;
+
       if (oldAppointment.recurrenceRule != null) {
         // Handle recurring event drag-and-drop
         AppLogger.debug('Handling recurring event drag-and-drop', 'Calendar');
@@ -437,7 +466,7 @@ class _CalendarWState extends State<CalendarW> {
         ];
 
         // Create a new appointment at the new drop location with updated exceptions
-        final newAppointment = CustomAppointment(
+        updatedAppointment = CustomAppointment(
           id: oldAppointment.id,
           title: oldAppointment.title,
           description: oldAppointment.description,
@@ -456,7 +485,7 @@ class _CalendarWState extends State<CalendarW> {
         );
 
         // Update the event in the provider (using local update for optimistic UI)
-        eventProvider.updateEventLocal(oldAppointment, newAppointment);
+        eventProvider.updateEventLocal(oldAppointment, updatedAppointment);
         AppLogger.debug(
             'Updated recurring event with exception date', 'Calendar');
       } else {
@@ -464,7 +493,7 @@ class _CalendarWState extends State<CalendarW> {
         AppLogger.debug(
             'Handling non-recurring event drag-and-drop', 'Calendar');
 
-        final updatedAppointment = CustomAppointment(
+        updatedAppointment = CustomAppointment(
           id: oldAppointment.id,
           title: oldAppointment.title,
           description: oldAppointment.description,
@@ -489,6 +518,153 @@ class _CalendarWState extends State<CalendarW> {
 
       // Refresh the calendar view
       setState(() {});
+
+      // Persist changes to backend
+      try {
+        final eventPayload = _createEventPayload(updatedAppointment);
+        AppLogger.debug(
+            'Persisting drag-and-drop changes to backend for event: ${oldAppointment.id}',
+            'Calendar');
+
+        final result = await eventProvider.updateEvent(
+          oldAppointment.id,
+          eventPayload,
+        );
+
+        if (result != null) {
+          AppLogger.debug(
+              'Successfully persisted event changes to backend', 'Calendar');
+        } else {
+          AppLogger.e(
+              'Failed to persist event changes: updateEvent returned null',
+              'Calendar');
+          
+          // Show error to user
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Failed to save event changes. Please try again.'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+
+          // Revert the local change
+          eventProvider.updateEventLocal(updatedAppointment, oldAppointment);
+          setState(() {});
+        }
+      } catch (e) {
+        AppLogger.e('Error persisting event changes to backend: $e', 'Calendar');
+        
+        // Show error to user
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save event changes: ${e.toString()}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+
+        // Revert the local change
+        eventProvider.updateEventLocal(updatedAppointment, oldAppointment);
+        setState(() {});
+      }
+    }
+  }
+
+  /// Handles appointment resize operations
+  void _handleResizeEnd(AppointmentResizeEndDetails details) async {
+    if (details.appointment != null) {
+      final oldAppointment = details.appointment as CustomAppointment;
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+
+      AppLogger.debug(
+          'Handling resize for appointment: ${oldAppointment.title}',
+          'Calendar');
+
+      // Create updated appointment with new start/end times
+      final updatedAppointment = CustomAppointment(
+        id: oldAppointment.id,
+        title: oldAppointment.title,
+        description: oldAppointment.description,
+        startTime: details.startTime!,
+        endTime: details.endTime!,
+        catTitle: oldAppointment.catTitle,
+        catColor: oldAppointment.catColor,
+        participants: oldAppointment.participants,
+        location: oldAppointment.location,
+        organizer: oldAppointment.organizer,
+        isAllDay: oldAppointment.isAllDay,
+        recurrenceRule: oldAppointment.recurrenceRule,
+        recurrenceExceptionDates: oldAppointment.recurrenceExceptionDates,
+        recurrenceId: oldAppointment.recurrenceId,
+        userCalendars: oldAppointment.userCalendars,
+        timeEventInstance: oldAppointment.timeEventInstance,
+      );
+
+      // Update the event in the provider (optimistic UI update)
+      eventProvider.updateEventLocal(oldAppointment, updatedAppointment);
+      AppLogger.debug('Updated event after resize', 'Calendar');
+
+      // Refresh the calendar view
+      setState(() {});
+
+      // Persist changes to backend
+      try {
+        final eventPayload = _createEventPayload(updatedAppointment);
+        AppLogger.debug(
+            'Persisting resize changes to backend for event: ${oldAppointment.id}',
+            'Calendar');
+
+        final result = await eventProvider.updateEvent(
+          oldAppointment.id,
+          eventPayload,
+        );
+
+        if (result != null) {
+          AppLogger.debug(
+              'Successfully persisted resize changes to backend', 'Calendar');
+        } else {
+          AppLogger.e(
+              'Failed to persist resize changes: updateEvent returned null',
+              'Calendar');
+          
+          // Show error to user
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Failed to save event changes. Please try again.'),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+
+          // Revert the local change
+          eventProvider.updateEventLocal(updatedAppointment, oldAppointment);
+          setState(() {});
+        }
+      } catch (e) {
+        AppLogger.e('Error persisting resize changes to backend: $e', 'Calendar');
+        
+        // Show error to user
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save event changes: ${e.toString()}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+
+        // Revert the local change
+        eventProvider.updateEventLocal(updatedAppointment, oldAppointment);
+        setState(() {});
+      }
     }
   }
 
