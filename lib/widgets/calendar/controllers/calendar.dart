@@ -757,10 +757,18 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
           '_EventDataSource');
 
       try {
+        // Add RRULE: prefix if missing (backend may return just "FREQ=DAILY")
+        String processedRule = rule;
+        if (!processedRule.startsWith('RRULE:') && processedRule.contains('FREQ=')) {
+          processedRule = 'RRULE:$processedRule';
+          AppLogger.debug('Added RRULE: prefix: "$rule" -> "$processedRule"',
+              '_EventDataSource');
+        }
+
         // Fix malformed RRULE dates from backend (temporary until backend is updated)
-        final fixedRule = _fixMalformedRRule(rule);
-        if (fixedRule != rule) {
-          AppLogger.debug('Fixed malformed RRULE: "$rule" -> "$fixedRule"',
+        final fixedRule = _fixMalformedRRule(processedRule);
+        if (fixedRule != processedRule) {
+          AppLogger.debug('Fixed malformed RRULE: "$processedRule" -> "$fixedRule"',
               '_EventDataSource');
         }
 
