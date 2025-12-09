@@ -12,8 +12,10 @@ import '../views/eventDetails.dart';
 import '../../../models/customApp.dart';
 import '../../../providers/eventProvider.dart';
 import '../../../providers/calendarProvider.dart';
+import '../../../providers/authProvider.dart';
 import '../../../utils/logger.dart';
 import '../../responsive/responsive_widgets.dart';
+import '../../../services/event_handler_service.dart';
 
 enum _calView { day, week, month }
 
@@ -26,6 +28,7 @@ class CalendarW extends StatefulWidget {
 
 class _CalendarWState extends State<CalendarW> {
   final CalendarController _controller = CalendarController();
+  List<DateTime> _visibleDates = [];
 
   String? _headerText,
       _weekStart,
@@ -51,6 +54,30 @@ class _CalendarWState extends State<CalendarW> {
     // Note: Initial event loading will be handled by the onViewChanged callback
     // when the calendar first loads, so we don't need duplicate loading here
   }
+
+  /// Loads events for the current visible date range using the new calendar view API
+  /// TODO: This method needs to be updated once EventProvider stores TimeEvent objects
+  /// For now, we'll use the existing _EventDataSource until the provider is refactored
+  Future<void> _loadEvents() async {
+    if (_visibleDates.isEmpty) return;
+
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+
+    // Use new calendar view API
+    await eventProvider.fetchCalendarView(
+      startDate: _visibleDates.first,
+      endDate: _visibleDates.last,
+    );
+
+    // For now, we'll continue using the existing _EventDataSource
+    // Once EventProvider is updated to store TimeEvent objects directly,
+    // we can create TimelystCalendarDataSource here
+    setState(() {
+      // The data source will be created in the build method using _EventDataSource
+      // until EventProvider is refactored to provide TimeEvent objects
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -162,6 +189,9 @@ class _CalendarWState extends State<CalendarW> {
                     onDragEnd: _handleDragEnd,
                     onAppointmentResizeEnd: _handleResizeEnd,
                     onViewChanged: (ViewChangedDetails viewChangedDetails) {
+                      // Track visible dates for _loadEvents
+                      _visibleDates = viewChangedDetails.visibleDates;
+
                       final eventProvider =
                           Provider.of<EventProvider>(context, listen: false);
 
@@ -175,11 +205,6 @@ class _CalendarWState extends State<CalendarW> {
                             .format(viewChangedDetails.visibleDates[
                                 viewChangedDetails.visibleDates.length ~/ 2])
                             .toString();
-
-                        // Fetch events for the visible month
-                        final visibleMonth = viewChangedDetails.visibleDates[
-                            viewChangedDetails.visibleDates.length ~/ 2];
-                        eventProvider.fetchMonthViewEvents(month: visibleMonth);
                       }
                       if (_controller.view == CalendarView.week) {
                         final visibleDatesLength =
@@ -198,22 +223,17 @@ class _CalendarWState extends State<CalendarW> {
                             .toString();
                         _headerText =
                             _month! + ' ' + _weekStart! + ' - ' + _weekEnd!;
-
-                        // Fetch events for the visible week
-                        final weekStart = viewChangedDetails.visibleDates[0];
-                        eventProvider.fetchWeekViewEvents(weekStart: weekStart);
                       }
                       if (_controller.view == CalendarView.day) {
                         _headerText = DateFormat('MMMMEEEEd')
                             .format(viewChangedDetails.visibleDates[
                                 viewChangedDetails.visibleDates.length ~/ 2])
                             .toString();
-
-                        // Fetch events for the visible day
-                        final visibleDay = viewChangedDetails.visibleDates[
-                            viewChangedDetails.visibleDates.length ~/ 2];
-                        eventProvider.fetchDayViewEvents(date: visibleDay);
                       }
+
+                      // Load events using the new calendar view API
+                      _loadEvents();
+
                       SchedulerBinding.instance
                           .addPostFrameCallback((duration) {
                         setState(() {});
@@ -439,127 +459,103 @@ class _CalendarWState extends State<CalendarW> {
   }
 
   /// Handles drag-and-drop operations, especially for recurring events
-  void _handleDragEnd(AppointmentDragEndDetails details) async {
-    if (details.appointment != null) {
-      final oldAppointment = details.appointment as CustomAppointment;
-      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+  Future<void> _handleDragEnd(AppointmentDragEndDetails details) async {
+    if (details.appointment == null) return;
 
-      AppLogger.debug(
-          'Handling drag-and-drop for appointment: ${oldAppointment.title}',
-          'Calendar');
-      AppLogger.debug(
-          'Is recurring: ${oldAppointment.recurrenceRule != null}', 'Calendar');
+    final appointment = details.appointment as CustomAppointment;
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
 
-      // Calculate the duration of the event
-      final duration =
-          oldAppointment.endTime.difference(oldAppointment.startTime);
+    AppLogger.debug(
+        'Handling drag-and-drop for appointment: ${appointment.title}',
+        'Calendar');
 
-      CustomAppointment updatedAppointment;
+    // Calculate the duration of the event
+    final duration = appointment.endTime.difference(appointment.startTime);
 
-      if (oldAppointment.recurrenceRule != null) {
-        // Handle recurring event drag-and-drop
-        AppLogger.debug('Handling recurring event drag-and-drop', 'Calendar');
+    if (appointment.isRecurring) {
+      // Handle recurring event with EventHandlerService
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final authToken = await authProvider.authService.getAuthToken();
 
-        // Add the old appointment start date to recurrenceExceptionDates
-        final updatedExceptionDates = <DateTime>[
-          if (oldAppointment.recurrenceExceptionDates != null)
-            ...oldAppointment.recurrenceExceptionDates!,
-          oldAppointment.startTime
-        ];
-
-        // Create a new appointment at the new drop location with updated exceptions
-        updatedAppointment = CustomAppointment(
-          id: oldAppointment.id,
-          title: oldAppointment.title,
-          description: oldAppointment.description,
-          startTime: details.droppingTime!,
-          endTime: details.droppingTime!.add(duration),
-          catTitle: oldAppointment.catTitle,
-          catColor: oldAppointment.catColor,
-          participants: oldAppointment.participants,
-          location: oldAppointment.location,
-          organizer: oldAppointment.organizer,
-          isAllDay: oldAppointment.isAllDay,
-          recurrenceRule: oldAppointment.recurrenceRule,
-          recurrenceExceptionDates: updatedExceptionDates,
-          userCalendars: oldAppointment.userCalendars,
-          timeEventInstance: oldAppointment.timeEventInstance,
-        );
-
-        // Update the event in the provider (using local update for optimistic UI)
-        eventProvider.updateEventLocal(oldAppointment, updatedAppointment);
-        AppLogger.debug(
-            'Updated recurring event with exception date', 'Calendar');
-      } else {
-        // Handle non-recurring event drag-and-drop
-        AppLogger.debug(
-            'Handling non-recurring event drag-and-drop', 'Calendar');
-
-        updatedAppointment = CustomAppointment(
-          id: oldAppointment.id,
-          title: oldAppointment.title,
-          description: oldAppointment.description,
-          startTime: details.droppingTime!,
-          endTime: details.droppingTime!.add(duration),
-          catTitle: oldAppointment.catTitle,
-          catColor: oldAppointment.catColor,
-          participants: oldAppointment.participants,
-          location: oldAppointment.location,
-          organizer: oldAppointment.organizer,
-          isAllDay: oldAppointment.isAllDay,
-          recurrenceRule: oldAppointment.recurrenceRule,
-          recurrenceExceptionDates: oldAppointment.recurrenceExceptionDates,
-          userCalendars: oldAppointment.userCalendars,
-          timeEventInstance: oldAppointment.timeEventInstance,
-        );
-
-        // Update the event in the provider (using local update for optimistic UI)
-        eventProvider.updateEventLocal(oldAppointment, updatedAppointment);
-        AppLogger.debug('Updated non-recurring event', 'Calendar');
+      if (authToken == null) {
+        AppLogger.e('No auth token available for drag-and-drop', 'Calendar');
+        return;
       }
 
-      // Refresh the calendar view
+      final handler = EventHandlerService(authToken: authToken);
+
+      // Get master ID and occurrence count
+      final masterId = appointment.recurrenceId ?? appointment.id;
+      final occurrenceCount = eventProvider.getOccurrenceCount(masterId);
+
+      try {
+        await handler.handleDragDrop(
+          context: context,
+          appointment: appointment,
+          newStartTime: details.droppingTime!,
+          eventDuration: duration,
+          totalOccurrences: occurrenceCount,
+        );
+
+        // Refresh calendar after successful update
+        await _loadEvents();
+      } catch (e) {
+        AppLogger.e('Error handling recurring event drag-and-drop: $e', 'Calendar');
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to update event: ${e.toString()}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } else {
+      // Handle non-recurring event - simple update
+      final updatedAppointment = CustomAppointment(
+        id: appointment.id,
+        title: appointment.title,
+        description: appointment.description,
+        startTime: details.droppingTime!,
+        endTime: details.droppingTime!.add(duration),
+        catTitle: appointment.catTitle,
+        catColor: appointment.catColor,
+        participants: appointment.participants,
+        location: appointment.location,
+        organizer: appointment.organizer,
+        isAllDay: appointment.isAllDay,
+        recurrenceRule: appointment.recurrenceRule,
+        recurrenceExceptionDates: appointment.recurrenceExceptionDates,
+        userCalendars: appointment.userCalendars,
+        timeEventInstance: appointment.timeEventInstance,
+      );
+
+      // Optimistic UI update
+      eventProvider.updateEventLocal(appointment, updatedAppointment);
       setState(() {});
 
-      // Persist changes to backend
+      // Persist to backend
       try {
         final eventPayload = _createEventPayload(updatedAppointment);
-        AppLogger.debug(
-            'Persisting drag-and-drop changes to backend for event: ${oldAppointment.id}',
-            'Calendar');
-
         final result = await eventProvider.updateEvent(
-          oldAppointment.id,
+          appointment.id,
           eventPayload,
         );
 
-        if (result != null) {
-          AppLogger.debug(
-              'Successfully persisted event changes to backend', 'Calendar');
-        } else {
-          AppLogger.e(
-              'Failed to persist event changes: updateEvent returned null',
-              'Calendar');
-          
-          // Show error to user
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Failed to save event changes. Please try again.'),
-                backgroundColor: Colors.red,
-                duration: Duration(seconds: 3),
-              ),
-            );
-          }
-
-          // Revert the local change
-          eventProvider.updateEventLocal(updatedAppointment, oldAppointment);
-          setState(() {});
+        if (result == null) {
+          throw Exception('Update returned null');
         }
+
+        AppLogger.debug('Successfully updated non-recurring event', 'Calendar');
       } catch (e) {
-        AppLogger.e('Error persisting event changes to backend: $e', 'Calendar');
+        AppLogger.e('Error updating non-recurring event: $e', 'Calendar');
         
-        // Show error to user
+        // Revert on error
+        eventProvider.updateEventLocal(updatedAppointment, appointment);
+        setState(() {});
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -569,90 +565,113 @@ class _CalendarWState extends State<CalendarW> {
             ),
           );
         }
-
-        // Revert the local change
-        eventProvider.updateEventLocal(updatedAppointment, oldAppointment);
-        setState(() {});
       }
     }
   }
 
   /// Handles appointment resize operations
-  void _handleResizeEnd(AppointmentResizeEndDetails details) async {
-    if (details.appointment != null) {
-      final oldAppointment = details.appointment as CustomAppointment;
-      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+  Future<void> _handleResizeEnd(AppointmentResizeEndDetails details) async {
+    if (details.appointment == null) return;
 
-      AppLogger.debug(
-          'Handling resize for appointment: ${oldAppointment.title}',
-          'Calendar');
+    final appointment = details.appointment as CustomAppointment;
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
 
-      // Create updated appointment with new start/end times
+    AppLogger.debug(
+        'Handling resize for appointment: ${appointment.title}',
+        'Calendar');
+
+    if (appointment.isRecurring) {
+      // Handle recurring event with EventHandlerService
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final authToken = await authProvider.authService.getAuthToken();
+
+      if (authToken == null) {
+        AppLogger.e('No auth token available for resize', 'Calendar');
+        return;
+      }
+
+      final handler = EventHandlerService(authToken: authToken);
+
+      // Get master ID and occurrence count
+      final masterId = appointment.recurrenceId ?? appointment.id;
+      final occurrenceCount = eventProvider.getOccurrenceCount(masterId);
+
+      // Build update payload with new times
+      final updates = {
+        'start': details.startTime!.toUtc().toIso8601String(),
+        'end': details.endTime!.toUtc().toIso8601String(),
+      };
+
+      try {
+        // Use handleEventEdit for resize operations on recurring events
+        await handler.handleEventEdit(
+          context: context,
+          appointment: appointment,
+          updates: updates,
+          occurrenceDate: appointment.startTime,
+          totalOccurrences: occurrenceCount,
+        );
+
+        // Refresh calendar after successful update
+        await _loadEvents();
+      } catch (e) {
+        AppLogger.e('Error handling recurring event resize: $e', 'Calendar');
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to update event: ${e.toString()}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } else {
+      // Handle non-recurring event - simple update
       final updatedAppointment = CustomAppointment(
-        id: oldAppointment.id,
-        title: oldAppointment.title,
-        description: oldAppointment.description,
+        id: appointment.id,
+        title: appointment.title,
+        description: appointment.description,
         startTime: details.startTime!,
         endTime: details.endTime!,
-        catTitle: oldAppointment.catTitle,
-        catColor: oldAppointment.catColor,
-        participants: oldAppointment.participants,
-        location: oldAppointment.location,
-        organizer: oldAppointment.organizer,
-        isAllDay: oldAppointment.isAllDay,
-        recurrenceRule: oldAppointment.recurrenceRule,
-        recurrenceExceptionDates: oldAppointment.recurrenceExceptionDates,
-        recurrenceId: oldAppointment.recurrenceId,
-        userCalendars: oldAppointment.userCalendars,
-        timeEventInstance: oldAppointment.timeEventInstance,
+        catTitle: appointment.catTitle,
+        catColor: appointment.catColor,
+        participants: appointment.participants,
+        location: appointment.location,
+        organizer: appointment.organizer,
+        isAllDay: appointment.isAllDay,
+        recurrenceRule: appointment.recurrenceRule,
+        recurrenceExceptionDates: appointment.recurrenceExceptionDates,
+        recurrenceId: appointment.recurrenceId,
+        userCalendars: appointment.userCalendars,
+        timeEventInstance: appointment.timeEventInstance,
       );
 
-      // Update the event in the provider (optimistic UI update)
-      eventProvider.updateEventLocal(oldAppointment, updatedAppointment);
-      AppLogger.debug('Updated event after resize', 'Calendar');
-
-      // Refresh the calendar view
+      // Optimistic UI update
+      eventProvider.updateEventLocal(appointment, updatedAppointment);
       setState(() {});
 
-      // Persist changes to backend
+      // Persist to backend
       try {
         final eventPayload = _createEventPayload(updatedAppointment);
-        AppLogger.debug(
-            'Persisting resize changes to backend for event: ${oldAppointment.id}',
-            'Calendar');
-
         final result = await eventProvider.updateEvent(
-          oldAppointment.id,
+          appointment.id,
           eventPayload,
         );
 
-        if (result != null) {
-          AppLogger.debug(
-              'Successfully persisted resize changes to backend', 'Calendar');
-        } else {
-          AppLogger.e(
-              'Failed to persist resize changes: updateEvent returned null',
-              'Calendar');
-          
-          // Show error to user
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Failed to save event changes. Please try again.'),
-                backgroundColor: Colors.red,
-                duration: Duration(seconds: 3),
-              ),
-            );
-          }
-
-          // Revert the local change
-          eventProvider.updateEventLocal(updatedAppointment, oldAppointment);
-          setState(() {});
+        if (result == null) {
+          throw Exception('Update returned null');
         }
+
+        AppLogger.debug('Successfully updated non-recurring event', 'Calendar');
       } catch (e) {
-        AppLogger.e('Error persisting resize changes to backend: $e', 'Calendar');
+        AppLogger.e('Error updating non-recurring event: $e', 'Calendar');
         
-        // Show error to user
+        // Revert on error
+        eventProvider.updateEventLocal(updatedAppointment, appointment);
+        setState(() {});
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -662,10 +681,6 @@ class _CalendarWState extends State<CalendarW> {
             ),
           );
         }
-
-        // Revert the local change
-        eventProvider.updateEventLocal(updatedAppointment, oldAppointment);
-        setState(() {});
       }
     }
   }
