@@ -26,16 +26,73 @@ Widget appointmentBuilder(BuildContext context,
     }
 
     final dynamic rawAppointment = calendarAppointmentDetails.appointments.first;
-    
-    // Debug logging to identify the object type and structure
-    // print('🔍 [AppointmentBuilder] Raw appointment type: ${rawAppointment.runtimeType}');
-    
-    if (rawAppointment is! CustomAppointment) {
-      print('⚠️ [AppointmentBuilder] Appointment is not CustomAppointment: $rawAppointment');
-      return SizedBox();
+    final dynamic rawAppointment = calendarAppointmentDetails.appointments.first;
+    CustomAppointment? customAppointment;
+
+    // print('🔍 [AppointmentBuilder] Processing: ${rawAppointment.runtimeType}');
+
+    if (rawAppointment is CustomAppointment) {
+      customAppointment = rawAppointment;
+      // print('   -> Is CustomAppointment: ${customAppointment.title} (ID: ${customAppointment.id})');
+    } else if (rawAppointment is Appointment) {
+      // Handle Syncfusion generated occurrence (Appointment object)
+      // print('   -> Is Syncfusion Appointment: ${rawAppointment.subject} (ID: ${rawAppointment.id})');
+      // We need to find the original master event to get custom properties
+      try {
+        final eventProvider = Provider.of<EventProvider>(context, listen: false);
+        // Syncfusion usually copies the ID if we override getId()
+        final dynamic id = rawAppointment.id;
+        
+        if (id != null) {
+          final masterEvent = eventProvider.events.firstWhere(
+            (e) => e.id == id,
+            orElse: () => CustomAppointment(
+              id: 'temp', 
+              title: 'Unknown', 
+              startTime: rawAppointment.startTime, 
+              endTime: rawAppointment.endTime, 
+              isAllDay: rawAppointment.isAllDay,
+            ),
+          );
+          
+          if (masterEvent.id != 'temp') {
+            // print('      -> Found master: ${masterEvent.title}');
+            // Create a synthetic CustomAppointment for this occurrence
+            customAppointment = masterEvent.copyWith(
+              startTime: rawAppointment.startTime,
+              endTime: rawAppointment.endTime,
+              isAllDay: rawAppointment.isAllDay,
+            );
+          } else {
+             // print('      -> Master NOT found for ID: $id');
+          }
+        } else {
+           // print('      -> ID is null on Appointment object');
+        }
+      } catch (e) {
+        print('⚠️ [AppointmentBuilder] Error resolving master for occurrence: $e');
+      }
+    } else {
+       print('⚠️ [AppointmentBuilder] Unknown type: ${rawAppointment.runtimeType}');
     }
     
-    final CustomAppointment customAppointment = rawAppointment;
+    if (customAppointment == null) {
+      // Fallback if we couldn't resolve it (should be rare with getId fixed)
+      // Try to use what properties we can from the raw object if it's an Appointment
+      if (rawAppointment is Appointment) {
+         return Container(
+           color: rawAppointment.color,
+           child: Center(
+             child: Text(
+               rawAppointment.subject, 
+               style: TextStyle(color: Colors.white, fontSize: 10),
+               overflow: TextOverflow.ellipsis,
+             )
+           ),
+         );
+      }
+      return SizedBox();
+    }
 
     // Fix: Correctly check if start and end are on the same day
     bool isSameDay = customAppointment.startTime.year == customAppointment.endTime.year &&

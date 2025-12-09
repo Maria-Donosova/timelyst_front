@@ -110,4 +110,7 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
 
   @override
   Object? getRecurrenceId(int index) => appointments![index].recurrenceId;
+
+  @override
+  Object? getId(int index) => appointments![index].id;
 }

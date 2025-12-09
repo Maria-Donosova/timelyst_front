@@ -378,43 +378,76 @@ class _CalendarWState extends State<CalendarW> {
     }
     if (details.targetElement == CalendarElement.appointment) {
       if (details.appointments != null && details.appointments!.isNotEmpty) {
-        final CustomAppointment _customAppointment = details.appointments![0];
-
-        _dateText = DateFormat('MMMM d', 'en_US')
-            .format(_customAppointment.startTime)
-            .toString();
-
-        _startTimeText = DateFormat('hh:mm a')
-            .format(_customAppointment.startTime)
-            .toString();
-
-        _endTimeText =
-            DateFormat('hh:mm a').format(_customAppointment.endTime).toString();
-
-        final result = await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                content: EventDetails(
-                  id: _customAppointment.id,
-                  subject: _customAppointment.title,
-                  dateText: _dateText,
-                  start: _startTimeText,
-                  end: _endTimeText,
-                  catTitle: _customAppointment.catTitle,
-                  catColor: _customAppointment.catColor,
-                  participants: _customAppointment.participants,
-                  body: _customAppointment.description,
-                  location: _customAppointment.location,
-                  isAllDay: _customAppointment.isAllDay,
-                  recurrenceRule: _customAppointment.recurrenceRule,
-                  recurrenceId: _customAppointment.recurrenceId,
-                  originalStart: _customAppointment.originalStart,
-                  exDates: _customAppointment.exDates,
-                  calendarId: _customAppointment.calendarId,
-                ),
+        final dynamic rawAppointment = details.appointments![0];
+        CustomAppointment? _customAppointment;
+        
+        if (rawAppointment is CustomAppointment) {
+          _customAppointment = rawAppointment;
+        } else if (rawAppointment is Appointment) {
+          // Handle Syncfusion generated occurrence
+          final eventProvider = Provider.of<EventProvider>(context, listen: false);
+          // Try to find by ID if available (from overridden getId)
+          if (rawAppointment.id != null) {
+            final master = eventProvider.events.firstWhere(
+              (e) => e.id == rawAppointment.id,
+              orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+            );
+            if (master.id != 'temp') {
+              _customAppointment = master.copyWith(
+                startTime: rawAppointment.startTime,
+                endTime: rawAppointment.endTime,
+                isAllDay: rawAppointment.isAllDay,
+                recurrenceId: rawAppointment.recurrenceId?.toString(), // Pass ID if available? Or leave as is?
+                // Actually recurrenceId for an occurrence is usually pointing to master? 
+                // But CustomAppointment structure uses recurrenceId strictly for exceptions?
+                // For display in dialog, we want to show it as an instance of the master.
               );
-            });
+            }
+          }
+        }
+
+        if (_customAppointment != null) {
+          _dateText = DateFormat('MMMM d', 'en_US')
+              .format(_customAppointment.startTime)
+              .toString();
+
+          _startTimeText = DateFormat('hh:mm a')
+              .format(_customAppointment.startTime)
+              .toString();
+
+          _endTimeText =
+              DateFormat('hh:mm a').format(_customAppointment.endTime).toString();
+
+          final result = await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  content: EventDetails(
+                    id: _customAppointment!.id,
+                    subject: _customAppointment!.title,
+                    dateText: _dateText,
+                    start: _startTimeText,
+                    end: _endTimeText,
+                    catTitle: _customAppointment!.catTitle,
+                    catColor: _customAppointment!.catColor,
+                    participants: _customAppointment!.participants,
+                    body: _customAppointment!.description,
+                    location: _customAppointment!.location,
+                    isAllDay: _customAppointment!.isAllDay,
+                    recurrenceRule: _customAppointment!.recurrenceRule,
+                    recurrenceId: _customAppointment!.recurrenceId,
+                    originalStart: _customAppointment!.originalStart,
+                    exDates: _customAppointment!.exDates,
+                    calendarId: _customAppointment!.calendarId,
+                  ),
+                );
+              });
+          
+          if (result == true) {
+            setState(() {});
+          }
+        }
+      }
 
         if (result == true) {
           setState(() {});
@@ -478,8 +511,29 @@ class _CalendarWState extends State<CalendarW> {
   Future<void> _handleDragEnd(AppointmentDragEndDetails details) async {
     if (details.appointment == null) return;
 
-    final appointment = details.appointment as CustomAppointment;
+    CustomAppointment? appointment;
+    final dynamic rawAppointment = details.appointment!;
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
+
+    if (rawAppointment is CustomAppointment) {
+      appointment = rawAppointment;
+    } else if (rawAppointment is Appointment) {
+      // Resolve master from ID - Syncfusion drag details returns the occurrence
+       if (rawAppointment.id != null) {
+          final master = eventProvider.events.firstWhere(
+            (e) => e.id == rawAppointment.id,
+            orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+          );
+          if (master.id != 'temp') {
+            appointment = master.copyWith(
+              startTime: rawAppointment.startTime, 
+              endTime: rawAppointment.endTime,
+            );
+          }
+       }
+    }
+    
+    if (appointment == null) return;
 
     AppLogger.debug(
         'Handling drag-and-drop for appointment: ${appointment.title}',
@@ -589,8 +643,27 @@ class _CalendarWState extends State<CalendarW> {
   Future<void> _handleResizeEnd(AppointmentResizeEndDetails details) async {
     if (details.appointment == null) return;
 
-    final appointment = details.appointment as CustomAppointment;
+    CustomAppointment? appointment;
+    final dynamic rawAppointment = details.appointment!;
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
+    
+    if (rawAppointment is CustomAppointment) {
+      appointment = rawAppointment;
+    } else if (rawAppointment is Appointment) {
+      // Resolve master from ID
+       if (rawAppointment.id != null) {
+          final master = eventProvider.events.firstWhere(
+            (e) => e.id == rawAppointment.id,
+             orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+          );
+          if (master.id != 'temp') {
+            appointment = master; 
+            // We use master base, but resize details gives us new start/end times via details.startTime/endTime
+          }
+       }
+    }
+
+    if (appointment == null) return;
 
     AppLogger.debug(
         'Handling resize for appointment: ${appointment.title}',
