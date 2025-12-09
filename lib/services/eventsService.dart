@@ -192,7 +192,7 @@ class EventService {
   }) async {
     try {
       final response = await _apiClient.put(
-        '${Config.backendURL}/events/$masterEventId/occurrences/${originalStart.toIso8601String()}',
+        '${Config.backendURL}/recurring-events/$masterEventId/occurrences/${originalStart.toIso8601String()}',
         body: updates,
         token: authToken,
       );
@@ -217,7 +217,7 @@ class EventService {
   }) async {
     try {
       final queryParams = {'from': fromDate.toIso8601String()};
-      final uri = Uri.parse('${Config.backendURL}/events/$masterEventId/split')
+      final uri = Uri.parse('${Config.backendURL}/recurring-events/$masterEventId/split')
           .replace(queryParameters: queryParams);
 
       final response = await _apiClient.put(
@@ -246,7 +246,7 @@ class EventService {
   }) async {
     try {
       final queryParams = {'preserveExceptions': preserveExceptions.toString()};
-      final uri = Uri.parse('${Config.backendURL}/events/$masterEventId')
+      final uri = Uri.parse('${Config.backendURL}/recurring-events/$masterEventId')
           .replace(queryParameters: queryParams);
 
       final response = await _apiClient.put(
@@ -274,7 +274,7 @@ class EventService {
   }) async {
     try {
       final response = await _apiClient.delete(
-        '${Config.backendURL}/events/$masterEventId/occurrences/${originalStart.toIso8601String()}',
+        '${Config.backendURL}/recurring-events/$masterEventId/occurrences/${originalStart.toIso8601String()}',
         token: authToken,
       );
 
@@ -294,7 +294,7 @@ class EventService {
   }) async {
     try {
       final queryParams = {'from': fromDate.toIso8601String()};
-      final uri = Uri.parse('${Config.backendURL}/events/$masterEventId/future')
+      final uri = Uri.parse('${Config.backendURL}/recurring-events/$masterEventId/future')
           .replace(queryParameters: queryParams);
 
       final response = await _apiClient.delete(
@@ -320,7 +320,7 @@ class EventService {
   }) async {
     try {
       final queryParams = {'deleteAll': 'true'};
-      final uri = Uri.parse('${Config.backendURL}/events/$masterEventId')
+      final uri = Uri.parse('${Config.backendURL}/recurring-events/$masterEventId')
           .replace(queryParameters: queryParams);
 
       final response = await _apiClient.delete(
