@@ -66,7 +66,7 @@ class _CalendarWState extends State<CalendarW> {
     // Use new calendar view API
     await eventProvider.fetchCalendarView(
       startDate: _visibleDates.first,
-      endDate: _visibleDates.last,
+      endDate: _visibleDates.last.add(const Duration(days: 1)),
     );
 
     // Get TimeEvent objects from provider
