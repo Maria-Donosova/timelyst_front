@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/services/authService.dart';
 import 'package:timelyst_flutter/services/eventsService.dart';
 import 'package:timelyst_flutter/models/customApp.dart';
+import 'package:timelyst_flutter/models/timeEvent.dart';
+import 'package:timelyst_flutter/utils/eventsMapper.dart';
 
 class EventProvider with ChangeNotifier {
   AuthService? _authService;
@@ -19,6 +21,9 @@ class EventProvider with ChangeNotifier {
   final Map<String, DateTime> _cacheTimestamps = {};
   static const Duration _cacheValidDuration = Duration(minutes: 1);
   
+  // Occurrence counts for recurring events (master event ID -> count)
+  final Map<String, int> _occurrenceCounts = {};
+  
   // Debug flag - set to true temporarily for debugging API issues
   static const bool _debugLogging = true;
   
@@ -29,6 +34,11 @@ class EventProvider with ChangeNotifier {
   List<CustomAppointment> get events => _events;
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
+  
+  /// Get occurrence count for a master event (for dialog display)
+  int getOccurrenceCount(String masterEventId) {
+    return _occurrenceCounts[masterEventId] ?? 0;
+  }
 
   EventProvider({AuthService? authService}) 
     : _authService = authService;
@@ -82,6 +92,7 @@ class EventProvider with ChangeNotifier {
   void invalidateCache() {
     _eventCache.clear();
     _cacheTimestamps.clear();
+    _occurrenceCounts.clear();
     if (_debugLogging) print('🗄️ [EventProvider] Cache invalidated - forcing fresh fetch on next request');
   }
 
@@ -273,6 +284,120 @@ class EventProvider with ChangeNotifier {
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime);
       print('⏱️ [EventProvider] fetchAllEvents failed after ${duration.inMilliseconds}ms');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Fetch calendar view with master events, exceptions, and occurrence counts
+  /// This is the new method that uses the structured calendar view API
+  Future<void> fetchCalendarView({
+    DateTime? startDate,
+    DateTime? endDate,
+    bool forceRefresh = false,
+  }) async {
+    final start = startDate ?? DateTime.now().subtract(Duration(days: 90));
+    final end = endDate ?? DateTime.now().add(Duration(days: 120));
+    
+    if (_debugLogging) {
+      print('📅 [EventProvider] fetchCalendarView: ${start.toIso8601String().substring(0, 10)} to ${end.toIso8601String().substring(0, 10)}');
+    }
+    
+    // Check cache first
+    if (!forceRefresh) {
+      final cacheKey = _generateCacheKey(start, end);
+      final cachedEvents = _getCachedEvents(cacheKey);
+      if (cachedEvents != null) {
+        _events = cachedEvents;
+        _previousEvents = List.from(_events);
+        notifyListeners();
+        if (_debugLogging) print('⚡ [EventProvider] Returned cached calendar view');
+        return;
+      }
+    }
+    
+    if (_authService == null) {
+      print("AuthService is null in EventProvider");
+      return;
+    }
+    
+    final authToken = await _authService!.getAuthToken();
+    if (authToken == null) {
+      print("❌ [EventProvider] Missing auth token");
+      _errorMessage = 'Authentication required. Please log in again.';
+      notifyListeners();
+      return;
+    }
+    
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      final response = await EventService.getCalendarView(
+        authToken: authToken,
+        start: start,
+        end: end,
+      );
+      
+      // Extract data from response
+      final masterEvents = (response['masterEvents'] as List<dynamic>)
+          .map((e) => TimeEvent.fromJson(e as Map<String, dynamic>))
+          .toList();
+      final exceptions = (response['exceptions'] as List<dynamic>)
+          .map((e) => TimeEvent.fromJson(e as Map<String, dynamic>))
+          .toList();
+      final occurrenceCounts = Map<String, int>.from(response['occurrenceCounts'] as Map);
+      
+      // Store occurrence counts
+      _occurrenceCounts.clear();
+      _occurrenceCounts.addAll(occurrenceCounts);
+      
+      if (_debugLogging) {
+        print('📊 [EventProvider] Received ${masterEvents.length} masters, ${exceptions.length} exceptions');
+        print('📊 [EventProvider] Occurrence counts: ${occurrenceCounts.length} series');
+      }
+      
+      // Combine masters and exceptions into single list for now
+      // The TimelystCalendarDataSource will handle the separation
+      final allEvents = [...masterEvents, ...exceptions];
+      
+      // Map to CustomAppointments
+      final appointments = allEvents
+          .map((event) {
+            try {
+              return EventMapper.mapTimeEventToCustomAppointment(event);
+            } catch (e) {
+              print('Error mapping event ${event.id}: $e');
+              return null;
+            }
+          })
+          .where((event) => event != null)
+          .cast<CustomAppointment>()
+          .toList();
+      
+      // Sync with existing events
+      if (startDate != null && endDate != null) {
+        _syncEventsForDateRange(appointments, start, end);
+      } else {
+        _syncEventsIncremental(appointments);
+      }
+      
+      _previousEvents = List.from(_events);
+      
+      // Cache the results
+      final cacheKey = _generateCacheKey(start, end);
+      _cacheEvents(cacheKey, appointments);
+      
+      _errorMessage = '';
+      
+      if (_debugLogging) {
+        print('✅ [EventProvider] Calendar view loaded: ${_events.length} total events');
+      }
+      
+    } catch (e) {
+      _errorMessage = 'Failed to fetch calendar view: $e';
+      print('❌ [EventProvider] Error: $_errorMessage');
     } finally {
       _isLoading = false;
       notifyListeners();

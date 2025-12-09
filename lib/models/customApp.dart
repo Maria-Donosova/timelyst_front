@@ -84,6 +84,16 @@ class CustomAppointment {
     }
   }
 
+  // Helper methods for recurrence detection
+  bool get isMasterEvent => 
+      recurrenceRule != null && 
+      recurrenceRule!.isNotEmpty && 
+      (recurrenceId == null || recurrenceId!.isEmpty);
+  
+  bool get isException => recurrenceId != null && recurrenceId!.isNotEmpty;
+  
+  bool get isRecurring => isMasterEvent || isException;
+
   // Convert CustomAppointment to JSON (if needed)
   Map<String, dynamic> toJson() {
     return {

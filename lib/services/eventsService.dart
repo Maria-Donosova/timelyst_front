@@ -148,4 +148,191 @@ class EventService {
       rethrow;
     }
   }
+
+  // ============ RECURRING EVENT OPERATIONS ============
+
+  /// Fetch calendar view with master events, exceptions, and occurrence counts
+  static Future<Map<String, dynamic>> getCalendarView({
+    required String authToken,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    try {
+      final queryParams = {
+        'start': start.toUtc().toIso8601String(),
+        'end': end.toUtc().toIso8601String(),
+      };
+
+      final uri = Uri.parse('${Config.backendURL}/calendar')
+          .replace(queryParameters: queryParams);
+
+      print('🔄 [EventService] GET $uri (calendar view)');
+      final response = await _apiClient.get(
+        uri.toString(),
+        token: authToken,
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to fetch calendar view: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ [EventService] Exception in getCalendarView: $e');
+      rethrow;
+    }
+  }
+
+  /// Update single occurrence (creates/updates exception)
+  static Future<TimeEvent> updateThisOccurrence({
+    required String authToken,
+    required String masterEventId,
+    required DateTime originalStart,
+    required Map<String, dynamic> updates,
+  }) async {
+    try {
+      final response = await _apiClient.put(
+        '${Config.backendURL}/events/$masterEventId/occurrences/${originalStart.toIso8601String()}',
+        body: updates,
+        token: authToken,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return TimeEvent.fromJson(data);
+      } else {
+        throw Exception('Failed to update occurrence: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Update this and future occurrences (splits series)
+  static Future<Map<String, dynamic>> updateThisAndFuture({
+    required String authToken,
+    required String masterEventId,
+    required DateTime fromDate,
+    required Map<String, dynamic> updates,
+  }) async {
+    try {
+      final queryParams = {'from': fromDate.toIso8601String()};
+      final uri = Uri.parse('${Config.backendURL}/events/$masterEventId/split')
+          .replace(queryParameters: queryParams);
+
+      final response = await _apiClient.put(
+        uri.toString(),
+        body: updates,
+        token: authToken,
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to split series: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Update all occurrences (updates master)
+  /// preserveExceptions defaults to true to keep existing modified/cancelled occurrences
+  static Future<TimeEvent> updateAllOccurrences({
+    required String authToken,
+    required String masterEventId,
+    required Map<String, dynamic> updates,
+    bool preserveExceptions = true,
+  }) async {
+    try {
+      final queryParams = {'preserveExceptions': preserveExceptions.toString()};
+      final uri = Uri.parse('${Config.backendURL}/events/$masterEventId')
+          .replace(queryParameters: queryParams);
+
+      final response = await _apiClient.put(
+        uri.toString(),
+        body: updates,
+        token: authToken,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return TimeEvent.fromJson(data);
+      } else {
+        throw Exception('Failed to update all occurrences: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Delete single occurrence (creates cancelled exception)
+  static Future<void> deleteThisOccurrence({
+    required String authToken,
+    required String masterEventId,
+    required DateTime originalStart,
+  }) async {
+    try {
+      final response = await _apiClient.delete(
+        '${Config.backendURL}/events/$masterEventId/occurrences/${originalStart.toIso8601String()}',
+        token: authToken,
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete occurrence: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Delete this and future occurrences (truncates series)
+  static Future<TimeEvent> deleteThisAndFuture({
+    required String authToken,
+    required String masterEventId,
+    required DateTime fromDate,
+  }) async {
+    try {
+      final queryParams = {'from': fromDate.toIso8601String()};
+      final uri = Uri.parse('${Config.backendURL}/events/$masterEventId/future')
+          .replace(queryParameters: queryParams);
+
+      final response = await _apiClient.delete(
+        uri.toString(),
+        token: authToken,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return TimeEvent.fromJson(data);
+      } else {
+        throw Exception('Failed to delete future occurrences: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Delete all occurrences (deletes master and all exceptions)
+  static Future<void> deleteAllOccurrences({
+    required String authToken,
+    required String masterEventId,
+  }) async {
+    try {
+      final queryParams = {'deleteAll': 'true'};
+      final uri = Uri.parse('${Config.backendURL}/events/$masterEventId')
+          .replace(queryParameters: queryParams);
+
+      final response = await _apiClient.delete(
+        uri.toString(),
+        token: authToken,
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete all occurrences: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
