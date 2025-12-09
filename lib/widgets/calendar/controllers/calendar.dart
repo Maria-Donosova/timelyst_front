@@ -449,10 +449,7 @@ class _CalendarWState extends State<CalendarW> {
         }
       }
 
-        if (result == true) {
-          setState(() {});
-        }
-      }
+
     } else {
       final result = await showDialog(
           context: context,

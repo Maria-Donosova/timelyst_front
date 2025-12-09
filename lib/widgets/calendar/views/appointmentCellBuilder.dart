@@ -6,6 +6,7 @@ import '../../../models/calendars.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/calendarProvider.dart';
 import '../../../utils/rruleParser.dart';
+import '../../../providers/eventProvider.dart';
 
 /**
  * Method to build the UI for a single appointment.
