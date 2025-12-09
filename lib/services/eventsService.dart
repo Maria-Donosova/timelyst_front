@@ -173,6 +173,7 @@ class EventService {
       );
 
       if (response.statusCode == 200) {
+        print('📦 [EventService] getCalendarView response body: ${response.body}');
         return jsonDecode(response.body) as Map<String, dynamic>;
       } else {
         throw Exception('Failed to fetch calendar view: ${response.statusCode}');
