@@ -877,9 +877,23 @@ class EventDetailsScreenState extends State<EventDetails> {
       });
 
       try {
-        // Use the appropriate ID for deletion
+        // Determine delete scope string for backend
+        String? deleteScope;
+        if (isSeries) {
+          deleteScope = 'series';
+        } else if (isOccurrence) {
+          deleteScope = 'occurrence';
+        }
+        
+        print('🗑️ [EventDetails] Deleting event $idToDelete with scope: ${deleteScope ?? "default"}');
+        
+        // Pass deleteScope to the controller
         final success = await EventDeletionController.deleteEvent(
-            context, idToDelete, _allDay);
+          context, 
+          idToDelete, 
+          _allDay,
+          deleteScope: deleteScope,
+        );
 
         if (success) {
           Navigator.of(context).pop(true); // Return true to indicate deletion

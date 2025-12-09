@@ -340,7 +340,7 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> deleteEvent(String id) async {
+  Future<bool> deleteEvent(String id, {String? deleteScope}) async {
     if (_authService == null) return false;
     final authToken = await _authService!.getAuthToken();
     if (authToken == null) return false;
@@ -349,12 +349,25 @@ class EventProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      await EventService.deleteEvent(id, authToken);
+      print('🗑️ [EventProvider] Deleting event $id with scope: ${deleteScope ?? "default"}');
+      
+      await EventService.deleteEvent(id, authToken, deleteScope: deleteScope);
+      
+      // Remove the event from local state
       _events.removeWhere((event) => event.id == id);
+      
+      // If deleting a series, invalidate cache to force refresh
+      // This ensures all occurrences are removed from the UI
+      if (deleteScope == 'series') {
+        print('🗑️ [EventProvider] Series deleted, invalidating cache');
+        invalidateCache();
+      }
+      
       _errorMessage = '';
       return true;
     } catch (e) {
       _errorMessage = 'Failed to delete event: $e';
+      print('❌ [EventProvider] Delete failed: $_errorMessage');
       return false;
     } finally {
       _isLoading = false;

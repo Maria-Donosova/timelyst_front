@@ -120,17 +120,31 @@ class EventService {
     }
   }
 
-  static Future<void> deleteEvent(String id, String authToken) async {
+  static Future<void> deleteEvent(
+    String id, 
+    String authToken,
+    {String? deleteScope}  // 'occurrence' or 'series'
+  ) async {
     try {
+      // Build URL with query parameter if scope provided
+      String url = '${Config.backendURL}/events/$id';
+      if (deleteScope != null && deleteScope.isNotEmpty) {
+        url += '?deleteScope=$deleteScope';
+        print('🗑️ [EventService] Deleting with scope: $deleteScope');
+      }
+      
       final response = await _apiClient.delete(
-        '${Config.backendURL}/events/$id',
+        url,
         token: authToken,
       );
 
       if (response.statusCode != 200) {
         throw Exception('Failed to delete event: ${response.statusCode} - ${response.body}');
       }
+      
+      print('✅ [EventService] Event deleted successfully');
     } catch (e) {
+      print('❌ [EventService] Delete failed: $e');
       rethrow;
     }
   }
