@@ -163,7 +163,7 @@ class EventService {
         'end': end.toUtc().toIso8601String(),
       };
 
-      final uri = Uri.parse('${Config.backendURL}/calendar')
+      final uri = Uri.parse('${Config.backendURL}/api/calendar')
           .replace(queryParameters: queryParams);
 
       print('🔄 [EventService] GET $uri (calendar view)');
