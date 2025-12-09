@@ -16,6 +16,7 @@ import '../../../providers/authProvider.dart';
 import '../../../utils/logger.dart';
 import '../../responsive/responsive_widgets.dart';
 import '../../../services/event_handler_service.dart';
+import '../../../data_sources/timelyst_calendar_data_source.dart';
 
 enum _calView { day, week, month }
 
@@ -29,6 +30,7 @@ class CalendarW extends StatefulWidget {
 class _CalendarWState extends State<CalendarW> {
   final CalendarController _controller = CalendarController();
   List<DateTime> _visibleDates = [];
+  TimelystCalendarDataSource? _dataSource;
 
   String? _headerText,
       _weekStart,
@@ -56,8 +58,6 @@ class _CalendarWState extends State<CalendarW> {
   }
 
   /// Loads events for the current visible date range using the new calendar view API
-  /// TODO: This method needs to be updated once EventProvider stores TimeEvent objects
-  /// For now, we'll use the existing _EventDataSource until the provider is refactored
   Future<void> _loadEvents() async {
     if (_visibleDates.isEmpty) return;
 
@@ -69,12 +69,28 @@ class _CalendarWState extends State<CalendarW> {
       endDate: _visibleDates.last,
     );
 
-    // For now, we'll continue using the existing _EventDataSource
-    // Once EventProvider is updated to store TimeEvent objects directly,
-    // we can create TimelystCalendarDataSource here
+    // Get TimeEvent objects from provider
+    final timeEvents = eventProvider.timeEvents;
+    
+    // Separate masters and exceptions
+    final masters = timeEvents.where((e) => e.isMasterEvent || !e.isRecurring).toList();
+    final exceptions = timeEvents.where((e) => e.isException).toList();
+    
+    // Build occurrence counts map
+    final occurrenceCounts = <String, int>{};
+    for (final master in masters) {
+      if (master.isMasterEvent) {
+        occurrenceCounts[master.id] = eventProvider.getOccurrenceCount(master.id);
+      }
+    }
+    
+    // Create data source
     setState(() {
-      // The data source will be created in the build method using _EventDataSource
-      // until EventProvider is refactored to provide TimeEvent objects
+      _dataSource = TimelystCalendarDataSource(
+        masterEvents: masters,
+        exceptionEvents: exceptions,
+        occurrenceCounts: occurrenceCounts,
+      );
     });
   }
 
@@ -184,7 +200,7 @@ class _CalendarWState extends State<CalendarW> {
                     allowDragAndDrop: true,
                     dragAndDropSettings:
                         DragAndDropSettings(showTimeIndicator: true),
-                    dataSource: _EventDataSource(appointments),
+                    dataSource: (_dataSource ?? _EventDataSource(appointments)) as CalendarDataSource<Object?>?,
                     onTap: _calendarTapped,
                     onDragEnd: _handleDragEnd,
                     onAppointmentResizeEnd: _handleResizeEnd,

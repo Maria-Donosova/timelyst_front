@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'timeEvent.dart';
 
 class CustomAppointment {
   final String id;
@@ -20,7 +21,7 @@ class CustomAppointment {
   final List<String>? exDates;
   final List<DateTime>? recurrenceExceptionDates;
   final List<String> userCalendars;
-  final String? timeEventInstance;
+  final TimeEvent? timeEventInstance;
   final String? createdAt;
   final String? updatedAt;
   
@@ -111,7 +112,7 @@ class CustomAppointment {
       'exDates': exDates,
       'recurrenceExceptionDates': recurrenceExceptionDates?.map((d) => d.toIso8601String()).toList(),
       'userCalendars': userCalendars,
-      'timeEventInstance': timeEventInstance,
+      'timeEventInstance': timeEventInstance?.toJson(),
       'createdBy': createdBy,
       'sourceCalendar': sourceCalendar,
       'calendarId': calendarId,

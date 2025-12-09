@@ -14,7 +14,7 @@ import '../utils/eventsMapper.dart';
 ///    - Creates master Appointment with recurrenceRule and recurrenceExceptionDates
 ///    - For each non-cancelled exception, creates separate Appointment with recurrenceId linking to master
 /// 3. For non-recurring events, creates simple appointments
-class TimelystCalendarDataSource extends CalendarDataSource {
+class TimelystCalendarDataSource extends CalendarDataSource<Appointment> {
   final Map<String, int> _occurrenceCounts;
 
   TimelystCalendarDataSource({

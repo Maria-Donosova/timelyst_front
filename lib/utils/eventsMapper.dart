@@ -23,6 +23,7 @@ class EventMapper {
       catColor: _getColorFromCategory(timeEvent.category),
       calendarId: timeEvent.calendarIds.isNotEmpty ? timeEvent.calendarIds.first : null,
       userCalendars: timeEvent.calendarIds,
+      timeEventInstance: timeEvent,
       // Map providerEventId to specific provider IDs if needed, or just use a generic one
       // googleEventId: timeEvent.providerEventId, // REMOVED: This was causing all events to be treated as Google events
       // We should rely on calendar source lookup instead

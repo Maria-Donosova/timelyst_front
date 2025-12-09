@@ -10,6 +10,9 @@ class EventProvider with ChangeNotifier {
   AuthService? _authService;
   List<CustomAppointment> _events = [];
   
+  // Store raw TimeEvent objects for TimelystCalendarDataSource
+  List<TimeEvent> _timeEvents = [];
+  
   // Track previous events for change detection
   List<CustomAppointment> _previousEvents = [];
 
@@ -32,6 +35,7 @@ class EventProvider with ChangeNotifier {
   static const Duration _parallelEventTimeout = Duration(seconds: 45); // Still reasonable timeout when loading with tasks
 
   List<CustomAppointment> get events => _events;
+  List<TimeEvent> get timeEvents => _timeEvents;
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
   
@@ -357,6 +361,9 @@ class EventProvider with ChangeNotifier {
         print('📊 [EventProvider] Received ${masterEvents.length} masters, ${exceptions.length} exceptions');
         print('📊 [EventProvider] Occurrence counts: ${occurrenceCounts.length} series');
       }
+      
+      // Store raw TimeEvent objects for TimelystCalendarDataSource
+      _timeEvents = [...masterEvents, ...exceptions];
       
       // Combine masters and exceptions into single list for now
       // The TimelystCalendarDataSource will handle the separation
