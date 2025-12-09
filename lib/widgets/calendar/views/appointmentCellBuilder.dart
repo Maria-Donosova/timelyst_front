@@ -20,59 +20,68 @@ import '../../../utils/rruleParser.dart';
 Widget appointmentBuilder(BuildContext context,
     CalendarAppointmentDetails calendarAppointmentDetails) {
   try {
-    // Get the first appointment from the list of appointments
-    final CustomAppointment customAppointment =
-        calendarAppointmentDetails.appointments.first;
+    // Verify we have an appointment
+    if (calendarAppointmentDetails.appointments.isEmpty) {
+      return SizedBox();
+    }
 
-    // Check if the appointment has a single day duration
-    // If the end time and start time have the same year, month, and day, it's a single day duration
+    final dynamic rawAppointment = calendarAppointmentDetails.appointments.first;
+    
+    // Debug logging to identify the object type and structure
+    // print('🔍 [AppointmentBuilder] Raw appointment type: ${rawAppointment.runtimeType}');
+    
+    if (rawAppointment is! CustomAppointment) {
+      print('⚠️ [AppointmentBuilder] Appointment is not CustomAppointment: $rawAppointment');
+      return SizedBox();
+    }
+    
+    final CustomAppointment customAppointment = rawAppointment;
 
-    bool isSameDay = customAppointment.startTime.year ==
-            customAppointment.endTime.year &&
-        customAppointment.startTime.month == customAppointment.endTime.month;
+    // Fix: Correctly check if start and end are on the same day
+    bool isSameDay = customAppointment.startTime.year == customAppointment.endTime.year &&
+        customAppointment.startTime.month == customAppointment.endTime.month &&
+        customAppointment.startTime.day == customAppointment.endTime.day;
 
     // Calculate occurrence info string
     String? occurrenceString;
-    if ((customAppointment.recurrenceRule != null && customAppointment.recurrenceRule!.isNotEmpty) ||
-        (customAppointment.recurrenceId != null && customAppointment.recurrenceId!.isNotEmpty)) {
-      
-      // We need the rule to calculate anything. If it's an exception (recurrenceId) without rule,
-      // we might not know the total count, but we can't calculate occurrence number easily without the rule.
-      // However, if we have the rule (either directly or inherited), we can try.
-      // For now, only if we have a rule.
-      if (customAppointment.recurrenceRule != null && customAppointment.recurrenceRule!.isNotEmpty) {
-         try {
-           final rrule = customAppointment.recurrenceRule!;
-           final recurrenceInfo = RRuleParser.parseRRule(rrule);
-           if (recurrenceInfo != null) {
-              final total = RRuleParser.getTotalOccurrences(rrule, customAppointment.startTime); // Approximate start
-              
-              // To calculate current occurrence, we need original start. 
-              // CustomAppointment has originalStart now.
-              final originalStart = customAppointment.originalStart;
-              final currentStart = customAppointment.startTime; // Or originalStart if available
-              
-              // If originalStart is missing for the series master, it is the start time.
-              // For an occurrence, originalStart should be set.
-              
-              final occurrenceNum = RRuleParser.calculateOccurrenceNumber(
-                eventStart: currentStart,
-                originalStart: originalStart, 
-                rrule: rrule,
-              );
-              
-              if (occurrenceNum != null) {
-                if (total != null) {
-                  occurrenceString = '$occurrenceNum/$total';
-                } else {
-                  occurrenceString = '#$occurrenceNum';
-                }
-              }
-           }
-         } catch (e) {
-           // Ignore errors in cell builder to prevent crash
-         }
+    // Wrap recurrence logic in try-catch to be safe
+    try {
+      if ((customAppointment.recurrenceRule != null && customAppointment.recurrenceRule!.isNotEmpty) ||
+          (customAppointment.recurrenceId != null && customAppointment.recurrenceId!.isNotEmpty)) {
+        
+        // Only attempt parsing if we have a rule
+        if (customAppointment.recurrenceRule != null && customAppointment.recurrenceRule!.isNotEmpty) {
+             final rrule = customAppointment.recurrenceRule!;
+             // Check RRuleParser availability
+             try {
+               final recurrenceInfo = RRuleParser.parseRRule(rrule);
+               if (recurrenceInfo != null) {
+                  final total = RRuleParser.getTotalOccurrences(rrule, customAppointment.startTime);
+                  
+                  final originalStart = customAppointment.originalStart;
+                  final currentStart = customAppointment.startTime;
+                  
+                  final occurrenceNum = RRuleParser.calculateOccurrenceNumber(
+                    eventStart: currentStart,
+                    originalStart: originalStart, 
+                    rrule: rrule,
+                  );
+                  
+                  if (occurrenceNum != null) {
+                    if (total != null) {
+                      occurrenceString = '$occurrenceNum/$total';
+                    } else {
+                      occurrenceString = '#$occurrenceNum';
+                    }
+                  }
+               }
+             } catch (e) {
+               print('⚠️ [AppointmentBuilder] RRule parsing error: $e');
+             }
+        }
       }
+    } catch (e) {
+      print('⚠️ [AppointmentBuilder] Recurrence logic error: $e');
     }
 
     final width = MediaQuery.of(context).size.width;
@@ -84,137 +93,130 @@ Widget appointmentBuilder(BuildContext context,
     Widget _getCalendarSourceWidget(CustomAppointment appointment,
         {double size = 14, required Color color}) {
       
-      // DEBUG: Trace why we are hitting default
-      // DEBUG: Trace why we are hitting default
-      print('🔍 [AppointmentBuilder] Checking icon for "${appointment.title}" (ID: ${appointment.id})');
-      print('   - calendarId: ${appointment.calendarId}');
-      print('   - source: ${appointment.source}');
-      print('   - googleEventId: ${appointment.googleEventId}');
-      
-      // First check the source map which should contain the most reliable information
-      if (appointment.source != null && appointment.source!.isNotEmpty) {
-        final sourceType =
-            appointment.source!['type']?.toString().toLowerCase() ?? '';
-        final sourceName =
-            appointment.source!['name']?.toString().toLowerCase() ?? '';
-
-        if (sourceType.contains('google') || sourceName.contains('google')) {
-          return Icon(Icons.mail_outline, size: size, color: color);
-        } else if (sourceType.contains('microsoft') ||
-            sourceType.contains('outlook') ||
-            sourceName.contains('microsoft') ||
-            sourceName.contains('outlook')) {
-          return Icon(Icons.window_outlined, size: size, color: color);
-        } else if (sourceType.contains('apple') ||
-            sourceType.contains('icloud') ||
-            sourceName.contains('apple') ||
-            sourceName.contains('icloud')) {
-          return Icon(Icons.apple, size: size, color: color);
-        }
-      }
-
-      // Check for specific calendar source IDs
-      if (appointment.googleEventId != null &&
-          appointment.googleEventId!.isNotEmpty) {
-        return Icon(Icons.mail_outline, size: size, color: color);
-      } else if (appointment.microsoftEventId != null &&
-          appointment.microsoftEventId!.isNotEmpty) {
-        return Icon(Icons.window_outlined, size: size, color: color);
-      } else if (appointment.appleEventId != null &&
-          appointment.appleEventId!.isNotEmpty) {
-        return Icon(Icons.apple, size: size, color: color);
-      }
-
-      // Check sourceCalendar field for calendar name patterns
-      if (appointment.sourceCalendar != null &&
-          appointment.sourceCalendar!.isNotEmpty) {
-        final sourceCalendarLower = appointment.sourceCalendar!.toLowerCase();
-
-        if (sourceCalendarLower.contains('google')) {
-          return Icon(Icons.mail_outline, size: size, color: color);
-        } else if (sourceCalendarLower.contains('microsoft') ||
-            sourceCalendarLower.contains('outlook')) {
-          return Icon(Icons.window_outlined, size: size, color: color);
-        } else if (sourceCalendarLower.contains('apple') ||
-            sourceCalendarLower.contains('icloud') ||
-            sourceCalendarLower.contains('caldav')) {
-          return Icon(Icons.apple, size: size, color: color);
-        }
-      }
-
-      // Check calendarId field as well
-      if (appointment.calendarId != null &&
-          appointment.calendarId!.isNotEmpty) {
+      try {
+        // DEBUG: Trace why we are hitting default
+        // print('🔍 [AppointmentBuilder] Checking icon for "${appointment.title}" (ID: ${appointment.id})');
         
-        // Try to look up the calendar source from CalendarProvider
-        try {
-          final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
-          final calendar = calendarProvider.getCalendarById(appointment.calendarId!);
-          
-          if (calendar != null) {
-            print('   - Provider found calendar: ${calendar.metadata.title}, source: ${calendar.source}');
-            switch (calendar.source) {
-              case CalendarSource.GOOGLE:
-                return Icon(Icons.mail_outline, size: size, color: color);
-              case CalendarSource.MICROSOFT:
-                return Icon(Icons.window_outlined, size: size, color: color);
-              case CalendarSource.APPLE:
-                return Icon(Icons.apple, size: size, color: color);
-              default:
-                // Fall through to other checks
-                break;
-            }
-          }
-        } catch (e) {
-          // Ignore provider errors and fall back to string matching
-        }
-        
-        // DEBUG: If we got here, provider lookup failed or returned LOCAL/Default
-        // DEBUG: If we got here, provider lookup failed or returned LOCAL/Default
-        print('   - Provider lookup result: Calendar not found or source is LOCAL');
+        // First check the source map which should contain the most reliable information
+        if (appointment.source != null && appointment.source!.isNotEmpty) {
+          final sourceType =
+              appointment.source!['type']?.toString().toLowerCase() ?? '';
+          final sourceName =
+              appointment.source!['name']?.toString().toLowerCase() ?? '';
 
-        final calendarIdLower = appointment.calendarId!.toLowerCase();
-
-        if (calendarIdLower.contains('google')) {
-          return Icon(Icons.mail_outline, size: size, color: color);
-        } else if (calendarIdLower.contains('microsoft') ||
-            calendarIdLower.contains('outlook')) {
-          return Icon(Icons.window_outlined, size: size, color: color);
-        } else if (calendarIdLower.contains('apple') ||
-            calendarIdLower.contains('icloud') ||
-            calendarIdLower.contains('caldav')) {
-          return Icon(Icons.apple, size: size, color: color);
-        }
-      }
-
-      // Check userCalendars field as it might contain calendar names
-      if (appointment.userCalendars.isNotEmpty) {
-        for (final calendar in appointment.userCalendars) {
-          final calendarLower = calendar.toLowerCase();
-
-          if (calendarLower.contains('google')) {
+          if (sourceType.contains('google') || sourceName.contains('google')) {
             return Icon(Icons.mail_outline, size: size, color: color);
-          } else if (calendarLower.contains('microsoft') ||
-              calendarLower.contains('outlook')) {
+          } else if (sourceType.contains('microsoft') ||
+              sourceType.contains('outlook') ||
+              sourceName.contains('microsoft') ||
+              sourceName.contains('outlook')) {
             return Icon(Icons.window_outlined, size: size, color: color);
-          } else if (calendarLower.contains('apple') ||
-              calendarLower.contains('icloud') ||
-              calendarLower.contains('caldav')) {
+          } else if (sourceType.contains('apple') ||
+              sourceType.contains('icloud') ||
+              sourceName.contains('apple') ||
+              sourceName.contains('icloud')) {
             return Icon(Icons.apple, size: size, color: color);
           }
         }
-      }
 
-      // Default icon - Timelyst Logo
-      return Image.asset(
-        'assets/images/logos/timelyst_logo.png',
-        width: size,
-        height: size,
-        // We don't apply color to the logo to keep its original branding,
-        // unless it's specifically requested to be monochrome.
-        // If it needs to match the text color, we could uncomment:
-        // color: color,
-      );
+        // Check for specific calendar source IDs
+        if (appointment.googleEventId != null &&
+            appointment.googleEventId!.isNotEmpty) {
+          return Icon(Icons.mail_outline, size: size, color: color);
+        } else if (appointment.microsoftEventId != null &&
+            appointment.microsoftEventId!.isNotEmpty) {
+          return Icon(Icons.window_outlined, size: size, color: color);
+        } else if (appointment.appleEventId != null &&
+            appointment.appleEventId!.isNotEmpty) {
+          return Icon(Icons.apple, size: size, color: color);
+        }
+
+        // Check sourceCalendar field for calendar name patterns
+        if (appointment.sourceCalendar != null &&
+            appointment.sourceCalendar!.isNotEmpty) {
+          final sourceCalendarLower = appointment.sourceCalendar!.toLowerCase();
+
+          if (sourceCalendarLower.contains('google')) {
+            return Icon(Icons.mail_outline, size: size, color: color);
+          } else if (sourceCalendarLower.contains('microsoft') ||
+              sourceCalendarLower.contains('outlook')) {
+            return Icon(Icons.window_outlined, size: size, color: color);
+          } else if (sourceCalendarLower.contains('apple') ||
+              sourceCalendarLower.contains('icloud') ||
+              sourceCalendarLower.contains('caldav')) {
+            return Icon(Icons.apple, size: size, color: color);
+          }
+        }
+
+        // Check calendarId field as well
+        if (appointment.calendarId != null &&
+            appointment.calendarId!.isNotEmpty) {
+          
+          // Try to look up the calendar source from CalendarProvider
+          try {
+            final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+            final calendar = calendarProvider.getCalendarById(appointment.calendarId!);
+            
+            if (calendar != null) {
+              // print('   - Provider found calendar: ${calendar.metadata.title}, source: ${calendar.source}');
+              switch (calendar.source) {
+                case CalendarSource.GOOGLE:
+                  return Icon(Icons.mail_outline, size: size, color: color);
+                case CalendarSource.MICROSOFT:
+                  return Icon(Icons.window_outlined, size: size, color: color);
+                case CalendarSource.APPLE:
+                  return Icon(Icons.apple, size: size, color: color);
+                default:
+                  // Fall through to other checks
+                  break;
+              }
+            }
+          } catch (e) {
+            // Ignore provider errors and fall back to string matching
+          }
+          
+          final calendarIdLower = appointment.calendarId!.toLowerCase();
+
+          if (calendarIdLower.contains('google')) {
+            return Icon(Icons.mail_outline, size: size, color: color);
+          } else if (calendarIdLower.contains('microsoft') ||
+              calendarIdLower.contains('outlook')) {
+            return Icon(Icons.window_outlined, size: size, color: color);
+          } else if (calendarIdLower.contains('apple') ||
+              calendarIdLower.contains('icloud') ||
+              calendarIdLower.contains('caldav')) {
+            return Icon(Icons.apple, size: size, color: color);
+          }
+        }
+
+        // Check userCalendars field as it might contain calendar names
+        if (appointment.userCalendars.isNotEmpty) {
+          for (final calendar in appointment.userCalendars) {
+            final calendarLower = calendar.toLowerCase();
+
+            if (calendarLower.contains('google')) {
+              return Icon(Icons.mail_outline, size: size, color: color);
+            } else if (calendarLower.contains('microsoft') ||
+                calendarLower.contains('outlook')) {
+              return Icon(Icons.window_outlined, size: size, color: color);
+            } else if (calendarLower.contains('apple') ||
+                calendarLower.contains('icloud') ||
+                calendarLower.contains('caldav')) {
+              return Icon(Icons.apple, size: size, color: color);
+            }
+          }
+        }
+
+        // Default icon - Timelyst Logo
+        return Image.asset(
+          'assets/images/logos/timelyst_logo.png',
+          width: size,
+          height: size,
+        );
+      } catch (e) {
+        print('⚠️ [AppointmentBuilder] Error getting source widget: $e');
+        return SizedBox(width: size, height: size); // Return empty placeholder on error
+      }
     }
 
     /**
