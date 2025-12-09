@@ -36,15 +36,8 @@ class EventService {
         token: authToken,
       );
 
-      print('🔄 [EventService] Response status: ${response.statusCode}');
-        if (response.statusCode == 200) {
+      if (response.statusCode == 200) {
         final body = response.body;
-        print('🔄 [EventService] Response body length: ${body.length}');
-        
-        // DEBUG: Print body if it contains "Recurrent" to see raw data
-        if (body.contains('Recurrent') || body.contains('recurrent')) {
-           print('🔍 [EventService] RAW BODY CONTAINING RECURRENT: $body');
-        }
 
         if (body == 'null') {
            print('🔄 [EventService] Body is "null" string');
@@ -52,17 +45,9 @@ class EventService {
         }
 
         final List<dynamic> data = jsonDecode(body);
-        print('🔄 [EventService] Decoded data length: ${data.length}');
         
         final List<TimeEvent> events = data.map((json) {
           try {
-             // Debug: check for Recurrent in title/description within this specific item
-             final strJson = json.toString();
-             if (strJson.contains('Recurrent') || strJson.contains('recurrent')) {
-                 print('🔍 [EventService] Found Recurrent item JSON: $json');
-                 print('   - All keys: ${json.keys.toList()}');
-             }
-
             return TimeEvent.fromJson(json);
           } catch (e) {
             print('❌ [EventService] Error parsing TimeEvent: $e');
@@ -70,8 +55,6 @@ class EventService {
             rethrow;
           }
         }).toList();
-
-        print('🔄 [EventService] Parsed ${events.length} events');
 
         return events
             .map((event) {

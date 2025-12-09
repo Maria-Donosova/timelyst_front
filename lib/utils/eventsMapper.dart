@@ -5,13 +5,6 @@ import '../models/dayEvent.dart';
 
 class EventMapper {
   static CustomAppointment mapTimeEventToCustomAppointment(TimeEvent timeEvent) {
-    // Debug logging for source information
-    print('🔍 [EventMapper] Mapping TimeEvent: "${timeEvent.eventTitle}"');
-    print('  - calendarIds: "${timeEvent.calendarIds}"');
-    print('  - providerEventId: "${timeEvent.providerEventId}"');
-    print('  - recurrenceRule: "${timeEvent.recurrenceRule}"');
-    print('  - recurrenceId: "${timeEvent.recurrenceId}"');
-
     return CustomAppointment(
       id: timeEvent.id,
       title: timeEvent.eventTitle.isEmpty ? 'Untitled Event' : timeEvent.eventTitle,
@@ -37,8 +30,6 @@ class EventMapper {
   }
 
   static CustomAppointment mapDayEventToCustomAppointment(DayEvent dayEvent) {
-    print('🔍 [EventMapper] Mapping DayEvent: "${dayEvent.eventTitle}"');
-    
     return CustomAppointment(
       id: dayEvent.id,
       title: dayEvent.eventTitle.isEmpty ? 'Untitled Event' : dayEvent.eventTitle,
