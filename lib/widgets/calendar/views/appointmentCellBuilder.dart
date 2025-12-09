@@ -26,7 +26,6 @@ Widget appointmentBuilder(BuildContext context,
     }
 
     final dynamic rawAppointment = calendarAppointmentDetails.appointments.first;
-    final dynamic rawAppointment = calendarAppointmentDetails.appointments.first;
     CustomAppointment? customAppointment;
 
     // print('🔍 [AppointmentBuilder] Processing: ${rawAppointment.runtimeType}');
