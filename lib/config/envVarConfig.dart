@@ -21,20 +21,7 @@ class Config {
     return _configService.get('GOOGLE_OATH2_TOKEN_URL') ?? 'https://accounts.google.com/o/oauth2/token';
   }
 
-  static String get backendGoogleCalendar {
-    final value = _configService.get('BACKEND_GOOGLE_CALENDAR');
-    return value ?? 'test_backend_google_calendar';
-  }
 
-  static String get backendFetchGoogleCalendars {
-    final value = _configService.get('BACKEND_FETCH_GOOGLE_CALENDARS');
-    return value ?? 'test_backend_fetch_google_calendars';
-  }
-
-  static String get backendSaveSelectedGoogleCalendars {
-    final value = _configService.get('BACKEND_SAVE_SELECTED_GOOGLE_CALENDARS');
-    return value ?? '${backendURL}/google/calendars/save';
-  }
 
   static String get redirectUri {
     final value = _configService.get('REDIRECT_URI');
