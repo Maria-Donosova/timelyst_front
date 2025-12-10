@@ -922,6 +922,11 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   }
 
   @override
+  Object? getId(int index) {
+    return appointments![index].id;
+  }
+
+  @override
   String getNotes(int index) {
     return appointments![index].description;
   }
