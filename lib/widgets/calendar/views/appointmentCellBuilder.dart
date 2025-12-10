@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../providers/calendarProvider.dart';
 import '../../../utils/rruleParser.dart';
 import '../../../providers/eventProvider.dart';
+import '../../../utils/eventsMapper.dart';
 
 /**
  * Method to build the UI for a single appointment.
@@ -46,13 +47,21 @@ Widget appointmentBuilder(BuildContext context,
         if (id != null) {
           final masterEvent = eventProvider.events.firstWhere(
             (e) => e.id == id,
-            orElse: () => CustomAppointment(
-              id: 'temp', 
-              title: 'Unknown', 
-              startTime: rawAppointment.startTime, 
-              endTime: rawAppointment.endTime, 
-              isAllDay: rawAppointment.isAllDay,
-            ),
+            orElse: () {
+              // Fallback: Try to find in raw timeEvents (TimelystCalendarDataSource uses these)
+              try {
+                final timeEvent = eventProvider.timeEvents.firstWhere((e) => e.id == id);
+                return EventMapper.mapTimeEventToCustomAppointment(timeEvent);
+              } catch (e) {
+                return CustomAppointment(
+                  id: 'temp', 
+                  title: 'Unknown', 
+                  startTime: rawAppointment.startTime, 
+                  endTime: rawAppointment.endTime, 
+                  isAllDay: rawAppointment.isAllDay,
+                );
+              }
+            },
           );
           
           if (masterEvent.id != 'temp') {
