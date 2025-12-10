@@ -122,6 +122,7 @@ Widget appointmentBuilder(BuildContext context,
                     eventStart: currentStart,
                     originalStart: originalStart, 
                     rrule: rrule,
+                    seriesStart: customAppointment.timeEventInstance?.start ?? customAppointment.originalStart,
                   );
                   
                   if (occurrenceNum != null) {
