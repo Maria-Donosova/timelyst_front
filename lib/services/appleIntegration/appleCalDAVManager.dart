@@ -33,19 +33,8 @@ class AppleCalDAVManager {
       );
 
       if (authResult['success'] == true) {
-        // 2. Fetch calendars from Apple (using the legacy service for now as it has the endpoint)
-        // Ideally this should be part of the connect response or a method in AppleCalendarService
-        final calendarsResponse =
-            await _appleCalDAVService.fetchAppleCalendars(appleId);
-
-        // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
-        final calendarsData = calendarsResponse['data']?['calendars'];
-        
-        final calendarsList = calendarsData is List
-            ? calendarsData
-                .map((cal) => Calendar.fromJson(cal as Map<String, dynamic>))
-                .toList()
-            : <Calendar>[];
+        // 2. Fetch calendars from Apple using unified endpoint
+        final calendarsList = await _appleCalDAVService.fetchAppleCalendars();
 
         return AppleSignInResult(
           userId: authResult['userId'] ?? '', // Assuming auth returns userId
@@ -64,20 +53,9 @@ class AppleCalDAVManager {
   }
 
   /// Fetches Apple calendars for a connected account
-  Future<List<Calendar>> fetchCalendars(String email) async {
+  Future<List<Calendar>> fetchCalendars() async {
     try {
-      final response = await _appleCalDAVService.fetchAppleCalendars(email);
-      
-      // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
-      final calendarsData = response['data']?['calendars'];
-
-      if (calendarsData != null) {
-        final calendars = calendarsData as List;
-        return calendars
-            .map((cal) => Calendar.fromJson(cal as Map<String, dynamic>))
-            .toList();
-      }
-      return [];
+      return await _appleCalDAVService.fetchAppleCalendars();
     } catch (e) {
       print('❌ [AppleCalDAVManager] Error fetching calendars: $e');
       rethrow;

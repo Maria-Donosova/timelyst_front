@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:timelyst_flutter/config/envVarConfig.dart';
 import 'package:timelyst_flutter/utils/apiClient.dart';
 import 'package:timelyst_flutter/services/authService.dart';
+import 'package:timelyst_flutter/models/calendars.dart';
 
 /// Service for Apple Calendar CalDAV integration
 /// Uses Apple ID + App-Specific Password instead of OAuth
@@ -48,31 +49,29 @@ class AppleCalDAVService {
     }
   }
 
-  /// Fetches Apple calendars for the connected account
-  Future<Map<String, dynamic>> fetchAppleCalendars(String email) async {
-
+  /// Fetches Apple calendars using the unified calendars endpoint
+  Future<List<Calendar>> fetchAppleCalendars() async {
     try {
       final authToken = await _authService.getAuthToken();
       if (authToken == null) {
         throw Exception('No authentication token available');
       }
 
-      final response = await _apiClient.post(
-        '${Config.backendURL}/apple/calendars/fetch',
-        body: {
-          'email': email,
-        },
+      final response = await _apiClient.get(
+        '${Config.backendURL}/calendars',
         token: authToken,
       );
 
-
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        // Standardized: { data: { calendars: [...], user: {...} } }
+        final List<dynamic> data = jsonDecode(response.body);
         
-        // We don't need to cast here, just return the full data object
-        // The manager (AppleCalDAVManager) handles the parsing of data['calendars']
-        return data;
+        // Filter for Apple calendars and parse
+        final appleCalendars = data
+            .where((cal) => cal['source'] == 'APPLE')
+            .map((cal) => Calendar.fromJson(cal as Map<String, dynamic>))
+            .toList();
+        
+        return appleCalendars;
       } else {
         final errorBody = response.body;
         print('❌ [AppleCalDAVService] Failed to fetch calendars: ${response.statusCode}');

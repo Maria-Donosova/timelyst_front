@@ -33,16 +33,8 @@ class AppleSignInOutService {
         // Get email from response or use appleId
         final email = response['email'] ?? appleId;
         
-        // Fetch initial calendars
-        // Fetch initial calendars
-        final fetchResponse = await _calDAVService.fetchAppleCalendars(email);
-        
-        // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
-        final calendars = fetchResponse['data']?['calendars'] as List?;
-        
-        final calendarsList = calendars != null 
-          ? calendars.map((cal) => Calendar.fromAppleJson(cal as Map<String, dynamic>)).toList()
-          : <Calendar>[];
+        // Fetch initial calendars using unified endpoint
+        final calendarsList = await _calDAVService.fetchAppleCalendars();
         
         return AppleSignInResult(
           userId: userId ?? '',
@@ -96,18 +88,9 @@ class AppleSignInOutService {
   }
 
   /// Fetches calendars for an email
-  Future<List<Calendar>> fetchCalendars(String email) async {
+  Future<List<Calendar>> fetchCalendars() async {
     try {
-      
-      final response = await _calDAVService.fetchAppleCalendars(email);
-      // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
-      final calendars = response['data']?['calendars'] as List?;
-      
-      final calendarsList = calendars != null 
-        ? calendars.map((cal) => Calendar.fromAppleJson(cal as Map<String, dynamic>)).toList()
-        : <Calendar>[];
-      
-      return calendarsList;
+      return await _calDAVService.fetchAppleCalendars();
     } catch (e) {
       print('❌ [AppleSignInOutService] Error fetching calendars: $e');
       rethrow;

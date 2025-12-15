@@ -72,11 +72,11 @@ class AppleSignInManager {
     }
   }
 
-  /// Fetches calendars for an email
-  Future<List<Calendar>> fetchCalendars(String email) async {
+  /// Fetches calendars for a connected account
+  Future<List<Calendar>> fetchCalendars() async {
     try {
       
-      final calendars = await _calDAVManager.fetchCalendars(email);
+      final calendars = await _calDAVManager.fetchCalendars();
       
       return calendars;
     } catch (e) {
