@@ -44,13 +44,19 @@ class Calendar {
   });
 
   factory Calendar.fromJson(Map<String, dynamic> json) {
+    // Backend may return flat structure (name, color, etc. at top level)
+    // or nested structure (metadata: {title, color, ...})
+    // If no nested 'metadata' object exists, use the json itself for metadata fields
+    final metadataSource = json['metadata'] is Map<String, dynamic> 
+        ? json['metadata'] as Map<String, dynamic>
+        : json; // Use top-level json when metadata is not nested
+    
     return Calendar(
       id: json['id'] ?? '',
       userId: json['userId'] ?? '',
-      source: _parseSource(json['source']),
+      source: _parseSource(json['source'] ?? json['provider']),
       providerCalendarId: json['providerCalendarId'] ?? '',
-      metadata: CalendarMetadata.fromJson(
-          json['metadata'] is Map<String, dynamic> ? json['metadata'] : {}),
+      metadata: CalendarMetadata.fromJson(metadataSource),
       preferences: CalendarPreferences.fromJson(
           json['preferences'] is Map<String, dynamic>
               ? json['preferences']
@@ -66,13 +72,17 @@ class Calendar {
   }
 
   factory Calendar.fromAppleJson(Map<String, dynamic> json) {
+    // Same flat/nested handling as fromJson
+    final metadataSource = json['metadata'] is Map<String, dynamic> 
+        ? json['metadata'] as Map<String, dynamic>
+        : json;
+    
     return Calendar(
       id: json['id'] ?? '',
       userId: json['userId'] ?? '',
       source: CalendarSource.APPLE,
       providerCalendarId: json['providerCalendarId'] ?? '',
-      metadata: CalendarMetadata.fromJson(
-          json['metadata'] is Map<String, dynamic> ? json['metadata'] : {}),
+      metadata: CalendarMetadata.fromJson(metadataSource),
       preferences: CalendarPreferences.fromJson(
           json['preferences'] is Map<String, dynamic>
               ? json['preferences']
