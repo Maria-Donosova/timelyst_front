@@ -33,9 +33,11 @@ class GoogleSignInOutService {
         print('🔍 [GoogleSignInOutService] Full backend response data: $response');
         
         // Try multiple possible locations for email in the response
+        // Backend response structure: { data: { calendars: [...], user: { email: "..." } } }
         final email = response['email'] ?? 
                      response['data']?['email'] ?? 
-                     response['data']?['googleEmail'];
+                     response['data']?['googleEmail'] ??
+                     response['data']?['user']?['email'];
         
         // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
         final calendarsList = response['data']?['calendars'] as List?;

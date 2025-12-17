@@ -176,8 +176,9 @@ class CalendarMetadata {
 
   factory CalendarMetadata.fromJson(Map<String, dynamic> json) {
     return CalendarMetadata(
-      title: json['title'],
-      color: json['color'],
+      // Backend may return 'name' instead of 'title' for calendar names
+      title: json['title'] ?? json['name'] ?? json['summary'],
+      color: json['color'] ?? json['backgroundColor'],
       timeZone: json['timeZone'],
       description: json['description'],
       category: json['category'],

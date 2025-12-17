@@ -29,9 +29,11 @@ class MicrosoftSignInOutService {
         final userId = await _authService.getUserId();
         
         // Try multiple possible locations for email in the response
+        // Backend response structure: { data: { calendars: [...], user: { email: "..." } } }
         final email = response['email'] ?? 
                      response['data']?['email'] ?? 
-                     response['data']?['microsoftEmail'];
+                     response['data']?['microsoftEmail'] ??
+                     response['data']?['user']?['email'];
         
         // Extract calendars from response or data object
         // Standardized backend response: { success: true, data: { calendars: [...], user: {...} } }
