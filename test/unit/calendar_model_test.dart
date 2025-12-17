@@ -61,7 +61,7 @@ void main() {
         userId: 'user-123',
         source: CalendarSource.LOCAL,
         providerCalendarId: 'prov-id',
-        metadata: CalendarMetadata(title: 'Test', color: const Color(0xFFA4BDFC)),
+        metadata: CalendarMetadata(title: 'Test', color: '#A4BDFC'),
         preferences: CalendarPreferences(importSettings: CalendarImportSettings()),
         sync: CalendarSyncInfo(
           lastSyncedAt: DateTime.parse('2023-01-01T12:00:00'), // Local time
@@ -80,6 +80,124 @@ void main() {
       expect(json['updatedAt'], endsWith('Z'));
       expect(json['sync']['lastSyncedAt'], endsWith('Z'));
       expect(json['sync']['expiration'], endsWith('Z'));
+    });
+  });
+
+  group('Defensive Date Parsing', () {
+    test('fromJson handles missing createdAt and updatedAt fields', () {
+      final json = {
+        'id': 'google-calendar-id',
+        'provider': 'google',
+        'name': 'Jewish Holidays',
+        'color': '#9fc6e7',
+        // No createdAt, no updatedAt - simulating backend response
+      };
+
+      final calendar = Calendar.fromJson(json);
+
+      expect(calendar.id, 'google-calendar-id');
+      expect(calendar.createdAt, isNull);
+      expect(calendar.updatedAt, isNull);
+    });
+
+    test('fromJson handles null createdAt and updatedAt fields', () {
+      final json = {
+        'id': 'test-id',
+        'userId': 'user-123',
+        'source': 'GOOGLE',
+        'createdAt': null,
+        'updatedAt': null,
+      };
+
+      final calendar = Calendar.fromJson(json);
+
+      expect(calendar.createdAt, isNull);
+      expect(calendar.updatedAt, isNull);
+    });
+
+    test('fromJson handles empty string createdAt and updatedAt fields', () {
+      final json = {
+        'id': 'test-id',
+        'userId': 'user-123',
+        'source': 'MICROSOFT',
+        'createdAt': '',
+        'updatedAt': '',
+      };
+
+      final calendar = Calendar.fromJson(json);
+
+      expect(calendar.createdAt, isNull);
+      expect(calendar.updatedAt, isNull);
+    });
+
+    test('fromJson handles invalid date format gracefully', () {
+      final json = {
+        'id': 'test-id',
+        'userId': 'user-123',
+        'source': 'APPLE',
+        'createdAt': 'not-a-date',
+        'updatedAt': 'also-not-a-date',
+      };
+
+      final calendar = Calendar.fromJson(json);
+
+      expect(calendar.createdAt, isNull);
+      expect(calendar.updatedAt, isNull);
+    });
+
+    test('fromJson parses valid dates correctly', () {
+      final json = {
+        'id': 'test-id',
+        'userId': 'user-123',
+        'source': 'LOCAL',
+        'createdAt': '2023-06-15T10:30:00.000Z',
+        'updatedAt': '2023-06-16T14:45:00.000Z',
+      };
+
+      final calendar = Calendar.fromJson(json);
+
+      expect(calendar.createdAt, isNotNull);
+      expect(calendar.updatedAt, isNotNull);
+      expect(calendar.createdAt!.year, 2023);
+      expect(calendar.createdAt!.month, 6);
+      expect(calendar.createdAt!.day, 15);
+    });
+
+    test('toJson handles null dates gracefully', () {
+      final calendar = Calendar(
+        id: 'test-id',
+        userId: 'user-123',
+        source: CalendarSource.GOOGLE,
+        providerCalendarId: 'prov-id',
+        metadata: CalendarMetadata(title: 'Test'),
+        preferences: CalendarPreferences(importSettings: CalendarImportSettings()),
+        sync: CalendarSyncInfo(),
+        isSelected: true,
+        isPrimary: false,
+        createdAt: null,
+        updatedAt: null,
+      );
+
+      final json = calendar.toJson();
+
+      expect(json['createdAt'], isNull);
+      expect(json['updatedAt'], isNull);
+    });
+
+    test('fromAppleJson handles missing dates same as fromJson', () {
+      final json = {
+        'id': 'apple-calendar-id',
+        'provider': 'apple',
+        'name': 'iCloud Calendar',
+        // No createdAt, no updatedAt
+      };
+
+      final calendar = Calendar.fromAppleJson(json);
+
+      expect(calendar.id, 'apple-calendar-id');
+      expect(calendar.source, CalendarSource.APPLE);
+      expect(calendar.createdAt, isNull);
+      expect(calendar.updatedAt, isNull);
     });
   });
 }

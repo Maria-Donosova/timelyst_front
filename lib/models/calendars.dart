@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
 
+/// Safe date parsing helper - handles null, empty, and invalid date strings
+DateTime? _parseDate(dynamic value) {
+  if (value == null) return null;
+  final str = value.toString();
+  if (str.isEmpty) return null;
+  try {
+    return DateTime.parse(str);
+  } catch (e) {
+    return null;
+  }
+}
+
 enum CalendarSource { LOCAL, GOOGLE, MICROSOFT, APPLE }
 
 class Calendar {
@@ -13,8 +25,8 @@ class Calendar {
   final String? syncToken;
   final bool isSelected;
   final bool isPrimary;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   Calendar({
     required this.id,
@@ -48,8 +60,8 @@ class Calendar {
       syncToken: json['syncToken'],
       isSelected: json['isSelected'] ?? false,
       isPrimary: json['isPrimary'] ?? false,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: _parseDate(json['createdAt']),
+      updatedAt: _parseDate(json['updatedAt']),
     );
   }
 
@@ -70,8 +82,8 @@ class Calendar {
       syncToken: json['syncToken'],
       isSelected: json['isSelected'] ?? false,
       isPrimary: json['isPrimary'] ?? false,
-      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
+      createdAt: _parseDate(json['createdAt']),
+      updatedAt: _parseDate(json['updatedAt']),
     );
   }
 
@@ -103,8 +115,8 @@ class Calendar {
       'syncToken': syncToken,
       'isSelected': isSelected,
       'isPrimary': isPrimary,
-      'createdAt': createdAt.toUtc().toIso8601String(),
-      'updatedAt': updatedAt.toUtc().toIso8601String(),
+      'createdAt': createdAt?.toUtc().toIso8601String(),
+      'updatedAt': updatedAt?.toUtc().toIso8601String(),
     };
   }
   
