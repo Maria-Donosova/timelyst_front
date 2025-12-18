@@ -25,9 +25,11 @@ class AppleAuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
+        print('🍎 [AppleAuthService] Backend response data: $data');
         return {
           'success': true,
           'message': data['message'] ?? 'Apple account connected',
+          'data': data['data'],  // Contains calendars and user info
         };
       } else {
         print('❌ [AppleAuthService] Backend error: ${response.statusCode}');

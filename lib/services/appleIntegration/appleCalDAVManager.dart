@@ -33,11 +33,19 @@ class AppleCalDAVManager {
       );
 
       if (authResult['success'] == true) {
-        // 2. Fetch calendars from Apple using unified endpoint
-        final calendarsList = await _appleCalDAVService.fetchAppleCalendars();
+        // Parse calendars from connect response (same pattern as Google)
+        print('🍎 [AppleCalDAVManager] Auth result data: ${authResult['data']}');
+        final calendarData = authResult['data']?['calendars'] as List?;
+        print('🍎 [AppleCalDAVManager] Calendar data from response: $calendarData');
+        
+        final calendarsList = calendarData
+            ?.map((json) => Calendar.fromAppleJson(json as Map<String, dynamic>))
+            .toList() ?? [];
+        
+        print('🍎 [AppleCalDAVManager] Parsed ${calendarsList.length} calendars');
 
         return AppleSignInResult(
-          userId: authResult['userId'] ?? '', // Assuming auth returns userId
+          userId: authResult['data']?['user']?['id']?.toString() ?? '',
           email: appleId,
           authCode: null,
           calendars: calendarsList,
