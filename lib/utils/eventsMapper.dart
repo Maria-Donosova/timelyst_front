@@ -11,14 +11,31 @@ class EventMapper {
     DateTime endTime;
     
     if (timeEvent.isAllDay) {
-      // Extract date components from UTC and create local midnight
+      // Extract date components from UTC and create local dates
       // This prevents the date shift that occurs when converting UTC midnight to local time
       // Example: 2024-11-28T00:00:00Z (Thanksgiving) should stay Nov 28, not shift to Nov 27
       final startUtc = timeEvent.start.toUtc();
       final endUtc = timeEvent.end.toUtc();
       
       startTime = DateTime(startUtc.year, startUtc.month, startUtc.day);
-      endTime = DateTime(endUtc.year, endUtc.month, endUtc.day);
+      
+      // Google/iCal uses EXCLUSIVE end dates for all-day events
+      // e.g., a 1-day event on Dec 26 has end = Dec 27T00:00:00Z (midnight of next day)
+      // SyncFusion treats midnight as the START of the next day, causing duplication
+      // Fix: Convert to the LAST ACTIVE DAY at 23:59:59 to prevent the event from
+      // appearing on the following day
+      final exclusiveEndDate = DateTime(endUtc.year, endUtc.month, endUtc.day);
+      final lastActiveDay = exclusiveEndDate.subtract(const Duration(days: 1));
+      
+      // Ensure endTime is not before startTime (for single-day events where
+      // exclusiveEndDate - 1 day would be before startTime)
+      if (lastActiveDay.isBefore(startTime)) {
+        // Single day event: end is same day at 23:59:59
+        endTime = DateTime(startTime.year, startTime.month, startTime.day, 23, 59, 59);
+      } else {
+        // Multi-day event: end is last active day at 23:59:59
+        endTime = DateTime(lastActiveDay.year, lastActiveDay.month, lastActiveDay.day, 23, 59, 59);
+      }
     } else {
       // Regular timed events: convert to local timezone
       startTime = timeEvent.start.toLocal();
