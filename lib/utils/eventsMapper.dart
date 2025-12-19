@@ -5,19 +5,6 @@ import '../models/dayEvent.dart';
 
 class EventMapper {
   static CustomAppointment mapTimeEventToCustomAppointment(TimeEvent timeEvent) {
-    // 🔍 DEBUG: Log YEARLY all-day events for SyncFusion triage
-    final isYearlyAllDay = timeEvent.isAllDay && timeEvent.recurrenceRule.contains('FREQ=YEARLY');
-    if (isYearlyAllDay) {
-      print('🔍 [EventMapper] YEARLY All-Day Event INPUT:');
-      print('   Title: "${timeEvent.eventTitle}"');
-      print('   Backend Start: ${timeEvent.start} (isUtc: ${timeEvent.start.isUtc})');
-      print('   Backend End: ${timeEvent.end} (isUtc: ${timeEvent.end.isUtc})');
-      print('   RecurrenceRule: "${timeEvent.recurrenceRule}"');
-      print('   StartTimeZone: "${timeEvent.startTimeZone}"');
-      print('   EndTimeZone: "${timeEvent.endTimeZone}"');
-      print('   IsMasterEvent: ${timeEvent.isMasterEvent}');
-    }
-
     // For all-day events, preserve the date without timezone conversion
     // For timed events, convert to local timezone
     DateTime startTime;
@@ -54,48 +41,6 @@ class EventMapper {
       startTime = timeEvent.start.toLocal();
       endTime = timeEvent.end.toLocal();
     }
-    
-    // 🔧 FIX: SyncFusion doesn't properly expand YEARLY RRULEs when master start is in the past.
-    // Workaround: Shift the start date to the next occurrence (same month/day, current or next year)
-    // so SyncFusion can correctly display the recurring event in the current view.
-    if (isYearlyAllDay && timeEvent.isMasterEvent) {
-      final now = DateTime.now();
-      final masterMonth = startTime.month;
-      final masterDay = startTime.day;
-      
-      // Calculate this year's occurrence
-      DateTime thisYearOccurrence = DateTime(now.year, masterMonth, masterDay);
-      
-      // If this year's occurrence has already passed, use next year
-      DateTime nextOccurrence;
-      if (thisYearOccurrence.isBefore(DateTime(now.year, now.month, now.day))) {
-        nextOccurrence = DateTime(now.year + 1, masterMonth, masterDay);
-      } else {
-        nextOccurrence = thisYearOccurrence;
-      }
-      
-      // Only shift if the original start is before the next occurrence
-      if (startTime.isBefore(nextOccurrence)) {
-        final originalStart = startTime;
-        startTime = nextOccurrence;
-        // Adjust endTime to maintain the same duration (1 day for all-day events)
-        endTime = DateTime(nextOccurrence.year, nextOccurrence.month, nextOccurrence.day, 23, 59, 59);
-        
-        print('🔧 [EventMapper] YEARLY All-Day FIX APPLIED:');
-        print('   Title: "${timeEvent.eventTitle}"');
-        print('   Original Start: $originalStart');
-        print('   Shifted Start: $startTime');
-        print('   Shifted End: $endTime');
-      }
-    }
-    
-    // 🔍 DEBUG: Log OUTPUT for YEARLY all-day events
-    if (isYearlyAllDay) {
-      print('🔍 [EventMapper] YEARLY All-Day Event OUTPUT:');
-      print('   Mapped StartTime: $startTime (isUtc: ${startTime.isUtc})');
-      print('   Mapped EndTime: $endTime (isUtc: ${endTime.isUtc})');
-      print('   IsAllDay: ${timeEvent.isAllDay}');
-    }
 
     return CustomAppointment(
       id: timeEvent.id,
@@ -116,9 +61,6 @@ class EventMapper {
       calendarId: timeEvent.calendarIds.isNotEmpty ? timeEvent.calendarIds.first : null,
       userCalendars: timeEvent.calendarIds,
       timeEventInstance: timeEvent,
-      // Map providerEventId to specific provider IDs if needed, or just use a generic one
-      // googleEventId: timeEvent.providerEventId, // REMOVED: This was causing all events to be treated as Google events
-      // We should rely on calendar source lookup instead
     );
   }
 

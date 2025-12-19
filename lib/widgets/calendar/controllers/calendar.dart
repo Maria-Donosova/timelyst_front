@@ -84,12 +84,14 @@ class _CalendarWState extends State<CalendarW> {
       }
     }
     
-    // Create data source
+    // Create data source with view range for YEARLY expansion
     setState(() {
       _dataSource = TimelystCalendarDataSource(
         masterEvents: masters,
         exceptionEvents: exceptions,
         occurrenceCounts: occurrenceCounts,
+        viewStart: _visibleDates.first,
+        viewEnd: _visibleDates.last.add(const Duration(days: 1)),
       );
     });
   }
