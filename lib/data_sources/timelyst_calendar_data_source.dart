@@ -102,7 +102,17 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
   bool isAllDay(int index) => appointments![index].isAllDay;
 
   @override
-  String? getRecurrenceRule(int index) => appointments![index].recurrenceRule;
+  String? getRecurrenceRule(int index) {
+    final rule = appointments![index].recurrenceRule;
+    if (rule != null && rule.isNotEmpty) {
+      // SyncFusion requires RRULE: prefix to expand recurring events
+      if (!rule.startsWith('RRULE:') && rule.contains('FREQ=')) {
+        return 'RRULE:$rule';
+      }
+      return rule;
+    }
+    return rule;
+  }
 
   @override
   List<DateTime>? getRecurrenceExceptionDates(int index) =>
