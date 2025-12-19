@@ -5,6 +5,19 @@ import '../models/dayEvent.dart';
 
 class EventMapper {
   static CustomAppointment mapTimeEventToCustomAppointment(TimeEvent timeEvent) {
+    // 🔍 DEBUG: Log YEARLY all-day events for SyncFusion triage
+    final isYearlyAllDay = timeEvent.isAllDay && timeEvent.recurrenceRule.contains('FREQ=YEARLY');
+    if (isYearlyAllDay) {
+      print('🔍 [EventMapper] YEARLY All-Day Event INPUT:');
+      print('   Title: "${timeEvent.eventTitle}"');
+      print('   Backend Start: ${timeEvent.start} (isUtc: ${timeEvent.start.isUtc})');
+      print('   Backend End: ${timeEvent.end} (isUtc: ${timeEvent.end.isUtc})');
+      print('   RecurrenceRule: "${timeEvent.recurrenceRule}"');
+      print('   StartTimeZone: "${timeEvent.startTimeZone}"');
+      print('   EndTimeZone: "${timeEvent.endTimeZone}"');
+      print('   IsMasterEvent: ${timeEvent.isMasterEvent}');
+    }
+
     // For all-day events, preserve the date without timezone conversion
     // For timed events, convert to local timezone
     DateTime startTime;
@@ -42,6 +55,14 @@ class EventMapper {
       endTime = timeEvent.end.toLocal();
     }
     
+    // 🔍 DEBUG: Log OUTPUT for YEARLY all-day events
+    if (isYearlyAllDay) {
+      print('🔍 [EventMapper] YEARLY All-Day Event OUTPUT:');
+      print('   Mapped StartTime: $startTime (isUtc: ${startTime.isUtc})');
+      print('   Mapped EndTime: $endTime (isUtc: ${endTime.isUtc})');
+      print('   IsAllDay: ${timeEvent.isAllDay}');
+    }
+
     return CustomAppointment(
       id: timeEvent.id,
       title: timeEvent.eventTitle.isEmpty ? 'Untitled Event' : timeEvent.eventTitle,

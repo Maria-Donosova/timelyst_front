@@ -56,6 +56,20 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
 
         // Create master appointment with recurrence
         final masterApp = EventMapper.mapTimeEventToCustomAppointment(master);
+        
+        // 🔍 DEBUG: Log YEARLY all-day masters for SyncFusion triage
+        if (master.recurrenceRule.contains('FREQ=YEARLY') && master.isAllDay) {
+          print('🔍 [TimelystCalendarDataSource] YEARLY All-Day Master:');
+          print('   Title: "${master.eventTitle}"');
+          print('   Original Start (UTC): ${master.start.toUtc()}');
+          print('   Mapped StartTime: ${masterApp.startTime}');
+          print('   Mapped EndTime: ${masterApp.endTime}');
+          print('   IsAllDay: ${masterApp.isAllDay}');
+          print('   RecurrenceRule: "${masterApp.recurrenceRule}"');
+          print('   StartTimeZone: "${masterApp.startTimeZone}"');
+          print('   ExceptionDates count: ${recurrenceExceptionDates.length}');
+        }
+        
         appointments.add(masterApp.copyWith(
           recurrenceExceptionDates: recurrenceExceptionDates,
         ));

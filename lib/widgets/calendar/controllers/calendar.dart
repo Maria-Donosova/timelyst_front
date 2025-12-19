@@ -841,7 +841,22 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
   @override
   String? getRecurrenceRule(int index) {
     final rule = appointments![index].recurrenceRule;
+    final isAllDay = appointments![index].isAllDay;
+    final startTime = appointments![index].startTime;
+    final title = appointments![index].title;
+    
     if (rule != null && rule.isNotEmpty) {
+      // 🔍 DEBUG: Log YEARLY all-day events specifically for SyncFusion triage
+      if (rule.contains('FREQ=YEARLY') && isAllDay) {
+        print('🔍 [_EventDataSource.getRecurrenceRule] YEARLY All-Day:');
+        print('   Title: "$title"');
+        print('   StartTime: $startTime');
+        print('   StartTime.toLocal(): ${startTime.toLocal()}');
+        print('   IsAllDay: $isAllDay');
+        print('   Original Rule: "$rule"');
+        print('   StartTimeZone: "${appointments![index].startTimeZone}"');
+      }
+      
       AppLogger.verbose(
           'getRecurrenceRule for "${appointments![index].title}": "$rule"',
           '_EventDataSource');
@@ -864,10 +879,21 @@ class _EventDataSource extends CalendarDataSource<CustomAppointment> {
 
         // Validate the RRULE format before returning
         if (_isValidRRule(fixedRule)) {
+          // 🔍 DEBUG: Log final rule being returned to SyncFusion
+          if (rule.contains('FREQ=YEARLY') && isAllDay) {
+            print('🔍 [_EventDataSource] FINAL RULE TO SYNCFUSION: "$fixedRule"');
+            print('   Validation: PASSED');
+          }
           return fixedRule;
         } else {
           AppLogger.debug('Invalid RRULE format, skipping: "$fixedRule"',
               '_EventDataSource');
+          // 🔍 DEBUG: Log if validation fails for YEARLY all-day
+          if (rule.contains('FREQ=YEARLY') && isAllDay) {
+            print('❌ [_EventDataSource] YEARLY All-Day VALIDATION FAILED!');
+            print('   Rule: "$fixedRule"');
+            print('   Returning NULL - SyncFusion will not expand this!');
+          }
           return null;
         }
       } catch (e) {
