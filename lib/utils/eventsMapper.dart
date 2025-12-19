@@ -55,6 +55,40 @@ class EventMapper {
       endTime = timeEvent.end.toLocal();
     }
     
+    // 🔧 FIX: SyncFusion doesn't properly expand YEARLY RRULEs when master start is in the past.
+    // Workaround: Shift the start date to the next occurrence (same month/day, current or next year)
+    // so SyncFusion can correctly display the recurring event in the current view.
+    if (isYearlyAllDay && timeEvent.isMasterEvent) {
+      final now = DateTime.now();
+      final masterMonth = startTime.month;
+      final masterDay = startTime.day;
+      
+      // Calculate this year's occurrence
+      DateTime thisYearOccurrence = DateTime(now.year, masterMonth, masterDay);
+      
+      // If this year's occurrence has already passed, use next year
+      DateTime nextOccurrence;
+      if (thisYearOccurrence.isBefore(DateTime(now.year, now.month, now.day))) {
+        nextOccurrence = DateTime(now.year + 1, masterMonth, masterDay);
+      } else {
+        nextOccurrence = thisYearOccurrence;
+      }
+      
+      // Only shift if the original start is before the next occurrence
+      if (startTime.isBefore(nextOccurrence)) {
+        final originalStart = startTime;
+        startTime = nextOccurrence;
+        // Adjust endTime to maintain the same duration (1 day for all-day events)
+        endTime = DateTime(nextOccurrence.year, nextOccurrence.month, nextOccurrence.day, 23, 59, 59);
+        
+        print('🔧 [EventMapper] YEARLY All-Day FIX APPLIED:');
+        print('   Title: "${timeEvent.eventTitle}"');
+        print('   Original Start: $originalStart');
+        print('   Shifted Start: $startTime');
+        print('   Shifted End: $endTime');
+      }
+    }
+    
     // 🔍 DEBUG: Log OUTPUT for YEARLY all-day events
     if (isYearlyAllDay) {
       print('🔍 [EventMapper] YEARLY All-Day Event OUTPUT:');
