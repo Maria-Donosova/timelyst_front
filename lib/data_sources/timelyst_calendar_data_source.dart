@@ -81,7 +81,7 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
         if (!isExcepted) {
           occurrences.add(CustomAppointment(
             id: master.id,  // Keep original ID for edit/delete operations
-            title: master.eventTitle.isEmpty ? 'Untitled Event' : master.eventTitle,
+            title: master.eventTitle.isEmpty ? 'Busy' : master.eventTitle,
             description: master.description,
             startTime: occurrenceStart,
             startTimeZone: master.startTimeZone,

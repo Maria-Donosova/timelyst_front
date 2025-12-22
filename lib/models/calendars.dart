@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'import_settings.dart';
+import 'calendar_import_config.dart';
 
 /// Safe date parsing helper - handles null, empty, and invalid date strings
 DateTime? _parseDate(dynamic value) {
@@ -235,7 +237,7 @@ class CalendarMetadata {
 }
 
 class CalendarPreferences {
-  late final CalendarImportSettings importSettings;
+  late final ImportSettings importSettings;
   final String? category;
   final Color? userColor;
 
@@ -248,7 +250,7 @@ class CalendarPreferences {
   factory CalendarPreferences.fromJson(Map<String, dynamic> json) {
     return CalendarPreferences(
       importSettings:
-          CalendarImportSettings.fromJson(json['importSettings'] ?? {}),
+          ImportSettings.fromJson(json['importSettings'] ?? {}),
       category: json['category'],
       userColor:
           json['color'] != null ? Calendar._parseColor(json['color']) : null,
@@ -260,13 +262,13 @@ class CalendarPreferences {
       'importSettings': importSettings.toJson(),
       'category': category,
       'color': userColor != null
-          ? '#${userColor!.value.toRadixString(16).padLeft(8, '0')}'
+          ? '#${userColor!.value.toRadixString(16).padLeft(8, '0').substring(2)}'
           : null,
     };
   }
 
   CalendarPreferences copyWith({
-    CalendarImportSettings? importSettings,
+    ImportSettings? importSettings,
     String? category,
     bool clearCategory = false,
     Color? userColor,
@@ -372,63 +374,7 @@ class CalendarNotification {
   }
 }
 
-class CalendarImportSettings {
-  final bool importAll;
-  final bool importSubject;
-  final bool importBody;
-  final bool importConferenceInfo;
-  final bool importOrganizer;
-  final bool importRecipients;
-
-  CalendarImportSettings({
-    this.importAll = false,
-    this.importSubject = true,
-    this.importBody = false,
-    this.importConferenceInfo = false,
-    this.importOrganizer = false,
-    this.importRecipients = false,
-  });
-
-  factory CalendarImportSettings.fromJson(Map<String, dynamic> json) {
-    return CalendarImportSettings(
-      importAll: json['importAll'] ?? false,
-      importSubject: json['importSubject'] ?? true,
-      importBody: json['importBody'] ?? false,
-      importConferenceInfo: json['importConferenceInfo'] ?? false,
-      importOrganizer: json['importOrganizer'] ?? false,
-      importRecipients: json['importRecipients'] ?? false,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'importAll': importAll,
-      'importSubject': importSubject,
-      'importBody': importBody,
-      'importConferenceInfo': importConferenceInfo,
-      'importOrganizer': importOrganizer,
-      'importRecipients': importRecipients,
-    };
-  }
-
-  CalendarImportSettings copyWith({
-    bool? importAll,
-    bool? importSubject,
-    bool? importBody,
-    bool? importConferenceInfo,
-    bool? importOrganizer,
-    bool? importRecipients,
-  }) {
-    return CalendarImportSettings(
-      importAll: importAll ?? this.importAll,
-      importSubject: importSubject ?? this.importSubject,
-      importBody: importBody ?? this.importBody,
-      importConferenceInfo: importConferenceInfo ?? this.importConferenceInfo,
-      importOrganizer: importOrganizer ?? this.importOrganizer,
-      importRecipients: importRecipients ?? this.importRecipients,
-    );
-  }
-}
+// Removed old CalendarImportSettings class as it's replaced by ImportSettings model
 
 enum ReminderMethod { email, popup, sms }
 

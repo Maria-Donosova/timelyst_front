@@ -44,7 +44,7 @@ class EventMapper {
 
     return CustomAppointment(
       id: timeEvent.id,
-      title: timeEvent.eventTitle.isEmpty ? 'Untitled Event' : timeEvent.eventTitle,
+      title: timeEvent.eventTitle.isEmpty ? 'Busy' : timeEvent.eventTitle,
       description: timeEvent.description,
       startTime: startTime,
       startTimeZone: timeEvent.startTimeZone,
@@ -67,7 +67,7 @@ class EventMapper {
   static CustomAppointment mapDayEventToCustomAppointment(DayEvent dayEvent) {
     return CustomAppointment(
       id: dayEvent.id,
-      title: dayEvent.eventTitle.isEmpty ? 'Untitled Event' : dayEvent.eventTitle,
+      title: dayEvent.eventTitle.isEmpty ? 'Busy' : dayEvent.eventTitle,
       description: dayEvent.eventBody,
       startTime: dayEvent.getStartDateTime().toLocal(),
       startTimeZone: dayEvent.startTimeZone.isNotEmpty ? dayEvent.startTimeZone : 'UTC',

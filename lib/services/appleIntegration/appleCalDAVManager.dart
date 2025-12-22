@@ -4,6 +4,7 @@ import 'package:timelyst_flutter/services/appleIntegration/appleAuthService.dart
 import 'package:timelyst_flutter/services/appleIntegration/appleCalDAVService.dart';
 import 'package:timelyst_flutter/services/appleIntegration/appleSignInResult.dart';
 import 'package:timelyst_flutter/models/calendars.dart';
+import 'package:timelyst_flutter/models/import_settings.dart';
 
 /// Manager for Apple Calendar CalDAV integration
 /// Replaces the OAuth-based AppleSignInManager with direct credential authentication
@@ -90,6 +91,11 @@ class AppleCalDAVManager {
 
       // Filter out calendars with no import options enabled
       final validCalendars = selectedCalendars.where((calendar) {
+        final importSettings = calendar['importSettings'];
+        if (importSettings is ImportSettings) {
+           return importSettings.level != ImportLevel.none;
+        }
+        
         final hasImportOptions = calendar['importAll'] == true ||
             calendar['importSubject'] == true ||
             calendar['importBody'] == true ||
@@ -125,14 +131,18 @@ class AppleCalDAVManager {
           ),
           preferences: CalendarPreferences(
             category: calMap['category'],
-            importSettings: CalendarImportSettings(
-              importAll: calMap['importAll'] ?? false,
-              importSubject: calMap['importSubject'] ?? false,
-              importBody: calMap['importBody'] ?? false,
-              importConferenceInfo: calMap['importConferenceInfo'] ?? false,
-              importOrganizer: calMap['importOrganizer'] ?? false,
-              importRecipients: calMap['importRecipients'] ?? false,
-            ),
+            importSettings: calMap['importSettings'] is ImportSettings 
+              ? calMap['importSettings'] as ImportSettings
+              : ImportSettings(
+                level: calMap['importAll'] == true ? ImportLevel.all : ImportLevel.custom,
+                fields: [
+                  if (calMap['importSubject'] == true) 'subject',
+                  if (calMap['importBody'] == true) 'description',
+                  if (calMap['importConferenceInfo'] == true) 'conferenceInfo',
+                  if (calMap['importOrganizer'] == true) 'organizer',
+                  if (calMap['importRecipients'] == true) 'recipients',
+                ],
+              ),
           ),
           sync: CalendarSyncInfo(
             syncToken: calMap['syncToken'],
