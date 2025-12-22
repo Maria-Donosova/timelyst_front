@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/calendars.dart';
 import '../../models/import_settings.dart';
-import '../../services/import_settings_service.dart';
+import '../../services/calendar_preferences_service.dart';
+import '../../services/calendar_exceptions.dart';
 import 'import_fields_checklist.dart';
 import 'category_selector.dart';
 import '../shared/customAppbar.dart';
@@ -24,7 +25,8 @@ class _ImportSettingsScreenState extends State<ImportSettingsScreen> {
   late String _category;
   late Color _color;
   bool _isSaving = false;
-  final ImportSettingsService _service = ImportSettingsService();
+  bool _isSaving = false;
+  final CalendarPreferencesService _service = CalendarPreferencesService();
 
   @override
   void initState() {
@@ -40,23 +42,39 @@ class _ImportSettingsScreenState extends State<ImportSettingsScreen> {
     });
 
     try {
-      await _service.updatePreferences(
-        calendarId: widget.calendar.id,
+      final preferences = CalendarPreferences(
         importSettings: _importSettings,
-        color: _color,
         category: _category,
+        userColor: _color,
+      );
+
+      final result = await _service.updatePreferences(
+        widget.calendar.id,
+        preferences,
       );
 
       if (mounted) {
+        String message = 'Settings saved successfully';
+        if (result.syncTriggered) {
+          message += '. Synchronization started...';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Settings saved successfully')),
+          SnackBar(content: Text(message)),
         );
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage = 'Failed to save settings: $e';
+        if (e is ValidationException && e.errors != null) {
+          errorMessage = 'Validation failed: ${e.errors}';
+        } else if (e is UnauthorizedException) {
+          errorMessage = 'Unauthorized. Please log in again.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save settings: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
       }
     } finally {

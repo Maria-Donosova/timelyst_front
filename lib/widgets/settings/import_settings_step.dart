@@ -7,12 +7,14 @@ class ImportSettingsStep extends StatefulWidget {
   final List<CalendarImportConfig> configs;
   final Function(List<CalendarImportConfig>) onSave;
   final VoidCallback onPrevious;
+  final bool isLoading;
 
   const ImportSettingsStep({
     Key? key,
     required this.configs,
     required this.onSave,
     required this.onPrevious,
+    this.isLoading = false,
   }) : super(key: key);
 
   @override
@@ -77,8 +79,8 @@ class _ImportSettingsStepState extends State<ImportSettingsStep> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: ResponsiveButton(
-                    text: 'Next',
-                    onPressed: () => widget.onSave(_configs),
+                    text: widget.isLoading ? 'Saving...' : 'Next',
+                    onPressed: widget.isLoading ? null : () => widget.onSave(_configs),
                     type: ButtonType.primary,
                   ),
                 ),

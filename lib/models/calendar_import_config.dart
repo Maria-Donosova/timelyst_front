@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'import_settings.dart';
 
 class CalendarImportConfig {
+  final String? calendarId;
   final String providerCalendarId;
   final String title;
   final ImportSettings importSettings;
@@ -9,6 +10,7 @@ class CalendarImportConfig {
   final String category;
 
   CalendarImportConfig({
+    this.calendarId,
     required this.providerCalendarId,
     required this.title,
     required this.importSettings,
@@ -17,6 +19,7 @@ class CalendarImportConfig {
   });
 
   CalendarImportConfig copyWith({
+    String? calendarId,
     String? providerCalendarId,
     String? title,
     ImportSettings? importSettings,
@@ -24,6 +27,7 @@ class CalendarImportConfig {
     String? category,
   }) {
     return CalendarImportConfig(
+      calendarId: calendarId ?? this.calendarId,
       providerCalendarId: providerCalendarId ?? this.providerCalendarId,
       title: title ?? this.title,
       importSettings: importSettings ?? this.importSettings,
@@ -34,6 +38,7 @@ class CalendarImportConfig {
 
   Map<String, dynamic> toJson() {
     return {
+      'calendarId': calendarId,
       'providerCalendarId': providerCalendarId,
       'importSettings': importSettings.toJson(),
       'color': '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}', // Keep it #RRGGBB

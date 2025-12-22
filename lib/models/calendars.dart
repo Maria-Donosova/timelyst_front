@@ -281,6 +281,25 @@ class CalendarPreferences {
   }
 }
 
+class UpdatePreferencesResponse {
+  final bool syncTriggered;
+  final CalendarPreferences? preferences;
+
+  UpdatePreferencesResponse({
+    required this.syncTriggered,
+    this.preferences,
+  });
+
+  factory UpdatePreferencesResponse.fromJson(Map<String, dynamic> json) {
+    return UpdatePreferencesResponse(
+      syncTriggered: json['syncTriggered'] ?? false,
+      preferences: json['preferences'] != null
+          ? CalendarPreferences.fromJson(json['preferences'])
+          : null,
+    );
+  }
+}
+
 class CalendarSyncInfo {
   final String? etag;
   final String? syncToken;

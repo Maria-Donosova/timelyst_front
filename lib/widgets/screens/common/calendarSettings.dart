@@ -7,6 +7,8 @@ import '../../responsive/responsive_helper.dart';
 import '../settings/import_settings_step.dart';
 import '../../../models/calendar_import_config.dart';
 import '../../../models/import_settings.dart';
+import '../../../services/calendar_preferences_service.dart';
+import '../../../services/calendar_exceptions.dart';
 
 class CalendarSettings extends StatefulWidget {
   final List<Calendar> calendars;
@@ -34,6 +36,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
   void initState() {
     super.initState();
     _configs = widget.calendars.map((cal) => CalendarImportConfig(
+      calendarId: cal.id,
       providerCalendarId: cal.providerCalendarId,
       title: cal.metadata.title,
       importSettings: cal.preferences.importSettings,
@@ -49,47 +52,31 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     });
 
     try {
-      final List<Calendar> updatedCalendars = widget.calendars.map((cal) {
-        final config = newConfigs.firstWhere(
-          (c) => c.providerCalendarId == cal.providerCalendarId,
-          orElse: () => CalendarImportConfig(
-            providerCalendarId: cal.providerCalendarId,
-            title: cal.metadata.title,
-            importSettings: cal.preferences.importSettings,
-            color: cal.preferences.userColor ?? cal.metadata.parsedColor,
-            category: cal.preferences.category ?? 'work',
-          ),
-        );
+      final service = CalendarPreferencesService();
+      final results = await service.updateMultipleFromConfigs(newConfigs);
+      
+      bool anySyncTriggered = results.any((r) => r.syncTriggered);
 
-        return cal.copyWith(
-          preferences: cal.preferences.copyWith(
-            importSettings: config.importSettings,
-            category: config.category,
-            userColor: config.color,
-          ),
-        );
-      }).toList();
-
-      final result = await CalendarSyncManager().saveSelectedCalendars(
-        userId: widget.userId,
-        email: widget.email,
-        selectedCalendars: updatedCalendars,
-      );
-
-      if (result.success) {
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Agenda()),
+      if (mounted) {
+        if (anySyncTriggered) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Settings saved. Synchronization started...')),
           );
         }
-      } else {
-        throw Exception(result.error ?? 'Failed to save calendars');
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Agenda()),
+        );
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage = 'Error saving settings: $e';
+        if (e is ValidationException && e.errors != null) {
+          errorMessage = 'Validation failed: ${e.errors}';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -112,6 +99,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
             configs: _configs,
             onSave: _handleSave,
             onPrevious: () => Navigator.pop(context),
+            isLoading: _isLoading,
           ),
     );
   }
