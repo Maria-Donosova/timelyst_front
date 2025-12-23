@@ -4,7 +4,7 @@ import '../../../models/calendars.dart';
 import '../../../services/googleIntegration/calendarSyncManager.dart';
 import '../../shared/customAppbar.dart';
 import '../../responsive/responsive_helper.dart';
-import '../settings/import_settings_step.dart';
+import '../../settings/import_settings_step.dart';
 import '../../../models/calendar_import_config.dart';
 import '../../../models/import_settings.dart';
 import '../../../services/calendar_preferences_service.dart';
@@ -38,7 +38,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
     _configs = widget.calendars.map((cal) => CalendarImportConfig(
       calendarId: cal.id,
       providerCalendarId: cal.providerCalendarId,
-      title: cal.metadata.title,
+      title: cal.metadata.title ?? '',
       importSettings: cal.preferences.importSettings,
       color: cal.preferences.userColor ?? cal.metadata.parsedColor,
       category: cal.preferences.category ?? 'work',

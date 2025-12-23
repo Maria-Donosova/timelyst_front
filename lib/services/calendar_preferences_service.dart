@@ -13,7 +13,7 @@ class CalendarPreferencesService {
   Future<CalendarPreferences> getPreferences(String calendarId) async {
     try {
       final token = await _authService.getAuthToken();
-      final url = '${Config.backendUrl}/calendars/$calendarId/preferences';
+      final url = '${Config.backendURL}/calendars/$calendarId/preferences';
       
       final response = await _apiClient.get(url, token: token);
 
@@ -36,7 +36,7 @@ class CalendarPreferencesService {
   Future<UpdatePreferencesResponse> updatePreferences(String calendarId, CalendarPreferences preferences) async {
     try {
       final token = await _authService.getAuthToken();
-      final url = '${Config.backendUrl}/calendars/$calendarId/preferences';
+      final url = '${Config.backendURL}/calendars/$calendarId/preferences';
       
       final response = await _apiClient.put(
         url,

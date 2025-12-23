@@ -217,7 +217,7 @@ class CalendarProvider with ChangeNotifier {
         // Construct preferences with importLevel
         // Default to 'none' if importAll is false, 'all' if true
         // This logic might need refinement based on user feedback, but following plan for now
-        final importLevel = calendar.preferences.importSettings.importAll ? 'all' : 'none';
+        final importLevel = calendar.preferences.importSettings.level == ImportLevel.all ? 'all' : 'none';
         
         return {
           'id': calendar.id,
