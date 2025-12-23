@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/widgets/shared/categories.dart' as app_cats;
 
 class CategorySelector extends StatelessWidget {

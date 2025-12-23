@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/models/calendars.dart';
+import 'package:timelyst_flutter/models/import_settings.dart';
 
 import './../services/calendarsService.dart';
 import './../services/authService.dart';

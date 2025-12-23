@@ -80,7 +80,8 @@ class _ImportSettingsStepState extends State<ImportSettingsStep> {
                 Expanded(
                   child: ResponsiveButton(
                     text: widget.isLoading ? 'Saving...' : 'Next',
-                    onPressed: widget.isLoading ? null : () => widget.onSave(_configs),
+                    onPressed: () => widget.onSave(_configs),
+                    isLoading: widget.isLoading,
                     type: ButtonType.primary,
                   ),
                 ),
