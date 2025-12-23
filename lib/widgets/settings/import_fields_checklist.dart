@@ -16,6 +16,7 @@ class ImportFieldsChecklist extends StatelessWidget {
     final fields = [
       {'id': 'subject', 'label': 'Subject'},
       {'id': 'description', 'label': 'Description'},
+      {'id': 'location', 'label': 'Location'},
       {'id': 'conferenceInfo', 'label': 'Conference Info'},
       {'id': 'organizer', 'label': 'Organizer'},
       {'id': 'recipients', 'label': 'Recipients'},
