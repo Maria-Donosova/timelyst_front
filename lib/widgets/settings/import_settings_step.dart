@@ -80,7 +80,24 @@ class _ImportSettingsStepState extends State<ImportSettingsStep> {
                 Expanded(
                   child: ResponsiveButton(
                     text: widget.isLoading ? 'Saving...' : 'Next',
-                    onPressed: () => widget.onSave(_configs),
+                    onPressed: () {
+                      final selectedButNoCategory = _configs
+                          .where((c) => c.isSelected && c.category.isEmpty)
+                          .toList();
+
+                      if (selectedButNoCategory.isNotEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Please assign a category to all selected calendars'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
+                      widget.onSave(_configs);
+                    },
                     isLoading: widget.isLoading,
                     type: ButtonType.primary,
                   ),

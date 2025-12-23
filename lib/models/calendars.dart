@@ -240,11 +240,13 @@ class CalendarPreferences {
   late final ImportSettings importSettings;
   final String? category;
   final Color? userColor;
+  final bool isSelected;
 
   CalendarPreferences({
     required this.importSettings,
     this.category,
     this.userColor,
+    this.isSelected = false,
   });
 
   factory CalendarPreferences.fromJson(Map<String, dynamic> json) {
@@ -254,6 +256,7 @@ class CalendarPreferences {
       category: json['category'],
       userColor:
           json['color'] != null ? Calendar._parseColor(json['color']) : null,
+      isSelected: json['isSelected'] ?? false,
     );
   }
 
@@ -264,6 +267,7 @@ class CalendarPreferences {
       'color': userColor != null
           ? '#${userColor!.value.toRadixString(16).padLeft(8, '0').substring(2)}'
           : null,
+      'isSelected': isSelected,
     };
   }
 
@@ -272,11 +276,13 @@ class CalendarPreferences {
     String? category,
     bool clearCategory = false,
     Color? userColor,
+    bool? isSelected,
   }) {
     return CalendarPreferences(
       importSettings: importSettings ?? this.importSettings,
       category: clearCategory ? null : (category ?? this.category),
       userColor: userColor ?? this.userColor,
+      isSelected: isSelected ?? this.isSelected,
     );
   }
 }

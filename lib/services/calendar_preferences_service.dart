@@ -68,6 +68,7 @@ class CalendarPreferencesService {
       importSettings: config.importSettings,
       category: config.category,
       userColor: config.color,
+      isSelected: config.isSelected,
     );
     return updatePreferences(calendarId, preferences);
   }

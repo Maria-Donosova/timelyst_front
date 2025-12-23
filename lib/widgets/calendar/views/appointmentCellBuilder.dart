@@ -306,7 +306,11 @@ Widget appointmentBuilder(BuildContext context,
                   children: [
                     Text(
                       customAppointment.title,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontStyle: customAppointment.title == 'Busy'
+                                ? FontStyle.italic
+                                : null,
+                          ),
                     ),
                     if (occurrenceString != null)
                       Text(
@@ -376,6 +380,9 @@ Widget appointmentBuilder(BuildContext context,
                       customAppointment.title,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
+                        fontStyle: customAppointment.title == 'Busy'
+                            ? FontStyle.italic
+                            : null,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),

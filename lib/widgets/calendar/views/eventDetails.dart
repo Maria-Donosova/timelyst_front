@@ -942,6 +942,7 @@ class EventDetailsScreenState extends State<EventDetails> {
                               maxLines: null,
                               decoration: InputDecoration(
                                 labelText: 'Subject',
+                                hintText: 'Busy',
                                 labelStyle:
                                     Theme.of(context).textTheme.bodyLarge,
                                 border: InputBorder.none,
@@ -1098,23 +1099,28 @@ class EventDetailsScreenState extends State<EventDetails> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  TextFormField(
-                    controller: _eventLocation,
-                    decoration: InputDecoration(
-                      labelText: 'Location',
-                      suffixIcon: Icon(Icons.location_on),
+                  if (widget._id == null || _eventLocation.text.isNotEmpty) ...[
+                    TextFormField(
+                      controller: _eventLocation,
+                      decoration: InputDecoration(
+                        labelText: 'Location',
+                        suffixIcon: Icon(Icons.location_on),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  TextFormField(
-                    controller: _eventDescriptionController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(),
+                    SizedBox(height: 20),
+                  ],
+                  if (widget._id == null ||
+                      _eventDescriptionController.text.isNotEmpty) ...[
+                    TextFormField(
+                      controller: _eventDescriptionController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 20),
+                    SizedBox(height: 20),
+                  ],
                   SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

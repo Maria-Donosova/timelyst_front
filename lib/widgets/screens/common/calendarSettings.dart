@@ -42,6 +42,7 @@ class _CalendarSettingsState extends State<CalendarSettings> {
       importSettings: cal.preferences.importSettings,
       color: cal.preferences.userColor ?? cal.metadata.parsedColor,
       category: cal.preferences.category ?? 'work',
+      isSelected: cal.isSelected,
     )).toList();
   }
 

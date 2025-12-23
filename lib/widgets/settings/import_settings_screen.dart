@@ -24,6 +24,7 @@ class _ImportSettingsScreenState extends State<ImportSettingsScreen> {
   late ImportSettings _importSettings;
   late String _category;
   late Color _color;
+  late bool _isSelected;
   bool _isSaving = false;
   bool _isSaving = false;
   final CalendarPreferencesService _service = CalendarPreferencesService();
@@ -34,6 +35,7 @@ class _ImportSettingsScreenState extends State<ImportSettingsScreen> {
     _importSettings = widget.calendar.preferences.importSettings;
     _category = widget.calendar.preferences.category ?? 'work';
     _color = widget.calendar.preferences.userColor ?? widget.calendar.metadata.parsedColor;
+    _isSelected = widget.calendar.isSelected;
   }
 
   Future<void> _save() async {
@@ -46,6 +48,7 @@ class _ImportSettingsScreenState extends State<ImportSettingsScreen> {
         importSettings: _importSettings,
         category: _category,
         userColor: _color,
+        isSelected: _isSelected,
       );
 
       final result = await _service.updatePreferences(
