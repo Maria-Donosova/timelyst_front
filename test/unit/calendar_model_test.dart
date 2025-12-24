@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timelyst_flutter/models/calendars.dart';
+import 'package:timelyst_flutter/models/import_settings.dart';
 
 void main() {
   group('Calendar Model Parsing', () {
@@ -62,7 +63,7 @@ void main() {
         source: CalendarSource.LOCAL,
         providerCalendarId: 'prov-id',
         metadata: CalendarMetadata(title: 'Test', color: '#A4BDFC'),
-        preferences: CalendarPreferences(importSettings: CalendarImportSettings()),
+        preferences: CalendarPreferences(importSettings: ImportSettings()),
         sync: CalendarSyncInfo(
           lastSyncedAt: DateTime.parse('2023-01-01T12:00:00'), // Local time
           expiration: DateTime.parse('2023-01-02T12:00:00'), // Local time
@@ -170,7 +171,7 @@ void main() {
         source: CalendarSource.GOOGLE,
         providerCalendarId: 'prov-id',
         metadata: CalendarMetadata(title: 'Test'),
-        preferences: CalendarPreferences(importSettings: CalendarImportSettings()),
+        preferences: CalendarPreferences(importSettings: ImportSettings()),
         sync: CalendarSyncInfo(),
         isSelected: true,
         isPrimary: false,

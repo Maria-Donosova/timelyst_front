@@ -26,8 +26,30 @@ class _ImportSettingsScreenState extends State<ImportSettingsScreen> {
   late Color _color;
   late bool _isSelected;
   bool _isSaving = false;
-  bool _isSaving = false;
   final CalendarPreferencesService _service = CalendarPreferencesService();
+
+  Future<bool> _showDeselectConfirmation() async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Deselect Calendar?'),
+            content: const Text(
+                'If you deselect this calendar, all previously imported events from it will be deleted from Timelyst. Are you sure?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Deselect & Delete'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
 
   @override
   void initState() {
@@ -39,6 +61,16 @@ class _ImportSettingsScreenState extends State<ImportSettingsScreen> {
   }
 
   Future<void> _save() async {
+    if (_isSelected && _category.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please assign a category before saving'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isSaving = true;
     });
@@ -102,25 +134,63 @@ class _ImportSettingsScreenState extends State<ImportSettingsScreen> {
               'Import Settings: ${widget.calendar.metadata.title}',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
+            const SizedBox(height: 24),
+            SwitchListTile(
+              title: const Text(
+                'Import this calendar',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: const Text('Sync events from this calendar to Timelyst'),
+              value: _isSelected,
+              activeColor: Colors.blue,
+              onChanged: (bool value) async {
+                if (value == false) {
+                  final confirmed = await _showDeselectConfirmation();
+                  if (confirmed) {
+                    setState(() {
+                      _isSelected = false;
+                    });
+                  }
+                } else {
+                  setState(() {
+                    _isSelected = true;
+                  });
+                }
+              },
+            ),
             const SizedBox(height: 32),
-            const Text(
-              'What would you like to import?',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            ImportFieldsChecklist(
-              settings: _importSettings,
-              onChanged: (val) => setState(() => _importSettings = val),
-            ),
-            const SizedBox(height: 32),
-            const Text(
-              'Assign Category',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            CategorySelector(
-              selectedCategory: _category,
-              onCategorySelected: (val) => setState(() => _category = val),
+            Opacity(
+              opacity: _isSelected ? 1.0 : 0.5,
+              child: IgnorePointer(
+                ignoring: !_isSelected,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'What would you like to import?',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    ImportFieldsChecklist(
+                      settings: _importSettings,
+                      onChanged: (val) => setState(() => _importSettings = val),
+                    ),
+                    const SizedBox(height: 32),
+                    const Text(
+                      'Assign Category',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    CategorySelector(
+                      selectedCategory: _category,
+                      onCategorySelected: (val) =>
+                          setState(() => _category = val),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 48),
             SizedBox(
