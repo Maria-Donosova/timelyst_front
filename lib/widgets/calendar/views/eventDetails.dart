@@ -1121,6 +1121,16 @@ class EventDetailsScreenState extends State<EventDetails> {
                     ),
                     SizedBox(height: 20),
                   ],
+                  if (widget._id == null || _eventParticipants.text.isNotEmpty) ...[
+                    TextFormField(
+                      controller: _eventParticipants,
+                      decoration: InputDecoration(
+                        labelText: 'Participants',
+                        suffixIcon: Icon(Icons.people_outline),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                  ],
                   SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
