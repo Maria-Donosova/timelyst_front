@@ -66,11 +66,14 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
       }
       
       final DateTime occurrenceStart = DateTime(year, month, adjustedDay);
-      final DateTime occurrenceEnd = DateTime(year, month, adjustedDay, 23, 59, 59);
+      final occurrenceEnd = occurrenceStart.add(eventDuration).subtract(const Duration(seconds: 1));
       
-      // Check if this occurrence falls within view range (with 1 day buffer)
-      if (occurrenceStart.isAfter(_viewStart.subtract(const Duration(days: 1))) &&
-          occurrenceStart.isBefore(_viewEnd.add(const Duration(days: 1)))) {
+      // Check if this occurrence falls within or intersects the view range (with 1 day buffer)
+      final bufferStart = _viewStart.subtract(const Duration(days: 1));
+      final bufferEnd = _viewEnd.add(const Duration(days: 1));
+      
+      if (occurrenceEnd.isAfter(bufferStart) &&
+          occurrenceStart.isBefore(bufferEnd)) {
         
         // Check if this occurrence is excepted (cancelled or modified)
         final isExcepted = exceptionDates.any((exDate) =>
@@ -79,9 +82,7 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
             exDate.day == occurrenceStart.day);
         
         if (!isExcepted) {
-          // Calculate ending date based on duration
-          // For all-day events, we maintain the 23:59:59 end time on the last active day
-          final occurrenceEnd = occurrenceStart.add(eventDuration).subtract(const Duration(seconds: 1));
+          // occurrenceEnd already calculated above
 
           occurrences.add(CustomAppointment(
             id: master.id,  // Keep original ID for edit/delete operations

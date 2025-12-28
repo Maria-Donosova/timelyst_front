@@ -362,11 +362,7 @@ class EventProvider with ChangeNotifier {
         print('📊 [EventProvider] Occurrence counts: ${occurrenceCounts.length} series');
       }
       
-      // Store raw TimeEvent objects for TimelystCalendarDataSource
-      _timeEvents = [...masterEvents, ...exceptions];
-      
-      // Combine masters and exceptions into single list for now
-      // The TimelystCalendarDataSource will handle the separation
+      // Combine masters and exceptions into single list
       final allEvents = [...masterEvents, ...exceptions];
       
       // Map to CustomAppointments
@@ -382,11 +378,13 @@ class EventProvider with ChangeNotifier {
           .where((event) => event != null)
           .cast<CustomAppointment>()
           .toList();
-      
-      // Sync with existing events
+
+      // Sync raw TimeEvent objects for TimelystCalendarDataSource
       if (startDate != null && endDate != null) {
+        _syncTimeEventsForDateRange(allEvents, start, end);
         _syncEventsForDateRange(appointments, start, end);
       } else {
+        _timeEvents = allEvents; // Fallback
         _syncEventsIncremental(appointments);
       }
       
@@ -581,6 +579,40 @@ class EventProvider with ChangeNotifier {
     }
     
     return changesMade > 0 || fetchedEvents.isNotEmpty;
+  }
+
+  /// Syncs raw TimeEvent objects for a specific date range
+  bool _syncTimeEventsForDateRange(List<TimeEvent> fetchedTimeEvents, DateTime startDate, DateTime endDate) {
+    if (_debugLogging) print('🔄 [EventProvider] Syncing _timeEvents for range');
+    
+    final fetchedIds = fetchedTimeEvents.map((e) => e.id).toSet();
+    final eventsToKeep = _timeEvents.where((event) {
+      final outsideRange = event.start.isBefore(startDate) || 
+                           event.start.isAfter(endDate) ||
+                           event.start.isAtSameMomentAs(endDate);
+      return outsideRange;
+    }).toList();
+
+    final finalEvents = <TimeEvent>[];
+    final seenIds = <String>{};
+    
+    for (final event in fetchedTimeEvents) {
+      if (!seenIds.contains(event.id)) {
+        finalEvents.add(event);
+        seenIds.add(event.id);
+      }
+    }
+    
+    for (final event in eventsToKeep) {
+      if (!seenIds.contains(event.id)) {
+        finalEvents.add(event);
+        seenIds.add(event.id);
+      }
+    }
+    
+    final changesMade = finalEvents.length != _timeEvents.length;
+    _timeEvents = finalEvents;
+    return changesMade;
   }
 
   /// Performs incremental synchronization of events
