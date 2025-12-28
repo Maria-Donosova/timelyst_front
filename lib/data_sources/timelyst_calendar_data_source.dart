@@ -79,6 +79,10 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
             exDate.day == occurrenceStart.day);
         
         if (!isExcepted) {
+          // Calculate ending date based on duration
+          // For all-day events, we maintain the 23:59:59 end time on the last active day
+          final occurrenceEnd = occurrenceStart.add(eventDuration).subtract(const Duration(seconds: 1));
+
           occurrences.add(CustomAppointment(
             id: master.id,  // Keep original ID for edit/delete operations
             title: master.eventTitle.isEmpty ? 'Busy' : master.eventTitle,

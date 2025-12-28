@@ -20,21 +20,22 @@ class EventMapper {
       startTime = DateTime(startUtc.year, startUtc.month, startUtc.day);
       
       // Google/iCal uses EXCLUSIVE end dates for all-day events
-      // e.g., a 1-day event on Dec 26 has end = Dec 27T00:00:00Z (midnight of next day)
-      // SyncFusion treats midnight as the START of the next day, causing duplication
-      // Fix: Convert to the LAST ACTIVE DAY at 23:59:59 to prevent the event from
-      // appearing on the following day
+      // e.g., a 1-day event on Dec 25 has end = Dec 26T00:00:00Z
+      // e.g., a 9-day event starting Dec 25 has end = Jan 3T00:00:00Z
       final exclusiveEndDate = DateTime(endUtc.year, endUtc.month, endUtc.day);
       final lastActiveDay = exclusiveEndDate.subtract(const Duration(days: 1));
       
-      // Ensure endTime is not before startTime (for single-day events where
-      // exclusiveEndDate - 1 day would be before startTime)
-      if (lastActiveDay.isBefore(startTime)) {
+      if (lastActiveDay.isAtSameMomentAs(startTime)) {
         // Single day event: end is same day at 23:59:59
+        // This prevents Syncfusion from showing a "ghost day" on the next day
         endTime = DateTime(startTime.year, startTime.month, startTime.day, 23, 59, 59);
-      } else {
+      } else if (lastActiveDay.isAfter(startTime)) {
         // Multi-day event: end is last active day at 23:59:59
+        // This ensures the event spans the correct number of days
         endTime = DateTime(lastActiveDay.year, lastActiveDay.month, lastActiveDay.day, 23, 59, 59);
+      } else {
+        // Fallback for edge cases where end <= start: treat as single day
+        endTime = DateTime(startTime.year, startTime.month, startTime.day, 23, 59, 59);
       }
     } else {
       // Regular timed events: convert to local timezone
