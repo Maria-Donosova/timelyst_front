@@ -102,7 +102,7 @@ class TimeEvent {
               ? (json['ex_dates'] as List<dynamic>).map((e) => e.toString()).toList() 
               : null),
       isAllDay: json['isAllDay'] ?? json['is_all_day'] ?? false,
-      category: json['category'] ?? '',
+      category: _normalizeCategory(json['category']),
       location: json['location'] ?? '',
       description: json['description'] ?? '',
       status: json['status'] ?? 'confirmed',
@@ -120,6 +120,22 @@ class TimeEvent {
       updatedAt: DateTime.parse(json['updatedAt'] ?? json['updated_at']),
       rawData: json['rawData'] ?? json['raw_data'],
     );
+  }
+
+  static String _normalizeCategory(String? category) {
+    if (category == null || category.isEmpty) return 'Other';
+    
+    String normalized = category.trim().toLowerCase();
+    if (normalized.isEmpty) return 'Other';
+    
+    // Convert to Title Case
+    normalized = normalized[0].toUpperCase() + normalized.substring(1);
+    
+    const validCategories = ['Personal', 'Work', 'Family', 'Social', 'Friends', 'Kids', 'Other'];
+    if (validCategories.contains(normalized)) {
+      return normalized;
+    }
+    return 'Other';
   }
 
   Map<String, dynamic> toJson() {
