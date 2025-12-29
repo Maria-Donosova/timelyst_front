@@ -455,6 +455,8 @@ class _CalendarWState extends State<CalendarW> {
                     recurrenceId: _customAppointment!.recurrenceId,
                     originalStart: _customAppointment!.originalStart,
                     exDates: _customAppointment!.exDates,
+                    initialStartTime: _customAppointment!.startTime,
+                    initialEndTime: _customAppointment!.endTime,
                     calendarId: _customAppointment!.calendarId,
                   ),
                 );
@@ -485,6 +487,8 @@ class _CalendarWState extends State<CalendarW> {
                 isAllDay: false,
                 recurrenceRule: '',
                 location: '',
+                initialStartTime: details.date,
+                initialEndTime: details.date?.add(const Duration(minutes: 60)),
               ),
             );
           });

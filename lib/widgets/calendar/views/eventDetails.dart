@@ -29,6 +29,8 @@ class EventDetails extends StatefulWidget {
     String? body,
     String? location,
     String? calendarId,
+    DateTime? initialStartTime,
+    DateTime? initialEndTime,
     String? recurrenceId,
     DateTime? originalStart,
     List<String>? exDates,
@@ -37,6 +39,8 @@ class EventDetails extends StatefulWidget {
         _dateText = dateText,
         _start = start,
         _end = end,
+        _initialStartTime = initialStartTime,
+        _initialEndTime = initialEndTime,
         _allDay = isAllDay,
         _recurrenceRule = recurrenceRule,
         _recurrenceId = recurrenceId,
@@ -53,6 +57,8 @@ class EventDetails extends StatefulWidget {
   final String? _dateText;
   final String? _start;
   final String? _end;
+  final DateTime? _initialStartTime;
+  final DateTime? _initialEndTime;
   final bool? _allDay;
   final String? _recurrenceRule;
   final String? _recurrenceId;
@@ -70,7 +76,8 @@ class EventDetails extends StatefulWidget {
 
 class EventDetailsScreenState extends State<EventDetails> {
   late TextEditingController _eventTitleController;
-  late TextEditingController _eventDateController;
+  late TextEditingController _eventStartDateController;
+  late TextEditingController _eventEndDateController;
   late TextEditingController _eventStartTimeController;
   late TextEditingController _eventEndTimeController;
   late TextEditingController _eventDescriptionController;
@@ -84,6 +91,9 @@ class EventDetailsScreenState extends State<EventDetails> {
   bool isChecked = false;
   bool _isEditing = false;
   bool _isLoading = false;
+
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   List<Calendar> _selectedCalendars = [];
   String?
@@ -120,7 +130,32 @@ class EventDetailsScreenState extends State<EventDetails> {
   void initState() {
     super.initState();
     _eventTitleController = TextEditingController(text: widget._subject);
-    _eventDateController = TextEditingController(text: widget._dateText);
+    
+    // Initialize start/end dates from initialStartTime/initialEndTime if available
+    _startDate = widget._initialStartTime;
+    _endDate = widget._initialEndTime;
+
+    // Fallback parsing if needed (for backwards compatibility if called with strings)
+    if (_startDate == null && widget._dateText != null) {
+      try {
+        _startDate = DateFormat('MMMM d', 'en_US').parse(widget._dateText!);
+        _startDate = DateTime(DateTime.now().year, _startDate!.month, _startDate!.day);
+        
+        // If start date is parsed, we need a default end date too
+        if (_endDate == null) {
+          _endDate = _startDate;
+        }
+      } catch (e) {
+        print('Error parsing initial date: $e');
+      }
+    }
+
+    _eventStartDateController = TextEditingController(
+      text: _startDate != null ? DateFormat('MMMM d', 'en_US').format(_startDate!) : widget._dateText
+    );
+    _eventEndDateController = TextEditingController(
+      text: _endDate != null ? DateFormat('MMMM d', 'en_US').format(_endDate!) : widget._dateText
+    );
     _eventStartTimeController = TextEditingController(text: widget._start);
     _eventEndTimeController = TextEditingController(text: widget._end);
     _eventLocation = TextEditingController(text: widget._eventLocation);
@@ -275,7 +310,8 @@ class EventDetailsScreenState extends State<EventDetails> {
 
   @override
   void dispose() {
-    _eventDateController.dispose();
+    _eventStartDateController.dispose();
+    _eventEndDateController.dispose();
     _eventStartTimeController.dispose();
     _eventEndTimeController.dispose();
     _eventTitleController.dispose();
@@ -287,16 +323,8 @@ class EventDetailsScreenState extends State<EventDetails> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    DateTime initialDate = DateTime.now();
-    try {
-      if (_eventDateController.text.isNotEmpty) {
-        final parsedDate = DateFormat('MMMM d', 'en_US').parse(_eventDateController.text);
-        initialDate = DateTime(DateTime.now().year, parsedDate.month, parsedDate.day);
-      }
-    } catch (e) {
-      print('Error parsing initial date: $e');
-    }
+  Future<void> _selectDate(BuildContext context, bool isStart) async {
+    DateTime initialDate = (isStart ? _startDate : _endDate) ?? DateTime.now();
 
     final selectedDate = await showDatePicker(
       context: context,
@@ -307,7 +335,25 @@ class EventDetailsScreenState extends State<EventDetails> {
 
     if (selectedDate != null) {
       setState(() {
-        _eventDateController.text = DateFormat('MMMM d', 'en_US').format(selectedDate);
+        if (isStart) {
+          _startDate = selectedDate;
+          _eventStartDateController.text = DateFormat('MMMM d', 'en_US').format(selectedDate);
+          
+          // If end date is before start date, update end date to match start date
+          if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+            _endDate = _startDate;
+            _eventEndDateController.text = _eventStartDateController.text;
+          }
+        } else {
+          _endDate = selectedDate;
+          _eventEndDateController.text = DateFormat('MMMM d', 'en_US').format(selectedDate);
+          
+          // If start date is after end date, update start date to match end date
+          if (_startDate != null && _startDate!.isAfter(_endDate!)) {
+            _startDate = _endDate;
+            _eventStartDateController.text = _eventEndDateController.text;
+          }
+        }
       });
     }
   }
@@ -472,84 +518,27 @@ class EventDetailsScreenState extends State<EventDetails> {
           return;
         }
 
-        // Parse date
-        final dateStr = _eventDateController.text;
-        DateTime? eventDate;
-        try {
-          eventDate = DateFormat('MMMM d', 'en_US').parse(dateStr);
-          if (eventDate.year != DateTime.now().year) {
-            eventDate =
-                DateTime(DateTime.now().year, eventDate.month, eventDate.day);
-          }
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  'Invalid date format. Please use format like "November 6"'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          setState(() {
-            _isLoading = false;
-          });
-          return;
-        }
-
-        // Parse times
-        TimeOfDay startTime, endTime;
-        try {
-          startTime = _parseTimeString(_eventStartTimeController.text);
-          endTime = _parseTimeString(_eventEndTimeController.text);
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content:
-                  Text('Invalid time format. Please use format like "2:30 PM"'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          setState(() {
-            _isLoading = false;
-          });
-          return;
-        }
-
-        // Validate end time is after start time (only for non-all-day events)
-        if (!_allDay && (endTime.hour < startTime.hour ||
-            (endTime.hour == startTime.hour &&
-                endTime.minute <= startTime.minute))) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('End time must be after start time'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          setState(() {
-            _isLoading = false;
-          });
-          return;
-        }
-
         // Create DateTime objects in local timezone
         // We don't convert to UTC because we want to preserve the user's input time
         final start = DateTime(
-          eventDate.year,
-          eventDate.month,
-          eventDate.day,
+          _startDate!.year,
+          _startDate!.month,
+          _startDate!.day,
           startTime.hour,
           startTime.minute,
         );
 
         final end = DateTime(
-          eventDate.year,
-          eventDate.month,
-          eventDate.day,
+          _endDate!.year,
+          _endDate!.month,
+          _endDate!.day,
           endTime.hour,
           endTime.minute,
         );
 
         print('📅 [EventDetails] User picked times:');
-        print('  - Date: ${eventDate.toString()}');
+        print('  - Start Date: ${_startDate.toString()}');
+        print('  - End Date: ${_endDate.toString()}');
         print('  - Start time: ${startTime.hour}:${startTime.minute}');
         print('  - End time: ${endTime.hour}:${endTime.minute}');
         print('  - Created DateTime objects:');
@@ -982,14 +971,32 @@ class EventDetailsScreenState extends State<EventDetails> {
                         ],
                       ),
                     ),
-                  TextFormField(
-                    controller: _eventDateController,
-                    readOnly: true,
-                    onTap: () => _selectDate(context),
-                    decoration: InputDecoration(
-                      labelText: 'Date',
-                      suffixIcon: Icon(Icons.calendar_today),
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _eventStartDateController,
+                          readOnly: true,
+                          onTap: () => _selectDate(context, true),
+                          decoration: InputDecoration(
+                            labelText: 'Start Date',
+                            suffixIcon: Icon(Icons.calendar_today),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _eventEndDateController,
+                          readOnly: true,
+                          onTap: () => _selectDate(context, false),
+                          decoration: InputDecoration(
+                            labelText: 'End Date',
+                            suffixIcon: Icon(Icons.calendar_today),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 20),
                   Row(
