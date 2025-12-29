@@ -419,6 +419,8 @@ class _CalendarWState extends State<CalendarW> {
           }
         }
 
+          if (_customAppointment == null) return;
+
           if (_customAppointment.groupedEvents != null) {
             await _showSummaryDialog(_customAppointment);
             return;
@@ -466,10 +468,7 @@ class _CalendarWState extends State<CalendarW> {
             setState(() {});
           }
         }
-      }
-
-
-    } else {
+      } else {
       final result = await showDialog(
           context: context,
           builder: (BuildContext context) {

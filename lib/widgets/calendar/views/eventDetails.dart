@@ -518,6 +518,44 @@ class EventDetailsScreenState extends State<EventDetails> {
           return;
         }
 
+        // Parse times
+        TimeOfDay startTime, endTime;
+        try {
+          startTime = _parseTimeString(_eventStartTimeController.text);
+          endTime = _parseTimeString(_eventEndTimeController.text);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text('Invalid time format. Please use format like "2:30 PM"'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
+        // Validate end time is after start time (only for same-day timed events)
+        if (!_allDay && _startDate!.year == _endDate!.year && 
+            _startDate!.month == _endDate!.month && 
+            _startDate!.day == _endDate!.day && 
+            (endTime.hour < startTime.hour ||
+            (endTime.hour == startTime.hour &&
+                endTime.minute <= startTime.minute))) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('End time must be after start time'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
         // Create DateTime objects in local timezone
         // We don't convert to UTC because we want to preserve the user's input time
         final start = DateTime(
