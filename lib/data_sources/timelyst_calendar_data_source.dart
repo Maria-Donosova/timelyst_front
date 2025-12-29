@@ -3,6 +3,7 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 import '../models/timeEvent.dart';
 import '../models/customApp.dart';
 import '../utils/eventsMapper.dart';
+import '../utils/calendar_utils.dart';
 
 /// Custom CalendarDataSource for SyncFusion Calendar
 /// Understands master/exception event model from backend
@@ -26,10 +27,16 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
     required Map<String, int> occurrenceCounts,
     DateTime? viewStart,
     DateTime? viewEnd,
+    double? summarizeWidth,
   }) : _occurrenceCounts = occurrenceCounts,
        _viewStart = viewStart ?? DateTime.now().subtract(const Duration(days: 45)),
        _viewEnd = viewEnd ?? DateTime.now().add(const Duration(days: 45)) {
-    appointments = _buildAppointments(masterEvents, exceptionEvents);
+    List<CustomAppointment> apps = _buildAppointments(masterEvents, exceptionEvents);
+    if (summarizeWidth != null) {
+      appointments = CalendarUtils.groupAndSummarize(apps, summarizeWidth);
+    } else {
+      appointments = apps;
+    }
   }
 
   /// Checks if an event needs manual YEARLY expansion
@@ -66,14 +73,11 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
       }
       
       final DateTime occurrenceStart = DateTime(year, month, adjustedDay);
-      final occurrenceEnd = occurrenceStart.add(eventDuration).subtract(const Duration(seconds: 1));
+      final DateTime occurrenceEnd = DateTime(year, month, adjustedDay, 23, 59, 59);
       
-      // Check if this occurrence falls within or intersects the view range (with 1 day buffer)
-      final bufferStart = _viewStart.subtract(const Duration(days: 1));
-      final bufferEnd = _viewEnd.add(const Duration(days: 1));
-      
-      if (occurrenceEnd.isAfter(bufferStart) &&
-          occurrenceStart.isBefore(bufferEnd)) {
+      // Check if this occurrence falls within view range (with 1 day buffer)
+      if (occurrenceStart.isAfter(_viewStart.subtract(const Duration(days: 1))) &&
+          occurrenceStart.isBefore(_viewEnd.add(const Duration(days: 1)))) {
         
         // Check if this occurrence is excepted (cancelled or modified)
         final isExcepted = exceptionDates.any((exDate) =>
@@ -82,8 +86,6 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
             exDate.day == occurrenceStart.day);
         
         if (!isExcepted) {
-          // occurrenceEnd already calculated above
-
           occurrences.add(CustomAppointment(
             id: master.id,  // Keep original ID for edit/delete operations
             title: master.eventTitle.isEmpty ? 'Busy' : master.eventTitle,

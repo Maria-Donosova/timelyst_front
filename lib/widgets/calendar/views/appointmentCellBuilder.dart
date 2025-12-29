@@ -290,12 +290,16 @@ Widget appointmentBuilder(BuildContext context,
      * If the appointment has a single day duration, return a Card with the appointment details
      */
     if (isSameDay && customAppointment.isAllDay == false) {
+      final isSummary = customAppointment.title.startsWith('+') && customAppointment.groupedEvents != null;
+      final Color indicatorColor = isSummary ? Colors.blue : catColor(customAppointment.catTitle);
+      
       return Container(
         width: width,
         // Set the height of the Container to the height of the appointment in the calendar
         height: calendarAppointmentDetails.bounds.height,
         child: Card(
-          elevation: 4,
+          elevation: isSummary ? 0 : 4, // More minimalist for summary
+          color: isSummary ? Colors.transparent : null, // Clean look for summary
           child: InkWell(
             splashColor: Colors.blueGrey.withAlpha(30),
             child: Stack(children: [
@@ -307,11 +311,18 @@ Widget appointmentBuilder(BuildContext context,
                     Text(
                       customAppointment.title,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: isSummary ? Theme.of(context).textTheme.bodyLarge?.color : null,
+                            fontWeight: isSummary ? FontWeight.bold : null,
                             fontStyle: customAppointment.title == 'Busy'
                                 ? FontStyle.italic
                                 : null,
                           ),
                     ),
+                    if (isSummary)
+                       Text(
+                        'Total: ${customAppointment.groupedEvents!.length + 1}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 8),
+                      ),
                     if (occurrenceString != null)
                       Text(
                         occurrenceString,
@@ -328,7 +339,7 @@ Widget appointmentBuilder(BuildContext context,
                   // Position the CircleAvatar at the top-left of the stack
                   alignment: Alignment(-1.005, -1.05),
                   child: CircleAvatar(
-                    backgroundColor: catColor(customAppointment.catTitle),
+                    backgroundColor: indicatorColor,
                     radius: 3.5,
                   ),
                 ),
@@ -338,8 +349,8 @@ Widget appointmentBuilder(BuildContext context,
                 decoration: BoxDecoration(
                   border: Border(
                     left: BorderSide(
-                      color: catColor(customAppointment.catTitle),
-                      width: 3,
+                      color: indicatorColor,
+                      width: 2.5, // Slightly thinner line as per screenshot
                       style: BorderStyle.solid,
                     ),
                   ),
@@ -347,16 +358,17 @@ Widget appointmentBuilder(BuildContext context,
                 ),
               ),
               // Calendar source icon in bottom right corner (shown for day/week views)
-              Positioned(
-                right: 4,
-                bottom: 4,
-                child: _getCalendarSourceWidget(
-                  customAppointment,
-                  size: 14,
-                  color:
-                      Theme.of(context).colorScheme.tertiary.withOpacity(0.7),
+              if (!isSummary)
+                Positioned(
+                  right: 4,
+                  bottom: 4,
+                  child: _getCalendarSourceWidget(
+                    customAppointment,
+                    size: 14,
+                    color:
+                        Theme.of(context).colorScheme.tertiary.withOpacity(0.7),
+                  ),
                 ),
-              ),
             ]),
           ),
         ),

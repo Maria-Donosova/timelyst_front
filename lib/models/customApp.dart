@@ -33,6 +33,7 @@ class CustomAppointment {
   final String? microsoftEventId;
   final String? googleEventId;
   final String? appleEventId;
+  final List<CustomAppointment>? groupedEvents;
 
   CustomAppointment({
     required this.id,
@@ -65,6 +66,7 @@ class CustomAppointment {
     this.microsoftEventId,
     this.googleEventId,
     this.appleEventId,
+    this.groupedEvents,
   })  : createdAt = _parseDate(createdAt),
         updatedAt = _parseDate(updatedAt);
 
@@ -151,6 +153,7 @@ class CustomAppointment {
     String? microsoftEventId,
     String? googleEventId,
     String? appleEventId,
+    List<CustomAppointment>? groupedEvents,
   }) {
     return CustomAppointment(
       id: id ?? this.id,
@@ -180,6 +183,7 @@ class CustomAppointment {
       microsoftEventId: microsoftEventId ?? this.microsoftEventId,
       googleEventId: googleEventId ?? this.googleEventId,
       appleEventId: appleEventId ?? this.appleEventId,
+      groupedEvents: groupedEvents ?? this.groupedEvents,
     );
   }
 }

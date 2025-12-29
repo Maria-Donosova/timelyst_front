@@ -14,6 +14,7 @@ import '../../../providers/eventProvider.dart';
 import '../../../providers/calendarProvider.dart';
 import '../../../providers/authProvider.dart';
 import '../../../utils/logger.dart';
+import '../../../utils/calendar_utils.dart';
 import '../../responsive/responsive_widgets.dart';
 import '../../../services/event_handler_service.dart';
 import '../../../data_sources/timelyst_calendar_data_source.dart';
@@ -85,6 +86,10 @@ class _CalendarWState extends State<CalendarW> {
     }
     
     // Create data source with view range for YEARLY expansion
+    final width = MediaQuery.of(context).size.width;
+    final cellWidth = width / 14;
+    final isWeek = _controller.view == CalendarView.week;
+
     setState(() {
       _dataSource = TimelystCalendarDataSource(
         masterEvents: masters,
@@ -92,6 +97,7 @@ class _CalendarWState extends State<CalendarW> {
         occurrenceCounts: occurrenceCounts,
         viewStart: _visibleDates.first,
         viewEnd: _visibleDates.last.add(const Duration(days: 1)),
+        summarizeWidth: isWeek ? cellWidth : null,
       );
     });
   }
@@ -110,11 +116,16 @@ class _CalendarWState extends State<CalendarW> {
     Provider.of<CalendarProvider>(context);
 
     final List<CustomAppointment> appointments = eventProvider.events;
+    List<CustomAppointment> processedAppointments = appointments;
+
+    if (isWeek) {
+      processedAppointments = CalendarUtils.groupAndSummarize(appointments, cellWidth);
+    }
 
     // Essential logging only
-    if (appointments.length > 0) {
+    if (processedAppointments.length > 0) {
       print(
-          '📅 [Calendar] Building calendar with ${appointments.length} events');
+          '📅 [Calendar] Building calendar with ${processedAppointments.length} events (Original: ${appointments.length})');
     }
 
     AppLogger.performance(
@@ -202,7 +213,7 @@ class _CalendarWState extends State<CalendarW> {
                     allowDragAndDrop: true,
                     dragAndDropSettings:
                         DragAndDropSettings(showTimeIndicator: true),
-                    dataSource: (_dataSource ?? _EventDataSource(appointments)) as CalendarDataSource<Object?>?,
+                    dataSource: (_dataSource ?? _EventDataSource(processedAppointments)) as CalendarDataSource<Object?>?,
                     onTap: _calendarTapped,
                     onDragEnd: _handleDragEnd,
                     onAppointmentResizeEnd: _handleResizeEnd,
@@ -408,7 +419,11 @@ class _CalendarWState extends State<CalendarW> {
           }
         }
 
-        if (_customAppointment != null) {
+          if (_customAppointment.groupedEvents != null) {
+            await _showSummaryDialog(_customAppointment);
+            return;
+          }
+
           _dateText = DateFormat('MMMM d', 'en_US')
               .format(_customAppointment.startTime)
               .toString();
@@ -771,6 +786,74 @@ class _CalendarWState extends State<CalendarW> {
         }
       }
     }
+  }
+
+  Future<void> _showSummaryDialog(CustomAppointment summary) async {
+    final events = summary.groupedEvents ?? [];
+    
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Events at ${DateFormat('jm').format(summary.startTime)}'),
+        content: SizedBox(
+          width: 400,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: events.length,
+            itemBuilder: (context, index) {
+              final event = events[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  radius: 6,
+                  backgroundColor: event.catColor,
+                ),
+                title: Text(event.title),
+                subtitle: Text('${DateFormat('jm').format(event.startTime)} - ${DateFormat('jm').format(event.endTime)}'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  // Trigger a re-tap on the specific event to show its details
+                  // Since SfCalendar expects a CalendarTapDetails which we don't have easily,
+                  // we can just directly show the EventDetails dialog.
+                  final dateText = DateFormat('MMMM d', 'en_US').format(event.startTime).toString();
+                  final startText = DateFormat('hh:mm a').format(event.startTime).toString();
+                  final endText = DateFormat('hh:mm a').format(event.endTime).toString();
+
+                  await showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      content: EventDetails(
+                        id: event.id,
+                        subject: event.title,
+                        dateText: dateText,
+                        start: startText,
+                        end: endText,
+                        catTitle: event.catTitle,
+                        catColor: event.catColor,
+                        participants: event.participants,
+                        body: event.description,
+                        location: event.location,
+                        isAllDay: event.isAllDay,
+                        recurrenceRule: event.recurrenceRule,
+                        recurrenceId: event.recurrenceId,
+                        originalStart: event.originalStart,
+                        exDates: event.exDates,
+                        calendarId: event.calendarId,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 
   void addEventAndRefresh(CustomAppointment event) {
