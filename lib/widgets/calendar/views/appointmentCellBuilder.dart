@@ -303,7 +303,9 @@ Widget appointmentBuilder(BuildContext context,
           color: isSummary ? Colors.transparent : null, // Clean look for summary
           child: InkWell(
             splashColor: Colors.blueGrey.withAlpha(30),
-            child: Stack(children: [
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -343,14 +345,15 @@ Widget appointmentBuilder(BuildContext context,
                   ],
                 ),
               ),
-              SizedBox(
-                child: Align(
-                  // Position the CircleAvatar at the top-left of the stack
-                  alignment: Alignment(-1.0, 0.0), // Center vertically
-                  child: CircleAvatar(
-                    backgroundColor: indicatorColor,
-                    radius: 3.5, // Increased size
-                  ),
+              Positioned(
+                // Precisely center the dot on the 2.5px wide border line
+                // Center of border = 1.25. Dot radius = 3.5. Left = 1.25 - 3.5 = -2.25
+                // Center of dot at top edge (0.0). Top = 0 - 3.5 = -3.5
+                left: -2.25,
+                top: -3.5,
+                child: CircleAvatar(
+                  backgroundColor: indicatorColor,
+                  radius: 3.5,
                 ),
               ),
               Container(
