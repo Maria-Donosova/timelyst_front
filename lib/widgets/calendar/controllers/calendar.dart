@@ -205,7 +205,7 @@ class _CalendarWState extends State<CalendarW> {
                     monthCellBuilder: monthCellBuilder,
                     monthViewSettings: MonthViewSettings(
                       appointmentDisplayMode:
-                          MonthAppointmentDisplayMode.appointment,
+                          MonthAppointmentDisplayMode.none,
                       showTrailingAndLeadingDates: false,
                     ),
                     appointmentBuilder: appointmentBuilder,

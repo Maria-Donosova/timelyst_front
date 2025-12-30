@@ -82,7 +82,7 @@ Widget monthCellBuilder(BuildContext context, MonthCellDetails details) {
                 Text(
                   '$length Events',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
                 ),
