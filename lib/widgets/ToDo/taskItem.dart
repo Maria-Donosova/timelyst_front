@@ -33,39 +33,39 @@ class _TaskItemState extends State<TaskItem> {
     final selectedCategory = widget.category;
     final categoryColor = catColor(selectedCategory);
 
-    return Stack(
-      alignment: Alignment.topLeft,
-      children: <Widget>[
-        Card(
-          elevation: 4,
-          child: InkWell(
-            splashColor: Colors.blueGrey.withAlpha(30),
-            onTap: () {
-              print('Card tapped.');
-            },
-            onLongPress: () => showModalBottomSheet(
-              useSafeArea: false,
-              context: context,
-              builder: (_) {
-                return EditTaskW(
-                  task: Task(
-                    id: widget.id,
-                    userId: '', // Placeholder
-                    title: widget.title,
-                    description: widget.title,
-                    priority: widget.category,
-                    dueDate: widget.dueDate,
-                    isCompleted: widget.status == 'completed',
-                    createdAt: DateTime.now(),
-                    updatedAt: DateTime.now(),
-                  ),
-                  onSave: (updatedTask) {
-                    widget.onTaskUpdated(updatedTask); // Notify parent widget
-                  },
-                );
+    return Card(
+      elevation: 4,
+      child: InkWell(
+        splashColor: Colors.blueGrey.withAlpha(30),
+        onTap: () {
+          print('Card tapped.');
+        },
+        onLongPress: () => showModalBottomSheet(
+          useSafeArea: false,
+          context: context,
+          builder: (_) {
+            return EditTaskW(
+              task: Task(
+                id: widget.id,
+                userId: '', // Placeholder
+                title: widget.title,
+                description: widget.title,
+                priority: widget.category,
+                dueDate: widget.dueDate,
+                isCompleted: widget.status == 'completed',
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              ),
+              onSave: (updatedTask) {
+                widget.onTaskUpdated(updatedTask); // Notify parent widget
               },
-            ),
-            child: Row(
+            );
+          },
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -100,7 +100,8 @@ class _TaskItemState extends State<TaskItem> {
                             ),
                             if (widget.dueDate != null)
                               Text(
-                                DateFormat('MMM d h:mm a').format(widget.dueDate!),
+                                DateFormat('MMM d h:mm a')
+                                    .format(widget.dueDate!),
                                 style: TextStyle(
                                   color: Colors.grey,
                                   fontSize: 12,
@@ -114,19 +115,20 @@ class _TaskItemState extends State<TaskItem> {
                 ),
               ],
             ),
-          ),
-        ),
-        SizedBox(
-          width: 230,
-          child: Align(
-            alignment: Alignment(-0.98, 0.0),
-            child: CircleAvatar(
-              backgroundColor: categoryColor,
-              radius: 3.5,
+            Positioned(
+              // Precisely center the dot on the 3px wide border line
+              // Center of border = 1.5. Dot radius = 3.5. Left = 1.5 - 3.5 = -2.0
+              // Center of dot at top edge (0.0). Top = 0 - 3.5 = -3.5
+              left: -2.0,
+              top: -3.5,
+              child: CircleAvatar(
+                backgroundColor: categoryColor,
+                radius: 3.5,
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
