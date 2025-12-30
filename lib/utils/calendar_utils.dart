@@ -11,9 +11,23 @@ class CalendarUtils {
   }) {
     if (appointments.isEmpty) return [];
 
+    // Deduplicate: If multiple events have same title, start, end, and category, keep only one
+    // This handles duplicates from multiple calendar providers (e.g. Google and Outlook both sync the same event)
+    final List<CustomAppointment> uniqueApps = [];
+    final Set<String> seen = {};
+
+    for (final app in appointments) {
+      // Content-based key for deduplication
+      final key = '${app.title}_${app.startTime.toIso8601String()}_${app.endTime.toIso8601String()}_${app.catTitle}';
+      if (!seen.contains(key)) {
+        uniqueApps.add(app);
+        seen.add(key);
+      }
+    }
+
     // Separate timed and all-day events (we only group timed ones)
-    final timedEvents = appointments.where((e) => !e.isAllDay).toList();
-    final allDayEvents = appointments.where((e) => e.isAllDay).toList();
+    final timedEvents = uniqueApps.where((e) => !e.isAllDay).toList();
+    final allDayEvents = uniqueApps.where((e) => e.isAllDay).toList();
 
     if (timedEvents.isEmpty) return allDayEvents;
 

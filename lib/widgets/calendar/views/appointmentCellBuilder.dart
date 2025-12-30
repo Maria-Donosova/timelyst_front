@@ -8,6 +8,7 @@ import '../../../providers/calendarProvider.dart';
 import '../../../utils/rruleParser.dart';
 import '../../../providers/eventProvider.dart';
 import '../../../utils/eventsMapper.dart';
+import '../../responsive/responsive_helper.dart';
 
 /**
  * Method to build the UI for a single appointment.
@@ -311,6 +312,12 @@ Widget appointmentBuilder(BuildContext context,
                     Text(
                       customAppointment.title,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontSize: ResponsiveHelper.getResponsiveValue(
+                              context,
+                              mobileValue: 10,
+                              tabletValue: 12,
+                              desktopValue: 14,
+                            ),
                             color: isSummary ? Theme.of(context).textTheme.bodyLarge?.color : null,
                             fontWeight: isSummary ? FontWeight.bold : null,
                             fontStyle: customAppointment.title == 'Busy'
@@ -391,6 +398,12 @@ Widget appointmentBuilder(BuildContext context,
                     child: Text(
                       customAppointment.title,
                       style: TextStyle(
+                        fontSize: ResponsiveHelper.getResponsiveValue(
+                          context,
+                          mobileValue: 10,
+                          tabletValue: 12,
+                          desktopValue: 14,
+                        ),
                         color: Theme.of(context).colorScheme.primary,
                         fontStyle: customAppointment.title == 'Busy'
                             ? FontStyle.italic

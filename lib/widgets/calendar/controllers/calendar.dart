@@ -143,13 +143,9 @@ class _CalendarWState extends State<CalendarW> {
                             mobile: 8.0, tablet: 10.0, desktop: 12.0)),
                     child: WeekDaysW(
                         cellWidth: cellWidth,
-                        viewHeaderText6: 'Sun',
-                        viewHeaderText: 'Mon',
-                        viewHeaderText1: 'Tue',
-                        viewHeaderText2: 'Wed',
-                        viewHeaderText3: 'Thu',
-                        viewHeaderText4: 'Fri',
-                        viewHeaderText5: 'Sat'),
+                        dayNames: ResponsiveHelper.isMobile(context)
+                            ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                            : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']),
                   )
                 : isWeek
                     ? Padding(
@@ -158,13 +154,9 @@ class _CalendarWState extends State<CalendarW> {
                                 mobile: 8.0, tablet: 10.0, desktop: 12.0)),
                         child: WeekDaysW(
                             cellWidth: cellWidth,
-                            viewHeaderText6: 'Sun',
-                            viewHeaderText: 'Mon',
-                            viewHeaderText1: 'Tue',
-                            viewHeaderText2: 'Wed',
-                            viewHeaderText3: 'Thur',
-                            viewHeaderText4: 'Fri',
-                            viewHeaderText5: 'Sun'),
+                            dayNames: ResponsiveHelper.isMobile(context)
+                                ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                                : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']),
                       )
                     : Container(),
           ]),
