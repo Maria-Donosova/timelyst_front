@@ -305,7 +305,7 @@ Widget appointmentBuilder(BuildContext context,
             splashColor: Colors.blueGrey.withAlpha(30),
             child: Stack(children: [
               Padding(
-                padding: const EdgeInsets.all(4.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -324,7 +324,7 @@ Widget appointmentBuilder(BuildContext context,
                                 ? FontStyle.italic
                                 : null,
                           ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (isSummary)
@@ -346,15 +346,15 @@ Widget appointmentBuilder(BuildContext context,
               SizedBox(
                 child: Align(
                   // Position the CircleAvatar at the top-left of the stack
-                  alignment: Alignment(-1.0, -1.0),
+                  alignment: Alignment(-1.0, 0.0), // Center vertically
                   child: CircleAvatar(
                     backgroundColor: indicatorColor,
-                    radius: 2.5,
+                    radius: 3.5, // Increased size
                   ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.all(4.0),
+                padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
                   border: Border(
                     left: BorderSide(
