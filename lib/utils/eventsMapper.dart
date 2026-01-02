@@ -61,6 +61,8 @@ class EventMapper {
       calendarId: timeEvent.calendarIds.isNotEmpty ? timeEvent.calendarIds.first : null,
       userCalendars: timeEvent.calendarIds,
       timeEventInstance: timeEvent,
+      masterId: timeEvent.masterId,
+      isOccurrence: timeEvent.isOccurrence,
     );
   }
 

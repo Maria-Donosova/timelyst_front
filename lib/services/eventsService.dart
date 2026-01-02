@@ -156,11 +156,13 @@ class EventService {
     required String authToken,
     required DateTime start,
     required DateTime end,
+    bool expand = true,  // Request expanded occurrences from backend
   }) async {
     try {
       final queryParams = {
         'start': start.toUtc().toIso8601String(),
         'end': end.toUtc().toIso8601String(),
+        'expand': expand.toString(),
       };
 
       final uri = Uri.parse('${Config.backendURL}/api/calendar')

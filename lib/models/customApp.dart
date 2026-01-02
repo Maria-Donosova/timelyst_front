@@ -34,6 +34,10 @@ class CustomAppointment {
   final String? googleEventId;
   final String? appleEventId;
   final List<CustomAppointment>? groupedEvents;
+  
+  // Fields for backend-expanded occurrences
+  final String? masterId;      // Original master event ID (for expanded occurrences)
+  final bool isOccurrence;     // True if this is a backend-expanded occurrence
 
   CustomAppointment({
     required this.id,
@@ -67,6 +71,8 @@ class CustomAppointment {
     this.googleEventId,
     this.appleEventId,
     this.groupedEvents,
+    this.masterId,
+    this.isOccurrence = false,
   })  : createdAt = _parseDate(createdAt),
         updatedAt = _parseDate(updatedAt);
 
@@ -91,11 +97,14 @@ class CustomAppointment {
   bool get isMasterEvent => 
       recurrenceRule != null && 
       recurrenceRule!.isNotEmpty && 
+      !isOccurrence &&
       (recurrenceId == null || recurrenceId!.isEmpty);
   
   bool get isException => recurrenceId != null && recurrenceId!.isNotEmpty;
   
   bool get isRecurring => isMasterEvent || isException;
+  
+  bool get isExpandedOccurrence => isOccurrence && masterId != null;
 
   // Convert CustomAppointment to JSON (if needed)
   Map<String, dynamic> toJson() {
@@ -122,6 +131,8 @@ class CustomAppointment {
       'microsoftEventId': microsoftEventId,
       'googleEventId': googleEventId,
       'appleEventId': appleEventId,
+      'masterId': masterId,
+      'isOccurrence': isOccurrence,
     };
   }
 
@@ -154,6 +165,8 @@ class CustomAppointment {
     String? googleEventId,
     String? appleEventId,
     List<CustomAppointment>? groupedEvents,
+    String? masterId,
+    bool? isOccurrence,
   }) {
     return CustomAppointment(
       id: id ?? this.id,
@@ -184,6 +197,8 @@ class CustomAppointment {
       googleEventId: googleEventId ?? this.googleEventId,
       appleEventId: appleEventId ?? this.appleEventId,
       groupedEvents: groupedEvents ?? this.groupedEvents,
+      masterId: masterId ?? this.masterId,
+      isOccurrence: isOccurrence ?? this.isOccurrence,
     );
   }
 }

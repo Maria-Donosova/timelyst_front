@@ -32,12 +32,17 @@ class TimeEvent {
   final DateTime createdAt;
   final DateTime updatedAt;
   final Map<String, dynamic>? rawData;
+  
+  // Fields for backend-expanded occurrences
+  final String? masterId;      // Original master event ID (for expanded occurrences)
+  final bool isOccurrence;     // True if this is a backend-expanded occurrence
 
   // Computed properties
-  bool get isMasterEvent => recurrenceRule.isNotEmpty && (recurrenceId == null || recurrenceId!.isEmpty);
+  bool get isMasterEvent => recurrenceRule.isNotEmpty && !isOccurrence && (recurrenceId == null || recurrenceId!.isEmpty);
   bool get isException => recurrenceId != null && recurrenceId!.isNotEmpty;
   bool get isCancelled => status == 'cancelled';
   bool get isRecurring => isMasterEvent || isException;
+  bool get isExpandedOccurrence => isOccurrence && masterId != null;
 
   TimeEvent({
     required this.id,
@@ -70,6 +75,8 @@ class TimeEvent {
     required this.createdAt,
     required this.updatedAt,
     this.rawData,
+    this.masterId,
+    this.isOccurrence = false,
   });
 
   factory TimeEvent.fromJson(Map<String, dynamic> json) {
@@ -119,6 +126,8 @@ class TimeEvent {
       createdAt: DateTime.parse(json['createdAt'] ?? json['created_at']),
       updatedAt: DateTime.parse(json['updatedAt'] ?? json['updated_at']),
       rawData: json['rawData'] ?? json['raw_data'],
+      masterId: json['masterId'] ?? json['master_id'],
+      isOccurrence: json['isOccurrence'] ?? json['is_occurrence'] ?? false,
     );
   }
 
@@ -170,6 +179,8 @@ class TimeEvent {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'rawData': rawData,
+      'masterId': masterId,
+      'isOccurrence': isOccurrence,
     };
   }
 }

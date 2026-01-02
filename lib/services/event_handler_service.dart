@@ -22,7 +22,8 @@ class EventHandlerService {
     DateTime? occurrenceDate,
     int? totalOccurrences,
   }) async {
-    final isRecurring = appointment.isMasterEvent || appointment.isException;
+    // For expanded occurrences, check isOccurrence flag
+    final isRecurring = appointment.isMasterEvent || appointment.isException || appointment.isOccurrence;
 
     if (!isRecurring) {
       // Simple single event - just update
@@ -34,10 +35,11 @@ class EventHandlerService {
       return;
     }
 
-    // Get the master event ID
-    final masterId = appointment.isException && appointment.recurrenceId != null
-        ? appointment.recurrenceId!
-        : appointment.id;
+    // Get the master event ID (prioritize masterId for expanded occurrences)
+    final masterId = appointment.masterId ?? 
+        (appointment.isException && appointment.recurrenceId != null
+            ? appointment.recurrenceId!
+            : appointment.id);
 
     // Show dialog to select edit scope
     final editType = await RecurringEventDialog(
@@ -46,7 +48,7 @@ class EventHandlerService {
 
     if (editType == null) return; // User cancelled
 
-    final originalStart = occurrenceDate ?? appointment.startTime;
+    final originalStart = appointment.originalStart ?? occurrenceDate ?? appointment.startTime;
 
     switch (editType) {
       case RecurringEditType.thisOccurrence:
@@ -91,7 +93,8 @@ class EventHandlerService {
     DateTime? occurrenceDate,
     int? totalOccurrences,
   }) async {
-    final isRecurring = appointment.isMasterEvent || appointment.isException;
+    // For expanded occurrences, check isOccurrence flag
+    final isRecurring = appointment.isMasterEvent || appointment.isException || appointment.isOccurrence;
 
     if (!isRecurring) {
       // Simple single event - just delete
@@ -99,10 +102,11 @@ class EventHandlerService {
       return;
     }
 
-    // Get the master event ID
-    final masterId = appointment.isException && appointment.recurrenceId != null
-        ? appointment.recurrenceId!
-        : appointment.id;
+    // Get the master event ID (prioritize masterId for expanded occurrences)
+    final masterId = appointment.masterId ?? 
+        (appointment.isException && appointment.recurrenceId != null
+            ? appointment.recurrenceId!
+            : appointment.id);
 
     // Show dialog to select delete scope
     final deleteType = await RecurringEventDialog(
@@ -111,7 +115,7 @@ class EventHandlerService {
 
     if (deleteType == null) return; // User cancelled
 
-    final originalStart = occurrenceDate ?? appointment.startTime;
+    final originalStart = appointment.originalStart ?? occurrenceDate ?? appointment.startTime;
 
     switch (deleteType) {
       case RecurringDeleteType.thisOccurrence:
@@ -150,7 +154,8 @@ class EventHandlerService {
     required Duration eventDuration,
     int? totalOccurrences,
   }) async {
-    final isRecurring = appointment.isMasterEvent || appointment.isException;
+    // For expanded occurrences, check isOccurrence flag
+    final isRecurring = appointment.isMasterEvent || appointment.isException || appointment.isOccurrence;
 
     if (!isRecurring) {
       // Simple single event - update directly
@@ -162,10 +167,11 @@ class EventHandlerService {
       return;
     }
 
-    // Get the master event ID
-    final masterId = appointment.isException && appointment.recurrenceId != null
-        ? appointment.recurrenceId!
-        : appointment.id;
+    // Get the master event ID (prioritize masterId for expanded occurrences)
+    final masterId = appointment.masterId ?? 
+        (appointment.isException && appointment.recurrenceId != null
+            ? appointment.recurrenceId!
+            : appointment.id);
 
     // Show simplified 2-option dialog for drag-and-drop
     final scope = await RecurringEventDialog(
@@ -185,7 +191,7 @@ class EventHandlerService {
         await EventService.updateThisOccurrence(
           authToken: authToken,
           masterEventId: masterId,
-          originalStart: appointment.startTime,
+          originalStart: appointment.originalStart ?? appointment.startTime,
           updates: updates,
         );
         break;

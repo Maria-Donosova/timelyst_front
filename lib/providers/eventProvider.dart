@@ -27,6 +27,9 @@ class EventProvider with ChangeNotifier {
   // Occurrence counts for recurring events (master event ID -> count)
   final Map<String, int> _occurrenceCounts = {};
   
+  // Store masters for edit/delete operations on expanded occurrences
+  Map<String, TimeEvent> _mastersMap = {};
+  
   // Debug flag - set to true temporarily for debugging API issues
   static const bool _debugLogging = true;
   
@@ -42,6 +45,15 @@ class EventProvider with ChangeNotifier {
   /// Get occurrence count for a master event (for dialog display)
   int getOccurrenceCount(String masterEventId) {
     return _occurrenceCounts[masterEventId] ?? 0;
+  }
+  
+  /// Get masters map for edit/delete operations
+  Map<String, TimeEvent> get mastersMap => _mastersMap;
+  
+  /// Store masters for edit/delete lookup on expanded occurrences
+  void setMastersMap(List<TimeEvent> masters) {
+    _mastersMap = {for (var m in masters) m.id: m};
+    if (_debugLogging) print('📊 [EventProvider] Stored ${masters.length} masters for lookup');
   }
 
   EventProvider({AuthService? authService}) 
@@ -342,35 +354,39 @@ class EventProvider with ChangeNotifier {
         authToken: authToken,
         start: start,
         end: end,
+        expand: true,  // Request backend-expanded occurrences
       );
       
-      // Extract data from response
-      final masterEvents = (response['masterEvents'] as List<dynamic>)
-          .map((e) => TimeEvent.fromJson(e as Map<String, dynamic>))
-          .toList();
-      final exceptions = (response['exceptions'] as List<dynamic>)
-          .map((e) => TimeEvent.fromJson(e as Map<String, dynamic>))
-          .toList();
-      final occurrenceCounts = Map<String, int>.from(response['occurrenceCounts'] as Map);
+      // Extract expanded events and masters from response
+      final events = (response['events'] as List<dynamic>?)
+          ?.map((e) => TimeEvent.fromJson(e as Map<String, dynamic>))
+          .toList() ?? [];
+          
+      final masters = (response['masters'] as List<dynamic>?)
+          ?.map((e) => TimeEvent.fromJson(e as Map<String, dynamic>))
+          .toList() ?? [];
+          
+      final occurrenceCounts = response['occurrenceCounts'] != null
+          ? Map<String, int>.from(response['occurrenceCounts'] as Map)
+          : <String, int>{};
       
       // Store occurrence counts
       _occurrenceCounts.clear();
       _occurrenceCounts.addAll(occurrenceCounts);
       
+      // Store masters map for edit/delete operations
+      setMastersMap(masters);
+      
       if (_debugLogging) {
-        print('📊 [EventProvider] Received ${masterEvents.length} masters, ${exceptions.length} exceptions');
+        print('📊 [EventProvider] Received ${events.length} expanded events, ${masters.length} masters');
         print('📊 [EventProvider] Occurrence counts: ${occurrenceCounts.length} series');
       }
       
       // Store raw TimeEvent objects for TimelystCalendarDataSource
-      _timeEvents = [...masterEvents, ...exceptions];
-      
-      // Combine masters and exceptions into single list for now
-      // The TimelystCalendarDataSource will handle the separation
-      final allEvents = [...masterEvents, ...exceptions];
+      _timeEvents = events;
       
       // Map to CustomAppointments
-      final appointments = allEvents
+      final appointments = events
           .map((event) {
             try {
               return EventMapper.mapTimeEventToCustomAppointment(event);
