@@ -56,7 +56,7 @@ class _CalendarWState extends State<CalendarW> {
 
     // Initialize data source with empty list to handle initial loading state gracefully
     _dataSource = TimelystCalendarDataSource(
-      events: [],
+      appointments: [],
       occurrenceCounts: {},
     );
     
@@ -72,13 +72,15 @@ class _CalendarWState extends State<CalendarW> {
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
 
     // Use new calendar view API with expand=true (default)
+    // Fix: Subtract 1 day from start to catch all-day events that might be 
+    // shifted by timezone (e.g. UTC midnight being 7-8pm the night before in local time)
     await eventProvider.fetchCalendarView(
-      startDate: _visibleDates.first,
+      startDate: _visibleDates.first.subtract(const Duration(days: 1)),
       endDate: _visibleDates.last.add(const Duration(days: 1)),
     );
 
-    // Get TimeEvent objects from provider (already expanded by backend)
-    final timeEvents = eventProvider.timeEvents;
+    // Get synced CustomAppointment objects from provider
+    final appointments = eventProvider.events;
     
     // Build occurrence counts map from masters
     final occurrenceCounts = <String, int>{};
@@ -93,7 +95,7 @@ class _CalendarWState extends State<CalendarW> {
 
     setState(() {
       _dataSource = TimelystCalendarDataSource(
-        events: timeEvents,  // Flat list from backend
+        appointments: appointments,  // Synced appointments from provider
         occurrenceCounts: occurrenceCounts,
         summarizeWidth: isWeek ? cellWidth : null,
       );

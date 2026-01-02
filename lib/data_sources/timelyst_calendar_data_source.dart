@@ -15,27 +15,17 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
   final Map<String, int> _occurrenceCounts;
 
   /// Constructor for expanded mode (default)
-  /// Accepts a flat list of events that are already expanded by the backend
+  /// Accepts a flat list of appointments that are already mapped and synced
   TimelystCalendarDataSource({
-    required List<TimeEvent> events,
+    required List<CustomAppointment> appointments,
     required Map<String, int> occurrenceCounts,
     double? summarizeWidth,
   }) : _occurrenceCounts = occurrenceCounts {
-    final apps = _buildAppointments(events);
     if (summarizeWidth != null) {
-      appointments = CalendarUtils.groupAndSummarize(apps, summarizeWidth);
+      this.appointments = CalendarUtils.groupAndSummarize(appointments, summarizeWidth);
     } else {
-      appointments = apps;
+      this.appointments = appointments;
     }
-  }
-
-  /// Builds CustomAppointments from backend-expanded events
-  /// Since backend handles expansion, this is a simple map operation
-  List<CustomAppointment> _buildAppointments(List<TimeEvent> events) {
-    return events
-        .where((e) => e.status != 'cancelled')  // Filter cancelled occurrences
-        .map((e) => EventMapper.mapTimeEventToCustomAppointment(e))
-        .toList();
   }
 
   /// Returns the total occurrence count for a master event
