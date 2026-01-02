@@ -101,8 +101,8 @@ class TimeEvent {
       recurrenceRule: json['recurrenceRule'] ?? json['recurrence_rule'] ?? '',
       recurrenceId: json['recurrenceId'] ?? json['recurrence_id'],
       originalStart: json['originalStart'] != null 
-          ? DateTime.parse(json['originalStart']) 
-          : (json['original_start'] != null ? DateTime.parse(json['original_start']) : null),
+          ? DateTime.parse(json['originalStart'] as String) 
+          : (json['original_start'] != null ? DateTime.parse(json['original_start'] as String) : null),
       exDates: json['exDates'] != null
           ? (json['exDates'] as List<dynamic>).map((e) => e.toString()).toList()
           : (json['ex_dates'] != null 
