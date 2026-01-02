@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/task.dart';
-import '../../services/tasksService.dart';
-import '../../services/authService.dart';
 import '../shared/categories.dart';
 import '../ToDo/editTask.dart';
+import '../responsive/responsive_helper.dart';
 
 class TaskItem extends StatefulWidget {
   final String id;
@@ -89,7 +88,16 @@ class _TaskItemState extends State<TaskItem> {
                           padding: const EdgeInsets.only(bottom: 7),
                           child: Text(
                             widget.title,
-                            style: Theme.of(context).textTheme.displaySmall,
+                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                              fontSize: ResponsiveHelper.getResponsiveValue(
+                                context,
+                                mobileValue: 10,
+                                tabletValue: 12,
+                                desktopValue: 14,
+                              ),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         Row(
@@ -97,6 +105,14 @@ class _TaskItemState extends State<TaskItem> {
                           children: [
                             Text(
                               widget.category,
+                              style: TextStyle(
+                                fontSize: ResponsiveHelper.getResponsiveValue(
+                                  context,
+                                  mobileValue: 8,
+                                  tabletValue: 10,
+                                  desktopValue: 12,
+                                ),
+                              ),
                             ),
                             if (widget.dueDate != null)
                               Text(
@@ -104,7 +120,12 @@ class _TaskItemState extends State<TaskItem> {
                                     .format(widget.dueDate!),
                                 style: TextStyle(
                                   color: Colors.grey,
-                                  fontSize: 12,
+                                  fontSize: ResponsiveHelper.getResponsiveValue(
+                                    context,
+                                    mobileValue: 8,
+                                    tabletValue: 10,
+                                    desktopValue: 12,
+                                  ),
                                 ),
                               ),
                           ],
