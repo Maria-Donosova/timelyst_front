@@ -538,10 +538,6 @@ class EventProvider with ChangeNotifier {
     final bufferStart = startDate.subtract(Duration(days: 1));
     final bufferEnd = endDate.add(Duration(days: 1));
     
-    if (_debugLogging) {
-      print('🔄 [EventProvider] Sync buffer: ${bufferStart.toIso8601String().substring(0, 10)} to ${bufferEnd.toIso8601String().substring(0, 10)}');
-    }
-
     // Only remove events that are completely outside the buffered range AND being replaced
     final fetchedEventIds = fetchedEvents.map((e) => e.id).toSet();
     final eventsToKeep = _events.where((event) {
