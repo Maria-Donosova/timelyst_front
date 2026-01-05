@@ -11,20 +11,14 @@ import '../../../models/customApp.dart';
  * @param details Details related to the month cell in the calendar.
  */
 Widget monthCellBuilder(BuildContext context, MonthCellDetails details) {
-  // Get the number of appointments in the month cell
-  final appointments = details.appointments;
-  final length = appointments.length;
+  // Get the appointments in the month cell
+  final appointments = details.appointments.cast<CustomAppointment>();
+  
+  // Separate all-day and regular events
+  final allDayEvents = appointments.where((app) => app.isAllDay).toList();
+  final regularEvents = appointments.where((app) => !app.isAllDay).toList();
 
   final width = MediaQuery.of(context).size.width;
-
-  // Find the first all-day event if any
-  CustomAppointment? allDayEvent;
-  for (final app in appointments) {
-    if (app is CustomAppointment && app.isAllDay) {
-      allDayEvent = app;
-      break;
-    }
-  }
 
   return Container(
     width: width,
@@ -33,62 +27,82 @@ Widget monthCellBuilder(BuildContext context, MonthCellDetails details) {
     ),
     child: InkWell(
       splashColor: Colors.blueGrey.withAlpha(30),
-      onTap: () {
-        // Taps are typically handled by SfCalendar's onTap
-      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Display the day of the month
           Padding(
-            padding: const EdgeInsets.only(top: 8, left: 8.0),
+            padding: const EdgeInsets.only(top: 6, left: 8.0),
             child: Text(
               details.date.day.toString(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 14,
-                    color: Colors.black,
+                    fontSize: 12,
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
                   ),
             ),
           ),
-          const SizedBox(height: 4),
-          // Display the all-day event title
-          if (allDayEvent != null)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                color: catColor(allDayEvent.catTitle).withOpacity(0.12),
-                borderRadius: BorderRadius.circular(2),
-              ),
+          const SizedBox(height: 2),
+          
+          // Display up to 2 all-day events
+          ...allDayEvents.take(2).map((event) => Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: catColor(event.catTitle).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(3),
+                  border: Border.all(
+                    color: catColor(event.catTitle).withOpacity(0.3),
+                    width: 0.5,
+                  ),
+                ),
+                child: Text(
+                  event.title,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              )),
+
+          // Indicator for more all-day events
+          if (allDayEvents.length > 2)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 1),
               child: Text(
-                allDayEvent.title,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w400,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                '+${allDayEvents.length - 2} more',
+                style: const TextStyle(fontSize: 8, color: Colors.grey),
               ),
             ),
+          
           const Spacer(),
-          // Display the number of events
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, bottom: 8.0, right: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '$length Events',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+
+          // Display dots for regular events
+          if (regularEvents.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Wrap(
+                spacing: 3,
+                runSpacing: 3,
+                children: regularEvents.take(12).map((event) => Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: catColor(event.catTitle),
+                        shape: BoxShape.circle,
+                        // Add a subtle border for lighter colors
+                        border: Border.all(
+                          color: Colors.black.withOpacity(0.05),
+                          width: 0.2,
+                        ),
                       ),
-                ),
-              ],
+                    )).toList(),
+              ),
             ),
-          ),
         ],
       ),
     ),
