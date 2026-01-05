@@ -199,6 +199,11 @@ class EventProvider with ChangeNotifier {
         final cachedEvents = _getCachedEvents(cacheKey);
         if (cachedEvents != null) {
           _events = cachedEvents;
+          // Sync _timeEvents for the calendar data source
+          _timeEvents = cachedEvents
+              .map((e) => e.timeEventInstance)
+              .whereType<TimeEvent>()
+              .toList();
           _previousEvents = List.from(_events);
           notifyListeners();
           if (_debugLogging) print('⚡ [EventProvider] Returned cached events, skipping API call');
@@ -272,7 +277,12 @@ class EventProvider with ChangeNotifier {
       
       // Sync events for the specific date range requested
       if (startDate != null && endDate != null) {
-        _syncEventsForDateRange(fetchedEvents, startDate, endDate);
+        _events = fetchedEvents;
+        // Sync _timeEvents for the calendar data source
+        _timeEvents = fetchedEvents
+            .map((e) => e.timeEventInstance)
+            .whereType<TimeEvent>()
+            .toList();
       } else {
         // For backward compatibility, replace all events if no date range specified
         _syncEventsIncremental(fetchedEvents);
@@ -326,6 +336,11 @@ class EventProvider with ChangeNotifier {
       final cachedEvents = _getCachedEvents(cacheKey);
       if (cachedEvents != null) {
         _events = cachedEvents;
+        // Sync _timeEvents for the calendar data source
+        _timeEvents = cachedEvents
+            .map((e) => e.timeEventInstance)
+            .whereType<TimeEvent>()
+            .toList();
         _previousEvents = List.from(_events);
         notifyListeners();
         if (_debugLogging) print('⚡ [EventProvider] Returned cached calendar view');
@@ -399,12 +414,9 @@ class EventProvider with ChangeNotifier {
           .cast<CustomAppointment>()
           .toList();
       
-      // Sync with existing events
-      if (startDate != null && endDate != null) {
-        _syncEventsForDateRange(appointments, start, end);
-      } else {
-        _syncEventsIncremental(appointments);
-      }
+      // Replace existing events for the calendar view to avoid accumulation
+      // and potential Syncfusion crashes with too many events.
+      _events = appointments;
       
       _previousEvents = List.from(_events);
       
