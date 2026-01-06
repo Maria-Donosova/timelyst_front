@@ -87,15 +87,21 @@ class _CalendarWState extends State<CalendarW> {
     }
     
     // Create simplified data source with flat event list
-    final width = MediaQuery.of(context).size.width;
-    final cellWidth = width / 14;
+    double screenWidth = 0;
+    try {
+      screenWidth = MediaQuery.of(context).size.width;
+    } catch (e) {
+      print('⚠️ [Calendar] Could not get screen width in _loadEvents: $e');
+    }
+    
+    final cellWidth = screenWidth / 14;
     final isWeek = _controller.view == CalendarView.week;
 
     setState(() {
       _dataSource = TimelystCalendarDataSource(
         events: timeEvents,  // Flat list from backend
         occurrenceCounts: occurrenceCounts,
-        summarizeWidth: isWeek ? cellWidth : null,
+        summarizeWidth: isWeek && cellWidth > 0 ? cellWidth : null,
       );
     });
   }
@@ -222,26 +228,28 @@ class _CalendarWState extends State<CalendarW> {
                       if (_controller.view == CalendarView.week) {
                         final visibleDatesLength =
                             viewChangedDetails.visibleDates.length;
-                        _weekStart = DateFormat('d')
-                            .format(viewChangedDetails.visibleDates[0])
-                            .toString();
+                        final firstDate = viewChangedDetails.visibleDates[0];
+                        final middleDate = viewChangedDetails.visibleDates[
+                                visibleDatesLength > 6
+                                    ? 3 // Better middle for week view
+                                    : visibleDatesLength ~/ 2];
+                                    
+                        _weekStart = DateFormat('d').format(firstDate).toString();
                         _weekEnd = DateFormat('d')
                             .format(viewChangedDetails.visibleDates[
                                 visibleDatesLength > 6
                                     ? 6
                                     : visibleDatesLength - 1])
                             .toString();
-                        _month = DateFormat('MMMM')
-                            .format(viewChangedDetails.visibleDates[0])
-                            .toString();
-                        _headerText =
-                            _month! + ' ' + _weekStart! + ' - ' + _weekEnd!;
+                        _month = DateFormat('MMMM').format(middleDate).toString();
+                        
+                        // Robust string interpolation with null checks
+                        _headerText = '${_month ?? ''} ${_weekStart ?? ''} - ${_weekEnd ?? ''}';
                       }
                       if (_controller.view == CalendarView.day) {
-                        _headerText = DateFormat('MMMMEEEEd')
-                            .format(viewChangedDetails.visibleDates[
-                                viewChangedDetails.visibleDates.length ~/ 2])
-                            .toString();
+                        final middleDate = viewChangedDetails.visibleDates[
+                                viewChangedDetails.visibleDates.length ~/ 2];
+                        _headerText = DateFormat('MMMMEEEEd').format(middleDate).toString();
                       }
 
                       // Load events using the new calendar view API
@@ -510,14 +518,19 @@ class _CalendarWState extends State<CalendarW> {
 
   /// Handles drag-and-drop operations, especially for recurring events
   Future<void> _handleDragEnd(AppointmentDragEndDetails details) async {
-    // Diagnostic logging to debug type mismatch issues
-    AppLogger.debug('Drag: appointment type = ${details.appointment?.runtimeType}', 'Calendar');
-    AppLogger.debug('Drag: droppingTime = ${details.droppingTime}', 'Calendar');
+    // Comprehensive diagnostic logging
+    final appointmentName = details.appointment is Appointment 
+        ? (details.appointment as Appointment).subject 
+        : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).title : 'Unknown');
+        
+    print('🖱️ [Drag] START: ${appointmentName}');
+    print('🖱 [Drag] Type: ${details.appointment?.runtimeType}');
+    print('🖱 [Drag] ID: ${details.appointment is Appointment ? (details.appointment as Appointment).id : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).id : "N/A")}');
+    print('🖱 [Drag] New Time: ${details.droppingTime}');
 
     // Null safety: Syncfusion may provide null values in edge cases
-    // (rapid gestures, widget disposal during drag)
     if (details.appointment == null || details.droppingTime == null) {
-      AppLogger.debug('Drag cancelled - null appointment or droppingTime', 'Calendar');
+      print('⚠️ [Drag] Cancelled - null appointment or droppingTime');
       return;
     }
 
@@ -544,7 +557,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime, 
             endTime: rawAppointment.endTime,
           );
-          AppLogger.debug('Drag: Resolved appointment by ID: ${master.id}', 'Calendar');
+          print('🖱️ [Drag] Resolved by ID: ${master.id}');
         }
       }
       
@@ -559,7 +572,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime, 
             endTime: rawAppointment.endTime,
           );
-          AppLogger.debug('Drag: Resolved appointment by time+title: ${match.id}', 'Calendar');
+          print('🖱️ [Drag] Resolved by time+title: ${match.id}');
         }
       }
       
@@ -574,7 +587,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime, 
             endTime: rawAppointment.endTime,
           );
-          AppLogger.debug('Drag: Resolved appointment by title-only: ${match.id}', 'Calendar');
+          print('🖱️ [Drag] Resolved by title-only: ${match.id}');
         }
       }
       
@@ -590,7 +603,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime,
             endTime: rawAppointment.endTime,
           );
-          AppLogger.debug('Drag: Resolved appointment by recurrenceId: ${master.id}', 'Calendar');
+          print('🖱️ [Drag] Resolved by recurrenceId: ${master.id}');
         }
       }
     }
@@ -731,16 +744,21 @@ class _CalendarWState extends State<CalendarW> {
 
   /// Handles appointment resize operations
   Future<void> _handleResizeEnd(AppointmentResizeEndDetails details) async {
-    // Diagnostic logging to debug type mismatch issues
-    AppLogger.debug('Resize: appointment type = ${details.appointment?.runtimeType}', 'Calendar');
-    AppLogger.debug('Resize: startTime = ${details.startTime}', 'Calendar');
-    AppLogger.debug('Resize: endTime = ${details.endTime}', 'Calendar');
+    // Comprehensive diagnostic logging
+    final appointmentName = details.appointment is Appointment 
+        ? (details.appointment as Appointment).subject 
+        : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).title : 'Unknown');
+
+    print('📏 [Resize] START: ${appointmentName}');
+    print('📏 [Resize] Type: ${details.appointment?.runtimeType}');
+    print('📏 [Resize] ID: ${details.appointment is Appointment ? (details.appointment as Appointment).id : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).id : "N/A")}');
+    print('📏 [Resize] Range: ${details.startTime} -> ${details.endTime}');
 
     // (rapid gestures, widget disposal during resize)
     if (details.appointment == null || 
         details.startTime == null || 
         details.endTime == null) {
-      AppLogger.debug('Resize cancelled - null values', 'Calendar');
+      print('⚠️ [Resize] Cancelled - null values');
       return;
     }
 
@@ -765,7 +783,7 @@ class _CalendarWState extends State<CalendarW> {
         );
         if (master.id != 'temp') {
           appointment = master;
-          AppLogger.debug('Resize: Resolved appointment by ID: ${master.id}', 'Calendar');
+          print('📏 [Resize] Resolved by ID: ${master.id}');
         }
       }
       
@@ -777,7 +795,7 @@ class _CalendarWState extends State<CalendarW> {
         );
         if (match.id != 'temp') {
           appointment = match;
-          AppLogger.debug('Resize: Resolved appointment by time+title: ${match.id}', 'Calendar');
+          print('📏 [Resize] Resolved by time+title: ${match.id}');
         }
       }
       
@@ -789,7 +807,7 @@ class _CalendarWState extends State<CalendarW> {
         );
         if (match.id != 'temp') {
           appointment = match;
-          AppLogger.debug('Resize: Resolved appointment by title-only: ${match.id}', 'Calendar');
+          print('📏 [Resize] Resolved by title-only: ${match.id}');
         }
       }
       
@@ -805,7 +823,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime,
             endTime: rawAppointment.endTime,
           );
-          AppLogger.debug('Resize: Resolved appointment by recurrenceId: ${master.id}', 'Calendar');
+          print('📏 [Resize] Resolved by recurrenceId: ${master.id}');
         }
       }
     }

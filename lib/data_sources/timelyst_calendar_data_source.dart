@@ -24,18 +24,42 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
     final apps = _buildAppointments(events);
     if (summarizeWidth != null) {
       appointments = CalendarUtils.groupAndSummarize(apps, summarizeWidth);
+      print('📊 [DataSource] Grouped ${apps.length} events into ${appointments?.length} (cellWidth: $summarizeWidth)');
     } else {
       appointments = apps;
+      print('📊 [DataSource] Initialized with ${apps.length} flat events');
     }
+  }
+
+  @override
+  CustomAppointment convertAppointmentToObject(Object? appointment) {
+    if (appointment is CustomAppointment) {
+      return appointment;
+    }
+    // Fallback or error case - Syncfusion should pass the CustomAppointment instance
+    // but if it passes a wrapper, we'd need to unwrap it here.
+    return appointment as CustomAppointment;
   }
 
   /// Builds CustomAppointments from backend-expanded events
   /// Since backend handles expansion, this is a simple map operation
   List<CustomAppointment> _buildAppointments(List<TimeEvent> events) {
-    return events
-        .where((e) => e.status != 'cancelled')  // Filter cancelled occurrences
+    int cancelledCount = 0;
+    final apps = events
+        .where((e) {
+          if (e.status == 'cancelled') {
+            cancelledCount++;
+            return false;
+          }
+          return true;
+        })
         .map((e) => EventMapper.mapTimeEventToCustomAppointment(e))
         .toList();
+        
+    if (cancelledCount > 0) {
+      print('📊 [DataSource] Filtered $cancelledCount cancelled occurrences');
+    }
+    return apps;
   }
 
   /// Returns the total occurrence count for a master event
