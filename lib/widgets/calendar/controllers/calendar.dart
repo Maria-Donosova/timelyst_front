@@ -510,7 +510,12 @@ class _CalendarWState extends State<CalendarW> {
 
   /// Handles drag-and-drop operations, especially for recurring events
   Future<void> _handleDragEnd(AppointmentDragEndDetails details) async {
-    if (details.appointment == null) return;
+    // Null safety: Syncfusion may provide null values in edge cases
+    // (rapid gestures, widget disposal during drag)
+    if (details.appointment == null || details.droppingTime == null) {
+      AppLogger.debug('Drag cancelled - null appointment or droppingTime', 'Calendar');
+      return;
+    }
 
     CustomAppointment? appointment;
     final dynamic rawAppointment = details.appointment!;
@@ -585,12 +590,24 @@ class _CalendarWState extends State<CalendarW> {
       }
     } else {
       // Handle non-recurring event - simple update
+      // For all-day events, ensure proper midnight-to-midnight format
+      DateTime newStart = details.droppingTime!;
+      DateTime newEnd = details.droppingTime!.add(duration);
+      
+      if (appointment.isAllDay) {
+        // Normalize to start of day for all-day events
+        newStart = DateTime(newStart.year, newStart.month, newStart.day);
+        // End must be exactly one day after start for single-day all-day events
+        final daysDuration = appointment.endTime.difference(appointment.startTime).inDays;
+        newEnd = newStart.add(Duration(days: daysDuration > 0 ? daysDuration : 1));
+      }
+      
       final updatedAppointment = CustomAppointment(
         id: appointment.id,
         title: appointment.title,
         description: appointment.description,
-        startTime: details.droppingTime!,
-        endTime: details.droppingTime!.add(duration),
+        startTime: newStart,
+        endTime: newEnd,
         catTitle: appointment.catTitle,
         catColor: appointment.catColor,
         participants: appointment.participants,
@@ -603,8 +620,11 @@ class _CalendarWState extends State<CalendarW> {
         timeEventInstance: appointment.timeEventInstance,
       );
 
-      // Optimistic UI update
-      eventProvider.updateEventLocal(appointment, updatedAppointment);
+      // Optimistic UI update with rollback capability
+      final rollback = eventProvider.optimisticUpdateEvent(
+        appointment.id, 
+        updatedAppointment,
+      );
       setState(() {});
 
       // Persist to backend
@@ -623,8 +643,8 @@ class _CalendarWState extends State<CalendarW> {
       } catch (e) {
         AppLogger.e('Error updating non-recurring event: $e', 'Calendar');
         
-        // Revert on error
-        eventProvider.updateEventLocal(updatedAppointment, appointment);
+        // Rollback on error
+        rollback();
         setState(() {});
 
         if (mounted) {
@@ -642,7 +662,14 @@ class _CalendarWState extends State<CalendarW> {
 
   /// Handles appointment resize operations
   Future<void> _handleResizeEnd(AppointmentResizeEndDetails details) async {
-    if (details.appointment == null) return;
+    // Null safety: Syncfusion may provide null values in edge cases
+    // (rapid gestures, widget disposal during resize)
+    if (details.appointment == null || 
+        details.startTime == null || 
+        details.endTime == null) {
+      AppLogger.debug('Resize cancelled - null values', 'Calendar');
+      return;
+    }
 
     CustomAppointment? appointment;
     final dynamic rawAppointment = details.appointment!;
@@ -719,12 +746,27 @@ class _CalendarWState extends State<CalendarW> {
       }
     } else {
       // Handle non-recurring event - simple update
+      // For all-day events, ensure proper midnight-to-midnight format
+      DateTime newStart = details.startTime!;
+      DateTime newEnd = details.endTime!;
+      
+      if (appointment.isAllDay) {
+        // Normalize to start of day for all-day events
+        newStart = DateTime(newStart.year, newStart.month, newStart.day);
+        // End must be start of next day (midnight format)
+        newEnd = DateTime(newEnd.year, newEnd.month, newEnd.day);
+        // If end equals start, add 1 day (minimum 1-day all-day event)
+        if (newEnd.isBefore(newStart) || newEnd.isAtSameMomentAs(newStart)) {
+          newEnd = newStart.add(const Duration(days: 1));
+        }
+      }
+      
       final updatedAppointment = CustomAppointment(
         id: appointment.id,
         title: appointment.title,
         description: appointment.description,
-        startTime: details.startTime!,
-        endTime: details.endTime!,
+        startTime: newStart,
+        endTime: newEnd,
         catTitle: appointment.catTitle,
         catColor: appointment.catColor,
         participants: appointment.participants,
@@ -738,8 +780,11 @@ class _CalendarWState extends State<CalendarW> {
         timeEventInstance: appointment.timeEventInstance,
       );
 
-      // Optimistic UI update
-      eventProvider.updateEventLocal(appointment, updatedAppointment);
+      // Optimistic UI update with rollback capability
+      final rollback = eventProvider.optimisticUpdateEvent(
+        appointment.id, 
+        updatedAppointment,
+      );
       setState(() {});
 
       // Persist to backend
@@ -758,8 +803,8 @@ class _CalendarWState extends State<CalendarW> {
       } catch (e) {
         AppLogger.e('Error updating non-recurring event: $e', 'Calendar');
         
-        // Revert on error
-        eventProvider.updateEventLocal(updatedAppointment, appointment);
+        // Rollback on error
+        rollback();
         setState(() {});
 
         if (mounted) {

@@ -738,4 +738,46 @@ class EventProvider with ChangeNotifier {
     }
   }
 
+  // ============ OPTIMISTIC UPDATE WITH ROLLBACK ============
+
+  /// Clones current events list for potential rollback
+  List<CustomAppointment> _cloneEvents() => List<CustomAppointment>.from(_events);
+
+  /// Restores events from a snapshot (for rollback on backend failure)
+  void restoreEventsSnapshot(List<CustomAppointment> snapshot) {
+    _events = snapshot;
+    if (_debugLogging) print('🔄 [EventProvider] Rolled back to previous state');
+    notifyListeners();
+  }
+
+  /// Performs an optimistic update and returns a rollback function
+  /// 
+  /// Usage:
+  /// ```dart
+  /// final rollback = eventProvider.optimisticUpdateEvent(eventId, updatedEvent);
+  /// try {
+  ///   await backendCall();
+  /// } catch (e) {
+  ///   rollback(); // Reverts to previous state
+  /// }
+  /// ```
+  Function optimisticUpdateEvent(String eventId, CustomAppointment updated) {
+    final snapshot = _cloneEvents();
+    final index = _events.indexWhere((e) => e.id == eventId);
+    
+    if (index >= 0) {
+      _events[index] = updated;
+      if (_debugLogging) print('✨ [EventProvider] Optimistic update for event: ${updated.title}');
+      notifyListeners();
+    } else {
+      // Event not found - add it
+      _events.add(updated);
+      if (_debugLogging) print('✨ [EventProvider] Optimistic add for event: ${updated.title}');
+      notifyListeners();
+    }
+    
+    // Return rollback function
+    return () => restoreEventsSnapshot(snapshot);
+  }
+
 }
