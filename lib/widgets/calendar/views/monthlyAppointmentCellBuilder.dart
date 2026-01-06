@@ -11,8 +11,10 @@ import '../../../models/customApp.dart';
  * @param details Details related to the month cell in the calendar.
  */
 Widget monthCellBuilder(BuildContext context, MonthCellDetails details) {
-  // Get the appointments in the month cell
-  final appointments = details.appointments.cast<CustomAppointment>();
+  // Safe list conversion - filter for CustomAppointment only to prevent cast errors
+  final List<CustomAppointment> appointments = details.appointments
+      .whereType<CustomAppointment>()
+      .toList();
   
   // Separate all-day and regular events
   final allDayEvents = appointments.where((app) => app.isAllDay).toList();

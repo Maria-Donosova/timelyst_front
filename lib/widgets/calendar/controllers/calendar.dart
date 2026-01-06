@@ -114,7 +114,7 @@ class _CalendarWState extends State<CalendarW> {
     Provider.of<CalendarProvider>(context);
 
     // Essential logging only
-    if (_dataSource != null && _dataSource!.appointments!.isNotEmpty) {
+    if (_dataSource != null && _dataSource!.appointments != null && _dataSource!.appointments!.isNotEmpty) {
       print(
           '📅 [Calendar] Building calendar with ${_dataSource!.appointments!.length} events');
     }
@@ -281,7 +281,7 @@ class _CalendarWState extends State<CalendarW> {
                   mobile: 20.0, tablet: 24.0, desktop: 30.0),
             ),
             child: Text(
-              _headerText!,
+              _headerText ?? '',
               style: Theme.of(context).textTheme.displayMedium,
             ),
           ),
@@ -521,6 +521,8 @@ class _CalendarWState extends State<CalendarW> {
       return;
     }
 
+    final droppingTime = details.droppingTime!;
+
     CustomAppointment? appointment;
     final dynamic rawAppointment = details.appointment!;
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
@@ -635,7 +637,7 @@ class _CalendarWState extends State<CalendarW> {
         await handler.handleDragDrop(
           context: context,
           appointment: appointment,
-          newStartTime: details.droppingTime!,
+          newStartTime: droppingTime,
           eventDuration: duration,
           totalOccurrences: occurrenceCount,
         );
@@ -656,10 +658,10 @@ class _CalendarWState extends State<CalendarW> {
         }
       }
     } else {
-      // Handle non-recurring event - simple update
-      // For all-day events, ensure proper midnight-to-midnight format
-      DateTime newStart = details.droppingTime!;
-      DateTime newEnd = details.droppingTime!.add(duration);
+      // for non-recurring event - simple update
+      // for all-day events, ensure proper midnight-to-midnight format
+      DateTime newStart = droppingTime;
+      DateTime newEnd = droppingTime.add(duration);
       
       if (appointment.isAllDay) {
         // Normalize to start of day for all-day events
@@ -734,7 +736,6 @@ class _CalendarWState extends State<CalendarW> {
     AppLogger.debug('Resize: startTime = ${details.startTime}', 'Calendar');
     AppLogger.debug('Resize: endTime = ${details.endTime}', 'Calendar');
 
-    // Null safety: Syncfusion may provide null values in edge cases
     // (rapid gestures, widget disposal during resize)
     if (details.appointment == null || 
         details.startTime == null || 
@@ -742,6 +743,9 @@ class _CalendarWState extends State<CalendarW> {
       AppLogger.debug('Resize cancelled - null values', 'Calendar');
       return;
     }
+
+    final startTime = details.startTime!;
+    final endTime = details.endTime!;
 
     CustomAppointment? appointment;
     final dynamic rawAppointment = details.appointment!;
@@ -843,8 +847,8 @@ class _CalendarWState extends State<CalendarW> {
 
       // Build update payload with new times
       final updates = {
-        'start': details.startTime!.toUtc().toIso8601String(),
-        'end': details.endTime!.toUtc().toIso8601String(),
+        'start': startTime.toUtc().toIso8601String(),
+        'end': endTime.toUtc().toIso8601String(),
       };
 
       try {
@@ -875,8 +879,8 @@ class _CalendarWState extends State<CalendarW> {
     } else {
       // Handle non-recurring event - simple update
       // For all-day events, ensure proper midnight-to-midnight format
-      DateTime newStart = details.startTime!;
-      DateTime newEnd = details.endTime!;
+      DateTime newStart = startTime;
+      DateTime newEnd = endTime;
       
       if (appointment.isAllDay) {
         // Normalize to start of day for all-day events

@@ -45,22 +45,50 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
   }
 
   @override
-  DateTime getStartTime(int index) => appointments![index].startTime;
+  DateTime getStartTime(int index) {
+    if (appointments == null || appointments!.length <= index) {
+      return DateTime.now();
+    }
+    return appointments![index].startTime;
+  }
 
   @override
-  DateTime getEndTime(int index) => appointments![index].endTime;
+  DateTime getEndTime(int index) {
+    if (appointments == null || appointments!.length <= index) {
+      return DateTime.now();
+    }
+    return appointments![index].endTime;
+  }
 
   @override
-  String getSubject(int index) => appointments![index].title;
+  String getSubject(int index) {
+    if (appointments == null || appointments!.length <= index) {
+      return '';
+    }
+    return appointments![index].title;
+  }
 
   @override
-  Color getColor(int index) => appointments![index].catColor;
+  Color getColor(int index) {
+    if (appointments == null || appointments!.length <= index) {
+      return Colors.grey;
+    }
+    return appointments![index].catColor;
+  }
 
   @override
-  bool isAllDay(int index) => appointments![index].isAllDay;
+  bool isAllDay(int index) {
+    if (appointments == null || appointments!.length <= index) {
+      return false;
+    }
+    return appointments![index].isAllDay;
+  }
 
   @override
   String? getRecurrenceRule(int index) {
+    if (appointments == null || appointments!.length <= index) {
+      return null;
+    }
     final app = appointments![index];
     
     // Backend-expanded occurrences should NOT be re-expanded by SyncFusion
@@ -85,12 +113,26 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
   }
 
   @override
-  List<DateTime>? getRecurrenceExceptionDates(int index) =>
-      appointments![index].recurrenceExceptionDates;
+  List<DateTime>? getRecurrenceExceptionDates(int index) {
+    if (appointments == null || appointments!.length <= index) {
+      return null;
+    }
+    return appointments![index].recurrenceExceptionDates;
+  }
 
   @override
-  Object? getRecurrenceId(int index) => appointments![index].recurrenceId;
+  Object? getRecurrenceId(int index) {
+    if (appointments == null || appointments!.length <= index) {
+      return null;
+    }
+    return appointments![index].recurrenceId;
+  }
 
   @override
-  Object? getId(int index) => appointments![index].id;
+  Object? getId(int index) {
+    if (appointments == null || appointments!.length <= index) {
+      return null;
+    }
+    return appointments![index].id;
+  }
 }
