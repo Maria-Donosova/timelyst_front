@@ -9,6 +9,7 @@ import '../../../utils/rruleParser.dart';
 import '../../../providers/eventProvider.dart';
 import '../../../utils/eventsMapper.dart';
 import '../../responsive/responsive_helper.dart';
+import '../../../utils/logger.dart';
 
 /**
  * Method to build the UI for a single appointment.
@@ -255,6 +256,7 @@ Widget appointmentBuilder(BuildContext context,
               calendarIdLower.contains('caldav')) {
             return Icon(Icons.apple, size: size, color: color);
           }
+          }
         }
 
         // Check userCalendars field as it might contain calendar names
@@ -329,13 +331,11 @@ Widget appointmentBuilder(BuildContext context,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                      if (isSummary) {
-                        final count = (customAppointment.groupedEvents?.length ?? 0) + 1;
-                        Text(
-                          'Total: $count',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 8),
-                        );
-                      }
+                    if (isSummary)
+                      Text(
+                        'Total: ${(customAppointment.groupedEvents?.length ?? 0) + 1}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 8),
+                      ),
                     if (occurrenceString != null)
                       Text(
                         occurrenceString,

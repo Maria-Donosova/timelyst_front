@@ -4,6 +4,7 @@ import '../models/timeEvent.dart';
 import '../models/customApp.dart';
 import '../utils/eventsMapper.dart';
 import '../utils/calendar_utils.dart';
+import '../utils/logger.dart';
 
 /// Custom CalendarDataSource for SyncFusion Calendar
 /// 
@@ -32,40 +33,36 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
   }
 
   @override
-  CustomAppointment convertAppointmentToObject(Object? appointment) {
-    if (appointment is CustomAppointment) {
-      return appointment;
+  CustomAppointment? convertAppointmentToObject(CustomAppointment? customData, Appointment appointment) {
+    // If customData is already provided, return it
+    if (customData != null) {
+      return customData;
     }
     
-    if (appointment is Appointment) {
-      // Syncfusion sometimes passes an Appointment object during drag/resize
-      // Try to find the original CustomAppointment in our local list
-      final dynamic id = appointment.id;
-      AppLogger.i('🖱️ [DataSource] convertAppointmentToObject for ID: $id');
-      if (id != null) {
-        final match = appointments?.whereType<CustomAppointment>().firstWhere(
-          (e) => e.id == id,
-          orElse: () => CustomAppointment(
-            id: 'temp', 
-            title: appointment.subject, 
-            startTime: appointment.startTime, 
-            endTime: appointment.endTime, 
-            isAllDay: appointment.isAllDay,
-          ),
-        );
-        if (match != null && match.id != 'temp') {
-          AppLogger.i('✅ [DataSource] Resolved Appointment -> CustomAppointment');
-          return match;
-        }
+    // Syncfusion sometimes passes an Appointment object during drag/resize
+    // Try to find the original CustomAppointment in our local list
+    final dynamic id = appointment.id;
+    AppLogger.i('🖱️ [DataSource] convertAppointmentToObject for ID: $id');
+    if (id != null) {
+      final match = appointments?.whereType<CustomAppointment>().firstWhere(
+        (e) => e.id == id,
+        orElse: () => CustomAppointment(
+          id: 'temp', 
+          title: appointment.subject, 
+          startTime: appointment.startTime, 
+          endTime: appointment.endTime, 
+          isAllDay: appointment.isAllDay,
+        ),
+      );
+      if (match != null && match.id != 'temp') {
+        AppLogger.i('✅ [DataSource] Resolved Appointment -> CustomAppointment');
+        return match;
       }
     }
     
-    // Final fallback: if we have to throw, let's at least check for null first
-    if (appointment == null) {
-      print('⚠️ [DataSource] convertAppointmentToObject received null');
-      return CustomAppointment(id: 'null_error', title: 'Error', startTime: DateTime.now(), endTime: DateTime.now(), isAllDay: false);
-    }
-    return appointment as CustomAppointment;
+    // Final fallback
+    AppLogger.w('⚠️ [DataSource] Could not resolve appointment ID: $id');
+    return null;
   }
 
   /// Builds CustomAppointments from backend-expanded events

@@ -5,6 +5,7 @@ import 'package:timelyst_flutter/services/eventsService.dart';
 import 'package:timelyst_flutter/models/customApp.dart';
 import 'package:timelyst_flutter/models/timeEvent.dart';
 import 'package:timelyst_flutter/utils/eventsMapper.dart';
+import 'package:timelyst_flutter/utils/logger.dart';
 
 class EventProvider with ChangeNotifier {
   AuthService? _authService;
