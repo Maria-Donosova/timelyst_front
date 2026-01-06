@@ -14,7 +14,7 @@ import '../../../providers/eventProvider.dart';
 import '../../../providers/calendarProvider.dart';
 import '../../../providers/authProvider.dart';
 import '../../../utils/logger.dart';
-import '../../../utils/calendar_utils.dart';
+
 import '../../responsive/responsive_widgets.dart';
 import '../../../services/event_handler_service.dart';
 import '../../../data_sources/timelyst_calendar_data_source.dart';
@@ -111,8 +111,9 @@ class _CalendarWState extends State<CalendarW> {
   void _refreshDataSource() {
     final eventProvider = Provider.of<EventProvider>(context, listen: false);
     
-    // Use events (CustomAppointments) which are updated by optimistic updates
-    final currentEvents = eventProvider.events;
+    // Use timeEvents (view-specific list) instead of all cached events
+    // This ensures we only display events for the current calendar view
+    final viewEvents = eventProvider.timeEvents;
     
     // Build occurrence counts map from masters
     final occurrenceCounts = <String, int>{};
@@ -131,14 +132,14 @@ class _CalendarWState extends State<CalendarW> {
     final isWeek = _controller.view == CalendarView.week;
 
     setState(() {
-      _dataSource = TimelystCalendarDataSource.fromAppointments(
-        appointments: currentEvents,
+      _dataSource = TimelystCalendarDataSource(
+        events: viewEvents,
         occurrenceCounts: occurrenceCounts,
         summarizeWidth: isWeek && cellWidth > 0 ? cellWidth : null,
       );
     });
     
-    AppLogger.i('🔄 [Calendar] Data source refreshed with ${currentEvents.length} events');
+    AppLogger.i('🔄 [Calendar] Data source refreshed with ${viewEvents.length} events');
   }
 
   @override
@@ -445,47 +446,48 @@ class _CalendarWState extends State<CalendarW> {
           }
         }
 
-          if (_customAppointment == null) return;
+          final appointmentToDisplay = _customAppointment;
+          if (appointmentToDisplay == null) return;
 
-          if (_customAppointment.groupedEvents != null) {
-            await _showSummaryDialog(_customAppointment);
+          if (appointmentToDisplay.groupedEvents != null) {
+            await _showSummaryDialog(appointmentToDisplay);
             return;
           }
 
           _dateText = DateFormat('MMMM d', 'en_US')
-              .format(_customAppointment.startTime)
+              .format(appointmentToDisplay.startTime)
               .toString();
 
           _startTimeText = DateFormat('hh:mm a')
-              .format(_customAppointment.startTime)
+              .format(appointmentToDisplay.startTime)
               .toString();
 
           _endTimeText =
-              DateFormat('hh:mm a').format(_customAppointment.endTime).toString();
+              DateFormat('hh:mm a').format(appointmentToDisplay.endTime).toString();
 
           final result = await showDialog(
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
                   content: EventDetails(
-                    id: _customAppointment!.id,
-                    subject: _customAppointment!.title,
+                    id: appointmentToDisplay.id,
+                    subject: appointmentToDisplay.title,
                     dateText: _dateText,
                     start: _startTimeText,
                     end: _endTimeText,
-                    catTitle: _customAppointment!.catTitle,
-                    catColor: _customAppointment!.catColor,
-                    participants: _customAppointment!.participants,
-                    body: _customAppointment!.description,
-                    location: _customAppointment!.location,
-                    isAllDay: _customAppointment!.isAllDay,
-                    recurrenceRule: _customAppointment!.recurrenceRule,
-                    recurrenceId: _customAppointment!.recurrenceId,
-                    originalStart: _customAppointment!.originalStart,
-                    exDates: _customAppointment!.exDates,
-                    initialStartTime: _customAppointment!.startTime,
-                    initialEndTime: _customAppointment!.endTime,
-                    calendarId: _customAppointment!.calendarId,
+                    catTitle: appointmentToDisplay.catTitle,
+                    catColor: appointmentToDisplay.catColor,
+                    participants: appointmentToDisplay.participants,
+                    body: appointmentToDisplay.description,
+                    location: appointmentToDisplay.location,
+                    isAllDay: appointmentToDisplay.isAllDay,
+                    recurrenceRule: appointmentToDisplay.recurrenceRule,
+                    recurrenceId: appointmentToDisplay.recurrenceId,
+                    originalStart: appointmentToDisplay.originalStart,
+                    exDates: appointmentToDisplay.exDates,
+                    initialStartTime: appointmentToDisplay.startTime,
+                    initialEndTime: appointmentToDisplay.endTime,
+                    calendarId: appointmentToDisplay.calendarId,
                   ),
                 );
               });
@@ -596,7 +598,7 @@ class _CalendarWState extends State<CalendarW> {
       }
       
       // Strategy 2: Match by time + title
-      if (appointment == null && rawAppointment.subject != null) {
+      if (appointment == null) {
         final match = eventProvider.events.firstWhere(
           (e) => e.startTime == rawAppointment.startTime && e.title == rawAppointment.subject,
           orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
@@ -611,7 +613,7 @@ class _CalendarWState extends State<CalendarW> {
       }
       
       // Strategy 3: Match by title only (less precise, last resort)
-      if (appointment == null && rawAppointment.subject != null) {
+      if (appointment == null) {
         final match = eventProvider.events.firstWhere(
           (e) => e.title == rawAppointment.subject,
           orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
@@ -758,12 +760,14 @@ class _CalendarWState extends State<CalendarW> {
         }
 
         AppLogger.i('✅ [Drag] Backend update successful');
+        // Second refresh to ensure UI is fully in sync after backend confirms
+        _refreshDataSource();
       } catch (e) {
         AppLogger.e('❌ [Drag] Backend update failed: $e');
         
         // Rollback on error
         rollback();
-        setState(() {});
+        _refreshDataSource();
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -824,7 +828,7 @@ class _CalendarWState extends State<CalendarW> {
       }
       
       // Strategy 2: Match by time + title
-      if (appointment == null && rawAppointment.subject != null) {
+      if (appointment == null) {
         final match = eventProvider.events.firstWhere(
           (e) => e.startTime == rawAppointment.startTime && e.title == rawAppointment.subject,
           orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
@@ -836,7 +840,7 @@ class _CalendarWState extends State<CalendarW> {
       }
       
       // Strategy 3: Match by title only (less precise, last resort)
-      if (appointment == null && rawAppointment.subject != null) {
+      if (appointment == null) {
         final match = eventProvider.events.firstWhere(
           (e) => e.title == rawAppointment.subject,
           orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
@@ -986,12 +990,14 @@ class _CalendarWState extends State<CalendarW> {
         }
 
         AppLogger.i('✅ [Resize] Backend update successful');
+        // Second refresh to ensure UI is fully in sync after backend confirms
+        _refreshDataSource();
       } catch (e) {
         AppLogger.e('❌ [Resize] Backend update failed: $e');
         
         // Rollback on error
         rollback();
-        setState(() {});
+        _refreshDataSource();
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

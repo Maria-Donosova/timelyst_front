@@ -775,10 +775,52 @@ class EventProvider with ChangeNotifier {
   /// ```
   Function optimisticUpdateEvent(String eventId, CustomAppointment updated) {
     final snapshot = _cloneEvents();
+    final timeEventsSnapshot = List<TimeEvent>.from(_timeEvents);
+    
     final index = _events.indexWhere((e) => e.id == eventId);
     
     if (index >= 0) {
       _events[index] = updated;
+      
+      // Also update _timeEvents to keep them in sync
+      final timeEventIndex = _timeEvents.indexWhere((e) => e.id == eventId);
+      if (timeEventIndex >= 0) {
+        final oldTimeEvent = _timeEvents[timeEventIndex];
+        // Update the TimeEvent with new times from the updated CustomAppointment
+        _timeEvents[timeEventIndex] = TimeEvent(
+          id: oldTimeEvent.id,
+          userId: oldTimeEvent.userId,
+          calendarIds: oldTimeEvent.calendarIds,
+          provider: oldTimeEvent.provider,
+          providerEventId: oldTimeEvent.providerEventId,
+          providerCalendarId: oldTimeEvent.providerCalendarId,
+          etag: oldTimeEvent.etag,
+          eventTitle: updated.title,
+          start: updated.startTime.toUtc(),
+          end: updated.endTime.toUtc(),
+          startTimeZone: oldTimeEvent.startTimeZone,
+          endTimeZone: oldTimeEvent.endTimeZone,
+          recurrenceRule: oldTimeEvent.recurrenceRule,
+          exDates: oldTimeEvent.exDates,
+          isAllDay: updated.isAllDay,
+          category: oldTimeEvent.category,
+          location: updated.location,
+          description: updated.description,
+          status: oldTimeEvent.status,
+          sequence: oldTimeEvent.sequence,
+          busyStatus: oldTimeEvent.busyStatus,
+          visibility: oldTimeEvent.visibility,
+          attendees: oldTimeEvent.attendees,
+          organizerEmail: oldTimeEvent.organizerEmail,
+          organizerName: oldTimeEvent.organizerName,
+          masterId: oldTimeEvent.masterId,
+          originalStart: oldTimeEvent.originalStart,
+          isOccurrence: oldTimeEvent.isOccurrence,
+          createdAt: oldTimeEvent.createdAt,
+          updatedAt: DateTime.now(),
+        );
+      }
+      
       if (_debugLogging) print('✨ [EventProvider] Optimistic update for event: ${updated.title}');
       notifyListeners();
     } else {
@@ -789,7 +831,13 @@ class EventProvider with ChangeNotifier {
     }
     
     // Return rollback function
-    return () => restoreEventsSnapshot(snapshot);
+    return () {
+      _events.clear();
+      _events.addAll(snapshot);
+      _timeEvents.clear();
+      _timeEvents.addAll(timeEventsSnapshot);
+      notifyListeners();
+    };
   }
 
 }
