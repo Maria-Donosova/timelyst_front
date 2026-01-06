@@ -27,6 +27,8 @@ Widget appointmentBuilder(BuildContext context,
     if (calendarAppointmentDetails.appointments.isEmpty) {
       return SizedBox();
     }
+    
+    AppLogger.i('🔍 [AppointmentBuilder] Starting build for ${calendarAppointmentDetails.appointments.length} appointments');
 
     final dynamic rawAppointment = calendarAppointmentDetails.appointments.first;
     CustomAppointment? customAppointment;
@@ -46,6 +48,7 @@ Widget appointmentBuilder(BuildContext context,
         final dynamic id = rawAppointment.id;
         
         if (id != null) {
+          AppLogger.i('🔍 [AppointmentBuilder] Resolving ID: $id');
           final masterEvent = eventProvider.events.firstWhere(
             (e) => e.id == id,
             orElse: () {
@@ -66,7 +69,7 @@ Widget appointmentBuilder(BuildContext context,
           );
           
           if (masterEvent.id != 'temp') {
-            // print('      -> Found master: ${masterEvent.title}');
+            AppLogger.i('✅ [AppointmentBuilder] Resolved master: ${masterEvent.title}');
             // Create a synthetic CustomAppointment for this occurrence
             customAppointment = masterEvent.copyWith(
               startTime: rawAppointment.startTime,
@@ -80,21 +83,20 @@ Widget appointmentBuilder(BuildContext context,
            // print('      -> ID is null on Appointment object');
         }
       } catch (e) {
-        print('⚠️ [AppointmentBuilder] Error resolving master for occurrence: $e');
+        AppLogger.e('⚠️ [AppointmentBuilder] Error resolving master: $e');
       }
     } else {
-       print('⚠️ [AppointmentBuilder] Unknown type: ${rawAppointment.runtimeType}');
+       AppLogger.w('⚠️ [AppointmentBuilder] Unknown type: ${rawAppointment.runtimeType}');
     }
     
     if (customAppointment == null) {
-      // Fallback if we couldn't resolve it (should be rare with getId fixed)
-      // Try to use what properties we can from the raw object if it's an Appointment
+      AppLogger.w('⚠️ [AppointmentBuilder] Could not resolve CustomAppointment for ID: ${rawAppointment is Appointment ? rawAppointment.id : "unknown"}');
       if (rawAppointment is Appointment) {
          return Container(
-           color: rawAppointment.color,
+           color: rawAppointment.color ?? Colors.grey,
            child: Center(
              child: Text(
-               rawAppointment.subject, 
+               rawAppointment.subject ?? 'Unknown', 
                style: TextStyle(color: Colors.white, fontSize: 10),
                overflow: TextOverflow.ellipsis,
              )
@@ -104,21 +106,24 @@ Widget appointmentBuilder(BuildContext context,
       return SizedBox();
     }
 
+    final DateTime start = customAppointment.startTime;
+    final DateTime end = customAppointment.endTime;
+
     // Fix: Correctly check if start and end are on the same day
-    bool isSameDay = customAppointment.startTime.year == customAppointment.endTime.year &&
-        customAppointment.startTime.month == customAppointment.endTime.month &&
-        customAppointment.startTime.day == customAppointment.endTime.day;
+    bool isSameDay = start.year == end.year &&
+        start.month == end.month &&
+        start.day == end.day;
 
     // Calculate occurrence info string
     String? occurrenceString;
     // Wrap recurrence logic in try-catch to be safe
     try {
-      if ((customAppointment.recurrenceRule != null && customAppointment.recurrenceRule!.isNotEmpty) ||
+      final String? rrule = customAppointment.recurrenceRule;
+      if ((rrule != null && rrule.isNotEmpty) ||
           (customAppointment.recurrenceId != null && customAppointment.recurrenceId!.isNotEmpty)) {
         
         // Only attempt parsing if we have a rule
-        if (customAppointment.recurrenceRule != null && customAppointment.recurrenceRule!.isNotEmpty) {
-             final rrule = customAppointment.recurrenceRule!;
+        if (rrule != null && rrule.isNotEmpty) {
              // Check RRuleParser availability
              try {
                final recurrenceInfo = RRuleParser.parseRRule(rrule);
@@ -144,12 +149,12 @@ Widget appointmentBuilder(BuildContext context,
                   }
                }
              } catch (e) {
-               print('⚠️ [AppointmentBuilder] RRule parsing error: $e');
+               AppLogger.e('⚠️ [AppointmentBuilder] RRule parsing error: $e');
              }
         }
       }
     } catch (e) {
-      print('⚠️ [AppointmentBuilder] Recurrence logic error: $e');
+      AppLogger.e('⚠️ [AppointmentBuilder] Recurrence logic error: $e');
     }
 
     final width = MediaQuery.of(context).size.width;
@@ -188,14 +193,11 @@ Widget appointmentBuilder(BuildContext context,
         }
 
         // Check for specific calendar source IDs
-        if (appointment.googleEventId != null &&
-            appointment.googleEventId!.isNotEmpty) {
+        if (appointment.googleEventId?.isNotEmpty == true) {
           return Icon(Icons.mail_outline, size: size, color: color);
-        } else if (appointment.microsoftEventId != null &&
-            appointment.microsoftEventId!.isNotEmpty) {
+        } else if (appointment.microsoftEventId?.isNotEmpty == true) {
           return Icon(Icons.window_outlined, size: size, color: color);
-        } else if (appointment.appleEventId != null &&
-            appointment.appleEventId!.isNotEmpty) {
+        } else if (appointment.appleEventId?.isNotEmpty == true) {
           return Icon(Icons.apple, size: size, color: color);
         }
 
@@ -217,33 +219,31 @@ Widget appointmentBuilder(BuildContext context,
         }
 
         // Check calendarId field as well
-        if (appointment.calendarId != null &&
-            appointment.calendarId!.isNotEmpty) {
-          
-          // Try to look up the calendar source from CalendarProvider
-          try {
-            final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
-            final calendar = calendarProvider.getCalendarById(appointment.calendarId!);
-            
-            if (calendar != null) {
-              // print('   - Provider found calendar: ${calendar.metadata.title}, source: ${calendar.source}');
-              switch (calendar.source) {
-                case CalendarSource.GOOGLE:
-                  return Icon(Icons.mail_outline, size: size, color: color);
-                case CalendarSource.MICROSOFT:
-                  return Icon(Icons.window_outlined, size: size, color: color);
-                case CalendarSource.APPLE:
-                  return Icon(Icons.apple, size: size, color: color);
-                default:
-                  // Fall through to other checks
-                  break;
+        if (appointment.calendarId != null) {
+          final String calId = appointment.calendarId!;
+          if (calId.isNotEmpty) {
+            // Try to look up the calendar source from CalendarProvider
+            try {
+              final calendarProvider = Provider.of<CalendarProvider>(context, listen: false);
+              final calendar = calendarProvider.getCalendarById(calId);
+              
+              if (calendar != null) {
+                switch (calendar.source) {
+                  case CalendarSource.GOOGLE:
+                    return Icon(Icons.mail_outline, size: size, color: color);
+                  case CalendarSource.MICROSOFT:
+                    return Icon(Icons.window_outlined, size: size, color: color);
+                  case CalendarSource.APPLE:
+                    return Icon(Icons.apple, size: size, color: color);
+                  default:
+                    break;
+                }
               }
+            } catch (e) {
+              // Ignore provider errors
             }
-          } catch (e) {
-            // Ignore provider errors and fall back to string matching
-          }
-          
-          final calendarIdLower = appointment.calendarId!.toLowerCase();
+            
+            final calendarIdLower = calId.toLowerCase();
 
           if (calendarIdLower.contains('google')) {
             return Icon(Icons.mail_outline, size: size, color: color);
@@ -329,11 +329,13 @@ Widget appointmentBuilder(BuildContext context,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (isSummary)
-                       Text(
-                        'Total: ${customAppointment.groupedEvents!.length + 1}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 8),
-                      ),
+                      if (isSummary) {
+                        final count = (customAppointment.groupedEvents?.length ?? 0) + 1;
+                        Text(
+                          'Total: $count',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 8),
+                        );
+                      }
                     if (occurrenceString != null)
                       Text(
                         occurrenceString,

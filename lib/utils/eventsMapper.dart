@@ -5,65 +5,77 @@ import '../models/dayEvent.dart';
 
 class EventMapper {
   static CustomAppointment mapTimeEventToCustomAppointment(TimeEvent timeEvent) {
-    // For all-day events, preserve the date without timezone conversion
-    // For timed events, convert to local timezone
-    DateTime startTime;
-    DateTime endTime;
-    
-    if (timeEvent.isAllDay) {
-      // Extract date components from UTC and create local dates
-      // This prevents the date shift that occurs when converting UTC midnight to local time
-      // Example: 2024-11-28T00:00:00Z (Thanksgiving) should stay Nov 28, not shift to Nov 27
-      final startUtc = timeEvent.start.toUtc();
-      final endUtc = timeEvent.end.toUtc();
+    try {
+      // For all-day events, preserve the date without timezone conversion
+      // For timed events, convert to local timezone
+      DateTime startTime;
+      DateTime endTime;
       
-      startTime = DateTime(startUtc.year, startUtc.month, startUtc.day);
-      
-      // Google/iCal uses EXCLUSIVE end dates for all-day events
-      // e.g., a 1-day event on Dec 26 has end = Dec 27T00:00:00Z (midnight of next day)
-      // SyncFusion treats midnight as the START of the next day, causing duplication
-      // Fix: Convert to the LAST ACTIVE DAY at 23:59:59 to prevent the event from
-      // appearing on the following day
-      final exclusiveEndDate = DateTime(endUtc.year, endUtc.month, endUtc.day);
-      final lastActiveDay = exclusiveEndDate.subtract(const Duration(days: 1));
-      
-      // Ensure endTime is not before startTime (for single-day events where
-      // exclusiveEndDate - 1 day would be before startTime)
-      if (lastActiveDay.isBefore(startTime)) {
-        // Single day event: end is same day at 23:59:59
-        endTime = DateTime(startTime.year, startTime.month, startTime.day, 23, 59, 59);
+      if (timeEvent.isAllDay) {
+        // Extract date components from UTC and create local dates
+        // This prevents the date shift that occurs when converting UTC midnight to local time
+        // Example: 2024-11-28T00:00:00Z (Thanksgiving) should stay Nov 28, not shift to Nov 27
+        final startUtc = timeEvent.start.toUtc();
+        final endUtc = timeEvent.end.toUtc();
+        
+        startTime = DateTime(startUtc.year, startUtc.month, startUtc.day);
+        
+        // Google/iCal uses EXCLUSIVE end dates for all-day events
+        // e.g., a 1-day event on Dec 26 has end = Dec 27T00:00:00Z (midnight of next day)
+        // SyncFusion treats midnight as the START of the next day, causing duplication
+        // Fix: Convert to the LAST ACTIVE DAY at 23:59:59 to prevent the event from
+        // appearing on the following day
+        final exclusiveEndDate = DateTime(endUtc.year, endUtc.month, endUtc.day);
+        final lastActiveDay = exclusiveEndDate.subtract(const Duration(days: 1));
+        
+        // Ensure endTime is not before startTime (for single-day events where
+        // exclusiveEndDate - 1 day would be before startTime)
+        if (lastActiveDay.isBefore(startTime)) {
+          // Single day event: end is same day at 23:59:59
+          endTime = DateTime(startTime.year, startTime.month, startTime.day, 23, 59, 59);
+        } else {
+          // Multi-day event: end is last active day at 23:59:59
+          endTime = DateTime(lastActiveDay.year, lastActiveDay.month, lastActiveDay.day, 23, 59, 59);
+        }
       } else {
-        // Multi-day event: end is last active day at 23:59:59
-        endTime = DateTime(lastActiveDay.year, lastActiveDay.month, lastActiveDay.day, 23, 59, 59);
+        // Regular timed events: convert to local timezone
+        startTime = timeEvent.start.toLocal();
+        endTime = timeEvent.end.toLocal();
       }
-    } else {
-      // Regular timed events: convert to local timezone
-      startTime = timeEvent.start.toLocal();
-      endTime = timeEvent.end.toLocal();
-    }
 
-    return CustomAppointment(
-      id: timeEvent.id,
-      title: timeEvent.eventTitle.isEmpty ? 'Busy' : timeEvent.eventTitle,
-      description: timeEvent.description,
-      startTime: startTime,
-      startTimeZone: timeEvent.startTimeZone,
-      endTime: endTime,
-      endTimeZone: timeEvent.endTimeZone,
-      isAllDay: timeEvent.isAllDay,
-      location: timeEvent.location,
-      recurrenceRule: timeEvent.recurrenceRule,
-      recurrenceId: timeEvent.recurrenceId,
-      originalStart: timeEvent.originalStart?.toLocal(),
-      exDates: timeEvent.exDates,
-      catTitle: timeEvent.category,
-      catColor: _getColorFromCategory(timeEvent.category),
-      calendarId: timeEvent.calendarIds.isNotEmpty ? timeEvent.calendarIds.first : null,
-      userCalendars: timeEvent.calendarIds,
-      timeEventInstance: timeEvent,
-      masterId: timeEvent.masterId,
-      isOccurrence: timeEvent.isOccurrence,
-    );
+      return CustomAppointment(
+        id: timeEvent.id,
+        title: timeEvent.eventTitle.isEmpty ? 'Busy' : timeEvent.eventTitle,
+        description: timeEvent.description,
+        startTime: startTime,
+        startTimeZone: timeEvent.startTimeZone,
+        endTime: endTime,
+        endTimeZone: timeEvent.endTimeZone,
+        isAllDay: timeEvent.isAllDay,
+        location: timeEvent.location,
+        recurrenceRule: timeEvent.recurrenceRule,
+        recurrenceId: timeEvent.recurrenceId,
+        originalStart: timeEvent.originalStart?.toLocal(),
+        exDates: timeEvent.exDates,
+        catTitle: timeEvent.category,
+        catColor: _getColorFromCategory(timeEvent.category),
+        calendarId: (timeEvent.calendarIds != null && timeEvent.calendarIds.isNotEmpty) ? timeEvent.calendarIds.first : null,
+        userCalendars: timeEvent.calendarIds ?? [],
+        timeEventInstance: timeEvent,
+        masterId: timeEvent.masterId,
+        isOccurrence: timeEvent.isOccurrence,
+      );
+    } catch (e) {
+      print('⚠️ [EventMapper] Error mapping TimeEvent ${timeEvent.id}: $e');
+      // Return a minimal valid appointment to prevent app crash
+      return CustomAppointment(
+        id: timeEvent.id,
+        title: 'Error Loading Event',
+        startTime: DateTime.now(),
+        endTime: DateTime.now().add(const Duration(hours: 1)),
+        isAllDay: false,
+      );
+    }
   }
 
   static CustomAppointment mapDayEventToCustomAppointment(DayEvent dayEvent) {

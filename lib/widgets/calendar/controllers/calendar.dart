@@ -523,14 +523,14 @@ class _CalendarWState extends State<CalendarW> {
         ? (details.appointment as Appointment).subject 
         : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).title : 'Unknown');
         
-    print('🖱️ [Drag] START: ${appointmentName}');
-    print('🖱 [Drag] Type: ${details.appointment?.runtimeType}');
-    print('🖱 [Drag] ID: ${details.appointment is Appointment ? (details.appointment as Appointment).id : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).id : "N/A")}');
-    print('🖱 [Drag] New Time: ${details.droppingTime}');
+    AppLogger.i('🖱️ [Drag] START: ${appointmentName}');
+    AppLogger.i('🖱 [Drag] Type: ${details.appointment?.runtimeType}');
+    AppLogger.i('🖱 [Drag] ID: ${details.appointment is Appointment ? (details.appointment as Appointment).id : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).id : "N/A")}');
+    AppLogger.i('🖱 [Drag] New Time: ${details.droppingTime}');
 
     // Null safety: Syncfusion may provide null values in edge cases
     if (details.appointment == null || details.droppingTime == null) {
-      print('⚠️ [Drag] Cancelled - null appointment or droppingTime');
+      AppLogger.w('⚠️ [Drag] Cancelled - null appointment or droppingTime');
       return;
     }
 
@@ -557,7 +557,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime, 
             endTime: rawAppointment.endTime,
           );
-          print('🖱️ [Drag] Resolved by ID: ${master.id}');
+          AppLogger.i('🖱️ [Drag] Resolved by ID: ${master.id}');
         }
       }
       
@@ -572,7 +572,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime, 
             endTime: rawAppointment.endTime,
           );
-          print('🖱️ [Drag] Resolved by time+title: ${match.id}');
+          AppLogger.i('🖱️ [Drag] Resolved by time+title: ${match.id}');
         }
       }
       
@@ -587,7 +587,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime, 
             endTime: rawAppointment.endTime,
           );
-          print('🖱️ [Drag] Resolved by title-only: ${match.id}');
+          AppLogger.i('🖱️ [Drag] Resolved by title-only: ${match.id}');
         }
       }
       
@@ -749,16 +749,16 @@ class _CalendarWState extends State<CalendarW> {
         ? (details.appointment as Appointment).subject 
         : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).title : 'Unknown');
 
-    print('📏 [Resize] START: ${appointmentName}');
-    print('📏 [Resize] Type: ${details.appointment?.runtimeType}');
-    print('📏 [Resize] ID: ${details.appointment is Appointment ? (details.appointment as Appointment).id : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).id : "N/A")}');
-    print('📏 [Resize] Range: ${details.startTime} -> ${details.endTime}');
+    AppLogger.i('📏 [Resize] START: ${appointmentName}');
+    AppLogger.i('📏 [Resize] Type: ${details.appointment?.runtimeType}');
+    AppLogger.i('📏 [Resize] ID: ${details.appointment is Appointment ? (details.appointment as Appointment).id : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).id : "N/A")}');
+    AppLogger.i('📏 [Resize] Range: ${details.startTime} -> ${details.endTime}');
 
     // (rapid gestures, widget disposal during resize)
     if (details.appointment == null || 
         details.startTime == null || 
         details.endTime == null) {
-      print('⚠️ [Resize] Cancelled - null values');
+      AppLogger.w('⚠️ [Resize] Cancelled - null values');
       return;
     }
 
@@ -783,7 +783,7 @@ class _CalendarWState extends State<CalendarW> {
         );
         if (master.id != 'temp') {
           appointment = master;
-          print('📏 [Resize] Resolved by ID: ${master.id}');
+          AppLogger.i('📏 [Resize] Resolved by ID: ${master.id}');
         }
       }
       
@@ -795,7 +795,7 @@ class _CalendarWState extends State<CalendarW> {
         );
         if (match.id != 'temp') {
           appointment = match;
-          print('📏 [Resize] Resolved by time+title: ${match.id}');
+          AppLogger.i('📏 [Resize] Resolved by time+title: ${match.id}');
         }
       }
       
@@ -807,7 +807,7 @@ class _CalendarWState extends State<CalendarW> {
         );
         if (match.id != 'temp') {
           appointment = match;
-          print('📏 [Resize] Resolved by title-only: ${match.id}');
+          AppLogger.i('📏 [Resize] Resolved by title-only: ${match.id}');
         }
       }
       
@@ -823,7 +823,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime,
             endTime: rawAppointment.endTime,
           );
-          print('📏 [Resize] Resolved by recurrenceId: ${master.id}');
+          AppLogger.i('📏 [Resize] Resolved by recurrenceId: ${master.id}');
         }
       }
     }

@@ -21,13 +21,13 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
     required Map<String, int> occurrenceCounts,
     double? summarizeWidth,
   }) : _occurrenceCounts = occurrenceCounts {
+    AppLogger.i('📊 [DataSource] Initializing with ${events.length} events');
     final apps = _buildAppointments(events);
     if (summarizeWidth != null) {
       appointments = CalendarUtils.groupAndSummarize(apps, summarizeWidth);
-      print('📊 [DataSource] Grouped ${apps.length} events into ${appointments?.length} (cellWidth: $summarizeWidth)');
+      AppLogger.i('📊 [DataSource] Grouped into ${appointments?.length} items (width: $summarizeWidth)');
     } else {
       appointments = apps;
-      print('📊 [DataSource] Initialized with ${apps.length} flat events');
     }
   }
 
@@ -36,8 +36,35 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
     if (appointment is CustomAppointment) {
       return appointment;
     }
-    // Fallback or error case - Syncfusion should pass the CustomAppointment instance
-    // but if it passes a wrapper, we'd need to unwrap it here.
+    
+    if (appointment is Appointment) {
+      // Syncfusion sometimes passes an Appointment object during drag/resize
+      // Try to find the original CustomAppointment in our local list
+      final dynamic id = appointment.id;
+      AppLogger.i('🖱️ [DataSource] convertAppointmentToObject for ID: $id');
+      if (id != null) {
+        final match = appointments?.whereType<CustomAppointment>().firstWhere(
+          (e) => e.id == id,
+          orElse: () => CustomAppointment(
+            id: 'temp', 
+            title: appointment.subject, 
+            startTime: appointment.startTime, 
+            endTime: appointment.endTime, 
+            isAllDay: appointment.isAllDay,
+          ),
+        );
+        if (match != null && match.id != 'temp') {
+          AppLogger.i('✅ [DataSource] Resolved Appointment -> CustomAppointment');
+          return match;
+        }
+      }
+    }
+    
+    // Final fallback: if we have to throw, let's at least check for null first
+    if (appointment == null) {
+      print('⚠️ [DataSource] convertAppointmentToObject received null');
+      return CustomAppointment(id: 'null_error', title: 'Error', startTime: DateTime.now(), endTime: DateTime.now(), isAllDay: false);
+    }
     return appointment as CustomAppointment;
   }
 
@@ -57,7 +84,7 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
         .toList();
         
     if (cancelledCount > 0) {
-      print('📊 [DataSource] Filtered $cancelledCount cancelled occurrences');
+      AppLogger.i('📊 [DataSource] Filtered $cancelledCount cancelled occurrences');
     }
     return apps;
   }

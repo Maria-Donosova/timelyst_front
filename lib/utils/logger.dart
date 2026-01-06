@@ -9,9 +9,9 @@ class AppLogger {
   late logger.Logger _logger;
 
   // Performance optimization flags
-  static const bool enableDebugLogs = false; // Set to false to disable debug logs
-  static const bool enableVerboseLogs = false; // Set to false to disable verbose logs
-  static const bool enablePerformanceLogs = false; // Set to false to disable performance logs
+  static const bool enableDebugLogs = true;
+  static const bool enableVerboseLogs = false;
+  static const bool enablePerformanceLogs = true;
 
   factory AppLogger() {
     return _instance;

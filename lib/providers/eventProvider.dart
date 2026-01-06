@@ -53,7 +53,7 @@ class EventProvider with ChangeNotifier {
   /// Store masters for edit/delete lookup on expanded occurrences
   void setMastersMap(List<TimeEvent> masters) {
     _mastersMap = {for (var m in masters) m.id: m};
-    if (_debugLogging) print('📊 [EventProvider] Stored ${masters.length} masters for lookup');
+    if (_debugLogging) AppLogger.i('📊 [EventProvider] Stored ${masters.length} masters for lookup');
   }
 
   EventProvider({AuthService? authService}) 
@@ -77,7 +77,7 @@ class EventProvider with ChangeNotifier {
     final isValid = now.difference(timestamp) < _cacheValidDuration;
     
     if (!isValid) {
-      if (_debugLogging) print('🗄️ [EventProvider] Cache expired for key: $cacheKey');
+      if (_debugLogging) AppLogger.i('🗄️ [EventProvider] Cache expired for key: $cacheKey');
       _eventCache.remove(cacheKey);
       _cacheTimestamps.remove(cacheKey);
     }
@@ -89,7 +89,7 @@ class EventProvider with ChangeNotifier {
   void _cacheEvents(String cacheKey, List<CustomAppointment> events) {
     _eventCache[cacheKey] = List.from(events);
     _cacheTimestamps[cacheKey] = DateTime.now();
-    if (_debugLogging) print('🗄️ [EventProvider] Cached ${events.length} events for key: $cacheKey');
+    if (_debugLogging) AppLogger.i('🗄️ [EventProvider] Cached ${events.length} events for key: $cacheKey');
   }
 
   /// Get events from cache
