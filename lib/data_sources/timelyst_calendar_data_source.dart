@@ -32,6 +32,22 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
     }
   }
 
+  /// Factory constructor for use after optimistic updates
+  /// Accepts CustomAppointments directly, bypassing TimeEvent conversion
+  TimelystCalendarDataSource.fromAppointments({
+    required List<CustomAppointment> appointments,
+    required Map<String, int> occurrenceCounts,
+    double? summarizeWidth,
+  }) : _occurrenceCounts = occurrenceCounts {
+    AppLogger.i('📊 [DataSource] Initializing from ${appointments.length} CustomAppointments');
+    if (summarizeWidth != null) {
+      this.appointments = CalendarUtils.groupAndSummarize(appointments, summarizeWidth);
+      AppLogger.i('📊 [DataSource] Grouped into ${this.appointments?.length} items');
+    } else {
+      this.appointments = appointments;
+    }
+  }
+
   @override
   CustomAppointment? convertAppointmentToObject(CustomAppointment? customData, Appointment appointment) {
     // If customData is already provided, return it

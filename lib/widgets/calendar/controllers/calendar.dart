@@ -106,6 +106,40 @@ class _CalendarWState extends State<CalendarW> {
     });
   }
 
+  /// Refreshes the data source from EventProvider's current events list.
+  /// Call this after optimistic updates to immediately reflect changes in the UI.
+  void _refreshDataSource() {
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+    
+    // Use events (CustomAppointments) which are updated by optimistic updates
+    final currentEvents = eventProvider.events;
+    
+    // Build occurrence counts map from masters
+    final occurrenceCounts = <String, int>{};
+    for (final master in eventProvider.mastersMap.values) {
+      occurrenceCounts[master.id] = eventProvider.getOccurrenceCount(master.id);
+    }
+    
+    double screenWidth = 0;
+    try {
+      screenWidth = MediaQuery.of(context).size.width;
+    } catch (e) {
+      // Ignore
+    }
+    
+    final cellWidth = screenWidth / 14;
+    final isWeek = _controller.view == CalendarView.week;
+
+    setState(() {
+      _dataSource = TimelystCalendarDataSource.fromAppointments(
+        appointments: currentEvents,
+        occurrenceCounts: occurrenceCounts,
+        summarizeWidth: isWeek && cellWidth > 0 ? cellWidth : null,
+      );
+    });
+    
+    AppLogger.i('🔄 [Calendar] Data source refreshed with ${currentEvents.length} events');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -707,7 +741,7 @@ class _CalendarWState extends State<CalendarW> {
         appointment.id, 
         updatedAppointment,
       );
-      setState(() {});
+      _refreshDataSource();
 
       // Persist to backend
       AppLogger.i('🖱️ [Drag] Starting backend update for: ${appointment.id}');
@@ -935,7 +969,7 @@ class _CalendarWState extends State<CalendarW> {
         appointment.id, 
         updatedAppointment,
       );
-      setState(() {});
+      _refreshDataSource();
 
       // Persist to backend
       AppLogger.i('📏 [Resize] Starting backend update for: ${appointment.id}');
