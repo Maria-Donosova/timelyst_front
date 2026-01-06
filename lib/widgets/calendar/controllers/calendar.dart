@@ -510,6 +510,10 @@ class _CalendarWState extends State<CalendarW> {
 
   /// Handles drag-and-drop operations, especially for recurring events
   Future<void> _handleDragEnd(AppointmentDragEndDetails details) async {
+    // Diagnostic logging to debug type mismatch issues
+    AppLogger.debug('Drag: appointment type = ${details.appointment?.runtimeType}', 'Calendar');
+    AppLogger.debug('Drag: droppingTime = ${details.droppingTime}', 'Calendar');
+
     // Null safety: Syncfusion may provide null values in edge cases
     // (rapid gestures, widget disposal during drag)
     if (details.appointment == null || details.droppingTime == null) {
@@ -524,22 +528,85 @@ class _CalendarWState extends State<CalendarW> {
     if (rawAppointment is CustomAppointment) {
       appointment = rawAppointment;
     } else if (rawAppointment is Appointment) {
-      // Resolve master from ID - Syncfusion drag details returns the occurrence
-       if (rawAppointment.id != null) {
-          final master = eventProvider.events.firstWhere(
-            (e) => e.id == rawAppointment.id,
-            orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+      // Multi-strategy resolution for when Syncfusion returns Appointment instead of CustomAppointment
+      AppLogger.debug('Drag: Syncfusion returned Appointment, attempting resolution...', 'Calendar');
+      
+      // Strategy 1: Resolve by ID
+      if (rawAppointment.id != null) {
+        final master = eventProvider.events.firstWhere(
+          (e) => e.id == rawAppointment.id,
+          orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+        );
+        if (master.id != 'temp') {
+          appointment = master.copyWith(
+            startTime: rawAppointment.startTime, 
+            endTime: rawAppointment.endTime,
           );
-          if (master.id != 'temp') {
-            appointment = master.copyWith(
-              startTime: rawAppointment.startTime, 
-              endTime: rawAppointment.endTime,
-            );
-          }
-       }
+          AppLogger.debug('Drag: Resolved appointment by ID: ${master.id}', 'Calendar');
+        }
+      }
+      
+      // Strategy 2: Match by time + title
+      if (appointment == null && rawAppointment.subject != null) {
+        final match = eventProvider.events.firstWhere(
+          (e) => e.startTime == rawAppointment.startTime && e.title == rawAppointment.subject,
+          orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+        );
+        if (match.id != 'temp') {
+          appointment = match.copyWith(
+            startTime: rawAppointment.startTime, 
+            endTime: rawAppointment.endTime,
+          );
+          AppLogger.debug('Drag: Resolved appointment by time+title: ${match.id}', 'Calendar');
+        }
+      }
+      
+      // Strategy 3: Match by title only (less precise, last resort)
+      if (appointment == null && rawAppointment.subject != null) {
+        final match = eventProvider.events.firstWhere(
+          (e) => e.title == rawAppointment.subject,
+          orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+        );
+        if (match.id != 'temp') {
+          appointment = match.copyWith(
+            startTime: rawAppointment.startTime, 
+            endTime: rawAppointment.endTime,
+          );
+          AppLogger.debug('Drag: Resolved appointment by title-only: ${match.id}', 'Calendar');
+        }
+      }
+      
+      // Strategy 4: Match by recurrenceId if present
+      if (appointment == null && rawAppointment.recurrenceId != null) {
+        final masterId = rawAppointment.recurrenceId.toString();
+        final master = eventProvider.events.firstWhere(
+          (e) => e.id == masterId || e.recurrenceId == masterId,
+          orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+        );
+        if (master.id != 'temp') {
+          appointment = master.copyWith(
+            startTime: rawAppointment.startTime,
+            endTime: rawAppointment.endTime,
+          );
+          AppLogger.debug('Drag: Resolved appointment by recurrenceId: ${master.id}', 'Calendar');
+        }
+      }
     }
     
-    if (appointment == null) return;
+    // Comprehensive null check with user-facing error
+    if (appointment == null) {
+      AppLogger.e('Drag: Failed to resolve appointment from Syncfusion data', 'Calendar');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Unable to move event. Please try again.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
 
     AppLogger.debug(
         'Handling drag-and-drop for appointment: ${appointment.title}',
@@ -662,6 +729,11 @@ class _CalendarWState extends State<CalendarW> {
 
   /// Handles appointment resize operations
   Future<void> _handleResizeEnd(AppointmentResizeEndDetails details) async {
+    // Diagnostic logging to debug type mismatch issues
+    AppLogger.debug('Resize: appointment type = ${details.appointment?.runtimeType}', 'Calendar');
+    AppLogger.debug('Resize: startTime = ${details.startTime}', 'Calendar');
+    AppLogger.debug('Resize: endTime = ${details.endTime}', 'Calendar');
+
     // Null safety: Syncfusion may provide null values in edge cases
     // (rapid gestures, widget disposal during resize)
     if (details.appointment == null || 
@@ -678,20 +750,76 @@ class _CalendarWState extends State<CalendarW> {
     if (rawAppointment is CustomAppointment) {
       appointment = rawAppointment;
     } else if (rawAppointment is Appointment) {
-      // Resolve master from ID
-       if (rawAppointment.id != null) {
-          final master = eventProvider.events.firstWhere(
-            (e) => e.id == rawAppointment.id,
-             orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+      // Multi-strategy resolution for when Syncfusion returns Appointment instead of CustomAppointment
+      AppLogger.debug('Resize: Syncfusion returned Appointment, attempting resolution...', 'Calendar');
+      
+      // Strategy 1: Resolve by ID
+      if (rawAppointment.id != null) {
+        final master = eventProvider.events.firstWhere(
+          (e) => e.id == rawAppointment.id,
+          orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+        );
+        if (master.id != 'temp') {
+          appointment = master;
+          AppLogger.debug('Resize: Resolved appointment by ID: ${master.id}', 'Calendar');
+        }
+      }
+      
+      // Strategy 2: Match by time + title
+      if (appointment == null && rawAppointment.subject != null) {
+        final match = eventProvider.events.firstWhere(
+          (e) => e.startTime == rawAppointment.startTime && e.title == rawAppointment.subject,
+          orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+        );
+        if (match.id != 'temp') {
+          appointment = match;
+          AppLogger.debug('Resize: Resolved appointment by time+title: ${match.id}', 'Calendar');
+        }
+      }
+      
+      // Strategy 3: Match by title only (less precise, last resort)
+      if (appointment == null && rawAppointment.subject != null) {
+        final match = eventProvider.events.firstWhere(
+          (e) => e.title == rawAppointment.subject,
+          orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+        );
+        if (match.id != 'temp') {
+          appointment = match;
+          AppLogger.debug('Resize: Resolved appointment by title-only: ${match.id}', 'Calendar');
+        }
+      }
+      
+      // Strategy 4: Match by recurrenceId if present
+      if (appointment == null && rawAppointment.recurrenceId != null) {
+        final masterId = rawAppointment.recurrenceId.toString();
+        final master = eventProvider.events.firstWhere(
+          (e) => e.id == masterId || e.recurrenceId == masterId,
+          orElse: () => CustomAppointment(id: 'temp', title: 'Unknown', startTime: rawAppointment.startTime, endTime: rawAppointment.endTime, isAllDay: rawAppointment.isAllDay),
+        );
+        if (master.id != 'temp') {
+          appointment = master.copyWith(
+            startTime: rawAppointment.startTime,
+            endTime: rawAppointment.endTime,
           );
-          if (master.id != 'temp') {
-            appointment = master; 
-            // We use master base, but resize details gives us new start/end times via details.startTime/endTime
-          }
-       }
+          AppLogger.debug('Resize: Resolved appointment by recurrenceId: ${master.id}', 'Calendar');
+        }
+      }
     }
 
-    if (appointment == null) return;
+    // Comprehensive null check with user-facing error
+    if (appointment == null) {
+      AppLogger.e('Resize: Failed to resolve appointment from Syncfusion data', 'Calendar');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Unable to resize event. Please try again.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
 
     AppLogger.debug(
         'Handling resize for appointment: ${appointment.title}',
