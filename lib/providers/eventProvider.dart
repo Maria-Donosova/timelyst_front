@@ -473,11 +473,19 @@ class EventProvider with ChangeNotifier {
 
   Future<CustomAppointment?> updateEvent(
       String id, Map<String, dynamic> eventInput) async {
-    if (_authService == null) return null;
+    AppLogger.i('🔄 [EventProvider.updateEvent] Called for ID: $id');
+    if (_authService == null) {
+      AppLogger.w('⚠️ [EventProvider.updateEvent] No authService');
+      return null;
+    }
     final authToken = await _authService!.getAuthToken();
-    if (authToken == null) return null;
+    if (authToken == null) {
+      AppLogger.w('⚠️ [EventProvider.updateEvent] No authToken');
+      return null;
+    }
 
     if (id.isEmpty) {
+      AppLogger.w('⚠️ [EventProvider.updateEvent] Empty ID');
       _errorMessage = 'Event ID cannot be empty';
       notifyListeners();
       return null;
@@ -487,12 +495,15 @@ class EventProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      AppLogger.i('🔄 [EventProvider.updateEvent] Calling EventService.updateEvent...');
       final updatedEvent =
           await EventService.updateEvent(id, eventInput, authToken);
+      AppLogger.i('✅ [EventProvider.updateEvent] API call succeeded');
       _updateSingleEvent(updatedEvent);
       _errorMessage = '';
       return updatedEvent;
     } catch (e) {
+      AppLogger.e('❌ [EventProvider.updateEvent] Error: $e');
       _errorMessage = 'Failed to update event: $e';
       return null;
     } finally {

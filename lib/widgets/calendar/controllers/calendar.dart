@@ -710,8 +710,10 @@ class _CalendarWState extends State<CalendarW> {
       setState(() {});
 
       // Persist to backend
+      AppLogger.i('🖱️ [Drag] Starting backend update for: ${appointment.id}');
       try {
         final eventPayload = _createEventPayload(updatedAppointment);
+        AppLogger.i('🖱️ [Drag] Payload created, calling updateEvent...');
         final result = await eventProvider.updateEvent(
           appointment.id,
           eventPayload,
@@ -721,9 +723,9 @@ class _CalendarWState extends State<CalendarW> {
           throw Exception('Update returned null');
         }
 
-        AppLogger.debug('Successfully updated non-recurring event', 'Calendar');
+        AppLogger.i('✅ [Drag] Backend update successful');
       } catch (e) {
-        AppLogger.e('Error updating non-recurring event: $e', 'Calendar');
+        AppLogger.e('❌ [Drag] Backend update failed: $e');
         
         // Rollback on error
         rollback();
@@ -843,9 +845,7 @@ class _CalendarWState extends State<CalendarW> {
       return;
     }
 
-    AppLogger.debug(
-        'Handling resize for appointment: ${appointment.title}',
-        'Calendar');
+    AppLogger.i('📏 [Resize] Handling: ${appointment.title} (isRecurring: ${appointment.isRecurring})');
 
     if (appointment.isRecurring) {
       // Handle recurring event with EventHandlerService
@@ -938,8 +938,10 @@ class _CalendarWState extends State<CalendarW> {
       setState(() {});
 
       // Persist to backend
+      AppLogger.i('📏 [Resize] Starting backend update for: ${appointment.id}');
       try {
         final eventPayload = _createEventPayload(updatedAppointment);
+        AppLogger.i('📏 [Resize] Payload created, calling updateEvent...');
         final result = await eventProvider.updateEvent(
           appointment.id,
           eventPayload,
@@ -949,9 +951,9 @@ class _CalendarWState extends State<CalendarW> {
           throw Exception('Update returned null');
         }
 
-        AppLogger.debug('Successfully updated non-recurring event', 'Calendar');
+        AppLogger.i('✅ [Resize] Backend update successful');
       } catch (e) {
-        AppLogger.e('Error updating non-recurring event: $e', 'Calendar');
+        AppLogger.e('❌ [Resize] Backend update failed: $e');
         
         // Rollback on error
         rollback();
