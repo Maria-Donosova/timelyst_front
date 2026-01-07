@@ -1,7 +1,7 @@
 // Timezone utility functions for handling IANA timezones and datetime formatting
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 class TimezoneUtils {
   static bool _initialized = false;
@@ -17,7 +17,7 @@ class TimezoneUtils {
 
       // Detect the device's actual IANA timezone
       try {
-        final String timeZoneName = await FlutterNativeTimezone.getLocalTimezone();
+        final String timeZoneName = await FlutterTimezone.getLocalTimezone();
         print('🌍 [TimezoneUtils] Detected device timezone: $timeZoneName');
 
         // Validate that the timezone is recognized
