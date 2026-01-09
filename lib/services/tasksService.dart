@@ -4,7 +4,7 @@ import '../models/task.dart';
 import '../utils/apiClient.dart';
 
 class TasksService {
-  static final ApiClient _apiClient = ApiClient();
+  static ApiClient apiClient = ApiClient();
 
   static Future<List<Task>> fetchUserTasks(String authToken, {bool? completed}) async {
     try {
@@ -13,7 +13,7 @@ class TasksService {
         url += '?completed=$completed';
       }
 
-      final response = await _apiClient.get(
+      final response = await apiClient.get(
         url,
         token: authToken,
       );
@@ -31,7 +31,7 @@ class TasksService {
 
   static Future<Task> createTask(String authToken, Map<String, dynamic> taskInput) async {
     try {
-      final response = await _apiClient.post(
+      final response = await apiClient.post(
         '${Config.backendURL}/tasks',
         body: taskInput,
         token: authToken,
@@ -50,7 +50,7 @@ class TasksService {
 
   static Future<Task> updateTask(String id, String authToken, Map<String, dynamic> taskInput) async {
     try {
-      final response = await _apiClient.put(
+      final response = await apiClient.put(
         '${Config.backendURL}/tasks/$id',
         body: taskInput,
         token: authToken,
@@ -69,7 +69,7 @@ class TasksService {
 
   static Future<void> deleteTask(String id, String authToken) async {
     try {
-      final response = await _apiClient.delete(
+      final response = await apiClient.delete(
         '${Config.backendURL}/tasks/$id',
         token: authToken,
       );

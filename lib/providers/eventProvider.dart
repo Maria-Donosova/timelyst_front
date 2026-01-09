@@ -278,15 +278,20 @@ class EventProvider with ChangeNotifier {
       
       // Sync events for the specific date range requested
       if (startDate != null && endDate != null) {
-        _events = fetchedEvents;
+        _syncEventsForDateRange(fetchedEvents, startDate, endDate);
         // Sync _timeEvents for the calendar data source
-        _timeEvents = fetchedEvents
+        _timeEvents = _events
             .map((e) => e.timeEventInstance)
             .whereType<TimeEvent>()
             .toList();
       } else {
         // For backward compatibility, replace all events if no date range specified
         _syncEventsIncremental(fetchedEvents);
+        // Sync _timeEvents
+        _timeEvents = _events
+            .map((e) => e.timeEventInstance)
+            .whereType<TimeEvent>()
+            .toList();
       }
 
       // Store current events as previous for next comparison
@@ -415,9 +420,9 @@ class EventProvider with ChangeNotifier {
           .cast<CustomAppointment>()
           .toList();
       
-      // Replace existing events for the calendar view to avoid accumulation
-      // and potential Syncfusion crashes with too many events.
-      _events = appointments;
+      // Replace/Sync events for the calendar view to avoid accumulation
+      // but preserve events outside the range via _syncEventsForDateRange
+      _syncEventsForDateRange(appointments, start, end);
       
       _previousEvents = List.from(_events);
       
