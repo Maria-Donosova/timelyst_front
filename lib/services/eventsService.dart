@@ -6,7 +6,7 @@ import '../utils/eventsMapper.dart';
 import '../../utils/apiClient.dart';
 
 class EventService {
-  static final ApiClient _apiClient = ApiClient();
+  static ApiClient apiClient = ApiClient();
 
   static Future<List<CustomAppointment>> fetchEvents(
       String userId, String authToken, {
@@ -31,7 +31,7 @@ class EventService {
       final uri = Uri.parse('${Config.backendURL}/events').replace(queryParameters: queryParams);
 
       print('🔄 [EventService] GET $uri');
-      final response = await _apiClient.get(
+      final response = await apiClient.get(
         uri.toString(),
         token: authToken,
       );
@@ -81,7 +81,7 @@ class EventService {
   static Future<CustomAppointment> createEvent(
       Map<String, dynamic> eventInput, String authToken) async {
     try {
-      final response = await _apiClient.post(
+      final response = await apiClient.post(
         '${Config.backendURL}/events',
         body: eventInput,
         token: authToken,
@@ -102,7 +102,7 @@ class EventService {
   static Future<CustomAppointment> updateEvent(
       String id, Map<String, dynamic> eventInput, String authToken) async {
     try {
-      final response = await _apiClient.put(
+      final response = await apiClient.put(
         '${Config.backendURL}/events/$id',
         body: eventInput,
         token: authToken,
@@ -133,7 +133,7 @@ class EventService {
         print('🗑️ [EventService] Deleting with scope: $deleteScope');
       }
       
-      final response = await _apiClient.delete(
+      final response = await apiClient.delete(
         url,
         token: authToken,
       );
@@ -169,7 +169,7 @@ class EventService {
           .replace(queryParameters: queryParams);
 
       print('🔄 [EventService] GET $uri (calendar view)');
-      final response = await _apiClient.get(
+      final response = await apiClient.get(
         uri.toString(),
         token: authToken,
       );
@@ -194,7 +194,7 @@ class EventService {
     required Map<String, dynamic> updates,
   }) async {
     try {
-      final response = await _apiClient.put(
+      final response = await apiClient.put(
         '${Config.backendURL}/recurring-events/$masterEventId/occurrences/${originalStart.toIso8601String()}',
         body: updates,
         token: authToken,
@@ -223,7 +223,7 @@ class EventService {
       final uri = Uri.parse('${Config.backendURL}/recurring-events/$masterEventId/split')
           .replace(queryParameters: queryParams);
 
-      final response = await _apiClient.put(
+      final response = await apiClient.put(
         uri.toString(),
         body: updates,
         token: authToken,
@@ -252,7 +252,7 @@ class EventService {
       final uri = Uri.parse('${Config.backendURL}/recurring-events/$masterEventId')
           .replace(queryParameters: queryParams);
 
-      final response = await _apiClient.put(
+      final response = await apiClient.put(
         uri.toString(),
         body: updates,
         token: authToken,
@@ -276,7 +276,7 @@ class EventService {
     required DateTime originalStart,
   }) async {
     try {
-      final response = await _apiClient.delete(
+      final response = await apiClient.delete(
         '${Config.backendURL}/recurring-events/$masterEventId/occurrences/${originalStart.toIso8601String()}',
         token: authToken,
       );
@@ -300,7 +300,7 @@ class EventService {
       final uri = Uri.parse('${Config.backendURL}/recurring-events/$masterEventId/future')
           .replace(queryParameters: queryParams);
 
-      final response = await _apiClient.delete(
+      final response = await apiClient.delete(
         uri.toString(),
         token: authToken,
       );
@@ -326,7 +326,7 @@ class EventService {
       final uri = Uri.parse('${Config.backendURL}/recurring-events/$masterEventId')
           .replace(queryParameters: queryParams);
 
-      final response = await _apiClient.delete(
+      final response = await apiClient.delete(
         uri.toString(),
         token: authToken,
       );

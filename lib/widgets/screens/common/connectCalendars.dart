@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
+import '../../../utils/platform/platform.dart' as platform;
 import 'package:provider/provider.dart';
 
 import '../../shared/customAppbar.dart';
@@ -137,7 +137,7 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
             TextButton(
               onPressed: () {
                 // Open Apple ID website
-                html.window.open('https://appleid.apple.com', '_blank');
+                platform.getPlatformUtils().openUrl('https://appleid.apple.com');
               },
               child: Text('Open Apple ID'),
             ),
@@ -190,7 +190,7 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
       print("🔄 [ConnectCalendars] Processing Microsoft OAuth callback");
 
       // Clean up URL immediately
-      html.window.history.replaceState(null, '', '/');
+      platform.getPlatformUtils().replaceState(null, '', '/');
 
       final signInManager = MicrosoftSignInManager();
       final result =
@@ -539,7 +539,7 @@ class _ConnectCalBodyState extends State<_ConnectCalBody> {
 
                                     // Ensure redirect happens in same window, not new tab
                                     // Use location.replace to avoid back button issues
-                                    html.window.location.replace(authUrl);
+                                    platform.getPlatformUtils().locationReplace(authUrl);
                                   } catch (e) {
                                     print(
                                         '❌ [ConnectCalendars] Exception during Microsoft OAuth: $e');
