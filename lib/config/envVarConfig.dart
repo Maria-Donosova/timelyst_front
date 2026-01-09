@@ -8,10 +8,6 @@ class Config {
     return value ?? 'test_google_client_id';
   }
 
-  static String get googleClientSecret {
-    final value = _configService.get('GOOGLE_CLIENT_SECRET');
-    return value ?? 'test_google_client_secret';
-  }
 
   static String get googleOath {
     return _configService.get('GOOGLE_OATH_URL') ?? 'https://accounts.google.com/o/oauth2/auth';
@@ -56,10 +52,6 @@ class Config {
     return value ?? '3193f9e8-2fa4-4fb2-b75b-70a1d65918af';
   }
 
-  static String get microsoftClientSecret {
-    final value = _configService.get('MICROSOFT_CLIENT_SECRET');
-    return value ?? 'test_microsoft_client_secret';
-  }
 
   static String get microsoftTenantId {
     final value = _configService.get('MICROSOFT_TENANT_ID');
@@ -94,10 +86,6 @@ class Config {
     return value ?? 'test_apple_client_id';
   }
 
-  static String get appleClientSecret {
-    final value = _configService.get('APPLE_CLIENT_SECRET');
-    return value ?? 'test_apple_client_secret';
-  }
 
   static String get appleTeamId {
     final value = _configService.get('APPLE_TEAM_ID');
