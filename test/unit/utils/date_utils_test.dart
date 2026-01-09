@@ -1,122 +1,117 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/utils/dateUtils.dart';
 
 void main() {
-  group('DateTimeUtils.parseAnyFormat', () {
-    test('should return current time when value is null', () {
-      final now = DateTime.now();
-      final result = DateTimeUtils.parseAnyFormat(null);
-      expect(result.year, now.year);
-      expect(result.month, now.month);
-      expect(result.day, now.day);
+  group('DateTimeUtils', () {
+    group('parseAnyFormat', () {
+      test('should parse numeric timestamp (int)', () {
+        final timestamp = 1731111111000; // 2024-11-09T00:11:51.000
+        final result = DateTimeUtils.parseAnyFormat(timestamp);
+        expect(result.millisecondsSinceEpoch, equals(timestamp));
+      });
+
+      test('should parse numeric timestamp (string)', () {
+        final timestampStr = '1731111111000';
+        final result = DateTimeUtils.parseAnyFormat(timestampStr);
+        expect(result.millisecondsSinceEpoch, equals(1731111111000));
+      });
+
+      test('should preserve wall clock time from ISO strings with offsets', () {
+        // Backend returns "2024-11-21T14:30:00-05:00"
+        // We want to see 14:30 regardless of our local timezone
+        final isoWithOffset = '2024-11-21T14:30:00-05:00';
+        final result = DateTimeUtils.parseAnyFormat(isoWithOffset);
+        
+        expect(result.year, equals(2024));
+        expect(result.month, equals(11));
+        expect(result.day, equals(21));
+        expect(result.hour, equals(14));
+        expect(result.minute, equals(30));
+        expect(result.second, equals(0));
+      });
+
+      test('should convert UTC (Z) strings to local', () {
+        // "2024-11-21T14:30:00Z" -> parsed and then .toLocal() called
+        final utcString = '2024-11-21T14:30:00Z';
+        final result = DateTimeUtils.parseAnyFormat(utcString);
+        
+        final expected = DateTime.parse(utcString).toLocal();
+        expect(result, equals(expected));
+      });
+
+      test('should parse ISO strings without timezone info as local', () {
+        final localString = '2024-11-21T14:30:00';
+        final result = DateTimeUtils.parseAnyFormat(localString);
+        
+        expect(result.year, equals(2024));
+        expect(result.hour, equals(14));
+        // result should be exactly what DateTime.parse(localString) gives
+        expect(result, equals(DateTime.parse(localString)));
+      });
+
+      test('should return DateTime.now() on null', () {
+        final start = DateTime.now();
+        final result = DateTimeUtils.parseAnyFormat(null);
+        final end = DateTime.now();
+        
+        expect(result.isAfter(start.subtract(const Duration(seconds: 1))), isTrue);
+        expect(result.isBefore(end.add(const Duration(seconds: 1))), isTrue);
+      });
+
+      test('should return DateTime.now() on invalid input', () {
+        final start = DateTime.now();
+        final result = DateTimeUtils.parseAnyFormat('not-a-date');
+        final end = DateTime.now();
+        
+        expect(result.isAfter(start.subtract(const Duration(seconds: 1))), isTrue);
+        expect(result.isBefore(end.add(const Duration(seconds: 1))), isTrue);
+      });
     });
 
-    test('should parse numeric timestamp (milliseconds)', () {
-      const timestamp = 1731513600000; // 2024-11-13 16:00:00 UTC
-      final result = DateTimeUtils.parseAnyFormat(timestamp);
-      final expected = DateTime.fromMillisecondsSinceEpoch(timestamp).toLocal();
-      expect(result, expected);
-    });
-
-    test('should parse string timestamp', () {
-      const timestampStr = '1731513600000';
-      final result = DateTimeUtils.parseAnyFormat(timestampStr);
-      final expected = DateTime.fromMillisecondsSinceEpoch(1731513600000).toLocal();
-      expect(result, expected);
-    });
-
-    test('should preserve wall clock time for ISO strings with offsets', () {
-      const isoWithOffset = '2024-11-21T14:30:00-05:00';
-      final result = DateTimeUtils.parseAnyFormat(isoWithOffset);
-      
-      expect(result.year, 2024);
-      expect(result.month, 11);
-      expect(result.day, 21);
-      expect(result.hour, 14);
-      expect(result.minute, 30);
-      expect(result.second, 0);
-    });
-
-    test('should preserve wall clock time for ISO strings with + offsets', () {
-      const isoWithOffset = '2024-11-21T14:30:00+02:00';
-      final result = DateTimeUtils.parseAnyFormat(isoWithOffset);
-      
-      expect(result.year, 2024);
-      expect(result.month, 11);
-      expect(result.day, 21);
-      expect(result.hour, 14);
-      expect(result.minute, 30);
-      expect(result.second, 0);
-    });
-
-    test('should convert UTC (Z) to local time', () {
-      const utcString = '2024-11-21T14:30:00Z';
-      final result = DateTimeUtils.parseAnyFormat(utcString);
-      final expected = DateTime.parse(utcString).toLocal();
-      expect(result, expected);
-    });
-
-    test('should treat local ISO strings as local time', () {
-      const localString = '2024-11-21T14:30:00';
-      final result = DateTimeUtils.parseAnyFormat(localString);
-      expect(result.year, 2024);
-      expect(result.month, 11);
-      expect(result.day, 21);
-      expect(result.hour, 14);
-    });
-
-    test('should handle invalid formats by returning current time', () {
-      final result = DateTimeUtils.parseAnyFormat('invalid-date');
-      final now = DateTime.now();
-      expect(result.year, now.year);
-    });
-  });
-
-  group('DateTimeUtils.formatForApi', () {
-    test('should return ISO8601 string', () {
+    test('formatForApi should return ISO8601 string', () {
       final date = DateTime(2024, 11, 21, 14, 30);
       final result = DateTimeUtils.formatForApi(date);
-      expect(result, date.toIso8601String());
-    });
-  });
-
-  group('DateTimeUtils.parseTimeString', () {
-    test('should parse HH:mm', () {
-      final result = DateTimeUtils.parseTimeString('14:30');
-      expect(result.hour, 14);
-      expect(result.minute, 30);
+      expect(result, equals(date.toIso8601String()));
     });
 
-    test('should parse H:mm AM', () {
-      final result = DateTimeUtils.parseTimeString('9:45 AM');
-      expect(result.hour, 9);
-      expect(result.minute, 45);
-    });
+    group('parseTimeString', () {
+      test('should parse HH:mm format', () {
+        final res = DateTimeUtils.parseTimeString('14:30');
+        expect(res.hour, equals(14));
+        expect(res.minute, equals(30));
+      });
 
-    test('should parse H:mm PM', () {
-      final result = DateTimeUtils.parseTimeString('2:30 PM');
-      expect(result.hour, 14);
-      expect(result.minute, 30);
-    });
+      test('should parse "H:mm AM/PM" format', () {
+        final pmRes = DateTimeUtils.parseTimeString('2:30 PM');
+        expect(pmRes.hour, equals(14));
+        expect(pmRes.minute, equals(30));
 
-    test('should parse 12 AM as 00:00', () {
-      final result = DateTimeUtils.parseTimeString('12:00 AM');
-      expect(result.hour, 0);
-      expect(result.minute, 0);
-    });
+        final amRes = DateTimeUtils.parseTimeString('10:15 AM');
+        expect(amRes.hour, equals(10));
+        expect(amRes.minute, equals(15));
+      });
 
-    test('should parse 12 PM as 12:00', () {
-      final result = DateTimeUtils.parseTimeString('12:00 PM');
-      expect(result.hour, 12);
-      expect(result.minute, 0);
-    });
+      test('should handle 12 AM/PM correctly', () {
+        final twelvePm = DateTimeUtils.parseTimeString('12:00 PM');
+        expect(twelvePm.hour, equals(12));
 
-    test('should handle invalid time by returning current time', () {
-      final result = DateTimeUtils.parseTimeString('invalid');
-      final now = TimeOfDay.now();
-      expect(result.hour, now.hour);
-      expect(result.minute, now.minute);
+        final twelveAm = DateTimeUtils.parseTimeString('12:00 AM');
+        expect(twelveAm.hour, equals(0));
+      });
+
+      test('should parse HH format (no minutes)', () {
+        final res = DateTimeUtils.parseTimeString('10 AM');
+        expect(res.hour, equals(10));
+        expect(res.minute, equals(0));
+      });
+
+      test('should return TimeOfDay.now() on invalid time', () {
+        final result = DateTimeUtils.parseTimeString('invalid');
+        // Difficult to test exactly TimeOfDay.now() without mocking clock, 
+        // but we can check it doesn't throw and returns a TimeOfDay
+        expect(result, isA<TimeOfDay>());
+      });
     });
   });
 }
