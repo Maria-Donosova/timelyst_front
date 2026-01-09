@@ -14,7 +14,7 @@ This is a Flutter-based mobile application for Timelyst, a tool for managing cal
 
 *   **Frontend:** Flutter
 *   **State Management:** [Provider](https://pub.dev/packages/provider)
-*   **API Communication:** [GraphQL (`graphql_flutter`)](https://pub.dev/packages/graphql_flutter)
+*   **API Communication:** MariaDB
 *   **Authentication:** [Google Sign-In](https://pub.dev/packages/google_sign_in), Email/Password (via GraphQL mutations)
 *   **Calendar:** [Syncfusion Flutter Calendar](https://pub.dev/packages/syncfusion_flutter_calendar)
 *   **Secure Storage:** [Flutter Secure Storage](https://pub.dev/packages/flutter_secure_storage) for storing auth tokens
