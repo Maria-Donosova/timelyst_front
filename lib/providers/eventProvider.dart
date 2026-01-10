@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:timelyst_flutter/services/authService.dart';
 import 'package:timelyst_flutter/services/eventsService.dart';
+import 'package:timelyst_flutter/config/envVarConfig.dart';
 import 'package:timelyst_flutter/models/customApp.dart';
 import 'package:timelyst_flutter/models/timeEvent.dart';
 import 'package:timelyst_flutter/utils/eventsMapper.dart';
@@ -18,12 +19,17 @@ class EventProvider with ChangeNotifier {
   List<CustomAppointment> _previousEvents = [];
 
   bool _isLoading = false;
+  bool _isBackgroundRefreshing = false;
   String _errorMessage = '';
   
   // Cache management
   final Map<String, List<CustomAppointment>> _eventCache = {};
   final Map<String, DateTime> _cacheTimestamps = {};
-  static const Duration _cacheValidDuration = Duration(minutes: 1);
+  static const Duration _cacheValidDuration = Duration(minutes: 5);
+  
+  // Cache metrics
+  final CacheMetrics _metrics = CacheMetrics();
+  CacheMetrics get metrics => _metrics;
   
   // Occurrence counts for recurring events (master event ID -> count)
   final Map<String, int> _occurrenceCounts = {};
@@ -41,6 +47,7 @@ class EventProvider with ChangeNotifier {
   List<CustomAppointment> get events => _events;
   List<TimeEvent> get timeEvents => _timeEvents;
   bool get isLoading => _isLoading;
+  bool get isBackgroundRefreshing => _isBackgroundRefreshing;
   String get errorMessage => _errorMessage;
   
   /// Get occurrence count for a master event (for dialog display)
@@ -69,6 +76,15 @@ class EventProvider with ChangeNotifier {
     return '${startDate.toIso8601String().substring(0, 10)}_${endDate.toIso8601String().substring(0, 10)}';
   }
 
+  /// Parse cache key back into DateTime range
+  _DateRange _parseCacheKey(String key) {
+    final parts = key.split('_');
+    return _DateRange(
+      start: DateTime.parse(parts[0]),
+      end: DateTime.parse(parts[1]),
+    );
+  }
+
   /// Check if cached data is still valid
   bool _isCacheValid(String cacheKey) {
     final timestamp = _cacheTimestamps[cacheKey];
@@ -88,20 +104,153 @@ class EventProvider with ChangeNotifier {
 
   /// Store events in cache
   void _cacheEvents(String cacheKey, List<CustomAppointment> events) {
-    _eventCache[cacheKey] = List.from(events);
+    _evictOldestIfNeeded();
+    _eventCache[cacheKey] = events;
     _cacheTimestamps[cacheKey] = DateTime.now();
-    if (_debugLogging) AppLogger.i('🗄️ [EventProvider] Cached ${events.length} events for key: $cacheKey');
+    if (_debugLogging) AppLogger.i('🗄️ [EventProvider] Cached ${events.length} events for key: $cacheKey (Total ranges: ${_eventCache.length})');
+  }
+
+  /// LRU Eviction: Remove oldest entries if we exceed the limit
+  void _evictOldestIfNeeded() {
+    const int maxCachedRanges = 10;
+    if (_eventCache.length >= maxCachedRanges) {
+      // Find the oldest entry based on timestamp
+      final oldestKey = _cacheTimestamps.entries
+          .reduce((a, b) => a.value.isBefore(b.value) ? a : b)
+          .key;
+      
+      _eventCache.remove(oldestKey);
+      _cacheTimestamps.remove(oldestKey);
+      if (_debugLogging) AppLogger.i('🗄️ [EventProvider] LRU Eviction: Removed oldest cache range $oldestKey');
+    }
+  }
+
+  /// Surgical update: update an event in all cached ranges
+  void _updateEventInCache(CustomAppointment updatedEvent) {
+    if (!Config.useSmartCache) {
+      invalidateCache();
+      return;
+    }
+    int updateCount = 0;
+    for (final key in _eventCache.keys) {
+      final events = _eventCache[key]!;
+      
+      // 1. Update the exact event if found
+      final index = events.indexWhere((e) => e.id == updatedEvent.id);
+      if (index != -1) {
+        events[index] = updatedEvent;
+        updateCount++;
+      } else {
+        // If it's not there, maybe it SHOULD be there now if its time changed?
+        final range = _parseCacheKey(key);
+        if (_eventFallsInRange(updatedEvent, range)) {
+          events.add(updatedEvent);
+          updateCount++;
+        }
+      }
+
+      // 2. RECURRENCE SURGERY: If this is a master event update, update its occurrences
+      // We assume if developer passes a master event to update, we should sync common properties
+      final timeEvent = updatedEvent.timeEventInstance;
+      if (timeEvent != null && timeEvent.masterId == null && !timeEvent.isOccurrence) {
+        for (int i = 0; i < events.length; i++) {
+          final e = events[i];
+          final te = e.timeEventInstance;
+          if (te != null && te.masterId == updatedEvent.id) {
+            // Apply master changes (title, category, etc.) to the occurrence
+            events[i] = _applyMasterChangesToOccurrence(e, updatedEvent);
+            updateCount++;
+          }
+        }
+      }
+    }
+    if (updateCount > 0) {
+      _metrics.partialUpdates += updateCount;
+      if (_debugLogging) AppLogger.i('🗄️ [EventProvider] Surgically updated event hierarchy ${updatedEvent.id} in cache');
+    }
+  }
+
+  /// Helper to apply master event changes to an occurrence
+  CustomAppointment _applyMasterChangesToOccurrence(CustomAppointment occurrence, CustomAppointment master) {
+    return occurrence.copyWith(
+      title: master.title,
+      catColor: master.catColor,
+      location: master.location,
+      description: master.description,
+      // Note: times are NOT copied as they are occurrence-specific
+    );
+  }
+
+  /// Surgical update: remove an event from all cached ranges
+  void _removeEventFromCache(String eventId) {
+    int removeCount = 0;
+    for (final key in _eventCache.keys) {
+      final events = _eventCache[key]!;
+      final initialLength = events.length;
+      events.removeWhere((e) => e.id == eventId);
+      if (events.length < initialLength) {
+        removeCount++;
+      }
+    }
+    if (removeCount > 0) {
+      _metrics.partialUpdates += removeCount;
+      if (_debugLogging) AppLogger.i('🗄️ [EventProvider] Surgically removed event $eventId from $removeCount cache ranges');
+    }
+  }
+
+  /// Surgical update: add an event to relevant cached ranges
+  void _addEventToCache(CustomAppointment newEvent) {
+    if (!Config.useSmartCache) return;
+    int addCount = 0;
+    for (final key in _eventCache.keys) {
+      final range = _parseCacheKey(key);
+      if (_eventFallsInRange(newEvent, range)) {
+        final events = _eventCache[key]!;
+        if (!events.any((e) => e.id == newEvent.id)) {
+          events.add(newEvent);
+          addCount++;
+        }
+      }
+    }
+    if (addCount > 0) {
+      _metrics.partialUpdates += addCount;
+      if (_debugLogging) AppLogger.i('🗄️ [EventProvider] Surgically added event ${newEvent.id} to $addCount cache ranges');
+    }
+  }
+
+  bool _eventFallsInRange(CustomAppointment event, _DateRange range) {
+    return event.startTime.toUtc().isBefore(range.end.toUtc()) && 
+           event.endTime.toUtc().isAfter(range.start.toUtc());
   }
 
   /// Get events from cache
   List<CustomAppointment>? _getCachedEvents(String cacheKey) {
-    if (_isCacheValid(cacheKey)) {
-      final cached = _eventCache[cacheKey];
-      if (cached != null) {
-        if (_debugLogging) print('🗄️ [EventProvider] Retrieved ${cached.length} events from cache for key: $cacheKey');
-        return List.from(cached);
+    return _getCachedEventsForRange(_parseCacheKey(cacheKey).start, _parseCacheKey(cacheKey).end);
+  }
+
+  /// Get events from cache, supporting overlapping ranges
+  List<CustomAppointment>? _getCachedEventsForRange(DateTime start, DateTime end) {
+    if (!Config.useSmartCache) return null;
+    for (final key in _eventCache.keys) {
+      if (!_isCacheValid(key)) continue;
+      
+      final range = _parseCacheKey(key);
+      // If cached range fully contains requested range
+      if ((range.start.toUtc().isBefore(start.toUtc()) || range.start.toUtc().isAtSameMomentAs(start.toUtc())) && 
+          (range.end.toUtc().isAfter(end.toUtc()) || range.end.toUtc().isAtSameMomentAs(end.toUtc()))) {
+        
+        _metrics.cacheHits++;
+        final allEvents = _eventCache[key]!;
+        // Filter events to requested range
+        final filtered = allEvents.where((e) => 
+          e.startTime.toUtc().isBefore(end.toUtc()) && e.endTime.toUtc().isAfter(start.toUtc())
+        ).toList();
+        
+        if (_debugLogging) AppLogger.i('⚡ [EventProvider] Cache hit (overlap) for ${start.toIso8601String().substring(0,10)}: ${filtered.length} events');
+        return filtered;
       }
     }
+    _metrics.cacheMisses++;
     return null;
   }
 
@@ -110,6 +259,7 @@ class EventProvider with ChangeNotifier {
     _eventCache.clear();
     _cacheTimestamps.clear();
     _occurrenceCounts.clear();
+    _metrics.fullInvalidations++;
     if (_debugLogging) print('🗄️ [EventProvider] Cache invalidated - forcing fresh fetch on next request');
   }
 
@@ -187,31 +337,50 @@ class EventProvider with ChangeNotifier {
     String? viewType,
     Duration? customTimeout,
   }) async {
-    final startTime = DateTime.now();
-    final viewTypeStr = viewType ?? 'default';
-    if (_debugLogging) print('⏱️ [EventProvider] Starting fetchAllEvents at ${startTime} for view: $viewTypeStr');
-    
-    if (startDate != null && endDate != null) {
-      if (_debugLogging) print('📅 [EventProvider] Using custom date range: ${startDate.toIso8601String().substring(0, 10)} to ${endDate.toIso8601String().substring(0, 10)}');
-      
-      // Check cache first (unless forcing refresh)
-      if (!forceFullRefresh) {
+    if (startDate != null && endDate != null && !forceFullRefresh) {
+      final cachedEvents = _getCachedEventsForRange(startDate, endDate);
+      if (cachedEvents != null) {
+        _events = cachedEvents;
+        _timeEvents = cachedEvents
+            .map((e) => e.timeEventInstance)
+            .whereType<TimeEvent>()
+            .toList();
+        _previousEvents = List.from(_events);
+        notifyListeners();
+        
         final cacheKey = _generateCacheKey(startDate, endDate);
-        final cachedEvents = _getCachedEvents(cacheKey);
-        if (cachedEvents != null) {
-          _events = cachedEvents;
-          // Sync _timeEvents for the calendar data source
-          _timeEvents = cachedEvents
-              .map((e) => e.timeEventInstance)
-              .whereType<TimeEvent>()
-              .toList();
-          _previousEvents = List.from(_events);
-          notifyListeners();
-          if (_debugLogging) print('⚡ [EventProvider] Returned cached events, skipping API call');
-          return;
+        final timestamp = _cacheTimestamps[cacheKey];
+        final isStale = timestamp == null || DateTime.now().difference(timestamp) > Duration(minutes: 2);
+        
+        if (isStale) {
+          if (_debugLogging) AppLogger.i('⚡ [EventProvider] Cache hit but stale (fetchAllEvents), refreshing in background');
+          _refreshAllEventsInBackground(startDate, endDate, viewType, customTimeout);
+        } else {
+          if (_debugLogging) print('⚡ [EventProvider] Fresh cache hit (fetchAllEvents)');
         }
+        return;
       }
     }
+    
+    return _fetchAllEventsFromApi(
+      forceFullRefresh: forceFullRefresh,
+      startDate: startDate,
+      endDate: endDate,
+      viewType: viewType,
+      customTimeout: customTimeout,
+    );
+  }
+
+  Future<void> _fetchAllEventsFromApi({
+    bool forceFullRefresh = false,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? viewType,
+    Duration? customTimeout,
+  }) async {
+    final startTime = DateTime.now();
+    final viewTypeStr = viewType ?? 'default';
+    if (_debugLogging) print('⏱️ [EventProvider] Starting _fetchAllEventsFromApi at ${startTime} for view: $viewTypeStr');
     
     // Prevent concurrent fetches (but allow forced refresh)
     if (_isLoading && !forceFullRefresh) {
@@ -228,30 +397,20 @@ class EventProvider with ChangeNotifier {
     final authToken = await _authService!.getAuthToken();
     final userId = await _authService!.getUserId();
     if (authToken == null || userId == null) {
-      final msg = "❌ [EventProvider] Missing authentication - Token: ${authToken != null ? 'Present' : 'NULL'}, UserId: ${userId != null ? 'Present' : 'NULL'}";
-      print(msg);
       _errorMessage = 'Authentication required. Please log in again.';
       _isLoading = false;
       notifyListeners();
       return;
     }
-    
-    print("✅ [EventProvider] Auth credentials valid - UserID: ${userId.length > 10 ? '${userId.substring(0, 10)}...' : userId}");
 
     _isLoading = true;
     notifyListeners();
 
     try {
-      // Only clear events on first load or forced refresh
       if (_events.isEmpty || forceFullRefresh) {
         _events = [];
       }
       
-      print('🔄 [EventProvider] Starting backend API calls...');
-      print('🔄 [EventProvider] Fetching events for date range: ${startDate?.toIso8601String().substring(0, 10)} to ${endDate?.toIso8601String().substring(0, 10)}');
-      final apiStartTime = DateTime.now();
-      
-      // Choose timeout based on context
       final timeout = customTimeout ?? 
                      (viewType == 'parallel' ? _parallelEventTimeout : _defaultEventTimeout);
       
@@ -263,62 +422,59 @@ class EventProvider with ChangeNotifier {
       ).timeout(
         timeout,
         onTimeout: () {
-          print('⏰ [EventProvider] API calls timed out after ${timeout.inSeconds} seconds');
+          print('⏰ [EventProvider] API calls timed out');
           throw TimeoutException('Event fetching timed out', timeout);
         }
       );
       
-      final apiEndTime = DateTime.now();
-      final apiDuration = apiEndTime.difference(apiStartTime);
-      print('✅ [EventProvider] Backend API calls completed in ${apiDuration.inMilliseconds}ms');
-
-      if (_debugLogging) {
-        print('🔍 [EventProvider] Fetched ${fetchedEvents.length} events');
-      }
-      
-      // Sync events for the specific date range requested
       if (startDate != null && endDate != null) {
         _syncEventsForDateRange(fetchedEvents, startDate, endDate);
-        // Sync _timeEvents for the calendar data source
-        _timeEvents = _events
-            .map((e) => e.timeEventInstance)
-            .whereType<TimeEvent>()
-            .toList();
+        _timeEvents = _events.map((e) => e.timeEventInstance).whereType<TimeEvent>().toList();
       } else {
-        // For backward compatibility, replace all events if no date range specified
         _syncEventsIncremental(fetchedEvents);
-        // Sync _timeEvents
-        _timeEvents = _events
-            .map((e) => e.timeEventInstance)
-            .whereType<TimeEvent>()
-            .toList();
+        _timeEvents = _events.map((e) => e.timeEventInstance).whereType<TimeEvent>().toList();
       }
 
-      // Store current events as previous for next comparison
       _previousEvents = List.from(_events);
 
-      // Cache the results if we have a specific date range
       if (startDate != null && endDate != null) {
         final cacheKey = _generateCacheKey(startDate, endDate);
         _cacheEvents(cacheKey, fetchedEvents);
       }
 
       _errorMessage = '';
-      
-      final endTime = DateTime.now();
-      final duration = endTime.difference(startTime);
-      print('✅ [EventProvider] Loaded ${_events.length} events in ${duration.inMilliseconds}ms ($viewTypeStr)');
-      
+      logCacheMetrics();
     } catch (e) {
       _errorMessage = 'Failed to fetch events: $e';
       print('❌ [EventProvider] Error: $_errorMessage');
-      
-      final endTime = DateTime.now();
-      final duration = endTime.difference(startTime);
-      print('⏱️ [EventProvider] fetchAllEvents failed after ${duration.inMilliseconds}ms');
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  void _refreshAllEventsInBackground(DateTime start, DateTime end, String? viewType, Duration? customTimeout) async {
+    try {
+      _metrics.backgroundRefreshes++;
+      final authToken = await _authService?.getAuthToken();
+      final userId = await _authService?.getUserId();
+      if (authToken == null || userId == null) return;
+
+      final fetchedEvents = await EventService.fetchEvents(
+        userId, authToken, startDate: start, endDate: end
+      );
+      
+      _syncEventsForDateRange(fetchedEvents, start, end);
+      _timeEvents = _events.map((e) => e.timeEventInstance).whereType<TimeEvent>().toList();
+      _previousEvents = List.from(_events);
+      
+      final cacheKey = _generateCacheKey(start, end);
+      _cacheEvents(cacheKey, fetchedEvents);
+      
+      notifyListeners();
+      if (_debugLogging) AppLogger.i('✅ [EventProvider] Background refresh (fetchAllEvents) completed');
+    } catch (e) {
+      if (_debugLogging) AppLogger.w('⚠️ [EventProvider] Background refresh failed: $e');
     }
   }
 
@@ -332,40 +488,38 @@ class EventProvider with ChangeNotifier {
     final start = startDate ?? DateTime.now().subtract(Duration(days: 90));
     final end = endDate ?? DateTime.now().add(Duration(days: 120));
     
-    if (_debugLogging) {
-      print('📅 [EventProvider] fetchCalendarView: ${start.toIso8601String().substring(0, 10)} to ${end.toIso8601String().substring(0, 10)}');
-    }
-    
-    // Check cache first
     if (!forceRefresh) {
-      final cacheKey = _generateCacheKey(start, end);
-      final cachedEvents = _getCachedEvents(cacheKey);
+      final cachedEvents = _getCachedEventsForRange(start, end);
       if (cachedEvents != null) {
         _events = cachedEvents;
-        // Sync _timeEvents for the calendar data source
         _timeEvents = cachedEvents
             .map((e) => e.timeEventInstance)
             .whereType<TimeEvent>()
             .toList();
         _previousEvents = List.from(_events);
         notifyListeners();
-        if (_debugLogging) print('⚡ [EventProvider] Returned cached calendar view');
+        
+        final cacheKey = _generateCacheKey(start, end);
+        final timestamp = _cacheTimestamps[cacheKey];
+        final isStale = timestamp == null || DateTime.now().difference(timestamp) > Duration(minutes: 2);
+        
+        if (isStale) {
+          if (_debugLogging) AppLogger.i('⚡ [EventProvider] Cache hit but stale (fetchCalendarView), refreshing in background');
+          _refreshCalendarViewInBackground(start, end);
+        } else {
+          if (_debugLogging) print('⚡ [EventProvider] Fresh cache hit (fetchCalendarView)');
+        }
         return;
       }
     }
     
-    if (_authService == null) {
-      print("AuthService is null in EventProvider");
-      return;
-    }
-    
+    return _fetchCalendarViewFromApi(start, end);
+  }
+
+  Future<void> _fetchCalendarViewFromApi(DateTime start, DateTime end) async {
+    if (_authService == null) return;
     final authToken = await _authService!.getAuthToken();
-    if (authToken == null) {
-      print("❌ [EventProvider] Missing auth token");
-      _errorMessage = 'Authentication required. Please log in again.';
-      notifyListeners();
-      return;
-    }
+    if (authToken == null) return;
     
     _isLoading = true;
     notifyListeners();
@@ -375,67 +529,12 @@ class EventProvider with ChangeNotifier {
         authToken: authToken,
         start: start,
         end: end,
-        expand: true,  // Request backend-expanded occurrences
+        expand: true,
       );
       
-      // Extract expanded events and masters from response
-      final events = (response['events'] as List<dynamic>?)
-          ?.map((e) => TimeEvent.fromJson(e as Map<String, dynamic>))
-          .toList() ?? [];
-          
-      final masters = (response['masters'] as List<dynamic>?)
-          ?.map((e) => TimeEvent.fromJson(e as Map<String, dynamic>))
-          .toList() ?? [];
-          
-      final occurrenceCounts = response['occurrenceCounts'] != null
-          ? Map<String, int>.from(response['occurrenceCounts'] as Map)
-          : <String, int>{};
-      
-      // Store occurrence counts
-      _occurrenceCounts.clear();
-      _occurrenceCounts.addAll(occurrenceCounts);
-      
-      // Store masters map for edit/delete operations
-      setMastersMap(masters);
-      
-      if (_debugLogging) {
-        print('📊 [EventProvider] Received ${events.length} expanded events, ${masters.length} masters');
-        print('📊 [EventProvider] Occurrence counts: ${occurrenceCounts.length} series');
-      }
-      
-      // Store raw TimeEvent objects for TimelystCalendarDataSource
-      _timeEvents = events;
-      
-      // Map to CustomAppointments
-      final appointments = events
-          .map((event) {
-            try {
-              return EventMapper.mapTimeEventToCustomAppointment(event);
-            } catch (e) {
-              print('Error mapping event ${event.id}: $e');
-              return null;
-            }
-          })
-          .where((event) => event != null)
-          .cast<CustomAppointment>()
-          .toList();
-      
-      // Replace/Sync events for the calendar view to avoid accumulation
-      // but preserve events outside the range via _syncEventsForDateRange
-      _syncEventsForDateRange(appointments, start, end);
-      
-      _previousEvents = List.from(_events);
-      
-      // Cache the results
-      final cacheKey = _generateCacheKey(start, end);
-      _cacheEvents(cacheKey, appointments);
-      
+      _processCalendarViewResponse(response, start, end);
       _errorMessage = '';
-      
-      if (_debugLogging) {
-        print('✅ [EventProvider] Calendar view loaded: ${_events.length} total events');
-      }
-      
+      logCacheMetrics();
     } catch (e) {
       _errorMessage = 'Failed to fetch calendar view: $e';
       print('❌ [EventProvider] Error: $_errorMessage');
@@ -445,6 +544,70 @@ class EventProvider with ChangeNotifier {
     }
   }
 
+  void _refreshCalendarViewInBackground(DateTime start, DateTime end) async {
+    try {
+      _metrics.backgroundRefreshes++;
+      _isBackgroundRefreshing = true;
+      notifyListeners();
+      
+      final authToken = await _authService?.getAuthToken();
+      if (authToken == null) return;
+
+      final response = await EventService.getCalendarView(
+        authToken: authToken,
+        start: start,
+        end: end,
+        expand: true,
+      );
+      
+      _processCalendarViewResponse(response, start, end);
+      notifyListeners();
+      if (_debugLogging) AppLogger.i('✅ [EventProvider] Background refresh (fetchCalendarView) completed');
+    } catch (e) {
+      if (_debugLogging) AppLogger.w('⚠️ [EventProvider] Background refresh failed: $e');
+    } finally {
+      _isBackgroundRefreshing = false;
+      notifyListeners();
+    }
+  }
+
+  void _processCalendarViewResponse(Map<String, dynamic> response, DateTime start, DateTime end) {
+    final events = (response['events'] as List<dynamic>?)
+        ?.map((e) => TimeEvent.fromJson(e as Map<String, dynamic>))
+        .toList() ?? [];
+        
+    final masters = (response['masters'] as List<dynamic>?)
+        ?.map((e) => TimeEvent.fromJson(e as Map<String, dynamic>))
+        .toList() ?? [];
+        
+    final occurrenceCounts = response['occurrenceCounts'] != null
+        ? Map<String, int>.from(response['occurrenceCounts'] as Map)
+        : <String, int>{};
+    
+    _occurrenceCounts.clear();
+    _occurrenceCounts.addAll(occurrenceCounts);
+    setMastersMap(masters);
+    
+    _timeEvents = events;
+    final appointments = events
+        .map((event) {
+          try {
+            return EventMapper.mapTimeEventToCustomAppointment(event);
+          } catch (e) {
+            return null;
+          }
+        })
+        .where((event) => event != null)
+        .cast<CustomAppointment>()
+        .toList();
+    
+    _syncEventsForDateRange(appointments, start, end);
+    _previousEvents = List.from(_events);
+    
+    final cacheKey = _generateCacheKey(start, end);
+    _cacheEvents(cacheKey, appointments);
+  }
+
   void addSingleEvent(CustomAppointment event) {
     _updateSingleEvent(event);
     notifyListeners();
@@ -452,18 +615,27 @@ class EventProvider with ChangeNotifier {
 
   Future<CustomAppointment?> createEvent(
       Map<String, dynamic> eventInput) async {
-    if (_authService == null) return null;
+    if (_debugLogging) print('🔄 [EventProvider] createEvent called with: $eventInput');
+    if (_authService == null) {
+      if (_debugLogging) print('❌ [EventProvider] createEvent failure: authService is null');
+      return null;
+    }
     final authToken = await _authService!.getAuthToken();
-    if (authToken == null) return null;
+    if (authToken == null) {
+      if (_debugLogging) print('❌ [EventProvider] createEvent failure: authToken is null');
+      return null;
+    }
 
     _isLoading = true;
     notifyListeners();
 
     try {
+      if (_debugLogging) print('🔄 [EventProvider] Calling EventService.createEvent...');
       final newEvent =
           await EventService.createEvent(eventInput, authToken);
       _events.add(newEvent);
       _errorMessage = '';
+      _addEventToCache(newEvent);
       notifyListeners();
       return newEvent;
     } catch (e) {
@@ -506,6 +678,7 @@ class EventProvider with ChangeNotifier {
       AppLogger.i('✅ [EventProvider.updateEvent] API call succeeded');
       _updateSingleEvent(updatedEvent);
       _errorMessage = '';
+      _updateEventInCache(updatedEvent);
       return updatedEvent;
     } catch (e) {
       AppLogger.e('❌ [EventProvider.updateEvent] Error: $e');
@@ -532,6 +705,7 @@ class EventProvider with ChangeNotifier {
       
       // Remove the event from local state
       _events.removeWhere((event) => event.id == id);
+      _removeEventFromCache(id);
       
       // If deleting a series, invalidate cache to force refresh
       // This ensures all occurrences are removed from the UI
@@ -571,14 +745,14 @@ class EventProvider with ChangeNotifier {
     final fetchedEventIds = fetchedEvents.map((e) => e.id).toSet();
     final eventsToKeep = _events.where((event) {
       // Keep events outside the core range (not the buffer)
-      final outsideCoreRange = event.startTime.isBefore(startDate) || 
-                              event.startTime.isAfter(endDate) ||
-                              event.startTime.isAtSameMomentAs(endDate);
+      final outsideCoreRange = event.startTime.toUtc().isBefore(startDate.toUtc()) || 
+                              event.startTime.toUtc().isAfter(endDate.toUtc()) ||
+                              event.startTime.toUtc().isAtSameMomentAs(endDate.toUtc());
       
       // For all-day events, be more lenient with date boundaries
       final isAllDayWithinBuffer = event.isAllDay && 
-                                  event.startTime.isAfter(bufferStart) && 
-                                  event.startTime.isBefore(bufferEnd);
+                                  event.startTime.toUtc().isAfter(bufferStart.toUtc()) && 
+                                  event.startTime.toUtc().isBefore(bufferEnd.toUtc());
       
       final shouldKeep = outsideCoreRange || isAllDayWithinBuffer;
       
@@ -626,6 +800,36 @@ class EventProvider with ChangeNotifier {
     }
     
     return changesMade > 0 || fetchedEvents.isNotEmpty;
+  }
+
+  /// Handle calendar visibility toggle surgically
+  void onCalendarVisibilityChanged(String calendarId, bool isVisible) {
+    if (!isVisible) {
+      // Remove events from this calendar from current state and cache
+      _events.removeWhere((e) => e.calendarId == calendarId);
+      _timeEvents.removeWhere((e) => e.calendarIds.contains(calendarId));
+      
+      for (final key in _eventCache.keys) {
+        _eventCache[key]!.removeWhere((e) => e.calendarId == calendarId);
+      }
+      
+      if (_debugLogging) AppLogger.i('🗄️ [EventProvider] Locally removed events for calendar $calendarId');
+      _metrics.partialUpdates++;
+      notifyListeners();
+    } else {
+      // If toggled ON, we need to fetch. 
+      // For now, let's force a refresh of the current view to get the events.
+      if (_debugLogging) AppLogger.i('🗄️ [EventProvider] Calendar $calendarId toggled ON, refreshing view');
+      // Use short delay to allow provider state to propagate if needed
+      Future.delayed(Duration(milliseconds: 100), () {
+        fetchCalendarView(forceRefresh: true);
+      });
+    }
+  }
+
+  /// Log current cache metrics
+  void logCacheMetrics() {
+    if (_debugLogging) AppLogger.i('📊 [EventProvider] Cache Metrics: ${_metrics.toString()}');
   }
 
   /// Performs incremental synchronization of events
@@ -751,6 +955,7 @@ class EventProvider with ChangeNotifier {
     final index = _events.indexWhere((event) => event.id == oldEvent.id);
     if (index >= 0) {
       _events[index] = newEvent;
+      _updateEventInCache(newEvent);
       notifyListeners();
     }
   }
@@ -786,6 +991,7 @@ class EventProvider with ChangeNotifier {
     
     if (index >= 0) {
       _events[index] = updated;
+      _updateEventInCache(updated);
       
       // Also update _timeEvents to keep them in sync
       final timeEventIndex = _timeEvents.indexWhere((e) => e.id == eventId);
@@ -835,7 +1041,7 @@ class EventProvider with ChangeNotifier {
       notifyListeners();
     }
     
-    // Return rollback function
+  // Return rollback function
     return () {
       _events.clear();
       _events.addAll(snapshot);
@@ -844,5 +1050,23 @@ class EventProvider with ChangeNotifier {
       notifyListeners();
     };
   }
+}
 
+class _DateRange {
+  final DateTime start;
+  final DateTime end;
+  _DateRange({required this.start, required this.end});
+}
+
+class CacheMetrics {
+  int cacheHits = 0;
+  int cacheMisses = 0;
+  int partialUpdates = 0;
+  int fullInvalidations = 0;
+  int backgroundRefreshes = 0;
+  
+  double get hitRate => (cacheHits + cacheMisses) == 0 ? 0 : cacheHits / (cacheHits + cacheMisses);
+  
+  @override
+  String toString() => 'Hits: $cacheHits, Misses: $cacheMisses, Hit Rate: ${hitRate.toStringAsFixed(2)}, Surgical Updates: $partialUpdates, Full Invalidations: $fullInvalidations, BG Refreshes: $backgroundRefreshes';
 }

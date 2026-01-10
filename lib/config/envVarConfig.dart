@@ -46,6 +46,8 @@ class Config {
     return value ?? 'https://timelyst-core.fly.dev/graphql';
   }
 
+  static const bool useSmartCache = true;
+
   // Microsoft OAuth Configuration
   static String get microsoftClientId {
     final value = _configService.get('MICROSOFT_CLIENT_ID');

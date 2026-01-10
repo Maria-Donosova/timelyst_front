@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/calendarProvider.dart';
+import '../../providers/eventProvider.dart';
 import '../../models/calendars.dart';
 import '../../services/authService.dart';
 
@@ -233,6 +234,8 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
       // Get current selected IDs
       final currentSelectedIds = _selectedCalendars.map((c) => c.id).toSet();
 
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+
       // Find calendars that need to be updated (selection state changed)
       final calendarsToUpdate = <Calendar>[];
 
@@ -244,6 +247,9 @@ class _CalendarSelectionScreenState extends State<CalendarSelectionScreen> {
         if (wasSelected != isNowSelected) {
           print('[CalendarSelection] Calendar "${calendar.metadata.title}" selection changed: $wasSelected -> $isNowSelected');
           calendarsToUpdate.add(calendar.copyWith(isSelected: isNowSelected));
+          
+          // Notify EventProvider of the change for surgical cache updates
+          eventProvider.onCalendarVisibilityChanged(calendar.id, isNowSelected);
         }
       }
 

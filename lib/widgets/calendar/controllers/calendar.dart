@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
 
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
@@ -32,6 +33,7 @@ class _CalendarWState extends State<CalendarW> {
   final CalendarController _controller = CalendarController();
   List<DateTime> _visibleDates = [];
   TimelystCalendarDataSource? _dataSource;
+  Timer? _loadEventsDebounce;
 
   String? _headerText,
       _weekStart,
@@ -62,6 +64,13 @@ class _CalendarWState extends State<CalendarW> {
     
     // Note: Initial event loading will be handled by the onViewChanged callback
     // when the calendar first loads, so we don't need duplicate loading here
+  }
+
+  @override
+  void dispose() {
+    _loadEventsDebounce?.cancel();
+    _controller.dispose();
+    super.dispose();
   }
 
   /// Loads events for the current visible date range using the new calendar view API
@@ -249,10 +258,10 @@ class _CalendarWState extends State<CalendarW> {
                       final eventProvider =
                           Provider.of<EventProvider>(context, listen: false);
 
-                      // Invalidate cache when view changes to ensure fresh data
-                      eventProvider.invalidateCache();
-                      print(
-                          '📅 [Calendar] View changed - cache invalidated for fresh event data');
+                      // REMOVED: Invalidate cache when view changes to ensure fresh data
+                      // eventProvider.invalidateCache();
+                      // print(
+                      //     '📅 [Calendar] View changed - cache invalidated for fresh event data');
 
                       if (_controller.view == CalendarView.month) {
                         _headerText = DateFormat('yMMMM')
@@ -287,8 +296,11 @@ class _CalendarWState extends State<CalendarW> {
                         _headerText = DateFormat('MMMMEEEEd').format(middleDate).toString();
                       }
 
-                      // Load events using the new calendar view API
-                      _loadEvents();
+                      // Load events using the new calendar view API with debounce
+                      _loadEventsDebounce?.cancel();
+                      _loadEventsDebounce = Timer(const Duration(milliseconds: 300), () {
+                        if (mounted) _loadEvents();
+                      });
 
                       SchedulerBinding.instance
                           .addPostFrameCallback((duration) {
@@ -345,10 +357,10 @@ class _CalendarWState extends State<CalendarW> {
                       Provider.of<EventProvider>(context, listen: false);
 
                   setState(() {
-                    // Invalidate cache when user manually switches views
-                    eventProvider.invalidateCache();
-                    print(
-                        '📅 [Calendar] Manual switch to Today - cache invalidated for fresh event data');
+                    // REMOVED: Invalidate cache when user manually switches views
+                    // eventProvider.invalidateCache();
+                    // print(
+                    //     '📅 [Calendar] Manual switch to Today - cache invalidated for fresh event data');
 
                     _controller.view = CalendarView.day;
                     _controller.displayDate = DateTime.now();
@@ -383,10 +395,10 @@ class _CalendarWState extends State<CalendarW> {
 
                 setState(
                   () {
-                    // Invalidate cache when user manually switches views
-                    eventProvider.invalidateCache();
-                    print(
-                        '📅 [Calendar] Manual view switch - cache invalidated for fresh event data');
+                    // REMOVED: Invalidate cache when user manually switches views
+                    // eventProvider.invalidateCache();
+                    // print(
+                    //     '📅 [Calendar] Manual view switch - cache invalidated for fresh event data');
 
                     if (value == _calView.day) {
                       _controller.view = CalendarView.day;
