@@ -7,9 +7,7 @@ You are the **timelyst_front agent**, responsible for developing and maintaining
 ---
 
 ## Project Context
-
 ### What is Timelyst?
-
 Timelyst solves three critical pain points in calendar/task management:
 
 1. **Multi-Calendar Sync Failures** — Users suffer from sync delays, duplicates, and missed deletions
@@ -17,7 +15,6 @@ Timelyst solves three critical pain points in calendar/task management:
 3. **Fragmented Tools** — Constant app-switching between calendars and task managers
 
 ### Your Role
-
 You build the user-facing application that provides:
 - A unified view of all calendars (Google, Microsoft, Apple)
 - Integrated task management alongside calendar events
@@ -27,44 +24,30 @@ You build the user-facing application that provides:
 ---
 
 ## Technology Stack (Current)
-
-| Component | Technology |
-|-----------|------------|
-| Framework | Flutter |
-| Language | Dart |
-| State Management | Provider |
-| Calendar UI | Syncfusion Flutter Calendar |
-| HTTP Client | http package |
-| Secure Storage | flutter_secure_storage |
-| Environment | flutter_dotenv |
-
----
+ComponentTechnologyFrameworkFlutter (Dart)State ManagementProvider (MultiProvider, ChangeNotifier, ProxyProvider)Calendar UISyncfusion Flutter CalendarHTTP Clienthttp package with custom ApiClient wrapperAuthenticationGoogle Sign-In, JWT, flutter_secure_storageSecure Storageflutter_secure_storageTimezone Handlingtimezone, flutter_timezoneLogginglogger packageEnvironmentflutter_dotenvDeploymentDocker, Nginx (Web), Fly.io
 
 ## Architecture
-
-### Project Structure (Current)
-
-```
+Project Structure (Current)
 lib/
 ├── config/                    # Environment configuration
 │   └── environment.dart
 │
 ├── data_sources/
-│   └── timelyst_calendar_data_source.dart  # Syncfusion data source
+│   └── timelyst_calendar_data_source.dart  # Syncfusion data source adapter
 │
 ├── main.dart                  # App entry point with Provider setup
 │
 ├── models/
-│   ├── timeEvent.dart         # Core event model (with recurrence fields)
+│   ├── timeEvent.dart         # Core event model (backend-expanded)
 │   ├── customApp.dart         # CustomAppointment for Syncfusion
 │   ├── task.dart
 │   ├── calendar.dart
 │   └── user.dart
 │
 ├── providers/
-│   ├── authProvider.dart      # Authentication state
-│   ├── eventProvider.dart     # Event state + caching
-│   ├── calendarProvider.dart  # Calendar list state
+│   ├── authProvider.dart      # Authentication state, session management
+│   ├── eventProvider.dart     # Event state, caching, optimistic updates
+│   ├── calendarProvider.dart  # Calendar list state, integrations
 │   └── taskProvider.dart      # Task state
 │
 ├── services/
@@ -75,20 +58,20 @@ lib/
 │   ├── contactService.dart    # Contact form
 │   ├── event_handler_service.dart  # Recurring event dialogs/logic
 │   │
-│   ├── googleIntegration/     # Google Calendar (8 files)
+│   ├── googleIntegration/     # Google Calendar
 │   │   ├── googleAuthService.dart
 │   │   ├── googleSignInManager.dart
 │   │   ├── googleCalendarService.dart
 │   │   ├── googleEventsImportService.dart
 │   │   └── calendarSyncManager.dart
 │   │
-│   ├── microsoftIntegration/  # Microsoft Calendar (5 files)
+│   ├── microsoftIntegration/  # Microsoft Calendar
 │   │   ├── microsoftAuthService.dart
 │   │   ├── microsoftSignInManager.dart
 │   │   ├── microsoftCalendarService.dart
 │   │   └── microsoftSignInOut.dart
 │   │
-│   └── appleIntegration/      # Apple Calendar (7 files)
+│   └── appleIntegration/      # Apple Calendar
 │       ├── appleAuthService.dart
 │       ├── appleCalDAVManager.dart
 │       ├── appleCalDAVService.dart
@@ -98,9 +81,10 @@ lib/
 ├── themes.dart                # App theming
 │
 ├── utils/
-│   ├── rrule_utils.dart       # RRULE parsing and expansion
-│   ├── date_utils.dart
-│   └── validators.dart
+│   ├── api_client.dart        # Centralized HTTP client with auth headers
+│   ├── event_mapper.dart      # TimeEvent ↔ CustomAppointment mapping
+│   ├── date_utils.dart        # Date parsing and formatting
+│   └── validators.dart        # Input validation
 │
 └── widgets/
     ├── calendar/
@@ -108,97 +92,226 @@ lib/
     │   │   └── calendar.dart  # CalendarW widget
     │   ├── recurring_event_dialog.dart
     │   └── event_detail_sheet.dart
+    ├── screens/               # Main application pages
+    │   ├── agenda.dart
+    │   ├── login_screen.dart
+    │   └── wrapper.dart       # Auth-based routing
     ├── events/
     ├── tasks/
     ├── settings/
     └── common/
-```
 
-### Architecture Pattern
-
-```
-┌─────────────────────────────────────────────────┐
-│              Presentation Layer                 │
-│     (Widgets, Screens, CalendarW)               │
-└─────────────────────┬───────────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────────┐
-│               Provider Layer                    │
-│  (AuthProvider, EventProvider, CalendarProvider)│
-└─────────────────────┬───────────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────────┐
-│               Service Layer                     │
-│   (EventService, CalendarService, AuthService)  │
-└─────────────────────┬───────────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────────┐
-│                Model Layer                      │
-│    (TimeEvent, CustomAppointment, Calendar)     │
-└─────────────────────────────────────────────────┘
-```
-
-### Provider Setup (main.dart)
-
-```dart
-MultiProvider(
+## Architecture Pattern
+┌─────────────────────────────────────────────────────────────┐
+│                   Presentation Layer                         │
+│              (Widgets, Screens, CalendarW)                   │
+│                                                              │
+│   Wrapper ─── routes to ─── LogInScreen OR Agenda           │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│                    Provider Layer                            │
+│     (AuthProvider, EventProvider, CalendarProvider)          │
+│                                                              │
+│   • Reactive state via ChangeNotifier                        │
+│   • Optimistic updates with rollback                         │
+│   • 5-minute event cache                                     │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│                    Service Layer                             │
+│        (API Services, Integration Services)                  │
+│                                                              │
+│   • ApiClient: Auth headers, logging, error handling         │
+│   • X-Timezone header on all requests                        │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│                     Data Layer                               │
+│        (Models, DTOs, Data Source Adapters)                  │
+│                                                              │
+│   • EventMapper: TimeEvent ↔ CustomAppointment               │
+│   • TimelystCalendarDataSource: Syncfusion adapter           │
+└─────────────────────────────────────────────────────────────┘
+Provider Setup (main.dart)
+dartMultiProvider(
   providers: [
     ChangeNotifierProvider(create: (_) => AuthProvider()),
     ChangeNotifierProxyProvider<AuthProvider, TaskProvider>(...),
     ChangeNotifierProxyProvider<AuthProvider, EventProvider>(...),
     ChangeNotifierProxyProvider<AuthProvider, CalendarProvider>(...),
   ],
+  child: Wrapper(),  // Auth-based routing
 )
-```
 
----
+## Key Implementation Details
+## Backend-Driven Event Expansion
+Critical Architecture Decision: Unlike traditional calendar apps that expand RRULEs on the frontend, Timelyst delegates recurrence expansion to the backend.
+┌─────────────┐     GET /events      ┌─────────────┐
+│   Frontend  │ ──────────────────►  │   Backend   │
+│             │                      │             │
+│  Receives   │ ◄──────────────────  │  Expands    │
+│  flat list  │   Expanded events    │  RRULEs     │
+└─────────────┘                      └─────────────┘
+What F
+Flat list of expanded occurrences
+Each occurrence has unique id and masterId
+No RRULE parsing required on frontend
+
+Benefits:
+Prevents rendering bottlenecks
+Ensures consistency across platforms
+Simplifies frontend complexity
+Backend handles timezone-aware expansion
+
+## Timezone Resilience
+The app implements strict timezone handling:
+dart// 1. Detect device timezone using flutter_timezone
+final deviceTimezone = await FlutterTimezone.getLocalTimezone();
+// e.g., "America/New_York"
+
+// 2. Send timezone in headers for all API requests
+headers: {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer $authToken',
+  'X-Timezone': deviceTimezone,
+}
+
+// 3. Backend returns times adjusted for viewer's timezone
+Timezone Flow:
+
+flutter_timezone detects device IANA timezone
+X-Timezone header sent with all API requests
+Backend expands events in their original timezone
+Frontend maps UTC strings to local DateTime objects
+Offset information preserved to avoid "time jumping"
+
+## Optimistic Updates & Rollbacks
+To provide a "latency-free" experience:
+dart// In EventProvider
+Future<void> updateEvent(event) async {
+  // 1. Store snapshot for rollback
+  final snapshot = List.from(_events);
+  
+  // 2. Apply update immediately (optimistic)
+  _applyLocalUpdate(event);
+  notifyListeners();
+  
+  // 3. Call API
+  try {
+    await eventService.updateEvent(event);
+  } catch (e) {
+    // 4. Rollback on failure
+    _events = snapshot;
+    notifyListeners();
+    rethrow;
+  }
+}
+Applies To:
+Drag-and-drop event moves
+Event resizing
+Quick edits
+
+## Reactive Authentication Flow
+The Wrapper widget in main.dart acts as an auth-based router:
+dartclass Wrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, auth, _) {
+        if (auth.isLoggedIn) {
+          return Agenda();
+        } else {
+          return LogInScreen();
+        }
+      },
+    );
+  }
+}
+Features:
+Automatic screen switching based on AuthProvider.isLoggedIn
+Handles auto-login on startup
+Manages token refresh flow
+
+## Event Mapper Pattern
+The EventMapper utility decouples API models from UI models:
+dart// utils/event_mapper.dart
+class EventMapper {
+  static CustomAppointment toAppointment(TimeEvent event) {
+    return CustomAppointment(
+      id: event.id,
+      subject: event.eventTitle,
+      startTime: event.start,
+      endTime: event.end,
+      color: _getCategoryColor(event.category),
+      isAllDay: event.isAllDay,
+      masterId: event.masterId,
+      // ... other mappings
+    );
+  }
+  
+  static TimeEvent fromAppointment(CustomAppointment apt) {
+    // Reverse mapping for updates
+  }
+}
+Benefits:
+UI remains stable if backend schema changes
+Centralized mapping logic
+Easy to add computed properties
 
 ## Core Services
-
-### EventService
-
-**File**: `services/eventsService.dart`
-
-**Standard Endpoints** (`/events/` prefix):
-```dart
-fetchEvents(userId, authToken, startDate?, endDate?)  // GET /events
-createEvent(eventInput, authToken)                     // POST /events
-updateEvent(id, eventInput, authToken)                 // PUT /events/:id
-deleteEvent(id, authToken, deleteScope?)               // DELETE /events/:id
-```
-
-**Recurring Event Endpoints** (`/recurring-events/` prefix):
-```dart
-// GET /api/calendar - Masters, exceptions, occurrence counts
+ApiClient
+File: utils/api_client.dart
+Purpose: Centralized HTTP client with authentication and timezone headers
+dartclass ApiClient {
+  final String baseUrl;
+  
+  Future<http.Response> get(String path, String authToken) async {
+    final timezone = await FlutterTimezone.getLocalTimezone();
+    return http.get(
+      Uri.parse('$baseUrl$path'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $authToken',
+        'X-Timezone': timezone,
+      },
+    );
+  }
+  
+  // Similar for post, put, delete
+}
+EventService
+File: services/eventsService.dart
+Standard Endpoints:
+dartfetchEvents(authToken, startDate?, endDate?)  // GET /events
+createEvent(eventInput, authToken)             // POST /events
+updateEvent(id, eventInput, authToken)         // PUT /events/:id
+deleteEvent(id, authToken, deleteScope?)       // DELETE /events/:id
+Recurring Event Endpoints:
+dart// GET /api/calendar - Expanded occurrences from backend
 getCalendarView(authToken, start, end)
 
-// PUT /recurring-events/:id/occurrences/:date - Create/update exception
+// PUT /recurring-events/:id/occurrences/:date
 updateThisOccurrence(authToken, masterEventId, originalStart, updates)
 
-// PUT /recurring-events/:id/split?from=date - Split series
+// PUT /recurring-events/:id/split?from=date
 updateThisAndFuture(authToken, masterEventId, fromDate, updates)
 
-// PUT /recurring-events/:id?preserveExceptions=bool - Update master
-updateAllOccurrences(authToken, masterEventId, updates, preserveExceptions)
+// PUT /recurring-events/:id
+updateAllOccurrences(authToken, masterEventId, updates)
 
-// DELETE /recurring-events/:id/occurrences/:date - Cancelled exception
+// DELETE /recurring-events/:id/occurrences/:date
 deleteThisOccurrence(authToken, masterEventId, originalStart)
 
-// DELETE /recurring-events/:id/future?from=date - Truncate series
+// DELETE /recurring-events/:id/future?from=date
 deleteThisAndFuture(authToken, masterEventId, fromDate)
 
-// DELETE /recurring-events/:id?deleteAll=true - Delete entire series
+// DELETE /recurring-events/:id
 deleteAllOccurrences(authToken, masterEventId)
-```
-
-### EventHandlerService
-
-**File**: `services/event_handler_service.dart`
-
-**Purpose**: Centralized logic for recurring event operations
-
-```dart
-// Shows 3-option dialog: This occurrence / This and future / All
+EventHandlerService
+File: services/event_handler_service.dart
+Purpose: Centralized logic for recurring event user interactions
+dart// Shows 3-option dialog: This occurrence / This and future / All
 handleEventEdit(context, event, occurrenceCount)
 
 // Shows 3-option delete dialog
@@ -206,93 +319,60 @@ handleEventDelete(context, event, occurrenceCount)
 
 // Shows 2-option dialog for drag-and-drop: This occurrence / All
 handleDragDrop(context, event, newStart, newEnd)
-```
-
-### Calendar Integration Services
-
-**Google** (`services/googleIntegration/`):
-- OAuth flow via `googleSignInManager`
-- Backend exchanges auth code for tokens
-- `googleEventsImportService.dart` (15KB) handles sync logic
-
-**Microsoft** (`services/microsoftIntegration/`):
-- OAuth with PKCE
-- Backend handles token exchange
-
-**Apple** (`services/appleIntegration/`):
-- App-specific password auth
-- CalDAV protocol via backend
-
----
 
 ## State Providers
+EventProvider
+File: providers/eventProvider.dart
+State:
+dartList<CustomAppointment> _events       // UI-ready appointments
+Map<String, List<CustomAppointment>> _eventCache  // 5-minute TTL cache
+bool _isLoading
+String? _error
+Key Methods:
+dartfetchEvents(start, end)        // Fetches expanded events from backend
+createEvent(event)             // With optimistic update
+updateEvent(event)             // With optimistic update + rollback
+deleteEvent(id, scope)         // With optimistic update + rollback
+invalidateCache()              // Force fresh fetch
+Caching Strategy:
 
-### EventProvider
+Cache key: "startDate_endDate" (e.g., "2025-10-12_2025-10-13")
+TTL: 5 minutes
+Invalidated on: view change, manual refresh, CRUD operations
 
-**File**: `providers/eventProvider.dart`
+CalendarProvider
+File: providers/calendarProvider.dart
+Responsibilities:
 
-**State**:
-```dart
-List<CustomAppointment> _events       // UI-ready appointments
-List<TimeEvent> _timeEvents           // Raw event data
-Map<String, List<CustomAppointment>> _eventCache  // 5-minute cache
-Map<String, int> _occurrenceCounts    // For recurring event dialogs
-```
+Manage user's calendar list (all providers)
+Track calendar selection state
+Handle provider re-authentication callbacks
+Manage import settings per calendar
 
-**Key Methods**:
-```dart
-fetchCalendarView()        // Fetches masters, exceptions, counts
-fetchDayViewEvents()
-fetchWeekViewEvents()
-fetchMonthViewEvents()
-createEvent()
-updateEvent()
-deleteEvent()
-getOccurrenceCount(masterEventId)  // For dialog display
-invalidateCache()          // Force fresh fetch
-```
-
-**Caching Strategy**:
-- Cache key: `"startDate_endDate"` (e.g., "2025-10-12_2025-10-13")
-- TTL: 5 minutes
-- Invalidated on: view change, manual refresh, CRUD operations
-
-### CalendarProvider
-
-**File**: `providers/calendarProvider.dart`
-
-**Responsibilities**:
-- Manage user's calendar list
-- Track calendar selection state
-- Handle Google re-authentication callback
-
-### AuthProvider
-
-**File**: `providers/authProvider.dart`
-
-**State**:
-```dart
-AuthService authService
+AuthProvider
+File: providers/authProvider.dart
+State:
+dartAuthService authService
+bool isLoggedIn
+User? currentUser
 bool googleReAuthRequired
-```
+bool microsoftReAuthRequired
+bool appleReAuthRequired
+Features:
 
-### TaskProvider
+Persistent auth state via flutter_secure_storage
+Auto-login on app startup
+Token refresh handling
 
-**File**: `providers/taskProvider.dart`
-
-**Responsibilities**: Task management (separate from events)
-
----
+TaskProvider
+File: providers/taskProvider.dart
+Responsibilities: Task lifecycle management (separate from calendar events)
 
 ## Data Models
-
-### TimeEvent (Core Model)
-
-**File**: `models/timeEvent.dart`
-
-**Standard Fields**:
-```dart
-String id
+TimeEvent (Core Model)
+File: models/timeEvent.dart
+Standard Fields:
+dartString id
 String eventTitle
 DateTime start
 DateTime end
@@ -303,374 +383,292 @@ String? description
 bool isAllDay
 String? calendarId
 String? category
-```
-
-**Provider/Sync Fields**:
-```dart
-String? provider              // 'google', 'microsoft', 'apple', 'timelyst'
+Provider/Sync Fields:
+dartString? provider              // 'google', 'microsoft', 'apple', 'timelyst'
 String? providerCalendarId
 String? providerEventId
 String? etag
 String? status                // 'confirmed', 'cancelled', 'tentative'
-int? sequence
 String? busyStatus
 String? visibility
 List<Map>? attendees
 String? organizerEmail
 String? organizerName
-Map? rawData
-```
-
-**Recurrence Fields**:
-```dart
-String? recurrenceRule        // RRULE string
-String? recurrenceId          // Points to master's providerEventId
+Recurrence Fields (for master events only):
+dartString? masterId              // ID of master event (for occurrences)
+String? recurrenceRule        // RRULE string (master events only)
 DateTime? originalStart       // Original occurrence time (for exceptions)
-```
-
-**Computed Properties**:
-```dart
-bool get isMasterEvent => recurrenceRule != null && recurrenceId == null
-bool get isException => recurrenceId != null
-bool get isCancelled => status == 'cancelled'
-bool get isRecurring => recurrenceRule != null || recurrenceId != null
-```
-
-### CustomAppointment (UI Model)
-
-**File**: `models/customApp.dart`
-
-**Purpose**: Syncfusion Calendar-compatible appointment
-
-**Key Fields**:
-```dart
-String id
-String title
+CustomAppointment (UI Model)
+File: models/customApp.dart
+Purpose: Syncfusion Calendar-compatible appointment
+Key Fields:
+dartString id
+String subject
 DateTime startTime
 DateTime endTime
 Color color
-String? recurrenceRule
-String? recurrenceId
-DateTime? originalStart
-bool isMasterEvent
-bool isException
-```
-
----
+bool isAllDay
+String? masterId              // Links occurrence to master
+String? notes
+String? location
 
 ## Calendar Data Source
-
-### TimelystCalendarDataSource
-
-**File**: `data_sources/timelyst_calendar_data_source.dart`
-
-**Purpose**: Bridge between TimeEvent/CustomAppointment and Syncfusion Calendar
-
-**Key Responsibilities**:
-- Expand master events into occurrences using RRULE
-- Apply exceptions (modified occurrences)
-- Filter cancelled occurrences
-- Return CustomAppointment list for Syncfusion
-
-```dart
-class TimelystCalendarDataSource extends CalendarDataSource {
-  TimelystCalendarDataSource(List<TimeEvent> events) {
-    appointments = _processEvents(events);
+TimelystCalendarDataSource
+File: data_sources/timelyst_calendar_data_source.dart
+Purpose: Bridge between backend events and Syncfusion Calendar
+dartclass TimelystCalendarDataSource extends CalendarDataSource {
+  TimelystCalendarDataSource(List<CustomAppointment> events) {
+    appointments = events;
   }
-
-  List<CustomAppointment> _processEvents(List<TimeEvent> events) {
-    // 1. Separate masters and exceptions
-    // 2. Expand masters using RRULE
-    // 3. Apply exceptions to matching occurrences
-    // 4. Filter cancelled occurrences
-    // 5. Return CustomAppointment list
-  }
+  
+  // Syncfusion CalendarDataSource overrides
+  @override
+  DateTime getStartTime(int index) => appointments![index].startTime;
+  
+  @override
+  DateTime getEndTime(int index) => appointments![index].endTime;
+  
+  @override
+  String getSubject(int index) => appointments![index].subject;
+  
+  @override
+  Color getColor(int index) => appointments![index].color;
+  
+  @override
+  bool isAllDay(int index) => appointments![index].isAllDay;
 }
-```
-
----
+Note: Unlike previous architecture, this no longer expands RRULEs. Backend sends pre-expanded occurrences.
 
 ## API Communication
-
-### Base URL
-
-```dart
-// From environment config
+Base URL
+dart// From environment config
 final baseUrl = dotenv.env['BACKEND_URL'] ?? 'https://timelyst-core.fly.dev';
-```
-
-### Authentication
-
-```dart
-// JWT token in header
-headers: {
+Request Headers
+dartheaders: {
   'Content-Type': 'application/json',
   'Authorization': 'Bearer $authToken',
+  'X-Timezone': await FlutterTimezone.getLocalTimezone(),
 }
-```
+Backend Endpoints Used
+Authentication:
 
-### Backend Endpoints Used
+POST /auth/login
+POST /auth/register
 
-**Authentication**:
-- `POST /auth/login`
-- `POST /auth/register`
+Events:
 
-**Events**:
-- `GET /events`
-- `POST /events`
-- `PUT /events/:id`
-- `DELETE /events/:id`
+GET /events - Returns expanded occurrences
+POST /events
+PUT /events/:id
+DELETE /events/:id
 
-**Recurring Events**:
-- `GET /api/calendar`
-- `PUT /recurring-events/:id`
-- `DELETE /recurring-events/:id`
-- `PUT /recurring-events/:id/occurrences/:date`
-- `DELETE /recurring-events/:id/occurrences/:date`
-- `PUT /recurring-events/:id/split`
-- `DELETE /recurring-events/:id/future`
+Recurring Events:
 
-**Calendars**:
-- `GET /calendars`
-- `POST /calendars`
-- `PUT /calendars/:id`
-- `DELETE /calendars/:id`
+GET /api/calendar - Calendar view with expanded events
+PUT /recurring-events/:id
+DELETE /recurring-events/:id
+PUT /recurring-events/:id/occurrences/:date
+DELETE /recurring-events/:id/occurrences/:date
+PUT /recurring-events/:id/split
+DELETE /recurring-events/:id/future
 
-**Tasks**:
-- `GET /tasks`
-- `POST /tasks`
-- `PUT /tasks/:id`
-- `DELETE /tasks/:id`
+Calendars:
 
-**Integrations**:
-- `POST /integrations/google/connect`
-- `POST /integrations/google/sync`
-- `POST /integrations/microsoft/connect`
-- `POST /integrations/microsoft/sync`
-- `POST /integrations/apple/connect`
-- `POST /integrations/apple/sync`
-- `POST /apple/calendars/fetch`
-- `POST /apple/calendars/save`
-- `DELETE /apple/calendars/delete`
-- `DELETE /apple/accounts/delete`
+GET /calendars
+POST /calendars
+PUT /calendars/:id
+PUT /calendars/:id/preferences - Import settings
+DELETE /calendars/:id
 
-**Other**:
-- `POST /contact`
+Tasks:
 
----
+GET /tasks
+POST /tasks
+PUT /tasks/:id
+DELETE /tasks/:id
 
-## Recurring Events Architecture
+Integrations:
 
-### Flow: Display Recurring Events
+POST /integrations/google/connect
+POST /integrations/google/sync
+POST /integrations/microsoft/connect
+POST /integrations/microsoft/sync
+POST /integrations/apple/connect
+POST /integrations/apple/sync
+POST /apple/calendars/fetch
+POST /apple/calendars/save
+DELETE /apple/calendars/delete
+DELETE /apple/accounts/delete
 
-```
-1. EventProvider.fetchCalendarView()
-   → EventService.getCalendarView()
-   → Backend returns: { masters, exceptions, occurrenceCounts }
+Other:
 
-2. EventProvider stores:
-   → _timeEvents (raw TimeEvent objects)
-   → _occurrenceCounts (for dialogs)
+GET /health
+POST /contact
 
-3. TimelystCalendarDataSource processes:
-   → Expands masters using RRULE
-   → Applies exceptions
-   → Returns CustomAppointment list
 
-4. CalendarW widget displays
-```
+Widget Integration
+CalendarW Widget
+File: widgets/calendar/controllers/calendar.dart
+Integration Points:
 
-### Flow: Edit Single Occurrence
+Uses TimelystCalendarDataSource for event display
+Calls EventHandlerService for drag-and-drop
+Calls EventHandlerService for event resize
+Shows RecurringEventDialog for recurring event actions
 
-```
-1. User taps occurrence → EventHandlerService.handleEventEdit()
-2. Dialog shows: "This occurrence" / "This and future" / "All"
-3. User selects "This occurrence"
-4. EventService.updateThisOccurrence(masterEventId, originalStart, updates)
-   → PUT /recurring-events/:id/occurrences/:date
-5. Backend creates/updates exception
-6. EventProvider.invalidateCache()
-7. UI refreshes
-```
-
-### Flow: Delete This and Future
-
-```
-1. User taps delete → EventHandlerService.handleEventDelete()
-2. Dialog shows: "This occurrence" / "This and future" / "All"
-3. User selects "This and future"
-4. EventService.deleteThisAndFuture(masterEventId, fromDate)
-   → DELETE /recurring-events/:id/future?from=date
-5. Backend updates master RRULE with UNTIL
-6. EventProvider.invalidateCache()
-7. UI refreshes
-```
-
----
-
-## Widget Integration
-
-### CalendarW Widget
-
-**File**: `widgets/calendar/controllers/calendar.dart`
-
-**Integration Points**:
-- Uses `TimelystCalendarDataSource` for event display
-- Calls `EventHandlerService` for drag-and-drop
-- Calls `EventHandlerService` for event resize
-- Shows `RecurringEventDialog` for recurring event actions
-
-```dart
-SfCalendar(
+dartSfCalendar(
   dataSource: TimelystCalendarDataSource(events),
   onTap: _handleCalendarTap,
   onLongPress: _handleLongPress,
   allowDragAndDrop: true,
   onDragEnd: (details) => _handleDragDrop(details),
+  view: CalendarView.week,
 )
-```
+RecurringEventDialog
+File: widgets/calendar/recurring_event_dialog.dart
+Purpose: 3-option dialog for recurring event modifications
+Options:
 
-### RecurringEventDialog
+This occurrence only
+This and future occurrences
+All occurrences
 
-**File**: `widgets/calendar/recurring_event_dialog.dart`
-
-**Purpose**: 3-option dialog for recurring event modifications
-
-**Options**:
-1. This occurrence only
-2. This and future occurrences
-3. All occurrences
-
-**Usage**:
-```dart
-final result = await showRecurringEventDialog(
+dartfinal result = await showRecurringEventDialog(
   context,
   event: event,
-  occurrenceCount: provider.getOccurrenceCount(event.id),
   isDelete: false,
 );
-```
 
----
-
-## Known Issues
-
-### 🔴 CRITICAL: Microsoft/Apple Events Not Appearing
-
-**Problem**: Only Google events appear in UI. Microsoft and Apple events have empty `source` and `userCalendars` fields.
-
-**Status**: Frontend ready, backend fix needed
-
-**Investigation Needed**:
-1. Verify events exist in database
-2. Check OAuth token status
-3. Review sync job logs
-4. Test API directly for Microsoft/Apple events
-
-### 🟡 MEDIUM: Recurring Events Integration Incomplete
-
-**Completed**:
-- ✅ Backend API endpoints
-- ✅ Frontend data models
-- ✅ TimelystCalendarDataSource
-- ✅ EventHandlerService
-- ✅ RecurringEventDialog
-- ✅ EventProvider.fetchCalendarView()
-- ✅ CalendarW integration
-
-**Pending**:
-- ⏳ End-to-end testing
-- ⏳ Provider sync for recurring events
-- ⏳ Edge case handling
-
-### 🟡 MEDIUM: Backend Performance
-
-**Issue**: Backend fetches broad date ranges regardless of frontend request
-
-**Impact**:
-- Day view: Fetches 210 days instead of 1
-- Week view: Fetches 210 days instead of 7
-- Month view: Fetches 210 days instead of 30
-
----
+switch (result) {
+  case RecurringEditChoice.thisOccurrence:
+    // Update single occurrence
+    break;
+  case RecurringEditChoice.thisAndFuture:
+    // Split series
+    break;
+  case RecurringEditChoice.allOccurrences:
+    // Update master
+    break;
+}
+Wrapper Widget
+File: widgets/screens/wrapper.dart
+Purpose: Auth-based routing between login and main app
+dartclass Wrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    
+    if (auth.isLoading) {
+      return LoadingScreen();
+    }
+    
+    return auth.isLoggedIn ? Agenda() : LogInScreen();
+  }
+}
 
 ## Development Commands
-
-```bash
-# Install dependencies
+bash# Install dependencies
 flutter pub get
 
-# Run app
+# Run app (debug)
 flutter run
+
+# Run app on specific device
+flutter run -d chrome
+flutter run -d ios
+flutter run -d android
 
 # Run tests
 flutter test
+
+# Run with coverage
+flutter test --coverage
 
 # Build for web
 flutter build web
 
 # Build for Android
 flutter build apk
+flutter build appbundle
 
 # Build for iOS
 flutter build ios
 
 # Analyze code
 flutter analyze
-```
 
----
+# Format code
+dart format lib/
 
 ## Environment Variables
-
-**File**: `lib/.env`
-
-```
+File: lib/.env
 BACKEND_URL=https://timelyst-core.fly.dev
 GOOGLE_CLIENT_ID=...
 MICROSOFT_CLIENT_ID=...
-```
 
----
+Testing Status
+Completed
 
-## Testing Status
+✅ Event mapper utilities
+✅ Date utilities
+✅ Basic provider tests
 
-### Completed
-- ✅ RRULE utilities (all passing)
-- ✅ Recurring events API (3 tests passing)
+Pending
+⏳ EventProvider comprehensive tests
+⏳ CalendarProvider tests
+⏳ Widget tests for CalendarW
+⏳ Widget tests for RecurringEventDialog
+⏳ Integration tests for auth flow
+⏳ Integration tests for event CRUD
+⏳ End-to-end recurring event tests
 
-### Pending
-- ⏳ Service layer tests
-- ⏳ Provider tests
-- ⏳ Widget tests
-- ⏳ End-to-end recurring event tests
-- ⏳ Calendar sync flow tests
+## Manual Testing Verified 
+✅ Google events display correctly
+✅ Microsoft events display correctly
+✅ Apple events display correctly
+✅ Recurring events display in all views
+✅ Drag-and-drop for events
+✅ Event creation and editing
 
-### Manual Testing Required
-- [ ] Recurring events display in all views
-- [ ] Exception events display correctly
-- [ ] Drag-and-drop for recurring events
-- [ ] Edit/delete dialogs show correct occurrence counts
-- [ ] Microsoft/Apple event sync and display
-
----
 
 ## Code Quality Notes
+Strengths
+✅ Clear separation of concerns (layered architecture)
+✅ Backend-driven event expansion (no frontend RRULE parsing)
+✅ Timezone-aware API communication
+✅ Optimistic updates with rollback
+✅ Centralized API client
+✅ Event mapper pattern for UI decoupling
+✅ Proper error handling
+✅ Extensive logging
 
-### Strengths
-- ✅ Clear separation of concerns
-- ✅ Comprehensive recurring events architecture
-- ✅ Backward compatibility maintained
-- ✅ Proper error handling
-- ✅ Extensive logging
+## Areas for Improvement
+⚠️ Test coverage needs expansion
+⚠️ Some aggressive cache invalidation (potential performance impact)
+⚠️ Error boundary implementation needed
 
-### Areas for Improvement
-- ⚠️ Aggressive cache invalidation (performance impact)
-- ⚠️ Dual event storage in provider (memory overhead)
-- ⚠️ Frontend RRULE format fixing (should be backend)
-- ⚠️ Missing comprehensive test coverage
 
----
+## Coordination with Backend
+The frontend is designed to work with the updated timelyst-core backend:
+AspectFrontend ExpectationBackend ProvidesEvent ExpansionFlat list of occurrencesRRULE expansion server-sideTimezoneSends X-Timezone headerExpands events in correct timezoneImport SettingsPer-calendar configurationPUT /calendars/:id/preferencesAuthJWT in Authorization header30-day expiry tokensProvidersGoogle, Microsoft, Apple, TimelystProvider-specific tablesRecurring EventsmasterId links occurrencesUnique IDs per occurrence
+API Contract:
+
+REST responses (not GraphQL)
+Consistent error response format
+Events include masterId for recurring occurrences
+Calendar includes importSettings for privacy control
+
+
+## Deployment
+Web (Docker + Nginx)
+dockerfile# Dockerfile for web deployment
+FROM nginx:alpine
+COPY build/web /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
+Fly.io
+bash# Deploy to Fly.io
+fly deploy
 
 ## Coordination with Backend
 
@@ -693,3 +691,5 @@ When coordinating with timelyst-core agent:
 - [ ] Error states are handled
 - [ ] Loading states are shown
 - [ ] API changes coordinated with backend team
+
+This documentation is accurate as of January 2026. For specific implementation details, refer to the comments within the respective source files.
