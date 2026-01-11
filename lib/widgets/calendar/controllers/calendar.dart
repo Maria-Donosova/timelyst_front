@@ -44,6 +44,7 @@ class _CalendarWState extends State<CalendarW> {
       _dateText,
       _cellDateText;
   double? width, cellWidth;
+  DateTime? _lastBuildLogTime;
 
   @override
   void initState() {
@@ -100,7 +101,7 @@ class _CalendarWState extends State<CalendarW> {
     try {
       screenWidth = MediaQuery.of(context).size.width;
     } catch (e) {
-      print('⚠️ [Calendar] Could not get screen width in _loadEvents: $e');
+      LogService.warn('Calendar', 'Could not get screen width in _loadEvents: $e');
     }
     
     final cellWidth = screenWidth / 14;
@@ -148,7 +149,7 @@ class _CalendarWState extends State<CalendarW> {
       );
     });
     
-    AppLogger.i('🔄 [Calendar] Data source refreshed with ${viewEvents.length} events');
+    LogService.info('Calendar', 'Data source refreshed with ${viewEvents.length} events');
   }
 
   @override
@@ -163,15 +164,13 @@ class _CalendarWState extends State<CalendarW> {
     // Listen to CalendarProvider to trigger rebuilds when calendars are loaded/updated
     Provider.of<CalendarProvider>(context);
 
-    // Essential logging only
-    if (_dataSource != null && _dataSource!.appointments != null && _dataSource!.appointments!.isNotEmpty) {
-      print(
-          '📅 [Calendar] Building calendar with ${_dataSource!.appointments!.length} events');
+    // Essential logging with debounce
+    final now = DateTime.now();
+    if (_lastBuildLogTime == null || now.difference(_lastBuildLogTime!) > const Duration(milliseconds: 100)) {
+      _lastBuildLogTime = now;
+      final appointmentsCount = _dataSource?.appointments?.length ?? 0;
+      LogService.info('Calendar', 'Built calendar with $appointmentsCount appointments');
     }
-    
-    final appointmentsCount = _dataSource?.appointments?.length ?? 0;
-    AppLogger.performance(
-        'Building calendar with $appointmentsCount events', 'Calendar');
 
     return Card(
       child: Column(
@@ -571,14 +570,14 @@ class _CalendarWState extends State<CalendarW> {
         ? (details.appointment as Appointment).subject 
         : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).title : 'Unknown');
         
-    AppLogger.i('🖱️ [Drag] START: ${appointmentName}');
-    AppLogger.i('🖱 [Drag] Type: ${details.appointment?.runtimeType}');
-    AppLogger.i('🖱 [Drag] ID: ${details.appointment is Appointment ? (details.appointment as Appointment).id : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).id : "N/A")}');
-    AppLogger.i('🖱 [Drag] New Time: ${details.droppingTime}');
+    LogService.info('Drag', 'START: $appointmentName');
+    LogService.debug('Drag', 'Type: ${details.appointment?.runtimeType}');
+    LogService.debug('Drag', 'ID: ${details.appointment is Appointment ? (details.appointment as Appointment).id : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).id : "N/A")}');
+    LogService.debug('Drag', 'New Time: ${details.droppingTime}');
 
     // Null safety: Syncfusion may provide null values in edge cases
     if (details.appointment == null || details.droppingTime == null) {
-      AppLogger.w('⚠️ [Drag] Cancelled - null appointment or droppingTime');
+      LogService.warn('Drag', 'Cancelled - null appointment or droppingTime');
       return;
     }
 
@@ -592,7 +591,7 @@ class _CalendarWState extends State<CalendarW> {
       appointment = rawAppointment;
     } else if (rawAppointment is Appointment) {
       // Multi-strategy resolution for when Syncfusion returns Appointment instead of CustomAppointment
-      AppLogger.debug('Drag: Syncfusion returned Appointment, attempting resolution...', 'Calendar');
+      LogService.debug('Calendar', 'Drag: Syncfusion returned Appointment, attempting resolution...');
       
       // Strategy 1: Resolve by ID
       if (rawAppointment.id != null) {
@@ -605,7 +604,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime, 
             endTime: rawAppointment.endTime,
           );
-          AppLogger.i('🖱️ [Drag] Resolved by ID: ${master.id}');
+          LogService.info('Drag', 'Resolved by ID: ${master.id}');
         }
       }
       
@@ -620,7 +619,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime, 
             endTime: rawAppointment.endTime,
           );
-          AppLogger.i('🖱️ [Drag] Resolved by time+title: ${match.id}');
+          LogService.info('Drag', 'Resolved by time+title: ${match.id}');
         }
       }
       
@@ -635,7 +634,7 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime, 
             endTime: rawAppointment.endTime,
           );
-          AppLogger.i('🖱️ [Drag] Resolved by title-only: ${match.id}');
+          LogService.info('Drag', 'Resolved by title-only: ${match.id}');
         }
       }
       
@@ -658,7 +657,7 @@ class _CalendarWState extends State<CalendarW> {
     
     // Comprehensive null check with user-facing error
     if (appointment == null) {
-      AppLogger.e('Drag: Failed to resolve appointment from Syncfusion data', 'Calendar');
+      LogService.error('Calendar', 'Drag: Failed to resolve appointment from Syncfusion data');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -671,9 +670,8 @@ class _CalendarWState extends State<CalendarW> {
       return;
     }
 
-    AppLogger.debug(
-        'Handling drag-and-drop for appointment: ${appointment.title}',
-        'Calendar');
+    LogService.debug(
+        'Calendar', 'Handling drag-and-drop for appointment: ${appointment.title}');
 
     // Calculate the duration of the event
     final duration = appointment.endTime.difference(appointment.startTime);
@@ -684,7 +682,7 @@ class _CalendarWState extends State<CalendarW> {
       final authToken = await authProvider.authService.getAuthToken();
 
       if (authToken == null) {
-        AppLogger.e('No auth token available for drag-and-drop', 'Calendar');
+        LogService.error('Calendar', 'No auth token available for drag-and-drop');
         return;
       }
 
@@ -706,7 +704,7 @@ class _CalendarWState extends State<CalendarW> {
         // Refresh calendar after successful update
         await _loadEvents();
       } catch (e) {
-        AppLogger.e('Error handling recurring event drag-and-drop: $e', 'Calendar');
+        LogService.error('Calendar', 'Error handling recurring event drag-and-drop', e);
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -758,10 +756,10 @@ class _CalendarWState extends State<CalendarW> {
       _refreshDataSource();
 
       // Persist to backend
-      AppLogger.i('🖱️ [Drag] Starting backend update for: ${appointment.id}');
+      LogService.info('Drag', 'Starting backend update for: ${appointment.id}');
       try {
         final eventPayload = _createEventPayload(updatedAppointment);
-        AppLogger.i('🖱️ [Drag] Payload created, calling updateEvent...');
+        LogService.info('Drag', 'Payload created, calling updateEvent...');
         final result = await eventProvider.updateEvent(
           appointment.id,
           eventPayload,
@@ -771,11 +769,11 @@ class _CalendarWState extends State<CalendarW> {
           throw Exception('Update returned null');
         }
 
-        AppLogger.i('✅ [Drag] Backend update successful');
+        LogService.info('Drag', 'Backend update successful');
         // Second refresh to ensure UI is fully in sync after backend confirms
         _refreshDataSource();
       } catch (e) {
-        AppLogger.e('❌ [Drag] Backend update failed: $e');
+        LogService.error('Drag', 'Backend update failed', e);
         
         // Rollback on error
         rollback();
@@ -801,16 +799,16 @@ class _CalendarWState extends State<CalendarW> {
         ? (details.appointment as Appointment).subject 
         : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).title : 'Unknown');
 
-    AppLogger.i('📏 [Resize] START: ${appointmentName}');
-    AppLogger.i('📏 [Resize] Type: ${details.appointment?.runtimeType}');
-    AppLogger.i('📏 [Resize] ID: ${details.appointment is Appointment ? (details.appointment as Appointment).id : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).id : "N/A")}');
-    AppLogger.i('📏 [Resize] Range: ${details.startTime} -> ${details.endTime}');
+    LogService.info('Resize', 'START: $appointmentName');
+    LogService.debug('Resize', 'Type: ${details.appointment?.runtimeType}');
+    LogService.debug('Resize', 'ID: ${details.appointment is Appointment ? (details.appointment as Appointment).id : (details.appointment is CustomAppointment ? (details.appointment as CustomAppointment).id : "N/A")}');
+    LogService.debug('Resize', 'Range: ${details.startTime} -> ${details.endTime}');
 
     // (rapid gestures, widget disposal during resize)
     if (details.appointment == null || 
         details.startTime == null || 
         details.endTime == null) {
-      AppLogger.w('⚠️ [Resize] Cancelled - null values');
+      LogService.warn('Resize', 'Cancelled - null values');
       return;
     }
 
@@ -825,7 +823,7 @@ class _CalendarWState extends State<CalendarW> {
       appointment = rawAppointment;
     } else if (rawAppointment is Appointment) {
       // Multi-strategy resolution for when Syncfusion returns Appointment instead of CustomAppointment
-      AppLogger.debug('Resize: Syncfusion returned Appointment, attempting resolution...', 'Calendar');
+      LogService.debug('Calendar', 'Resize: Syncfusion returned Appointment, attempting resolution...');
       
       // Strategy 1: Resolve by ID
       if (rawAppointment.id != null) {
@@ -835,7 +833,7 @@ class _CalendarWState extends State<CalendarW> {
         );
         if (master.id != 'temp') {
           appointment = master;
-          AppLogger.i('📏 [Resize] Resolved by ID: ${master.id}');
+          LogService.info('Resize', 'Resolved by ID: ${master.id}');
         }
       }
       
@@ -847,7 +845,7 @@ class _CalendarWState extends State<CalendarW> {
         );
         if (match.id != 'temp') {
           appointment = match;
-          AppLogger.i('📏 [Resize] Resolved by time+title: ${match.id}');
+          LogService.info('Resize', 'Resolved by time+title: ${match.id}');
         }
       }
       
@@ -859,7 +857,7 @@ class _CalendarWState extends State<CalendarW> {
         );
         if (match.id != 'temp') {
           appointment = match;
-          AppLogger.i('📏 [Resize] Resolved by title-only: ${match.id}');
+          LogService.info('Resize', 'Resolved by title-only: ${match.id}');
         }
       }
       
@@ -875,14 +873,14 @@ class _CalendarWState extends State<CalendarW> {
             startTime: rawAppointment.startTime,
             endTime: rawAppointment.endTime,
           );
-          AppLogger.i('📏 [Resize] Resolved by recurrenceId: ${master.id}');
+          LogService.info('Resize', 'Resolved by recurrenceId: ${master.id}');
         }
       }
     }
 
     // Comprehensive null check with user-facing error
     if (appointment == null) {
-      AppLogger.e('Resize: Failed to resolve appointment from Syncfusion data', 'Calendar');
+      LogService.error('Calendar', 'Resize: Failed to resolve appointment from Syncfusion data');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -895,7 +893,7 @@ class _CalendarWState extends State<CalendarW> {
       return;
     }
 
-    AppLogger.i('📏 [Resize] Handling: ${appointment.title} (isRecurring: ${appointment.isRecurring})');
+    LogService.info('Resize', 'Handling: ${appointment.title} (isRecurring: ${appointment.isRecurring})');
 
     if (appointment.isRecurring) {
       // Handle recurring event with EventHandlerService
@@ -903,7 +901,7 @@ class _CalendarWState extends State<CalendarW> {
       final authToken = await authProvider.authService.getAuthToken();
 
       if (authToken == null) {
-        AppLogger.e('No auth token available for resize', 'Calendar');
+        LogService.error('Calendar', 'No auth token available for resize');
         return;
       }
 
@@ -932,7 +930,7 @@ class _CalendarWState extends State<CalendarW> {
         // Refresh calendar after successful update
         await _loadEvents();
       } catch (e) {
-        AppLogger.e('Error handling recurring event resize: $e', 'Calendar');
+        LogService.error('Calendar', 'Error handling recurring event resize', e);
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -988,10 +986,10 @@ class _CalendarWState extends State<CalendarW> {
       _refreshDataSource();
 
       // Persist to backend
-      AppLogger.i('📏 [Resize] Starting backend update for: ${appointment.id}');
+      LogService.info('Resize', 'Starting backend update for: ${appointment.id}');
       try {
         final eventPayload = _createEventPayload(updatedAppointment);
-        AppLogger.i('📏 [Resize] Payload created, calling updateEvent...');
+        LogService.info('Resize', 'Payload created, calling updateEvent...');
         final result = await eventProvider.updateEvent(
           appointment.id,
           eventPayload,
@@ -1001,11 +999,11 @@ class _CalendarWState extends State<CalendarW> {
           throw Exception('Update returned null');
         }
 
-        AppLogger.i('✅ [Resize] Backend update successful');
+        LogService.info('Resize', 'Backend update successful');
         // Second refresh to ensure UI is fully in sync after backend confirms
         _refreshDataSource();
       } catch (e) {
-        AppLogger.e('❌ [Resize] Backend update failed: $e');
+        LogService.error('Resize', 'Backend update failed', e);
         
         // Rollback on error
         rollback();

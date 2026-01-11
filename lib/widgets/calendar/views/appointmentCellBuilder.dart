@@ -29,7 +29,7 @@ Widget appointmentBuilder(BuildContext context,
       return SizedBox();
     }
     
-    AppLogger.i('🔍 [AppointmentBuilder] Starting build for ${calendarAppointmentDetails.appointments.length} appointments');
+    LogService.info('AppointmentBuilder', 'Starting build for ${calendarAppointmentDetails.appointments.length} appointments');
 
     final dynamic rawAppointment = calendarAppointmentDetails.appointments.first;
     CustomAppointment? customAppointment;
@@ -49,7 +49,7 @@ Widget appointmentBuilder(BuildContext context,
         final dynamic id = rawAppointment.id;
         
         if (id != null) {
-          AppLogger.i('🔍 [AppointmentBuilder] Resolving ID: $id');
+          LogService.verbose('AppointmentBuilder', 'Resolving ID: $id');
           final masterEvent = eventProvider.events.firstWhere(
             (e) => e.id == id,
             orElse: () {
@@ -70,7 +70,7 @@ Widget appointmentBuilder(BuildContext context,
           );
           
           if (masterEvent.id != 'temp') {
-            AppLogger.i('✅ [AppointmentBuilder] Resolved master: ${masterEvent.title}');
+            LogService.verbose('AppointmentBuilder', 'Resolved master: ${masterEvent.title}');
             // Create a synthetic CustomAppointment for this occurrence
             customAppointment = masterEvent.copyWith(
               startTime: rawAppointment.startTime,
@@ -84,14 +84,14 @@ Widget appointmentBuilder(BuildContext context,
            // print('      -> ID is null on Appointment object');
         }
       } catch (e) {
-        AppLogger.e('⚠️ [AppointmentBuilder] Error resolving master: $e');
+        LogService.error('AppointmentBuilder', 'Error resolving master', e);
       }
     } else {
-       AppLogger.w('⚠️ [AppointmentBuilder] Unknown type: ${rawAppointment.runtimeType}');
+       LogService.warn('AppointmentBuilder', 'Unknown type: ${rawAppointment.runtimeType}');
     }
     
     if (customAppointment == null) {
-      AppLogger.w('⚠️ [AppointmentBuilder] Could not resolve CustomAppointment for ID: ${rawAppointment is Appointment ? rawAppointment.id : "unknown"}');
+      LogService.warn('AppointmentBuilder', 'Could not resolve CustomAppointment for ID: ${rawAppointment is Appointment ? rawAppointment.id : "unknown"}');
       if (rawAppointment is Appointment) {
          return Container(
            color: rawAppointment.color ?? Colors.grey,
@@ -150,12 +150,12 @@ Widget appointmentBuilder(BuildContext context,
                   }
                }
              } catch (e) {
-               AppLogger.e('⚠️ [AppointmentBuilder] RRule parsing error: $e');
+               LogService.error('AppointmentBuilder', 'RRule parsing error', e);
              }
         }
       }
     } catch (e) {
-      AppLogger.e('⚠️ [AppointmentBuilder] Recurrence logic error: $e');
+      LogService.error('AppointmentBuilder', 'Recurrence logic error', e);
     }
 
     final width = MediaQuery.of(context).size.width;

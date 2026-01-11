@@ -22,11 +22,11 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
     required Map<String, int> occurrenceCounts,
     double? summarizeWidth,
   }) : _occurrenceCounts = occurrenceCounts {
-    AppLogger.i('📊 [DataSource] Initializing with ${events.length} events');
+    LogService.debug('DataSource', 'Initializing with ${events.length} events');
     final apps = _buildAppointments(events);
     if (summarizeWidth != null) {
       appointments = CalendarUtils.groupAndSummarize(apps, summarizeWidth);
-      AppLogger.i('📊 [DataSource] Grouped into ${appointments?.length} items (width: $summarizeWidth)');
+      LogService.debug('DataSource', 'Grouped into ${appointments?.length} items (width: $summarizeWidth)');
     } else {
       appointments = apps;
     }
@@ -42,7 +42,7 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
     // Syncfusion sometimes passes an Appointment object during drag/resize
     // Try to find the original CustomAppointment in our local list
     final dynamic id = appointment.id;
-    AppLogger.i('🖱️ [DataSource] convertAppointmentToObject for ID: $id');
+    LogService.verbose('DataSource', 'convertAppointmentToObject for ID: $id');
     if (id != null) {
       final match = appointments?.whereType<CustomAppointment>().firstWhere(
         (e) => e.id == id,
@@ -55,13 +55,13 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
         ),
       );
       if (match != null && match.id != 'temp') {
-        AppLogger.i('✅ [DataSource] Resolved Appointment -> CustomAppointment');
+        LogService.verbose('DataSource', 'Resolved Appointment -> CustomAppointment');
         return match;
       }
     }
     
     // Final fallback
-    AppLogger.w('⚠️ [DataSource] Could not resolve appointment ID: $id');
+    LogService.warn('DataSource', 'Could not resolve appointment ID: $id');
     return null;
   }
 
@@ -81,7 +81,7 @@ class TimelystCalendarDataSource extends CalendarDataSource<CustomAppointment> {
         .toList();
         
     if (cancelledCount > 0) {
-      AppLogger.i('📊 [DataSource] Filtered $cancelledCount cancelled occurrences');
+      LogService.debug('DataSource', 'Filtered $cancelledCount cancelled occurrences');
     }
     return apps;
   }

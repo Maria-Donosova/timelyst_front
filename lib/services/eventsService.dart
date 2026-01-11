@@ -2,6 +2,8 @@ import 'dart:convert';
 import '../../config/envVarConfig.dart';
 import '../../models/customApp.dart';
 import '../../models/timeEvent.dart';
+import '../utils/logger.dart';
+import '../config/logging_config.dart';
 import '../utils/eventsMapper.dart';
 import '../../utils/apiClient.dart';
 
@@ -30,7 +32,7 @@ class EventService {
       
       final uri = Uri.parse('${Config.backendURL}/events').replace(queryParameters: queryParams);
 
-      print('🔄 [EventService] GET $uri');
+      LogService.info('EventService', 'GET $uri');
       final response = await apiClient.get(
         uri.toString(),
         token: authToken,
@@ -40,7 +42,7 @@ class EventService {
         final body = response.body;
 
         if (body == 'null') {
-           print('🔄 [EventService] Body is "null" string');
+           LogService.info('EventService', 'Body is "null" string');
            return [];
         }
 
@@ -50,8 +52,8 @@ class EventService {
           try {
             return TimeEvent.fromJson(json);
           } catch (e) {
-            print('❌ [EventService] Error parsing TimeEvent: $e');
-            print('❌ [EventService] JSON: $json');
+            LogService.error('EventService', 'Error parsing TimeEvent', e);
+            LogService.verbose('EventService', 'JSON: $json');
             rethrow;
           }
         }).toList();
@@ -61,7 +63,7 @@ class EventService {
               try {
                 return EventMapper.mapTimeEventToCustomAppointment(event);
               } catch (e) {
-                print('Error mapping event ${event.id}: $e');
+                LogService.warn('EventService', 'Error mapping event ${event.id}: $e');
                 return null;
               }
             })
@@ -72,8 +74,7 @@ class EventService {
         throw Exception('Failed to fetch events: ${response.statusCode}');
       }
     } catch (e, stackTrace) {
-      print('❌ [EventService] Exception in fetchEvents: $e');
-      print('❌ [EventService] Stack trace: $stackTrace');
+      LogService.error('EventService', 'Exception in fetchEvents', e, stackTrace);
       rethrow;
     }
   }
@@ -130,7 +131,7 @@ class EventService {
       String url = '${Config.backendURL}/events/$id';
       if (deleteScope != null && deleteScope.isNotEmpty) {
         url += '?deleteScope=$deleteScope';
-        print('🗑️ [EventService] Deleting with scope: $deleteScope');
+        LogService.info('EventService', 'Deleting with scope: $deleteScope');
       }
       
       final response = await apiClient.delete(
@@ -142,9 +143,9 @@ class EventService {
         throw Exception('Failed to delete event: ${response.statusCode} - ${response.body}');
       }
       
-      print('✅ [EventService] Event deleted successfully');
+      LogService.info('EventService', 'Event deleted successfully');
     } catch (e) {
-      print('❌ [EventService] Delete failed: $e');
+      LogService.error('EventService', 'Delete failed', e);
       rethrow;
     }
   }
@@ -168,20 +169,24 @@ class EventService {
       final uri = Uri.parse('${Config.backendURL}/api/calendar')
           .replace(queryParameters: queryParams);
 
-      print('🔄 [EventService] GET $uri (calendar view)');
+      LogService.info('EventService', 'GET $uri (calendar view)');
       final response = await apiClient.get(
         uri.toString(),
         token: authToken,
       );
 
       if (response.statusCode == 200) {
-        print('📦 [EventService] getCalendarView response body: ${response.body}');
+        if (LoggingConfig.shouldLogApiResponses) {
+          final body = response.body;
+          final truncatedBody = body.length > 200 ? '${body.substring(0, 200)}...' : body;
+          LogService.verbose('EventService', 'getCalendarView response body: $truncatedBody');
+        }
         return jsonDecode(response.body) as Map<String, dynamic>;
       } else {
         throw Exception('Failed to fetch calendar view: ${response.statusCode}');
       }
     } catch (e) {
-      print('❌ [EventService] Exception in getCalendarView: $e');
+      LogService.error('EventService', 'Exception in getCalendarView', e);
       rethrow;
     }
   }
